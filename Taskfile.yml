@@ -1,0 +1,6 @@
+version: '3'
+
+includes:
+  scripts:
+    taskfile: ./scripts/Taskfile_{{OS}}.yml
+    dir: ./scripts

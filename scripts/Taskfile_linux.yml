@@ -1,0 +1,17 @@
+version: '3'
+
+includes:
+  install: ./install/Taskfile_{{OS}}.yml
+  build: ./build/Taskfile_{{OS}}.yml
+
+tasks:
+  test:
+    deps: [install:hadolint]
+    desc: "Run test"
+    cmds:
+      - ./sh/test_linux
+
+  stat:
+    desc: "Get code statistics"
+    cmds:
+      - ./sh/stat_linux

@@ -1,0 +1,746 @@
+swagger: "2.0"
+
+info:
+  title: Plaid Connector
+  version: 0.2.0
+  description: |
+    # ...
+    ## List of all custom errors
+    First number is HTTP Status code, second is value of "code" field in returned JSON object, text description may or may not match "message" field in returned JSON object.
+basePath: /api
+schemes:
+  - http
+
+definitions:
+  # This model should match output of api.ServeError handler, to ensure
+  # errors returned by go-swagger (like failed validation) use same
+  # format as general errors returned by our handlers.
+  # By default api.ServeError = github.com/go-openapi/errors.ServeError.
+  Error:
+    type: object
+    required:
+      - code
+      - message
+    properties:
+      code:
+        description: Either same as HTTP Status Code OR >= 600 with HTTP Status Code 422.
+        type: integer
+        format: int32
+      message:
+        type: string
+
+  AccountBalance:
+    type: object
+    properties:
+      available:
+        $ref: "#/definitions/NullableFloat64"
+      current:
+        $ref: "#/definitions/NullableFloat64"
+      limit:
+        $ref: "#/definitions/NullableFloat64"
+      iso_currency_code:
+        $ref: "#/definitions/NullableString"
+      unofficial_currency_code:
+        $ref: "#/definitions/NullableString"
+      last_updated_datetime:
+        $ref: "#/definitions/NullableTime"
+      "":
+        $ref: "#/definitions/AdditionalProperties"
+    title: AccountBalance
+    required:
+      - available
+      - current
+      - limit
+      - iso_currency_code
+      - unofficial_currency_code
+      - last_updated_datetime
+  AccountBase:
+    type: object
+    properties:
+      account_id:
+        type: string
+      balances:
+        $ref: "#/definitions/AccountBalance"
+      mask:
+        $ref: "#/definitions/NullableString"
+      name:
+        type: string
+      official_name:
+        $ref: "#/definitions/NullableString"
+      type:
+        type: string
+      subtype:
+        $ref: "#/definitions/NullableAccountSubtype"
+      verification_status:
+        type: string
+      "":
+        $ref: "#/definitions/AdditionalProperties"
+    title: AccountBase
+    required:
+      - account_id
+      - balances
+      - mask
+      - name
+      - official_name
+      - type
+      - subtype
+      - verification_status
+  AccountIdentity:
+    type: object
+    properties:
+      account_id:
+        type: string
+      balances:
+        $ref: "#/definitions/AccountBalance"
+      mask:
+        $ref: "#/definitions/NullableString"
+      name:
+        type: string
+      official_name:
+        $ref: "#/definitions/NullableString"
+      type:
+        type: string
+      subtype:
+        $ref: "#/definitions/NullableAccountSubtype"
+      verification_status:
+        type: string
+      owners:
+        type: array
+        items:
+          $ref: "#/definitions/Owner"
+    title: AccountIdentity
+    required:
+      - account_id
+      - balances
+      - mask
+      - name
+      - official_name
+      - type
+      - subtype
+      - verification_status
+      - owners
+  AdditionalProperties:
+    type: object
+    properties:
+      "":
+        $ref: "#/definitions/mapstringinterface"
+    title: AdditionalProperties
+  Address:
+    type: object
+    properties:
+      data:
+        $ref: "#/definitions/AddressData"
+      primary:
+        type: boolean
+        format: boolean
+      "":
+        $ref: "#/definitions/AdditionalProperties"
+    title: Address
+    required:
+      - data
+      - primary
+  AddressData:
+    type: object
+    properties:
+      city:
+        type: string
+      region:
+        $ref: "#/definitions/NullableString"
+      street:
+        type: string
+      postal_code:
+        $ref: "#/definitions/NullableString"
+      country:
+        $ref: "#/definitions/NullableString"
+      "":
+        $ref: "#/definitions/AdditionalProperties"
+    title: AddressData
+    required:
+      - city
+      - region
+      - street
+      - postal_code
+      - country
+  AuthGetNumbers:
+    type: object
+    properties:
+      ach:
+        type: array
+        items:
+          $ref: "#/definitions/NumbersACH"
+      eft:
+        type: array
+        items:
+          $ref: "#/definitions/NumbersEFT"
+      international:
+        type: array
+        items:
+          $ref: "#/definitions/NumbersInternational"
+      bacs:
+        type: array
+        items:
+          $ref: "#/definitions/NumbersBACS"
+      "":
+        $ref: "#/definitions/AdditionalProperties"
+    title: AuthGetNumbers
+    required:
+      - ach
+      - eft
+      - international
+      - bacs
+  LinkTokenCreateResp:
+    type: object
+    properties:
+      link_token:
+        type: string
+    title: LinkTokenCreateResp
+    required:
+      - link_token
+  Email:
+    type: object
+    properties:
+      data:
+        type: string
+      primary:
+        type: boolean
+        format: boolean
+      type:
+        type: string
+      "":
+        $ref: "#/definitions/AdditionalProperties"
+    title: Email
+    required:
+      - data
+      - primary
+      - type
+  GetAccessTokenResp:
+    type: object
+    properties:
+      access_token:
+        type: string
+      item_id:
+        type: string
+    title: GetAccessTokenResp
+    required:
+      - access_token
+      - item_id
+  GetAccountsResp:
+    type: object
+    properties:
+      accounts:
+        type: array
+        items:
+          $ref: "#/definitions/AccountBase"
+    title: GetAccountsResp
+    required:
+      - accounts
+  GetAuthAccountResp:
+    type: object
+    properties:
+      accounts:
+        type: array
+        items:
+          $ref: "#/definitions/AccountBase"
+      numbers:
+        $ref: "#/definitions/AuthGetNumbers"
+    title: GetAuthAccountResp
+    required:
+      - accounts
+      - numbers
+  GetIdentityResp:
+    type: object
+    properties:
+      identity:
+        type: array
+        items:
+          $ref: "#/definitions/AccountIdentity"
+    title: GetIdentityResp
+    required:
+      - identity
+  GetInfoResp:
+    type: object
+    properties:
+      access_token:
+        type: string
+      item_id:
+        type: string
+      products:
+        type: string
+    title: GetInfoResp
+    required:
+      - access_token
+      - item_id
+      - products
+  GetTransactionsResp:
+    type: object
+    properties:
+      latest_transactions:
+        type: array
+        items:
+          $ref: "#/definitions/Transaction"
+    title: GetTransactionsResp
+    required:
+      - latest_transactions
+  Location:
+    type: object
+    properties:
+      address:
+        $ref: "#/definitions/NullableString"
+      city:
+        $ref: "#/definitions/NullableString"
+      region:
+        $ref: "#/definitions/NullableString"
+      postal_code:
+        $ref: "#/definitions/NullableString"
+      country:
+        $ref: "#/definitions/NullableString"
+      lat:
+        $ref: "#/definitions/NullableFloat64"
+      lon:
+        $ref: "#/definitions/NullableFloat64"
+      store_number:
+        $ref: "#/definitions/NullableString"
+      "":
+        $ref: "#/definitions/AdditionalProperties"
+    title: Location
+    required:
+      - address
+      - city
+      - region
+      - postal_code
+      - country
+      - lat
+      - lon
+      - store_number
+  NullableAccountSubtype:
+    type: object
+    properties:
+      value:
+        type: string
+      isSet:
+        type: boolean
+        format: boolean
+    title: NullableAccountSubtype
+    required:
+      - value
+      - isSet
+  NullableFloat64:
+    type: object
+    properties:
+      value:
+        type: number
+        format: double
+      isSet:
+        type: boolean
+        format: boolean
+    title: NullableFloat64
+    required:
+      - value
+      - isSet
+  NullablePersonalFinanceCategory:
+    type: object
+    properties:
+      value:
+        $ref: "#/definitions/PersonalFinanceCategory"
+      isSet:
+        type: boolean
+        format: boolean
+    title: NullablePersonalFinanceCategory
+    required:
+      - value
+      - isSet
+  NullableString:
+    type: object
+    properties:
+      value:
+        type: string
+      isSet:
+        type: boolean
+        format: boolean
+    title: NullableString
+    required:
+      - value
+      - isSet
+  NullableTime:
+    type: object
+    properties:
+      value:
+        type: string
+      isSet:
+        type: boolean
+        format: boolean
+    title: NullableTime
+    required:
+      - value
+      - isSet
+  NullableTransactionCode:
+    type: object
+    properties:
+      value:
+        type: string
+      isSet:
+        type: boolean
+        format: boolean
+    title: NullableTransactionCode
+    required:
+      - value
+      - isSet
+  NumbersACH:
+    type: object
+    properties:
+      account_id:
+        type: string
+      account:
+        type: string
+      routing:
+        type: string
+      wire_routing:
+        $ref: "#/definitions/NullableString"
+      "":
+        $ref: "#/definitions/AdditionalProperties"
+    title: NumbersACH
+    required:
+      - account_id
+      - account
+      - routing
+      - wire_routing
+  NumbersBACS:
+    type: object
+    properties:
+      account_id:
+        type: string
+      account:
+        type: string
+      sort_code:
+        type: string
+      "":
+        $ref: "#/definitions/AdditionalProperties"
+    title: NumbersBACS
+    required:
+      - account_id
+      - account
+      - sort_code
+  NumbersEFT:
+    type: object
+    properties:
+      account_id:
+        type: string
+      account:
+        type: string
+      institution:
+        type: string
+      branch:
+        type: string
+      "":
+        $ref: "#/definitions/AdditionalProperties"
+    title: NumbersEFT
+    required:
+      - account_id
+      - account
+      - institution
+      - branch
+  NumbersInternational:
+    type: object
+    properties:
+      account_id:
+        type: string
+      iban:
+        type: string
+      bic:
+        type: string
+      "":
+        $ref: "#/definitions/AdditionalProperties"
+    title: NumbersInternational
+    required:
+      - account_id
+      - iban
+      - bic
+  Owner:
+    type: object
+    properties:
+      names:
+        type: array
+        items:
+          type: string
+      phone_numbers:
+        type: array
+        items:
+          $ref: "#/definitions/PhoneNumber"
+      emails:
+        type: array
+        items:
+          $ref: "#/definitions/Email"
+      addresses:
+        type: array
+        items:
+          $ref: "#/definitions/Address"
+      "":
+        $ref: "#/definitions/AdditionalProperties"
+    title: Owner
+    required:
+      - names
+      - phone_numbers
+      - emails
+      - addresses
+  PaymentMeta:
+    type: object
+    properties:
+      reference_number:
+        $ref: "#/definitions/NullableString"
+      ppd_id:
+        $ref: "#/definitions/NullableString"
+      payee:
+        $ref: "#/definitions/NullableString"
+      by_order_of:
+        $ref: "#/definitions/NullableString"
+      payer:
+        $ref: "#/definitions/NullableString"
+      payment_method:
+        $ref: "#/definitions/NullableString"
+      payment_processor:
+        $ref: "#/definitions/NullableString"
+      reason:
+        $ref: "#/definitions/NullableString"
+      "":
+        $ref: "#/definitions/AdditionalProperties"
+    title: PaymentMeta
+    required:
+      - reference_number
+      - ppd_id
+      - payee
+      - by_order_of
+      - payer
+      - payment_method
+      - payment_processor
+      - reason
+  PersonalFinanceCategory:
+    type: object
+    properties:
+      primary:
+        type: string
+      detailed:
+        type: string
+      "":
+        $ref: "#/definitions/AdditionalProperties"
+    title: PersonalFinanceCategory
+    required:
+      - primary
+      - detailed
+  PhoneNumber:
+    type: object
+    properties:
+      data:
+        type: string
+      primary:
+        type: boolean
+        format: boolean
+      type:
+        type: string
+      "":
+        $ref: "#/definitions/AdditionalProperties"
+    title: PhoneNumber
+    required:
+      - data
+      - primary
+      - type
+  Transaction:
+    type: object
+    properties:
+      transaction_type:
+        type: string
+      pending_transaction_id:
+        $ref: "#/definitions/NullableString"
+      category_id:
+        $ref: "#/definitions/NullableString"
+      category:
+        type: array
+        items:
+          type: string
+      location:
+        $ref: "#/definitions/Location"
+      payment_meta:
+        $ref: "#/definitions/PaymentMeta"
+      account_owner:
+        $ref: "#/definitions/NullableString"
+      name:
+        type: string
+      original_description:
+        $ref: "#/definitions/NullableString"
+      account_id:
+        type: string
+      amount:
+        type: number
+        format: double
+      iso_currency_code:
+        $ref: "#/definitions/NullableString"
+      unofficial_currency_code:
+        $ref: "#/definitions/NullableString"
+      date:
+        type: string
+      pending:
+        type: boolean
+        format: boolean
+      transaction_id:
+        type: string
+      merchant_name:
+        $ref: "#/definitions/NullableString"
+      check_number:
+        $ref: "#/definitions/NullableString"
+      payment_channel:
+        type: string
+      authorized_date:
+        $ref: "#/definitions/NullableString"
+      authorized_datetime:
+        $ref: "#/definitions/NullableTime"
+      datetime:
+        $ref: "#/definitions/NullableTime"
+      transaction_code:
+        $ref: "#/definitions/NullableTransactionCode"
+      personal_finance_category:
+        $ref: "#/definitions/NullablePersonalFinanceCategory"
+    title: Transaction
+    required:
+      - transaction_type
+      - pending_transaction_id
+      - category_id
+      - category
+      - location
+      - payment_meta
+      - account_owner
+      - name
+      - original_description
+      - account_id
+      - amount
+      - iso_currency_code
+      - unofficial_currency_code
+      - date
+      - pending
+      - transaction_id
+      - merchant_name
+      - check_number
+      - payment_channel
+      - authorized_date
+      - authorized_datetime
+      - datetime
+      - transaction_code
+      - personal_finance_category
+  mapstringinterface:
+    type: object
+    title: mapstringinterface
+responses:
+  GenericError:
+    description: General errors using same model as used by go-swagger for validation errors.
+    schema:
+      $ref: "#/definitions/Error"
+
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /health-check:
+    get:
+      operationId: healthCheck
+      description: Returns 200 if service works okay.
+      responses:
+        "200":
+          description: Extra details about service status, if any.
+          schema:
+            type: object
+            additionalProperties: true
+        default: { $ref: "#/responses/GenericError" }
+
+  # Plaid API
+  /accounts:
+    get:
+      operationId: GetAccounts
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            $ref: "#/definitions/GetAccountsResp"
+        default: { $ref: "#/responses/GenericError" }
+  /auth:
+    get:
+      operationId: GetAuthAccount
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            $ref: "#/definitions/GetAuthAccountResp"
+        default: { $ref: "#/responses/GenericError" }
+  /balance:
+    get:
+      operationId: GetBalance
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            $ref: "#/definitions/GetAccountsResp"
+        default: { $ref: "#/responses/GenericError" }
+  /create_link_token:
+    post:
+      operationId: LinkTokenCreate
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            $ref: "#/definitions/LinkTokenCreateResp"
+        default: { $ref: "#/responses/GenericError" }
+  /identity:
+    get:
+      operationId: GetIdentity
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            $ref: "#/definitions/GetIdentityResp"
+        default: { $ref: "#/responses/GenericError" }
+  /info:
+    post:
+      operationId: GetInfo
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            $ref: "#/definitions/GetInfoResp"
+        default: { $ref: "#/responses/GenericError" }
+  /sandbox_access_token/{institution_id}:
+    get:
+      operationId: GetSandboxAccessToken
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            $ref: "#/definitions/GetAccessTokenResp"
+        default: { $ref: "#/responses/GenericError" }
+      parameters:
+        - name: institution_id
+          in: path
+          required: true
+          type: string
+  /set_access_token:
+    post:
+      operationId: GetAccessToken
+      consumes:
+        - application/x-www-form-urlencoded
+      parameters:
+        - name: public_token
+          in: formData
+          required: true
+          type: string
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            $ref: "#/definitions/GetAccessTokenResp"
+        default: { $ref: "#/responses/GenericError" }
+  /transactions:
+    get:
+      operationId: GetTransactions
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            $ref: "#/definitions/GetTransactionsResp"
+        default: { $ref: "#/responses/GenericError" }
