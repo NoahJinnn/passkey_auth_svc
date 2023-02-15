@@ -5,6 +5,17 @@ includes:
   build: ./build/Taskfile_{{OS}}.yml
 
 tasks:
+  run:
+    desc: "Go run app with dev env"
+    cmds:
+      - ./sh/run_macos
+
+  run_bin:
+    deps: [build:binary]
+    desc: "Run app bin with dev env"
+    cmds:
+      - ./sh/run_macos bin
+
   test:
     deps: [install:hadolint]
     desc: "Run test"

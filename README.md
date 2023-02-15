@@ -26,6 +26,9 @@ for more details.
 - [Development](#development)
   - [Requirements](#requirements)
   - [Setup](#setup)
+    - [Environment vars](#environment-vars)
+    - [Secrets](#secrets)
+    - [docker-compose](#docker-compose)
     - [HTTPS](#https)
   - [Usage](#usage)
     - [Cheatsheet](#cheatsheet)
@@ -111,18 +114,30 @@ for more details.
 
 ### Requirements
 
-- Go 1.16
+- Go 1.19
 - [Docker](https://docs.docker.com/install/) 19.03+
 - [Docker Compose](https://docs.docker.com/compose/install/) 1.25+
 
 ### Setup
 
+#### Environment vars
+
 1. After cloning the repo copy `env.sh.dist` to `env.sh`.
 2. Review `env.sh` and update for your system as needed.
-3. It's recommended to add shell alias `alias dc="if test -f env.sh; then
-   source env.sh; fi && docker-compose"` and then run `dc` instead of
-   `docker-compose` - this way you won't have to run `source env.sh` after
-   changing it.
+
+#### Secrets
+
+Setup Doppler with:
+```bash
+task scripts:install:doppler 
+```
+
+#### docker-compose
+
+It's recommended to add shell alias `alias dc="if test -f env.sh; then
+source env.sh; fi && docker-compose"` and then run `dc` instead of
+`docker-compose` - this way you won't have to run `source env.sh` after
+changing it.
 
 #### HTTPS
 
@@ -187,24 +202,23 @@ available networks, then you'll have to restart docker service or reboot.
 
 ### Docker
 
-```
-$ docker run -i -t --rm ghcr.io/powerman/go-monolith-example:0.2.0 -v
-mono version v0.2.0 7562a1e 2020-10-22_03:12:04 go1.15.3
-```
-
 ### Source
 
 #### Run directly, without building
 
 ```bash
-# because golang allows to run a go file directly
 # cmd/mono/main.go is the entry point with the `main` function
-go run cmd/mono/main.go serve
+task scripts:run
 ```
 
 #### Build first, then run
 
-We can either build the binary only, or build the binary and then dockerize it.
+We can either build and run the binary only, or build the binary and then dockerize it.
+
+```bash
+task scripts:run_bin
+```
+
 
 In this example below, we demonstrate using the `Taskfile` command to build our binary, then, run our built `mono` binary.
 
@@ -240,14 +254,11 @@ Usage:
   mono serve [flags]
 
 Flags:
-  -h, --help                                  help for serve
-      --host NotEmptyString                   host to serve (default home)
-      --host-int NotEmptyString               internal host to serve (default home)
-      --mono.port Port                        port to serve monolith introspection (default 17000)
-      --nats.urls NotEmptyString              URLs to connect to NATS (separated by comma) (default nats://localhost:34222)
-      --stan.cluster_id NotEmptyString        STAN cluster ID (default local)
-      --timeout.shutdown Duration             must be less than 10s used by 'docker stop' between SIGTERM and SIGKILL (default 9s)
-      --timeout.startup Duration              must be less than swarm's deploy.update_config.monitor (default 3s)
+  -h, --help                        help for serve
+      --host-int NotEmptyString     internal host to serve (default Trans-MacBook-Pro-2.local)
+      --hq.port Port                port to serve monolith introspection (default 17000)
+      --timeout.shutdown Duration   must be less than 10s used by 'docker stop' between SIGTERM and SIGKILL (default 9s)
+      --timeout.startup Duration    must be less than swarm's deploy.update_config.monitor (default 3s)
 
 Global Flags:
       --log.level OneOfString   log level [debug|info|warn|err] (default debug)
@@ -256,26 +267,45 @@ $ ./bin/mono -v
 mono version v0.2.0 7562a1e 2020-10-22_03:19:37 go1.15.3
 
 $ ./bin/mono serve
-         mono: inf      main: `started` version v0.2.0 7562a1e 2020-10-22_03:19:37
-         mono: inf     serve: `serve` home:17000 [monolith introspection]
-      
-^C
-         mono: inf     serve: `shutdown` [monolith introspection]
-         mono: inf      main: `finished` version v0.2.0 7562a1e 2020-10-22_03:19:37
+         mono: inf      main: `started` version f/design-task-command-to-run-hqservice 51adc59-dirty 2023-02-15_09:36:06
+           hq: inf   openapi: `OpenAPI protocol` version 0.2.0
+           hq: inf     serve: `serve` 127.0.0.1:17001 [Prometheus metrics]
+           hq: inf     serve: `serve` 127.0.0.1:17000 [OpenAPI]
+           hq: inf   swagger: `Serving plaid connector at http://127.0.0.1:17000`
 ```
 
 ## TODO
 
-- [ ] Add security-related headers for HTTPS endpoints (HSTS, CSP, etc.),
-  also move default host from localhost to avoid poisoning it with HSTS.
-- [ ] Embed https://github.com/powerman/go-service-example as an example
-  of embedding microservices from another repo.
-- [ ] Add example of `internal/svc/*` adapters calling some other services.
-- [ ] Add LPC (local procedure call API between embedded microservices),
-  probably using https://github.com/fullstorydev/grpchan.
-- [ ] Add complete CRUD example as per Google API Design Guide (with
-  PATCH/FieldMask), probably with generation of models conversion code using
-  https://github.com/bold-commerce/protoc-gen-struct-transformer.
-- [ ] Add NATS/STAN publish/subscribe example in `internal/sub`
-  (or maybe use JetStream instead of STAN?).
-- [ ] Switch from github.com/lib/pq to github.com/jackc/pgx.
+Functionality Group 1: add/connect assets and debts
+- [x] Plaid aggregator with dev env
+- [ ] Plaid aggregator with stg, prd env
+- [ ] Create database `User` model, and other models using PostgreSQL
+      1. Bank Account
+      2. Crypto Account
+      3. Cars
+      4. Collectibles
+      5. Loans
+      6. Private Shares
+- [ ] Create CRUD REST API for all types of asset, debt and user model
+- [ ] Integration test APIs
+
+Functionality Group 2: Recap feature (‘reflections’)
+- [ ] Create DB models:
+      1. Asset
+      2. Cashflow
+      3. Indices
+      4. IRR
+      5. Reflections
+- [ ] Create CRUD REST API for all types of model
+- [ ] Integration test APIs
+
+Functionality Group 3: Insurance
+- [ ] Create DB model for Insurance to store Insurance providers information, link to static assets
+- [ ] Create CRUD REST API for Insurance model
+- [ ] Integration test APIs
+Functionality Group 4: Safety Deposit Box
+- Need to discuss
+Functionality Group 5: Beneficiary 
+- Need to discuss
+
+

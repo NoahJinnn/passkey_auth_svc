@@ -1,0 +1,14 @@
+#!/bin/sh
+source ../env.sh
+if command -v doppler &> /dev/null; then
+    if [ "$1" == "bin" ]; then
+        echo "HQ service started by exec built app"
+        doppler run -- ../bin/mono serve
+    else
+        echo "HQ service started by 'go run'"
+        doppler run -- go run ../cmd/mono/main.go serve
+    fi
+    
+else
+    echo "Doppler is not installed or not in PATH, please run 'task scripts:install:doppler' and try again"
+fi
