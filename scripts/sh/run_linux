@@ -2,7 +2,7 @@
 
 if command -v doppler &> /dev/null; then
     source ../env.sh
-    doppler run -- ../bin/mono serve
+    doppler run -- go run ../cmd/mono/main.go serve
 else
     echo "Doppler is not installed or not in PATH, please run 'task scripts:install:doppler' and try again"
 fi

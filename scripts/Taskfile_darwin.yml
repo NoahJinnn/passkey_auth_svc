@@ -6,10 +6,15 @@ includes:
 
 tasks:
   run:
-    deps: [build:binary]
-    desc: "Start app with dev env"
+    desc: "Go run app with dev env"
     cmds:
       - ./sh/run_macos
+
+  run_bin:
+    deps: [build:binary]
+    desc: "Run app bin with dev env"
+    cmds:
+      - ./sh/run_macos bin
 
   test:
     deps: [install:hadolint]

@@ -35,6 +35,6 @@ if [ "$1" == "debug" ]; then
   echo "Build debug bin"
   build_debug
 else
-  echo "Build product bin"
+  echo "Build normal bin"
   build
 fi
