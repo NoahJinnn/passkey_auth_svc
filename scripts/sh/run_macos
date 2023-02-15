@@ -2,10 +2,10 @@
 source ../env.sh
 if command -v doppler &> /dev/null; then
     if [ "$1" == "bin" ]; then
-        echo "Build first then run"
+        echo "HQ service started by exec built app"
         doppler run -- ../bin/mono serve
     else
-        echo "Go run"
+        echo "HQ service started by 'go run'"
         doppler run -- go run ../cmd/mono/main.go serve
     fi
     
