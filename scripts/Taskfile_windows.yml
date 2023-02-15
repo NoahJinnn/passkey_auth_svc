@@ -5,6 +5,12 @@ includes:
   build: ./build/Taskfile_{{OS}}.yml
 
 tasks:
+  run:
+    deps: [build:binary]
+    desc: "Start app with dev env"
+    cmds:
+      - ./sh/run_linux
+      
   test:
     deps: [install:hadolint]
     desc: "Run test"
