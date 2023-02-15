@@ -32,6 +32,8 @@ for more details.
 - [Run](#run)
   - [Docker](#docker)
   - [Source](#source)
+    - [Run directly, without building](#run-directly-without-building)
+    - [Build first, then run](#build-first-then-run)
 - [TODO](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
