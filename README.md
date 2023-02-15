@@ -192,12 +192,26 @@ mono version v0.2.0 7562a1e 2020-10-22_03:12:04 go1.15.3
 
 ### Source
 
-Use of the `./scripts/build` script is optional (it's main feature is
-embedding git version into compiled binary), you can use usual
-`go get|install|build` to get the application instead.
+#### Run directly, without building
 
+```bash
+# because golang allows to run a go file directly
+# cmd/mono/main.go is the entry point with the `main` function
+go run cmd/mono/main.go serve
 ```
-$ ./scripts/build
+
+#### Build first, then run
+
+We can either build the binary only, or build the binary and then dockerize it.
+
+In this example below, we demonstrate using the `Taskfile` command to build our binary, then, run our built `mono` binary.
+
+```bash
+# build binary only
+# our binary gets installed into the ./bin/ folder, as `mono`.
+$ task scripts:build:binary
+
+# so now, we can just run the built `mono` binary.
 $ ./bin/mono -h
 Example monolith with embedded microservices
 
