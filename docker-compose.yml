@@ -6,7 +6,7 @@ volumes:
 
 services:
   postgres:
-    image: "postgres:12.7" # We're using 12.
+    image: "postgres:15.2" # We're using 12.
     container_name: "mono_postgres"
     restart: "always"
     shm_size: "256m"
@@ -31,7 +31,7 @@ services:
   postgres-setup:
     depends_on:
       - postgres
-    image: "postgres:12.7" # We're using 12.
+    image: "postgres:15.2" # We're using 12.
     container_name: "mono_postgres-setup"
     restart: "no"
     volumes:
@@ -52,35 +52,6 @@ services:
         done
         set -x -e -o pipefail
         postgres-setup | psql
-
-  nats:
-    image: "nats:2.2.6" # This is the latest version at the moment.
-    container_name: mono_nats
-    restart: always
-    ports:
-      - "${mono_nats_addr_port:-0}:4222"
-
-  stan:
-    image: "nats-streaming:0.21.2" # This is the latest version at the moment.
-    container_name: mono_stan
-    restart: always
-    volumes:
-      - "stan:/data"
-    command:
-      - "--cluster_id=local"
-      - "--max_channels=0"
-      - "--max_subs=0"
-      - "--max_msgs=0"
-      - "--max_bytes=0"
-      - "--max_age=0s"
-      - "--max_inactivity=0s"
-      - "--nats_server=nats://nats:4222"
-      - "--hb_interval=1s"
-      - "--hb_timeout=1s"
-      - "--hb_fail_count=3"
-      - "--store=FILE"
-      - "--dir=/data"
-      - "--file_fds_limit=4000"
 
   mono:
     build:

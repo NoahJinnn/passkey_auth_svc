@@ -15,9 +15,7 @@ require (
 	github.com/go-openapi/validate v0.22.1
 	github.com/go-swagger/go-swagger v0.30.4
 	github.com/golang/mock v1.6.0
-	// github.com/golangci/golangci-lint v1.51.1
 	github.com/jessevdk/go-flags v1.5.0
-	github.com/jmoiron/sqlx v1.3.5
 	github.com/oklog/ulid v1.3.1
 	github.com/powerman/appcfg v0.9.0
 	github.com/powerman/check v1.6.0
@@ -28,7 +26,6 @@ require (
 	github.com/powerman/pqx v0.7.0
 	github.com/powerman/rpc-codec v1.2.2
 	github.com/powerman/sensitive v0.0.7
-	github.com/powerman/sqlxx v0.2.0
 	github.com/powerman/structlog v0.7.3
 	github.com/prometheus/client_golang v1.14.0
 	github.com/sebest/xff v0.0.0-20210106013422-671bd2870b3a
@@ -58,12 +55,15 @@ require (
 	github.com/golang/glog v1.0.0 // indirect
 	github.com/golangci/golangci-lint v1.50.1 // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect
+	github.com/jmoiron/sqlx v1.3.5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/powerman/deepequal v0.1.0 // indirect
+	github.com/powerman/sqlxx v0.2.0 // indirect
+	github.com/quasilyte/go-ruleguard/dsl/fluent v0.0.0-20201222093424-5d7e62a465d3 // indirect
 	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/streadway/amqp v1.0.0 // indirect
