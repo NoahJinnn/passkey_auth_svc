@@ -16,16 +16,9 @@ jobs:
   test:
     runs-on: 'ubuntu-latest'
     timeout-minutes: 30
-    services:
-      nats:
-        image: 'nats:2.2.6'
-        ports:
-          - '4222:4222'
     env:
       MONO_TLS_CA_CERT: 'configs/insecure-dev-pki/ca.crt'
-      MONO_X_NATS_ADDR_URLS: 'nats://localhost:4222'
       MONO_X_POSTGRES_ADDR_HOST: 'localhost'
-      MONO_X_STAN_CLUSTER_ID: 'ci'
       MONO__AUTH_POSTGRES_AUTH_LOGIN: 'auth'
       MONO__AUTH_POSTGRES_AUTH_PASS: 'authpass'
       MONO__AUTH_SECRET: 's3cr3t'
@@ -37,24 +30,6 @@ jobs:
       PGUSER: 'postgres'
       PGPASSWORD: 'postgres'
     steps:
-      - name: Run STAN service
-        run: |
-          docker run -d --net=host nats-streaming:0.21.2 \
-            --cluster_id=ci \
-            --max_channels=0 \
-            --max_subs=0 \
-            --max_msgs=0 \
-            --max_bytes=0 \
-            --max_age=0s \
-            --max_inactivity=0s \
-            --nats_server=nats://localhost:4222 \
-            --hb_interval=1s \
-            --hb_timeout=1s \
-            --hb_fail_count=3 \
-            --store=FILE \
-            --dir=/tmp \
-            --file_fds_limit=4000
-
       - uses: actions/setup-go@v3
         with:
           go-version: ${{ env.GO_VERSION }}
