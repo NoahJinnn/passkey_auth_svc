@@ -1,3 +1,6 @@
 #!/bin/sh
 
-doppler setup --no-interactive
+scriptsdir=$( dirname -- "$0"; )
+cd $scriptsdir/../../
+
+doppler setup --no-interactive --config doppler.yaml

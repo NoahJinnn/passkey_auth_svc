@@ -1,12 +1,16 @@
 #!/bin/sh
-source ../env.sh
+
+scriptsdir=$( dirname -- "$0"; )
+cd $scriptsdir/../../
+
+source env.sh
 if command -v doppler &> /dev/null; then
     if [ "$1" == "bin" ]; then
         echo "HQ service started by exec built app"
-        doppler run -- ../bin/mono serve
+        doppler run -- ./bin/mono serve
     else
         echo "HQ service started by 'go run'"
-        doppler run -- go run ../cmd/mono/main.go serve
+        doppler run -- go run ./cmd/mono/main.go serve
     fi
     
 else
