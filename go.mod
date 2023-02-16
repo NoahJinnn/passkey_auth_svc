@@ -64,7 +64,6 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/powerman/deepequal v0.1.0 // indirect
 	github.com/powerman/sqlxx v0.2.0 // indirect
-	github.com/quasilyte/go-ruleguard/dsl/fluent v0.0.0-20201222093424-5d7e62a465d3 // indirect
 	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/streadway/amqp v1.0.0 // indirect
