@@ -56,6 +56,7 @@ require (
 	github.com/golangci/golangci-lint v1.50.1 // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect
 	github.com/jmoiron/sqlx v1.3.5 // indirect
+	github.com/jmoiron/sqlx v1.3.5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
@@ -63,6 +64,7 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/powerman/deepequal v0.1.0 // indirect
 	github.com/powerman/sqlxx v0.2.0 // indirect
+	github.com/quasilyte/go-ruleguard/dsl/fluent v0.0.0-20201222093424-5d7e62a465d3 // indirect
 	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/streadway/amqp v1.0.0 // indirect

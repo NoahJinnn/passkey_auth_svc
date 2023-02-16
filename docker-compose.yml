@@ -5,7 +5,7 @@ volumes:
 
 services:
   postgres:
-    image: "postgres:15.2"
+    image: "postgres:15.2" # We're using 12.
     container_name: "mono_postgres"
     restart: "always"
     shm_size: "256m"
