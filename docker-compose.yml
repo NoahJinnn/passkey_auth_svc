@@ -57,7 +57,7 @@ services:
       context: .
       dockerfile: use `./scripts/build` instead of `docker-compose build`
     image: "go-monolith-example:latest"
-    container_name: mono_hq
+    container_name: hqservice
     restart: always
     ports:
       - "${MONO_HQ_ADDR_PORT:-0}:17000"

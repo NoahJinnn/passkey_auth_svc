@@ -4,6 +4,7 @@
 package tools
 
 import (
+	_ "entgo.io/ent/cmd/ent"
 	_ "github.com/bufbuild/buf/cmd/buf"
 	_ "github.com/cheekybits/genny"
 	_ "github.com/go-swagger/go-swagger/cmd/swagger"

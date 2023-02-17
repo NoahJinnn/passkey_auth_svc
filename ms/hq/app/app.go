@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/hellohq/hqservice/internal/sharedconfig"
@@ -11,6 +12,15 @@ import (
 
 // Ctx is a synonym for convenience.
 type Ctx = context.Context
+
+// Errors.
+var (
+	ErrAccessDenied  = errors.New("access denied")
+	ErrAlreadyExist  = errors.New("already exists")
+	ErrNotFound      = errors.New("not found")
+	ErrValidate      = errors.New("validate")
+	ErrWrongPassword = errors.New("wrong password")
+)
 
 // Appl provides application features (use cases) service.
 type Appl interface {
@@ -30,6 +40,10 @@ type Appl interface {
 	GetIdentity(ctx Ctx) (*GetIdentityResp, error)
 	GetBalance(ctx Ctx) (*GetAccountsResp, error)
 	GetAccounts(ctx Ctx) (*GetAccountsResp, error)
+}
+
+// Repo provides data storage.
+type Repo interface {
 }
 
 // Ref: https://github.com/plaid/quickstart/blob/master/.env.example

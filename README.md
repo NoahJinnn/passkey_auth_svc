@@ -154,8 +154,8 @@ $ . ./env.sh   # Sets $EASYRSA_PKI=configs/insecure-dev-pki.
 $ /path/to/easyrsa init-pki
 $ echo Dev CA $(go list -m) | /path/to/easyrsa build-ca nopass
 $ /path/to/easyrsa --days=3650 "--subject-alt-name=DNS:postgres" build-server-full postgres nopass
-$ /path/to/easyrsa --days=3650 "--subject-alt-name=DNS:localhost" build-server-full ms-auth nopass
-$ /path/to/easyrsa --days=3650 "--subject-alt-name=IP:127.0.0.1" build-server-full ms-auth-int nopass
+$ /path/to/easyrsa --days=3650 "--subject-alt-name=DNS:localhost" build-server-full ms-hq nopass
+$ /path/to/easyrsa --days=3650 "--subject-alt-name=IP:127.0.0.1" build-server-full ms-hq-int nopass
 ```
 
 ### Usage
