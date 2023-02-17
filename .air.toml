@@ -1,13 +1,13 @@
 root = "."
 testdata_dir = "testdata"
-tmp_dir = "tmp"
+tmp_dir = "bin"
 
 [build]
 args_bin = []
-bin = "./tmp/main"
-cmd = "go build  -ldflags \"-X '$(go list -m)/pkg/def.ver=$(gitver)'\"  -o ./tmp/main ./cmd/*"
+bin = "./bin/mono"
+cmd = "go build  -ldflags \"-X '$(go list -m)/pkg/def.ver=$(gitver)'\"  -o ./bin/mono ./cmd/*"
 delay = 0
-exclude_dir = ["assets", "tmp", "vendor", "testdata", "bin"]
+exclude_dir = ["assets", "vendor", "testdata", "bin"]
 exclude_file = []
 exclude_regex = ["_test.go"]
 exclude_unchanged = false
