@@ -4,7 +4,6 @@ tasks:
   doppler:
     desc: "Install Doppler on macOS"
     cmds:
-      - brew install dopplerhq/cli/doppler
       - ./install/sh/doppler.sh
 
   hadolint:
