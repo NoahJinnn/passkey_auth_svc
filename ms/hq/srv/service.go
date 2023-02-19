@@ -3,15 +3,19 @@ package srv
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"regexp"
 
 	"github.com/hellohq/hqservice/api/openapi/restapi"
 	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/ms/hq/app"
 	"github.com/hellohq/hqservice/ms/hq/config"
+	"github.com/hellohq/hqservice/ms/hq/dal"
 	"github.com/hellohq/hqservice/ms/hq/srv/openapi"
 	"github.com/hellohq/hqservice/pkg/concurrent"
 	"github.com/hellohq/hqservice/pkg/def"
+	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/hellohq/hqservice/pkg/serve"
 	"github.com/powerman/structlog"
 	"github.com/prometheus/client_golang/prometheus"
@@ -25,9 +29,13 @@ var reg = prometheus.NewPedanticRegistry()
 
 // Service implements main.embeddedService interface.
 type Service struct {
-	cfg  *config.Config
-	srv  *restapi.Server
-	appl *app.App
+	cfg     *config.Config
+	srv     *restapi.Server
+	appl    *app.App
+	repo    *dal.Repo
+	ca      *x509.CertPool
+	cert    tls.Certificate
+	certInt tls.Certificate
 }
 
 // Name implements main.embeddedService interface.
@@ -43,7 +51,7 @@ func (s *Service) Init(sharedCfg *sharedconfig.Shared, _, serveCmd *cobra.Comman
 }
 
 // RunServe implements main.embeddedService interface.
-func (s *Service) RunServe(_, ctxShutdown Ctx, shutdown func()) (err error) {
+func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func()) (err error) {
 	log := structlog.FromContext(ctxShutdown, nil)
 
 	if s.cfg == nil {
@@ -51,6 +59,26 @@ func (s *Service) RunServe(_, ctxShutdown Ctx, shutdown func()) (err error) {
 	}
 	if err != nil {
 		return log.Err("failed to get config", "err", err)
+	}
+
+	if err == nil {
+		s.ca, err = netx.LoadCACert(s.cfg.TLSCACert)
+	}
+	if err == nil {
+		s.cert, err = tls.LoadX509KeyPair(s.cfg.TLSCert, s.cfg.TLSKey)
+	}
+	if err == nil {
+		s.certInt, err = tls.LoadX509KeyPair(s.cfg.TLSCertInt, s.cfg.TLSKeyInt)
+	}
+	if err != nil {
+		return log.Err("failed to get config", "err", err)
+	}
+
+	err = concurrent.Setup(ctxStartup, map[interface{}]concurrent.SetupFunc{
+		&s.repo: s.connectRepo,
+	})
+	if err != nil {
+		return log.Err("failed to connect", "err", err)
 	}
 
 	if s.appl == nil {
@@ -84,4 +112,8 @@ func (s *Service) serveMetrics(ctx Ctx) error {
 
 func (s *Service) serveOpenAPI(ctx Ctx) error {
 	return serve.OpenAPI(ctx, s.srv, "OpenAPI")
+}
+
+func (s *Service) connectRepo(ctx Ctx) (interface{}, error) {
+	return dal.New(ctx, s.cfg.Postgres)
 }

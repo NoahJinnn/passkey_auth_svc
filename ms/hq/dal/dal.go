@@ -24,19 +24,17 @@ type Repo struct {
 
 // New creates and returns new Repo.
 // It will also run required DB migrations and connects to DB.
-func New(ctx Ctx, dir string, cfg *config.PostgresConfig) (_ *Repo, err error) {
+func New(ctx Ctx, cfg *config.PostgresConfig) (_ *Repo, err error) {
 	returnErrs := []error{ // List of app.Err… returned by Repo methods.
 		app.ErrAlreadyExist,
 		app.ErrNotFound,
 	}
 
 	r := &Repo{}
-	r.Repo, err = repo.NewPostgres(ctx, repo.PostgresRepoConfig{
-		Postgres:         cfg,
-		GoosePostgresDir: dir,
-		SchemaVersion:    schemaVersion,
-		Metric:           metric,
-		ReturnErrs:       returnErrs,
+	r.Repo, err = repo.NewPostgresRepo(ctx, repo.PostgresRepoConfig{
+		Postgres:   cfg,
+		Metric:     metric,
+		ReturnErrs: returnErrs,
 	})
 	if err != nil {
 		return nil, err

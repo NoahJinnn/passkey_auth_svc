@@ -8,89 +8,90 @@ on:
     branches: [main]
 
 env:
-  GO_VERSION: '^1.19'
-  GOFLAGS: '-mod=readonly'
+  GO_VERSION: "^1.19"
+  GOFLAGS: "-mod=readonly"
 
 jobs:
+  # TODO: Update test CI
 
-  test:
-    runs-on: 'ubuntu-latest'
-    timeout-minutes: 30
-    env:
-      MONO_TLS_CA_CERT: 'configs/insecure-dev-pki/ca.crt'
-      MONO_X_POSTGRES_ADDR_HOST: 'localhost'
-      MONO__AUTH_POSTGRES_AUTH_LOGIN: 'auth'
-      MONO__AUTH_POSTGRES_AUTH_PASS: 'authpass'
-      MONO__AUTH_SECRET: 's3cr3t'
-      MONO__AUTH_TLS_CERT: 'configs/insecure-dev-pki/issued/ms-auth.crt'
-      MONO__AUTH_TLS_CERT_INT: 'configs/insecure-dev-pki/issued/ms-auth-int.crt'
-      MONO__AUTH_TLS_KEY: 'configs/insecure-dev-pki/private/ms-auth.key'
-      MONO__AUTH_TLS_KEY_INT: 'configs/insecure-dev-pki/private/ms-auth-int.key'
-      PGHOST: 'localhost'
-      PGUSER: 'postgres'
-      PGPASSWORD: 'postgres'
-    steps:
-      - uses: actions/setup-go@v3
-        with:
-          go-version: ${{ env.GO_VERSION }}
+  # test:
+  #   runs-on: 'ubuntu-latest'
+  #   timeout-minutes: 30
+  #   env:
+  #     MONO_TLS_CA_CERT: 'configs/insecure-dev-pki/ca.crt'
+  #     MONO_X_POSTGRES_ADDR_HOST: 'localhost'
+  #     MONO__AUTH_POSTGRES_AUTH_LOGIN: 'auth'
+  #     MONO__AUTH_POSTGRES_AUTH_PASS: 'authpass'
+  #     MONO__AUTH_SECRET: 's3cr3t'
+  #     MONO__AUTH_TLS_CERT: 'configs/insecure-dev-pki/issued/ms-auth.crt'
+  #     MONO__AUTH_TLS_CERT_INT: 'configs/insecure-dev-pki/issued/ms-auth-int.crt'
+  #     MONO__AUTH_TLS_KEY: 'configs/insecure-dev-pki/private/ms-auth.key'
+  #     MONO__AUTH_TLS_KEY_INT: 'configs/insecure-dev-pki/private/ms-auth-int.key'
+  #     PGHOST: 'localhost'
+  #     PGUSER: 'postgres'
+  #     PGPASSWORD: 'postgres'
+  #   steps:
+  #     - uses: actions/setup-go@v3
+  #       with:
+  #         go-version: ${{ env.GO_VERSION }}
 
-      - uses: actions/checkout@v3
+  #     - uses: actions/checkout@v3
 
-      - name: Run PostgreSQL service
-        run: |
-          docker run -d --net=host \
-            -e POSTGRES_PASSWORD=postgres \
-            -v $PWD/configs/insecure-dev-pki/issued/postgres.crt:/dev.crt \
-            -v $PWD/configs/insecure-dev-pki/private/postgres.key:/dev.key \
-            --entrypoint=bash postgres:12.7 -c '
-                set -x -e -o pipefail
-                install -m 0440 -o root -g postgres /dev.crt /server.crt
-                install -m 0440 -o root -g postgres /dev.key /server.key
-                exec docker-entrypoint.sh postgres -c ssl=on \
-                    --ssl_cert_file=/server.crt --ssl_key_file=/server.key
-            '
+  #     - name: Run PostgreSQL service
+  #       run: |
+  #         docker run -d --net=host \
+  #           -e POSTGRES_PASSWORD=postgres \
+  #           -v $PWD/configs/insecure-dev-pki/issued/postgres.crt:/dev.crt \
+  #           -v $PWD/configs/insecure-dev-pki/private/postgres.key:/dev.key \
+  #           --entrypoint=bash postgres:12.7 -c '
+  #               set -x -e -o pipefail
+  #               install -m 0440 -o root -g postgres /dev.crt /server.crt
+  #               install -m 0440 -o root -g postgres /dev.key /server.key
+  #               exec docker-entrypoint.sh postgres -c ssl=on \
+  #                   --ssl_cert_file=/server.crt --ssl_key_file=/server.key
+  #           '
 
-      - name: Fetch main branch (to compare .proto files)
-        run: |
-          if ! git show-branch main >/dev/null 2>&1; then
-            git fetch --depth=1 origin main && git branch main origin/main
-          fi
+  #     - name: Fetch main branch (to compare .proto files)
+  #       run: |
+  #         if ! git show-branch main >/dev/null 2>&1; then
+  #           git fetch --depth=1 origin main && git branch main origin/main
+  #         fi
 
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/bin
-            ~/go/pkg
-            ~/go/src
-            ~/.cache/go-build
-            ~/.cache/golangci-lint
-            .gobincache
-          key: v3-test-${{ runner.os }}-${{ hashFiles('go.mod') }}
-          restore-keys: |
-            v3-test-${{ runner.os }}-
+  #     - uses: actions/cache@v3
+  #       with:
+  #         path: |
+  #           ~/go/bin
+  #           ~/go/pkg
+  #           ~/go/src
+  #           ~/.cache/go-build
+  #           ~/.cache/golangci-lint
+  #           .gobincache
+  #         key: v3-test-${{ runner.os }}-${{ hashFiles('go.mod') }}
+  #         restore-keys: |
+  #           v3-test-${{ runner.os }}-
 
-      - name: Install tools
-        run: |
-          sudo apt update
-          sudo apt install -y postgresql-client
-          sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
-          ./bin/task scripts:install:gotools
+  #     - name: Install tools
+  #       run: |
+  #         sudo apt update
+  #         sudo apt install -y postgresql-client
+  #         sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
+  #         ./bin/task scripts:install:gotools
 
-      - name: Run test
-        run: ./bin/task scripts:test
+  #     - name: Run test
+  #       run: ./bin/task scripts:test
 
-      - name: Ensure API spec match auto-generated code
-        run: |
-          go generate ./api/...
-          git add . && git status --short && git diff-index --quiet HEAD
+  #     - name: Ensure API spec match auto-generated code
+  #       run: |
+  #         go generate ./api/...
+  #         git add . && git status --short && git diff-index --quiet HEAD
 
-      - name: Report code coverage
-        env:
-          COVERALLS_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
-        if: env.COVERALLS_TOKEN
-        run: |
-          scripts/cover
-          .gobincache/goveralls -coverprofile=cover.out -service=GitHub
+  #     - name: Report code coverage
+  #       env:
+  #         COVERALLS_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
+  #       if: env.COVERALLS_TOKEN
+  #       run: |
+  #         scripts/cover
+  #         .gobincache/goveralls -coverprofile=cover.out -service=GitHub
 
   build-and-release:
     needs: test

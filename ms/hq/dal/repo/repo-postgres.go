@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/hellohq/hqservice/ms/hq/config"
 	"github.com/jmoiron/sqlx"
@@ -29,16 +28,14 @@ func PostgresErrName(err error, name string) bool {
 
 // PostgresConfig contains repo configuration.
 type PostgresRepoConfig struct {
-	Postgres         *config.PostgresConfig
-	GoosePostgresDir string
-	SchemaVersion    int64
-	Metric           Metrics
-	ReturnErrs       []error // List of app.Err… returned by DAL methods.
+	Postgres   *config.PostgresConfig
+	Metric     Metrics
+	ReturnErrs []error // List of app.Err… returned by DAL methods.
 }
 
 // NewPostgres creates and returns new Repo.
 // It will also run required DB migrations and connects to DB.
-func NewPostgres(ctx Ctx, cfg PostgresRepoConfig) (_ *Repo, err error) {
+func NewPostgresRepo(ctx Ctx, cfg PostgresRepoConfig) (_ *Repo, err error) {
 	log := structlog.FromContext(ctx, nil)
 
 	err = cfg.Postgres.UpdateConnectTimeout(ctx)
@@ -71,13 +68,11 @@ func NewPostgres(ctx Ctx, cfg PostgresRepoConfig) (_ *Repo, err error) {
 	}
 
 	r := &Repo{
-		DB: sqlxx.NewDB(sqlx.NewDb(db, "postgres")),
-		// SchemaVer:     schemaVer,
-		schemaVersion: strconv.Itoa(int(cfg.SchemaVersion)),
-		returnErrs:    cfg.ReturnErrs,
-		metric:        cfg.Metric,
-		log:           log,
-		serialize:     pqx.Serialize,
+		DB:         sqlxx.NewDB(sqlx.NewDb(db, "postgres")),
+		returnErrs: cfg.ReturnErrs,
+		metric:     cfg.Metric,
+		log:        log,
+		serialize:  pqx.Serialize,
 	}
 	return r, nil
 }
