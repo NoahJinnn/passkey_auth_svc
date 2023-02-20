@@ -44,6 +44,7 @@ type Appl interface {
 
 // Repo provides data storage.
 type Repo interface {
+	IncExample(ctx Ctx, UserName string) error
 }
 
 // Ref: https://github.com/plaid/quickstart/blob/master/.env.example
@@ -69,10 +70,11 @@ type Config struct {
 type App struct {
 	cfg         *Config
 	plaidClient *plaid.APIClient
+	repo        Repo
 }
 
 // New creates and returns new App.
-func New() (*App, error) {
+func New(repo Repo) (*App, error) {
 	var cfg = &Config{}
 	fromEnv := appcfg.NewFromEnv(sharedconfig.EnvPrefix)
 	err := appcfg.ProvideStruct(cfg, fromEnv)
@@ -86,6 +88,7 @@ func New() (*App, error) {
 	a := &App{
 		cfg:         cfg,
 		plaidClient: plaidClient,
+		repo:        repo,
 	}
 	return a, nil
 }

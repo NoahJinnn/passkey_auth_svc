@@ -27,9 +27,7 @@ func NewPostgresConfig(cfg pqx.Config) *PostgresConfig {
 	if c.SSLMode != pqx.SSLVerifyFull {
 		c.SSLMode = pqx.SSLVerifyCA
 	}
-	// Extra protection in case secure schema usage pattern isn't used on this server
-	// https://www.postgresql.org/docs/11/ddl-schemas.html#DDL-SCHEMAS-PATTERNS.
-	c.SearchPath = `"$user"`
+
 	// In modern PostgreSQL serializable is fast enough, use it by default.
 	if c.DefaultTransactionIsolation == sql.LevelDefault {
 		c.DefaultTransactionIsolation = sql.LevelSerializable

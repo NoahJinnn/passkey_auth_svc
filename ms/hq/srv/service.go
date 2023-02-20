@@ -63,7 +63,7 @@ func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func()) (er
 	}
 
 	if s.appl == nil {
-		s.appl, err = app.New()
+		s.appl, err = app.New(s.repo)
 		if err != nil {
 			return log.Err("failed to create Appl", "err", err)
 		}
