@@ -4,15 +4,12 @@ scriptsdir=$( dirname -- "$0"; )
 cd $scriptsdir/../../
 
 source env.sh
-if command -v doppler &> /dev/null; then
-    if [ "$1" == "bin" ]; then
-        echo "HQ service started by exec built app"
-        doppler run -- ./bin/mono serve
-    else
-        echo "HQ service started by 'go run'"
-        doppler run -- go run ./cmd/mono/main.go serve
-    fi
-    
-else
+if ! command -v doppler &> /dev/null; then
     echo "Doppler is not installed or not in PATH, please run 'task scripts:install:doppler' and try again"
+
+elif ! command -v air &> /dev/null; then
+    echo "Air is not installed or not in GOPATH, please run 'task scripts:install:gotools' and try again"
+else
+    echo "HQ service started by exec built app"
+    doppler run -- air serve
 fi

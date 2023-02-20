@@ -1,7 +1,5 @@
 FROM alpine:3.17
 
-LABEL org.opencontainers.image.source="https://github.com/powerman/go-monolith-example"
-
 WORKDIR /app
 
 HEALTHCHECK --interval=30s --timeout=5s \
