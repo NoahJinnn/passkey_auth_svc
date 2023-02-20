@@ -22,7 +22,6 @@ type Shared struct {
 	AddrHost          appcfg.NotEmptyString `env:"ADDR_HOST"`
 	AddrHostInt       appcfg.NotEmptyString `env:"ADDR_HOST_INT"`
 	MetricsAddrPort   appcfg.Port           `env:"METRICS_ADDR_PORT"`
-	TLSCACert         appcfg.NotEmptyString `env:"TLS_CA_CERT"`
 	XPostgresAddrHost appcfg.NotEmptyString `env:"X_POSTGRES_ADDR_HOST"`
 	XPostgresAddrPort appcfg.Port           `env:"X_POSTGRES_ADDR_PORT"`
 	XPostgresDBName   appcfg.NotEmptyString `env:"X_POSTGRES_DB_NAME"`

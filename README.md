@@ -146,11 +146,11 @@ changing it.
    so you'll need to create certificate to run it on localhost - follow
    instructions in [Create local CA to issue localhost HTTPS
    certificates](https://gist.github.com/powerman/2fc4b1a5aee62dd9491cee7f75ead0b4).
-2. Or you can just use certificates in `configs/insecure-dev-pki`, which
+2. Or you can just use certificates in `configs/dev-pki`, which
    was created this way:
 
 ```
-$ . ./env.sh   # Sets $EASYRSA_PKI=configs/insecure-dev-pki.
+$ . ./env.sh   # Sets $EASYRSA_PKI=configs/dev-pki.
 $ /path/to/easyrsa init-pki
 $ echo Dev CA $(go list -m) | /path/to/easyrsa build-ca nopass
 $ /path/to/easyrsa --days=3650 "--subject-alt-name=DNS:postgres" build-server-full postgres nopass

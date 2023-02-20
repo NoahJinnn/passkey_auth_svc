@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 
 volumes:
   postgres:
@@ -16,7 +16,8 @@ services:
       - "${mono_postgres_tls_cert}:/dev.crt"
       - "${mono_postgres_tls_key}:/dev.key"
     environment:
-      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_USER: "${MONO_HQ_POSTGRES_AUTH_LOGIN}"
+      POSTGRES_PASSWORD: "${MONO_HQ_POSTGRES_AUTH_PASS}"
     entrypoint:
       - bash
       - -c
@@ -26,7 +27,7 @@ services:
         install -m 0440 -o root -g postgres /dev.key /server.key
         exec docker-entrypoint.sh postgres -c ssl=on \
             --ssl_cert_file=/server.crt --ssl_key_file=/server.key
-
+  
   # postgres-setup:
   #   depends_on:
   #     - postgres
@@ -52,29 +53,29 @@ services:
   #       set -x -e -o pipefail
   #       postgres-setup | psql
 
-  hq:
-    build:
-      context: .
-      dockerfile: use `./scripts/build` instead of `docker-compose build`
-    image: "go-monolith-example:latest"
-    container_name: hqservice
-    restart: always
-    ports:
-      - "${MONO_HQ_ADDR_PORT:-0}:17000"
-    volumes:
-      - "${MONO_TLS_CA_CERT}:/ca.crt"
-      - "${MONO_HQ_TLS_CERT}:/auth.crt"
-      - "${MONO_HQ_TLS_CERT_INT}:/auth-int.crt"
-      - "${MONO_HQ_TLS_KEY}:/auth.key"
-      - "${MONO_HQ_TLS_KEY_INT}:/auth-int.key"
-    environment:
-      MONO_ADDR_HOST: "${MONO_ADDR_HOST}"
-      MONO_ADDR_HOST_INT: "${MONO_ADDR_HOST_INT}"
-      MONO_TLS_CA_CERT: "/ca.crt"
-      MONO_X_POSTGRES_ADDR_HOST: "postgres"
-      MONO_HQ_POSTGRES_AUTH_LOGIN: "${MONO_HQ_POSTGRES_AUTH_LOGIN}"
-      MONO_HQ_POSTGRES_AUTH_PASS: "${MONO_HQ_POSTGRES_AUTH_PASS}"
-      MONO_HQ_TLS_CERT: "/auth.crt"
-      MONO_HQ_TLS_CERT_INT: "/auth-int.crt"
-      MONO_HQ_TLS_KEY: "/auth.key"
-      MONO_HQ_TLS_KEY_INT: "/auth-int.key"
+  # hq:
+  #   build:
+  #     context: .
+  #     dockerfile: use `./scripts/build` instead of `docker-compose build`
+  #   image: "go-monolith-example:latest"
+  #   container_name: hqservice
+  #   restart: always
+  #   ports:
+  #     - "${MONO_HQ_ADDR_PORT:-0}:17000"
+  #   volumes:
+  #     - "${MONO_TLS_CA_CERT}:/ca.crt"
+  #     - "${MONO_HQ_TLS_CERT}:/auth.crt"
+  #     - "${MONO_HQ_TLS_CERT_INT}:/auth-int.crt"
+  #     - "${MONO_HQ_TLS_KEY}:/auth.key"
+  #     - "${MONO_HQ_TLS_KEY_INT}:/auth-int.key"
+  #   environment:
+  #     MONO_ADDR_HOST: "${MONO_ADDR_HOST}"
+  #     MONO_ADDR_HOST_INT: "${MONO_ADDR_HOST_INT}"
+  #     MONO_TLS_CA_CERT: "/ca.crt"
+  #     MONO_X_POSTGRES_ADDR_HOST: "postgres"
+  #     MONO_HQ_POSTGRES_AUTH_LOGIN: "${MONO_HQ_POSTGRES_AUTH_LOGIN}"
+  #     MONO_HQ_POSTGRES_AUTH_PASS: "${MONO_HQ_POSTGRES_AUTH_PASS}"
+  #     MONO_HQ_TLS_CERT: "/auth.crt"
+  #     MONO_HQ_TLS_CERT_INT: "/auth-int.crt"
+  #     MONO_HQ_TLS_KEY: "/auth.key"
+  #     MONO_HQ_TLS_KEY_INT: "/auth-int.key"

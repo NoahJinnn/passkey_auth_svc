@@ -31,10 +31,6 @@ var (
 		MetricsAddrPort appcfg.Port           `env:"HQ_METRICS_ADDR_PORT"`
 		PostgresUser    appcfg.NotEmptyString `env:"HQ_POSTGRES_AUTH_LOGIN"`
 		PostgresPass    appcfg.NotEmptyString `env:"HQ_POSTGRES_AUTH_PASS"`
-		TLSCert         appcfg.NotEmptyString `env:"HQ_TLS_CERT"`
-		TLSCertInt      appcfg.NotEmptyString `env:"HQ_TLS_CERT_INT"`
-		TLSKey          appcfg.NotEmptyString `env:"HQ_TLS_KEY"`
-		TLSKeyInt       appcfg.NotEmptyString `env:"HQ_TLS_KEY_INT"`
 	}{
 		Port:            appcfg.MustPort(strconv.Itoa(sharedconfig.MonoPort)),
 		MetricsAddrPort: appcfg.MustPort(strconv.Itoa(sharedconfig.MetricsPort)),
@@ -46,11 +42,6 @@ type Config struct {
 	BindAddr        netx.Addr
 	BindMetricsAddr netx.Addr
 	Postgres        *PostgresConfig
-	TLSCACert       string
-	TLSCert         string
-	TLSCertInt      string
-	TLSKey          string
-	TLSKeyInt       string
 }
 
 // Init updates config defaults (from env) and setup subcommands flags.
@@ -84,18 +75,12 @@ func GetServe() (c *Config, err error) {
 		BindAddr:        netx.NewAddr(shared.AddrHostInt.Value(&err), own.Port.Value(&err)),
 		BindMetricsAddr: netx.NewAddr(shared.AddrHostInt.Value(&err), own.MetricsAddrPort.Value(&err)),
 		Postgres: NewPostgresConfig(pqx.Config{
-			Host:        shared.XPostgresAddrHost.Value(&err),
-			Port:        shared.XPostgresAddrPort.Value(&err),
-			DBName:      shared.XPostgresDBName.Value(&err),
-			User:        own.PostgresUser.Value(&err),
-			Pass:        own.PostgresPass.Value(&err),
-			SSLRootCert: shared.TLSCACert.Value(&err),
+			Host:   shared.XPostgresAddrHost.Value(&err),
+			Port:   shared.XPostgresAddrPort.Value(&err),
+			DBName: shared.XPostgresDBName.Value(&err),
+			User:   own.PostgresUser.Value(&err),
+			Pass:   own.PostgresPass.Value(&err),
 		}),
-		TLSCACert:  shared.TLSCACert.Value(&err),
-		TLSCert:    own.TLSCert.Value(&err),
-		TLSCertInt: own.TLSCertInt.Value(&err),
-		TLSKey:     own.TLSKey.Value(&err),
-		TLSKeyInt:  own.TLSKeyInt.Value(&err),
 	}
 
 	if err != nil {

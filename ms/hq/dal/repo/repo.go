@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/lib/pq"
 	"github.com/powerman/narada4d/schemaver"
 	"github.com/powerman/sqlxx"
@@ -47,7 +46,6 @@ func (r *Repo) Close() {
 func (r *Repo) strict(err error) error {
 	switch {
 	case err == nil:
-	case errors.As(err, new(*mysql.MySQLError)):
 	case errors.As(err, new(*pq.Error)):
 	case errors.Is(err, ErrSchemaVer):
 	case errors.Is(err, sql.ErrNoRows):

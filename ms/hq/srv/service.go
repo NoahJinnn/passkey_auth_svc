@@ -3,8 +3,6 @@ package srv
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"regexp"
 
 	"github.com/hellohq/hqservice/api/openapi/restapi"
@@ -15,7 +13,6 @@ import (
 	"github.com/hellohq/hqservice/ms/hq/srv/openapi"
 	"github.com/hellohq/hqservice/pkg/concurrent"
 	"github.com/hellohq/hqservice/pkg/def"
-	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/hellohq/hqservice/pkg/serve"
 	"github.com/powerman/structlog"
 	"github.com/prometheus/client_golang/prometheus"
@@ -29,13 +26,10 @@ var reg = prometheus.NewPedanticRegistry()
 
 // Service implements main.embeddedService interface.
 type Service struct {
-	cfg     *config.Config
-	srv     *restapi.Server
-	appl    *app.App
-	repo    *dal.Repo
-	ca      *x509.CertPool
-	cert    tls.Certificate
-	certInt tls.Certificate
+	cfg  *config.Config
+	srv  *restapi.Server
+	appl *app.App
+	repo *dal.Repo
 }
 
 // Name implements main.embeddedService interface.
@@ -56,19 +50,6 @@ func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func()) (er
 
 	if s.cfg == nil {
 		s.cfg, err = config.GetServe()
-	}
-	if err != nil {
-		return log.Err("failed to get config", "err", err)
-	}
-
-	if err == nil {
-		s.ca, err = netx.LoadCACert(s.cfg.TLSCACert)
-	}
-	if err == nil {
-		s.cert, err = tls.LoadX509KeyPair(s.cfg.TLSCert, s.cfg.TLSKey)
-	}
-	if err == nil {
-		s.certInt, err = tls.LoadX509KeyPair(s.cfg.TLSCertInt, s.cfg.TLSKeyInt)
 	}
 	if err != nil {
 		return log.Err("failed to get config", "err", err)
