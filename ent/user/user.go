@@ -7,10 +7,22 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldAge holds the string denoting the age field in the database.
-	FieldAge = "age"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
+	// FieldFirstName holds the string denoting the first_name field in the database.
+	FieldFirstName = "first_name"
+	// FieldLastName holds the string denoting the last_name field in the database.
+	FieldLastName = "last_name"
+	// FieldEmail holds the string denoting the email field in the database.
+	FieldEmail = "email"
+	// FieldPassword holds the string denoting the password field in the database.
+	FieldPassword = "password"
+	// FieldPhoneNumber holds the string denoting the phone_number field in the database.
+	FieldPhoneNumber = "phone_number"
+	// FieldAddress holds the string denoting the address field in the database.
+	FieldAddress = "address"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 )
@@ -18,8 +30,14 @@ const (
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
-	FieldAge,
-	FieldName,
+	FieldFirstName,
+	FieldLastName,
+	FieldEmail,
+	FieldPassword,
+	FieldPhoneNumber,
+	FieldAddress,
+	FieldCreatedAt,
+	FieldUpdatedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -31,10 +49,3 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
-
-var (
-	// AgeValidator is a validator for the "age" field. It is called by the builders before save.
-	AgeValidator func(int) error
-	// DefaultName holds the default value on creation for the "name" field.
-	DefaultName string
-)

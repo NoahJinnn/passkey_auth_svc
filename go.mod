@@ -50,6 +50,8 @@ require (
 
 require (
 	ariga.io/atlas v0.9.1-0.20230119145809-92243f7c55cb // indirect
+	ariga.io/entimport v0.0.0-20220722070026-e5b57d96ab7c // indirect
+	entgo.io/contrib v0.2.1-0.20220405071655-7dbe27ee8fec // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
@@ -64,6 +66,7 @@ require (
 	github.com/golangci/golangci-lint v1.50.1 // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect
 	github.com/hashicorp/hcl/v2 v2.13.0 // indirect
+	github.com/jhump/protoreflect v1.14.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
