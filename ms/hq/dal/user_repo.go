@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/ms/hq/app"
 )
 
 func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
@@ -19,8 +18,4 @@ func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	}
 	log.Println("user was created: ", u)
 	return u, nil
-}
-
-func (r *Repo) IncExample(ctx app.Ctx, userName string) error {
-	return nil
 }

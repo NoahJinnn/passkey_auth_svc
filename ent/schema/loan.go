@@ -14,7 +14,7 @@ type Loan struct {
 }
 
 func (Loan) Fields() []ent.Field {
-	return []ent.Field{field.Uint("id").SchemaType(map[string]string{"postgres": "serial"}), field.Int32("user_id").Optional(), field.String("lender_name"), field.String("loan_type"), field.Float("balance"), field.Float("interest_rate"), field.Time("created_at"), field.Time("updated_at")}
+	return []ent.Field{field.Uint("id").SchemaType(map[string]string{"postgres": "serial"}), field.Uint("user_id").Optional(), field.String("lender_name"), field.String("loan_type"), field.Float("balance"), field.Float("interest_rate"), field.Time("created_at"), field.Time("updated_at")}
 }
 func (Loan) Edges() []ent.Edge {
 	return []ent.Edge{edge.From("user", User.Type).Ref("loans").Unique().Field("user_id")}

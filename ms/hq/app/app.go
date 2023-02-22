@@ -44,7 +44,6 @@ type Appl interface {
 
 // Repo provides data storage.
 type Repo interface {
-	IncExample(ctx Ctx, UserName string) error
 }
 
 // Ref: https://github.com/plaid/quickstart/blob/master/.env.example

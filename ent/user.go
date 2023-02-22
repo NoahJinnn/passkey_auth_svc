@@ -32,6 +32,82 @@ type User struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserQuery when eager-loading is set.
+	Edges UserEdges `json:"edges"`
+}
+
+// UserEdges holds the relations/edges for other nodes in the graph.
+type UserEdges struct {
+	// BankAccounts holds the value of the bank_accounts edge.
+	BankAccounts []*BankAccount `json:"bank_accounts,omitempty"`
+	// Cars holds the value of the cars edge.
+	Cars []*Car `json:"cars,omitempty"`
+	// Collectibles holds the value of the collectibles edge.
+	Collectibles []*Collectible `json:"collectibles,omitempty"`
+	// CryptoAccounts holds the value of the crypto_accounts edge.
+	CryptoAccounts []*CryptoAccount `json:"crypto_accounts,omitempty"`
+	// Loans holds the value of the loans edge.
+	Loans []*Loan `json:"loans,omitempty"`
+	// PrivateShares holds the value of the private_shares edge.
+	PrivateShares []*PrivateShare `json:"private_shares,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [6]bool
+}
+
+// BankAccountsOrErr returns the BankAccounts value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) BankAccountsOrErr() ([]*BankAccount, error) {
+	if e.loadedTypes[0] {
+		return e.BankAccounts, nil
+	}
+	return nil, &NotLoadedError{edge: "bank_accounts"}
+}
+
+// CarsOrErr returns the Cars value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) CarsOrErr() ([]*Car, error) {
+	if e.loadedTypes[1] {
+		return e.Cars, nil
+	}
+	return nil, &NotLoadedError{edge: "cars"}
+}
+
+// CollectiblesOrErr returns the Collectibles value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) CollectiblesOrErr() ([]*Collectible, error) {
+	if e.loadedTypes[2] {
+		return e.Collectibles, nil
+	}
+	return nil, &NotLoadedError{edge: "collectibles"}
+}
+
+// CryptoAccountsOrErr returns the CryptoAccounts value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) CryptoAccountsOrErr() ([]*CryptoAccount, error) {
+	if e.loadedTypes[3] {
+		return e.CryptoAccounts, nil
+	}
+	return nil, &NotLoadedError{edge: "crypto_accounts"}
+}
+
+// LoansOrErr returns the Loans value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) LoansOrErr() ([]*Loan, error) {
+	if e.loadedTypes[4] {
+		return e.Loans, nil
+	}
+	return nil, &NotLoadedError{edge: "loans"}
+}
+
+// PrivateSharesOrErr returns the PrivateShares value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) PrivateSharesOrErr() ([]*PrivateShare, error) {
+	if e.loadedTypes[5] {
+		return e.PrivateShares, nil
+	}
+	return nil, &NotLoadedError{edge: "private_shares"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -117,6 +193,36 @@ func (u *User) assignValues(columns []string, values []any) error {
 		}
 	}
 	return nil
+}
+
+// QueryBankAccounts queries the "bank_accounts" edge of the User entity.
+func (u *User) QueryBankAccounts() *BankAccountQuery {
+	return NewUserClient(u.config).QueryBankAccounts(u)
+}
+
+// QueryCars queries the "cars" edge of the User entity.
+func (u *User) QueryCars() *CarQuery {
+	return NewUserClient(u.config).QueryCars(u)
+}
+
+// QueryCollectibles queries the "collectibles" edge of the User entity.
+func (u *User) QueryCollectibles() *CollectibleQuery {
+	return NewUserClient(u.config).QueryCollectibles(u)
+}
+
+// QueryCryptoAccounts queries the "crypto_accounts" edge of the User entity.
+func (u *User) QueryCryptoAccounts() *CryptoAccountQuery {
+	return NewUserClient(u.config).QueryCryptoAccounts(u)
+}
+
+// QueryLoans queries the "loans" edge of the User entity.
+func (u *User) QueryLoans() *LoanQuery {
+	return NewUserClient(u.config).QueryLoans(u)
+}
+
+// QueryPrivateShares queries the "private_shares" edge of the User entity.
+func (u *User) QueryPrivateShares() *PrivateShareQuery {
+	return NewUserClient(u.config).QueryPrivateShares(u)
 }
 
 // Update returns a builder for updating this User.

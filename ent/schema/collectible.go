@@ -14,7 +14,7 @@ type Collectible struct {
 }
 
 func (Collectible) Fields() []ent.Field {
-	return []ent.Field{field.Uint("id").SchemaType(map[string]string{"postgres": "serial"}), field.Int32("user_id").Optional(), field.String("name"), field.String("description"), field.Time("created_at"), field.Time("updated_at")}
+	return []ent.Field{field.Uint("id").SchemaType(map[string]string{"postgres": "serial"}), field.Uint("user_id").Optional(), field.String("name"), field.String("description"), field.Time("created_at"), field.Time("updated_at")}
 }
 func (Collectible) Edges() []ent.Edge {
 	return []ent.Edge{edge.From("user", User.Type).Ref("collectibles").Unique().Field("user_id")}

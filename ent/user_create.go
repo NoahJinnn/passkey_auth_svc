@@ -10,6 +10,12 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/hellohq/hqservice/ent/bankaccount"
+	"github.com/hellohq/hqservice/ent/car"
+	"github.com/hellohq/hqservice/ent/collectible"
+	"github.com/hellohq/hqservice/ent/cryptoaccount"
+	"github.com/hellohq/hqservice/ent/loan"
+	"github.com/hellohq/hqservice/ent/privateshare"
 	"github.com/hellohq/hqservice/ent/user"
 )
 
@@ -88,6 +94,96 @@ func (uc *UserCreate) SetUpdatedAt(t time.Time) *UserCreate {
 func (uc *UserCreate) SetID(u uint) *UserCreate {
 	uc.mutation.SetID(u)
 	return uc
+}
+
+// AddBankAccountIDs adds the "bank_accounts" edge to the BankAccount entity by IDs.
+func (uc *UserCreate) AddBankAccountIDs(ids ...uint) *UserCreate {
+	uc.mutation.AddBankAccountIDs(ids...)
+	return uc
+}
+
+// AddBankAccounts adds the "bank_accounts" edges to the BankAccount entity.
+func (uc *UserCreate) AddBankAccounts(b ...*BankAccount) *UserCreate {
+	ids := make([]uint, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return uc.AddBankAccountIDs(ids...)
+}
+
+// AddCarIDs adds the "cars" edge to the Car entity by IDs.
+func (uc *UserCreate) AddCarIDs(ids ...uint) *UserCreate {
+	uc.mutation.AddCarIDs(ids...)
+	return uc
+}
+
+// AddCars adds the "cars" edges to the Car entity.
+func (uc *UserCreate) AddCars(c ...*Car) *UserCreate {
+	ids := make([]uint, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uc.AddCarIDs(ids...)
+}
+
+// AddCollectibleIDs adds the "collectibles" edge to the Collectible entity by IDs.
+func (uc *UserCreate) AddCollectibleIDs(ids ...uint) *UserCreate {
+	uc.mutation.AddCollectibleIDs(ids...)
+	return uc
+}
+
+// AddCollectibles adds the "collectibles" edges to the Collectible entity.
+func (uc *UserCreate) AddCollectibles(c ...*Collectible) *UserCreate {
+	ids := make([]uint, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uc.AddCollectibleIDs(ids...)
+}
+
+// AddCryptoAccountIDs adds the "crypto_accounts" edge to the CryptoAccount entity by IDs.
+func (uc *UserCreate) AddCryptoAccountIDs(ids ...uint) *UserCreate {
+	uc.mutation.AddCryptoAccountIDs(ids...)
+	return uc
+}
+
+// AddCryptoAccounts adds the "crypto_accounts" edges to the CryptoAccount entity.
+func (uc *UserCreate) AddCryptoAccounts(c ...*CryptoAccount) *UserCreate {
+	ids := make([]uint, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uc.AddCryptoAccountIDs(ids...)
+}
+
+// AddLoanIDs adds the "loans" edge to the Loan entity by IDs.
+func (uc *UserCreate) AddLoanIDs(ids ...uint) *UserCreate {
+	uc.mutation.AddLoanIDs(ids...)
+	return uc
+}
+
+// AddLoans adds the "loans" edges to the Loan entity.
+func (uc *UserCreate) AddLoans(l ...*Loan) *UserCreate {
+	ids := make([]uint, len(l))
+	for i := range l {
+		ids[i] = l[i].ID
+	}
+	return uc.AddLoanIDs(ids...)
+}
+
+// AddPrivateShareIDs adds the "private_shares" edge to the PrivateShare entity by IDs.
+func (uc *UserCreate) AddPrivateShareIDs(ids ...uint) *UserCreate {
+	uc.mutation.AddPrivateShareIDs(ids...)
+	return uc
+}
+
+// AddPrivateShares adds the "private_shares" edges to the PrivateShare entity.
+func (uc *UserCreate) AddPrivateShares(p ...*PrivateShare) *UserCreate {
+	ids := make([]uint, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uc.AddPrivateShareIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -205,6 +301,120 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if nodes := uc.mutation.BankAccountsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BankAccountsTable,
+			Columns: []string{user.BankAccountsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint,
+					Column: bankaccount.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.CarsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CarsTable,
+			Columns: []string{user.CarsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint,
+					Column: car.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.CollectiblesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CollectiblesTable,
+			Columns: []string{user.CollectiblesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint,
+					Column: collectible.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.CryptoAccountsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CryptoAccountsTable,
+			Columns: []string{user.CryptoAccountsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint,
+					Column: cryptoaccount.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.LoansIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.LoansTable,
+			Columns: []string{user.LoansColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint,
+					Column: loan.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.PrivateSharesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PrivateSharesTable,
+			Columns: []string{user.PrivateSharesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUint,
+					Column: privateshare.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

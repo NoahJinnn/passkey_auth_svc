@@ -6,5 +6,23 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// BankAccount is the predicate function for bankaccount builders.
+type BankAccount func(*sql.Selector)
+
+// Car is the predicate function for car builders.
+type Car func(*sql.Selector)
+
+// Collectible is the predicate function for collectible builders.
+type Collectible func(*sql.Selector)
+
+// CryptoAccount is the predicate function for cryptoaccount builders.
+type CryptoAccount func(*sql.Selector)
+
+// Loan is the predicate function for loan builders.
+type Loan func(*sql.Selector)
+
+// PrivateShare is the predicate function for privateshare builders.
+type PrivateShare func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

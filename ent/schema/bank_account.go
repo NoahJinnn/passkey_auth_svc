@@ -15,7 +15,8 @@ type BankAccount struct {
 }
 
 func (BankAccount) Fields() []ent.Field {
-	return []ent.Field{field.Uint("id").SchemaType(map[string]string{"postgres": "serial"}), field.Int32("user_id").Optional(), field.String("account_id"), field.String("institution_name"), field.String("account_type"), field.Time("created_at"), field.Time("updated_at")}
+	return []ent.Field{field.Uint("id").SchemaType(map[string]string{"postgres": "serial"}), field.Uint("user_id").Optional().SchemaType(map[string]string{"postgres": "serial"}), field.String("account_id"), field.JSON("institution_info", struct{}{}), field.JSON("account_info", struct{}{}), field.String("sensible_data"), field.Time("created_at"), field.Time("updated_at")}
+
 }
 func (BankAccount) Edges() []ent.Edge {
 	return []ent.Edge{edge.From("user", User.Type).Ref("bank_accounts").Unique().Field("user_id")}

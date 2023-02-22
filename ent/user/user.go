@@ -23,8 +23,62 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// EdgeBankAccounts holds the string denoting the bank_accounts edge name in mutations.
+	EdgeBankAccounts = "bank_accounts"
+	// EdgeCars holds the string denoting the cars edge name in mutations.
+	EdgeCars = "cars"
+	// EdgeCollectibles holds the string denoting the collectibles edge name in mutations.
+	EdgeCollectibles = "collectibles"
+	// EdgeCryptoAccounts holds the string denoting the crypto_accounts edge name in mutations.
+	EdgeCryptoAccounts = "crypto_accounts"
+	// EdgeLoans holds the string denoting the loans edge name in mutations.
+	EdgeLoans = "loans"
+	// EdgePrivateShares holds the string denoting the private_shares edge name in mutations.
+	EdgePrivateShares = "private_shares"
 	// Table holds the table name of the user in the database.
 	Table = "users"
+	// BankAccountsTable is the table that holds the bank_accounts relation/edge.
+	BankAccountsTable = "bank_account"
+	// BankAccountsInverseTable is the table name for the BankAccount entity.
+	// It exists in this package in order to avoid circular dependency with the "bankaccount" package.
+	BankAccountsInverseTable = "bank_account"
+	// BankAccountsColumn is the table column denoting the bank_accounts relation/edge.
+	BankAccountsColumn = "user_id"
+	// CarsTable is the table that holds the cars relation/edge.
+	CarsTable = "cars"
+	// CarsInverseTable is the table name for the Car entity.
+	// It exists in this package in order to avoid circular dependency with the "car" package.
+	CarsInverseTable = "cars"
+	// CarsColumn is the table column denoting the cars relation/edge.
+	CarsColumn = "user_id"
+	// CollectiblesTable is the table that holds the collectibles relation/edge.
+	CollectiblesTable = "collectibles"
+	// CollectiblesInverseTable is the table name for the Collectible entity.
+	// It exists in this package in order to avoid circular dependency with the "collectible" package.
+	CollectiblesInverseTable = "collectibles"
+	// CollectiblesColumn is the table column denoting the collectibles relation/edge.
+	CollectiblesColumn = "user_id"
+	// CryptoAccountsTable is the table that holds the crypto_accounts relation/edge.
+	CryptoAccountsTable = "crypto_account"
+	// CryptoAccountsInverseTable is the table name for the CryptoAccount entity.
+	// It exists in this package in order to avoid circular dependency with the "cryptoaccount" package.
+	CryptoAccountsInverseTable = "crypto_account"
+	// CryptoAccountsColumn is the table column denoting the crypto_accounts relation/edge.
+	CryptoAccountsColumn = "user_id"
+	// LoansTable is the table that holds the loans relation/edge.
+	LoansTable = "loans"
+	// LoansInverseTable is the table name for the Loan entity.
+	// It exists in this package in order to avoid circular dependency with the "loan" package.
+	LoansInverseTable = "loans"
+	// LoansColumn is the table column denoting the loans relation/edge.
+	LoansColumn = "user_id"
+	// PrivateSharesTable is the table that holds the private_shares relation/edge.
+	PrivateSharesTable = "private_shares"
+	// PrivateSharesInverseTable is the table name for the PrivateShare entity.
+	// It exists in this package in order to avoid circular dependency with the "privateshare" package.
+	PrivateSharesInverseTable = "private_shares"
+	// PrivateSharesColumn is the table column denoting the private_shares relation/edge.
+	PrivateSharesColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.

@@ -3,11 +3,157 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
 
 var (
+	// BankAccountColumns holds the columns for the "bank_account" table.
+	BankAccountColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "account_id", Type: field.TypeString},
+		{Name: "institution_info", Type: field.TypeJSON},
+		{Name: "account_info", Type: field.TypeJSON},
+		{Name: "sensible_data", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUint, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// BankAccountTable holds the schema information for the "bank_account" table.
+	BankAccountTable = &schema.Table{
+		Name:       "bank_account",
+		Columns:    BankAccountColumns,
+		PrimaryKey: []*schema.Column{BankAccountColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "bank_account_users_bank_accounts",
+				Columns:    []*schema.Column{BankAccountColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// CarsColumns holds the columns for the "cars" table.
+	CarsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "make", Type: field.TypeString},
+		{Name: "model", Type: field.TypeString},
+		{Name: "year", Type: field.TypeInt32},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUint, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// CarsTable holds the schema information for the "cars" table.
+	CarsTable = &schema.Table{
+		Name:       "cars",
+		Columns:    CarsColumns,
+		PrimaryKey: []*schema.Column{CarsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "cars_users_cars",
+				Columns:    []*schema.Column{CarsColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// CollectiblesColumns holds the columns for the "collectibles" table.
+	CollectiblesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "name", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUint, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// CollectiblesTable holds the schema information for the "collectibles" table.
+	CollectiblesTable = &schema.Table{
+		Name:       "collectibles",
+		Columns:    CollectiblesColumns,
+		PrimaryKey: []*schema.Column{CollectiblesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "collectibles_users_collectibles",
+				Columns:    []*schema.Column{CollectiblesColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// CryptoAccountColumns holds the columns for the "crypto_account" table.
+	CryptoAccountColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "name", Type: field.TypeString},
+		{Name: "coin_type", Type: field.TypeString},
+		{Name: "balance", Type: field.TypeFloat64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUint, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// CryptoAccountTable holds the schema information for the "crypto_account" table.
+	CryptoAccountTable = &schema.Table{
+		Name:       "crypto_account",
+		Columns:    CryptoAccountColumns,
+		PrimaryKey: []*schema.Column{CryptoAccountColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "crypto_account_users_crypto_accounts",
+				Columns:    []*schema.Column{CryptoAccountColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// LoansColumns holds the columns for the "loans" table.
+	LoansColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "lender_name", Type: field.TypeString},
+		{Name: "loan_type", Type: field.TypeString},
+		{Name: "balance", Type: field.TypeFloat64},
+		{Name: "interest_rate", Type: field.TypeFloat64},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUint, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// LoansTable holds the schema information for the "loans" table.
+	LoansTable = &schema.Table{
+		Name:       "loans",
+		Columns:    LoansColumns,
+		PrimaryKey: []*schema.Column{LoansColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "loans_users_loans",
+				Columns:    []*schema.Column{LoansColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// PrivateSharesColumns holds the columns for the "private_shares" table.
+	PrivateSharesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "name", Type: field.TypeString},
+		{Name: "company_name", Type: field.TypeString},
+		{Name: "quantity", Type: field.TypeInt32},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUint, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// PrivateSharesTable holds the schema information for the "private_shares" table.
+	PrivateSharesTable = &schema.Table{
+		Name:       "private_shares",
+		Columns:    PrivateSharesColumns,
+		PrimaryKey: []*schema.Column{PrivateSharesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "private_shares_users_private_shares",
+				Columns:    []*schema.Column{PrivateSharesColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -28,9 +174,27 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		BankAccountTable,
+		CarsTable,
+		CollectiblesTable,
+		CryptoAccountTable,
+		LoansTable,
+		PrivateSharesTable,
 		UsersTable,
 	}
 )
 
 func init() {
+	BankAccountTable.ForeignKeys[0].RefTable = UsersTable
+	BankAccountTable.Annotation = &entsql.Annotation{
+		Table: "bank_account",
+	}
+	CarsTable.ForeignKeys[0].RefTable = UsersTable
+	CollectiblesTable.ForeignKeys[0].RefTable = UsersTable
+	CryptoAccountTable.ForeignKeys[0].RefTable = UsersTable
+	CryptoAccountTable.Annotation = &entsql.Annotation{
+		Table: "crypto_account",
+	}
+	LoansTable.ForeignKeys[0].RefTable = UsersTable
+	PrivateSharesTable.ForeignKeys[0].RefTable = UsersTable
 }

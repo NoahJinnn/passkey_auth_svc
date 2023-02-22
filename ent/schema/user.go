@@ -15,10 +15,10 @@ type User struct {
 
 // Fields of the User.
 func (User) Fields() []ent.Field {
-	return []ent.Field{field.Uint("id").SchemaType(map[string]string{"postgres": "serial"}), field.String("first_name"), field.String(
+	return []ent.Field{field.Uint("id").SchemaType(map[string]string{"postgres": "serial"}), field.String("first_name"), field.String("last_name"), field.String(
 
 		// Edges of the User.
-		"last_name"), field.String("email").Unique(), field.String("password"), field.String("phone_number").Optional(), field.String("address").Optional(), field.Time("created_at"), field.Time("updated_at")}
+		"email").Unique(), field.String("password"), field.String("phone_number").Optional(), field.String("address").Optional(), field.Time("created_at"), field.Time("updated_at")}
 
 }
 

@@ -9,6 +9,78 @@ import (
 	"github.com/hellohq/hqservice/ent"
 )
 
+// The BankAccountFunc type is an adapter to allow the use of ordinary
+// function as BankAccount mutator.
+type BankAccountFunc func(context.Context, *ent.BankAccountMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BankAccountFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.BankAccountMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BankAccountMutation", m)
+}
+
+// The CarFunc type is an adapter to allow the use of ordinary
+// function as Car mutator.
+type CarFunc func(context.Context, *ent.CarMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CarFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CarMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CarMutation", m)
+}
+
+// The CollectibleFunc type is an adapter to allow the use of ordinary
+// function as Collectible mutator.
+type CollectibleFunc func(context.Context, *ent.CollectibleMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CollectibleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CollectibleMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CollectibleMutation", m)
+}
+
+// The CryptoAccountFunc type is an adapter to allow the use of ordinary
+// function as CryptoAccount mutator.
+type CryptoAccountFunc func(context.Context, *ent.CryptoAccountMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CryptoAccountFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CryptoAccountMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CryptoAccountMutation", m)
+}
+
+// The LoanFunc type is an adapter to allow the use of ordinary
+// function as Loan mutator.
+type LoanFunc func(context.Context, *ent.LoanMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LoanFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LoanMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LoanMutation", m)
+}
+
+// The PrivateShareFunc type is an adapter to allow the use of ordinary
+// function as PrivateShare mutator.
+type PrivateShareFunc func(context.Context, *ent.PrivateShareMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PrivateShareFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PrivateShareMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PrivateShareMutation", m)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)

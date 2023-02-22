@@ -14,7 +14,7 @@ type PrivateShare struct {
 }
 
 func (PrivateShare) Fields() []ent.Field {
-	return []ent.Field{field.Uint("id").SchemaType(map[string]string{"postgres": "serial"}), field.Int32("user_id").Optional(), field.String("name"), field.String("company_name"), field.Int32("quantity"), field.Time("created_at"), field.Time("updated_at")}
+	return []ent.Field{field.Uint("id").SchemaType(map[string]string{"postgres": "serial"}), field.Uint("user_id").Optional(), field.String("name"), field.String("company_name"), field.Int32("quantity"), field.Time("created_at"), field.Time("updated_at")}
 }
 func (PrivateShare) Edges() []ent.Edge {
 	return []ent.Edge{edge.From("user", User.Type).Ref("private_shares").Unique().Field("user_id")}
