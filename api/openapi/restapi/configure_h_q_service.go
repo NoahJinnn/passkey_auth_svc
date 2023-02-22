@@ -14,11 +14,11 @@ import (
 )
 
 
-func configureFlags(api *op.PlaidConnectorAPI) {
+func configureFlags(api *op.HQServiceAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }
 }
 
-func configureAPI(api *op.PlaidConnectorAPI) http.Handler {
+func configureAPI(api *op.HQServiceAPI) http.Handler {
 	// configure the api here
 	api.ServeError = errors.ServeError
 

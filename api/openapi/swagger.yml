@@ -1,7 +1,7 @@
 swagger: "2.0"
 
 info:
-  title: Plaid Connector
+  title: HQ Service
   version: 0.2.0
   description: |
     # ...
