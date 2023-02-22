@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/sharedconfig"
 	plaid "github.com/plaid/plaid-go/v3/plaid"
 	"github.com/powerman/appcfg"
@@ -28,22 +29,15 @@ type Appl interface {
 	// status otherwise.
 	// Errors: none.
 	HealthCheck(Ctx) (interface{}, error)
-
-	Info() *GetInfoResp
-	GetSandboxAccessToken(ctx Ctx, institutionID string) (*GetAccessTokenResp, error)
-	LinkTokenCreate(
-		ctx Ctx, paymentInitiation *plaid.LinkTokenCreateRequestPaymentInitiation,
-	) (*LinkTokenCreateResp, error)
-	GetAccessToken(ctx Ctx, publicToken string) (*GetAccessTokenResp, error)
-	GetAuthAccount(ctx Ctx) (*GetAuthAccountResp, error)
-	GetTransactions(ctx Ctx) (*GetTransactionsResp, error)
-	GetIdentity(ctx Ctx) (*GetIdentityResp, error)
-	GetBalance(ctx Ctx) (*GetAccountsResp, error)
-	GetAccounts(ctx Ctx) (*GetAccountsResp, error)
+	IPlaidSvc
 }
 
 // Repo provides data storage.
 type Repo interface {
+	GetAllUsers(ctx Ctx) ([]*User, error)
+	GetUserById(ctx Ctx, id uint) (*User, error)
+	CreateUser(ctx Ctx, u *User) (*ent.User, error)
+	UpdateUser(ctx Ctx, id uint, u *User) (*ent.User, error)
 }
 
 // Ref: https://github.com/plaid/quickstart/blob/master/.env.example
@@ -52,13 +46,10 @@ type Config struct {
 	// See https://dashboard.plaid.com/account/keys
 	ClientId appcfg.String `env:"PLAID_CLIENT_ID"`
 	Secret   appcfg.String `env:"PLAID_SECRET"`
-
 	// See sandbox, development, product
 	Env appcfg.String `env:"PLAID_ENV"`
-
 	// See https://plaid.com/docs/api/tokens/#link-token-create-request-products
 	Products appcfg.String `env:"PLAID_PRODUCTS"`
-
 	// See https://plaid.com/docs/api/tokens/#link-token-create-request-country-codes
 	CountryCodes appcfg.String `env:"PLAID_COUNTRY_CODES"`
 	// See https://dashboard.plaid.com/team/api

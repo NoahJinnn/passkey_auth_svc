@@ -1,21 +1,79 @@
 package dal
 
 import (
-	"context"
 	"fmt"
 	"log"
 
 	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/ent/user"
+	dom "github.com/hellohq/hqservice/ms/hq/app"
 )
 
-func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
-	u, err := client.User.
-		Create().
-		SetFirstName("a8m").
-		Save(ctx)
+func (repo *Repo) GetAllUsers(ctx Ctx) ([]*dom.User, error) {
+	eus, err := repo.db.User.
+		Query().
+		All(ctx)
+
 	if err != nil {
-		return nil, fmt.Errorf("failed creating user: %w", err)
+		return nil, fmt.Errorf("failed querying all users: %w", err)
 	}
-	log.Println("user was created: ", u)
+
+	us := dom.UserListFromEnt(eus)
+
+	log.Println("users returned: ", us)
+	return us, nil
+}
+
+func (repo *Repo) GetUserById(ctx Ctx, id uint) (*dom.User, error) {
+	eu, err := repo.db.User.
+		Query().
+		Where(user.ID(id)).
+		Only(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed querying user by id: %w", err)
+	}
+
+	u := &dom.User{}
+	u = u.FromEnt(eu)
+	log.Println("users returned: ", u)
 	return u, nil
+}
+
+func (repo *Repo) CreateUser(ctx Ctx, u *dom.User) (*ent.User, error) {
+	eu, err := repo.db.User.
+		Create().
+		SetFirstName(u.FirstName).
+		SetLastName(u.LastName).
+		SetEmail(u.Email).
+		SetPassword(u.Password).
+		SetPhoneNumber(u.PhoneNumber).
+		SetAddress(u.Address).
+		Save(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed querying user by id: %w", err)
+	}
+
+	log.Println("users returned: ", u)
+	return eu, nil
+}
+
+func (repo *Repo) UpdateUser(ctx Ctx, id uint, u *dom.User) (*ent.User, error) {
+	eu, err := repo.db.User.
+		UpdateOneID(id).
+		SetFirstName(u.FirstName).
+		SetLastName(u.LastName).
+		SetEmail(u.Email).
+		SetPassword(u.Password).
+		SetPhoneNumber(u.PhoneNumber).
+		SetAddress(u.Address).
+		Save(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed querying user by id: %w", err)
+	}
+
+	log.Println("users returned: ", u)
+	return eu, nil
 }
