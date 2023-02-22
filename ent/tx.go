@@ -12,6 +12,8 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// AssetInfo is the client for interacting with the AssetInfo builders.
+	AssetInfo *AssetInfoClient
 	// BankAccount is the client for interacting with the BankAccount builders.
 	BankAccount *BankAccountClient
 	// Car is the client for interacting with the Car builders.
@@ -157,6 +159,7 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.AssetInfo = NewAssetInfoClient(tx.config)
 	tx.BankAccount = NewBankAccountClient(tx.config)
 	tx.Car = NewCarClient(tx.config)
 	tx.Collectible = NewCollectibleClient(tx.config)
@@ -173,7 +176,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: BankAccount.QueryXXX(), the query will be executed
+// applies a query, for example: AssetInfo.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

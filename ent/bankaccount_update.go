@@ -49,27 +49,16 @@ func (bau *BankAccountUpdate) ClearUserID() *BankAccountUpdate {
 	return bau
 }
 
-// SetAccountID sets the "account_id" field.
-func (bau *BankAccountUpdate) SetAccountID(s string) *BankAccountUpdate {
-	bau.mutation.SetAccountID(s)
+// SetAssetInfoID sets the "asset_info_id" field.
+func (bau *BankAccountUpdate) SetAssetInfoID(u uint) *BankAccountUpdate {
+	bau.mutation.ResetAssetInfoID()
+	bau.mutation.SetAssetInfoID(u)
 	return bau
 }
 
-// SetInstitutionInfo sets the "institution_info" field.
-func (bau *BankAccountUpdate) SetInstitutionInfo(s struct{}) *BankAccountUpdate {
-	bau.mutation.SetInstitutionInfo(s)
-	return bau
-}
-
-// SetAccountInfo sets the "account_info" field.
-func (bau *BankAccountUpdate) SetAccountInfo(s struct{}) *BankAccountUpdate {
-	bau.mutation.SetAccountInfo(s)
-	return bau
-}
-
-// SetSensibleData sets the "sensible_data" field.
-func (bau *BankAccountUpdate) SetSensibleData(s string) *BankAccountUpdate {
-	bau.mutation.SetSensibleData(s)
+// AddAssetInfoID adds u to the "asset_info_id" field.
+func (bau *BankAccountUpdate) AddAssetInfoID(u int) *BankAccountUpdate {
+	bau.mutation.AddAssetInfoID(u)
 	return bau
 }
 
@@ -137,17 +126,11 @@ func (bau *BankAccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := bau.mutation.AccountID(); ok {
-		_spec.SetField(bankaccount.FieldAccountID, field.TypeString, value)
+	if value, ok := bau.mutation.AssetInfoID(); ok {
+		_spec.SetField(bankaccount.FieldAssetInfoID, field.TypeUint, value)
 	}
-	if value, ok := bau.mutation.InstitutionInfo(); ok {
-		_spec.SetField(bankaccount.FieldInstitutionInfo, field.TypeJSON, value)
-	}
-	if value, ok := bau.mutation.AccountInfo(); ok {
-		_spec.SetField(bankaccount.FieldAccountInfo, field.TypeJSON, value)
-	}
-	if value, ok := bau.mutation.SensibleData(); ok {
-		_spec.SetField(bankaccount.FieldSensibleData, field.TypeString, value)
+	if value, ok := bau.mutation.AddedAssetInfoID(); ok {
+		_spec.AddField(bankaccount.FieldAssetInfoID, field.TypeUint, value)
 	}
 	if value, ok := bau.mutation.CreatedAt(); ok {
 		_spec.SetField(bankaccount.FieldCreatedAt, field.TypeTime, value)
@@ -230,27 +213,16 @@ func (bauo *BankAccountUpdateOne) ClearUserID() *BankAccountUpdateOne {
 	return bauo
 }
 
-// SetAccountID sets the "account_id" field.
-func (bauo *BankAccountUpdateOne) SetAccountID(s string) *BankAccountUpdateOne {
-	bauo.mutation.SetAccountID(s)
+// SetAssetInfoID sets the "asset_info_id" field.
+func (bauo *BankAccountUpdateOne) SetAssetInfoID(u uint) *BankAccountUpdateOne {
+	bauo.mutation.ResetAssetInfoID()
+	bauo.mutation.SetAssetInfoID(u)
 	return bauo
 }
 
-// SetInstitutionInfo sets the "institution_info" field.
-func (bauo *BankAccountUpdateOne) SetInstitutionInfo(s struct{}) *BankAccountUpdateOne {
-	bauo.mutation.SetInstitutionInfo(s)
-	return bauo
-}
-
-// SetAccountInfo sets the "account_info" field.
-func (bauo *BankAccountUpdateOne) SetAccountInfo(s struct{}) *BankAccountUpdateOne {
-	bauo.mutation.SetAccountInfo(s)
-	return bauo
-}
-
-// SetSensibleData sets the "sensible_data" field.
-func (bauo *BankAccountUpdateOne) SetSensibleData(s string) *BankAccountUpdateOne {
-	bauo.mutation.SetSensibleData(s)
+// AddAssetInfoID adds u to the "asset_info_id" field.
+func (bauo *BankAccountUpdateOne) AddAssetInfoID(u int) *BankAccountUpdateOne {
+	bauo.mutation.AddAssetInfoID(u)
 	return bauo
 }
 
@@ -348,17 +320,11 @@ func (bauo *BankAccountUpdateOne) sqlSave(ctx context.Context) (_node *BankAccou
 			}
 		}
 	}
-	if value, ok := bauo.mutation.AccountID(); ok {
-		_spec.SetField(bankaccount.FieldAccountID, field.TypeString, value)
+	if value, ok := bauo.mutation.AssetInfoID(); ok {
+		_spec.SetField(bankaccount.FieldAssetInfoID, field.TypeUint, value)
 	}
-	if value, ok := bauo.mutation.InstitutionInfo(); ok {
-		_spec.SetField(bankaccount.FieldInstitutionInfo, field.TypeJSON, value)
-	}
-	if value, ok := bauo.mutation.AccountInfo(); ok {
-		_spec.SetField(bankaccount.FieldAccountInfo, field.TypeJSON, value)
-	}
-	if value, ok := bauo.mutation.SensibleData(); ok {
-		_spec.SetField(bankaccount.FieldSensibleData, field.TypeString, value)
+	if value, ok := bauo.mutation.AddedAssetInfoID(); ok {
+		_spec.AddField(bankaccount.FieldAssetInfoID, field.TypeUint, value)
 	}
 	if value, ok := bauo.mutation.CreatedAt(); ok {
 		_spec.SetField(bankaccount.FieldCreatedAt, field.TypeTime, value)

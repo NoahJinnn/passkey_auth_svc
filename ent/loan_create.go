@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/hellohq/hqservice/ent/loan"
@@ -35,27 +36,9 @@ func (lc *LoanCreate) SetNillableUserID(u *uint) *LoanCreate {
 	return lc
 }
 
-// SetLenderName sets the "lender_name" field.
-func (lc *LoanCreate) SetLenderName(s string) *LoanCreate {
-	lc.mutation.SetLenderName(s)
-	return lc
-}
-
-// SetLoanType sets the "loan_type" field.
-func (lc *LoanCreate) SetLoanType(s string) *LoanCreate {
-	lc.mutation.SetLoanType(s)
-	return lc
-}
-
-// SetBalance sets the "balance" field.
-func (lc *LoanCreate) SetBalance(f float64) *LoanCreate {
-	lc.mutation.SetBalance(f)
-	return lc
-}
-
-// SetInterestRate sets the "interest_rate" field.
-func (lc *LoanCreate) SetInterestRate(f float64) *LoanCreate {
-	lc.mutation.SetInterestRate(f)
+// SetAssetInfoID sets the "asset_info_id" field.
+func (lc *LoanCreate) SetAssetInfoID(u uint) *LoanCreate {
+	lc.mutation.SetAssetInfoID(u)
 	return lc
 }
 
@@ -116,17 +99,11 @@ func (lc *LoanCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (lc *LoanCreate) check() error {
-	if _, ok := lc.mutation.LenderName(); !ok {
-		return &ValidationError{Name: "lender_name", err: errors.New(`ent: missing required field "Loan.lender_name"`)}
-	}
-	if _, ok := lc.mutation.LoanType(); !ok {
-		return &ValidationError{Name: "loan_type", err: errors.New(`ent: missing required field "Loan.loan_type"`)}
-	}
-	if _, ok := lc.mutation.Balance(); !ok {
-		return &ValidationError{Name: "balance", err: errors.New(`ent: missing required field "Loan.balance"`)}
-	}
-	if _, ok := lc.mutation.InterestRate(); !ok {
-		return &ValidationError{Name: "interest_rate", err: errors.New(`ent: missing required field "Loan.interest_rate"`)}
+	switch lc.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		if _, ok := lc.mutation.AssetInfoID(); !ok {
+			return &ValidationError{Name: "asset_info_id", err: errors.New(`ent: missing required field "Loan.asset_info_id"`)}
+		}
 	}
 	if _, ok := lc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Loan.created_at"`)}
@@ -166,21 +143,9 @@ func (lc *LoanCreate) createSpec() (*Loan, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := lc.mutation.LenderName(); ok {
-		_spec.SetField(loan.FieldLenderName, field.TypeString, value)
-		_node.LenderName = value
-	}
-	if value, ok := lc.mutation.LoanType(); ok {
-		_spec.SetField(loan.FieldLoanType, field.TypeString, value)
-		_node.LoanType = value
-	}
-	if value, ok := lc.mutation.Balance(); ok {
-		_spec.SetField(loan.FieldBalance, field.TypeFloat64, value)
-		_node.Balance = value
-	}
-	if value, ok := lc.mutation.InterestRate(); ok {
-		_spec.SetField(loan.FieldInterestRate, field.TypeFloat64, value)
-		_node.InterestRate = value
+	if value, ok := lc.mutation.AssetInfoID(); ok {
+		_spec.SetField(loan.FieldAssetInfoID, field.TypeUint, value)
+		_node.AssetInfoID = value
 	}
 	if value, ok := lc.mutation.CreatedAt(); ok {
 		_spec.SetField(loan.FieldCreatedAt, field.TypeTime, value)

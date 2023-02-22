@@ -60,14 +60,9 @@ func UserID(v uint) predicate.Collectible {
 	return predicate.Collectible(sql.FieldEQ(FieldUserID, v))
 }
 
-// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldEQ(FieldName, v))
-}
-
-// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
-func Description(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldEQ(FieldDescription, v))
+// AssetInfoID applies equality check predicate on the "asset_info_id" field. It's identical to AssetInfoIDEQ.
+func AssetInfoID(v uint) predicate.Collectible {
+	return predicate.Collectible(sql.FieldEQ(FieldAssetInfoID, v))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -110,134 +105,44 @@ func UserIDNotNil() predicate.Collectible {
 	return predicate.Collectible(sql.FieldNotNull(FieldUserID))
 }
 
-// NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldEQ(FieldName, v))
+// AssetInfoIDEQ applies the EQ predicate on the "asset_info_id" field.
+func AssetInfoIDEQ(v uint) predicate.Collectible {
+	return predicate.Collectible(sql.FieldEQ(FieldAssetInfoID, v))
 }
 
-// NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldNEQ(FieldName, v))
+// AssetInfoIDNEQ applies the NEQ predicate on the "asset_info_id" field.
+func AssetInfoIDNEQ(v uint) predicate.Collectible {
+	return predicate.Collectible(sql.FieldNEQ(FieldAssetInfoID, v))
 }
 
-// NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldIn(FieldName, vs...))
+// AssetInfoIDIn applies the In predicate on the "asset_info_id" field.
+func AssetInfoIDIn(vs ...uint) predicate.Collectible {
+	return predicate.Collectible(sql.FieldIn(FieldAssetInfoID, vs...))
 }
 
-// NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldNotIn(FieldName, vs...))
+// AssetInfoIDNotIn applies the NotIn predicate on the "asset_info_id" field.
+func AssetInfoIDNotIn(vs ...uint) predicate.Collectible {
+	return predicate.Collectible(sql.FieldNotIn(FieldAssetInfoID, vs...))
 }
 
-// NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldGT(FieldName, v))
+// AssetInfoIDGT applies the GT predicate on the "asset_info_id" field.
+func AssetInfoIDGT(v uint) predicate.Collectible {
+	return predicate.Collectible(sql.FieldGT(FieldAssetInfoID, v))
 }
 
-// NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldGTE(FieldName, v))
+// AssetInfoIDGTE applies the GTE predicate on the "asset_info_id" field.
+func AssetInfoIDGTE(v uint) predicate.Collectible {
+	return predicate.Collectible(sql.FieldGTE(FieldAssetInfoID, v))
 }
 
-// NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldLT(FieldName, v))
+// AssetInfoIDLT applies the LT predicate on the "asset_info_id" field.
+func AssetInfoIDLT(v uint) predicate.Collectible {
+	return predicate.Collectible(sql.FieldLT(FieldAssetInfoID, v))
 }
 
-// NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldLTE(FieldName, v))
-}
-
-// NameContains applies the Contains predicate on the "name" field.
-func NameContains(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldContains(FieldName, v))
-}
-
-// NameHasPrefix applies the HasPrefix predicate on the "name" field.
-func NameHasPrefix(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldHasPrefix(FieldName, v))
-}
-
-// NameHasSuffix applies the HasSuffix predicate on the "name" field.
-func NameHasSuffix(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldHasSuffix(FieldName, v))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldContainsFold(FieldName, v))
-}
-
-// DescriptionEQ applies the EQ predicate on the "description" field.
-func DescriptionEQ(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldEQ(FieldDescription, v))
-}
-
-// DescriptionNEQ applies the NEQ predicate on the "description" field.
-func DescriptionNEQ(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldNEQ(FieldDescription, v))
-}
-
-// DescriptionIn applies the In predicate on the "description" field.
-func DescriptionIn(vs ...string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldIn(FieldDescription, vs...))
-}
-
-// DescriptionNotIn applies the NotIn predicate on the "description" field.
-func DescriptionNotIn(vs ...string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldNotIn(FieldDescription, vs...))
-}
-
-// DescriptionGT applies the GT predicate on the "description" field.
-func DescriptionGT(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldGT(FieldDescription, v))
-}
-
-// DescriptionGTE applies the GTE predicate on the "description" field.
-func DescriptionGTE(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldGTE(FieldDescription, v))
-}
-
-// DescriptionLT applies the LT predicate on the "description" field.
-func DescriptionLT(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldLT(FieldDescription, v))
-}
-
-// DescriptionLTE applies the LTE predicate on the "description" field.
-func DescriptionLTE(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldLTE(FieldDescription, v))
-}
-
-// DescriptionContains applies the Contains predicate on the "description" field.
-func DescriptionContains(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldContains(FieldDescription, v))
-}
-
-// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
-func DescriptionHasPrefix(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldHasPrefix(FieldDescription, v))
-}
-
-// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
-func DescriptionHasSuffix(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldHasSuffix(FieldDescription, v))
-}
-
-// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
-func DescriptionEqualFold(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldEqualFold(FieldDescription, v))
-}
-
-// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
-func DescriptionContainsFold(v string) predicate.Collectible {
-	return predicate.Collectible(sql.FieldContainsFold(FieldDescription, v))
+// AssetInfoIDLTE applies the LTE predicate on the "asset_info_id" field.
+func AssetInfoIDLTE(v uint) predicate.Collectible {
+	return predicate.Collectible(sql.FieldLTE(FieldAssetInfoID, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

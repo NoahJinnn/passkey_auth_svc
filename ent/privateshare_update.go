@@ -49,28 +49,16 @@ func (psu *PrivateShareUpdate) ClearUserID() *PrivateShareUpdate {
 	return psu
 }
 
-// SetName sets the "name" field.
-func (psu *PrivateShareUpdate) SetName(s string) *PrivateShareUpdate {
-	psu.mutation.SetName(s)
+// SetAssetInfoID sets the "asset_info_id" field.
+func (psu *PrivateShareUpdate) SetAssetInfoID(u uint) *PrivateShareUpdate {
+	psu.mutation.ResetAssetInfoID()
+	psu.mutation.SetAssetInfoID(u)
 	return psu
 }
 
-// SetCompanyName sets the "company_name" field.
-func (psu *PrivateShareUpdate) SetCompanyName(s string) *PrivateShareUpdate {
-	psu.mutation.SetCompanyName(s)
-	return psu
-}
-
-// SetQuantity sets the "quantity" field.
-func (psu *PrivateShareUpdate) SetQuantity(i int32) *PrivateShareUpdate {
-	psu.mutation.ResetQuantity()
-	psu.mutation.SetQuantity(i)
-	return psu
-}
-
-// AddQuantity adds i to the "quantity" field.
-func (psu *PrivateShareUpdate) AddQuantity(i int32) *PrivateShareUpdate {
-	psu.mutation.AddQuantity(i)
+// AddAssetInfoID adds u to the "asset_info_id" field.
+func (psu *PrivateShareUpdate) AddAssetInfoID(u int) *PrivateShareUpdate {
+	psu.mutation.AddAssetInfoID(u)
 	return psu
 }
 
@@ -138,17 +126,11 @@ func (psu *PrivateShareUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := psu.mutation.Name(); ok {
-		_spec.SetField(privateshare.FieldName, field.TypeString, value)
+	if value, ok := psu.mutation.AssetInfoID(); ok {
+		_spec.SetField(privateshare.FieldAssetInfoID, field.TypeUint, value)
 	}
-	if value, ok := psu.mutation.CompanyName(); ok {
-		_spec.SetField(privateshare.FieldCompanyName, field.TypeString, value)
-	}
-	if value, ok := psu.mutation.Quantity(); ok {
-		_spec.SetField(privateshare.FieldQuantity, field.TypeInt32, value)
-	}
-	if value, ok := psu.mutation.AddedQuantity(); ok {
-		_spec.AddField(privateshare.FieldQuantity, field.TypeInt32, value)
+	if value, ok := psu.mutation.AddedAssetInfoID(); ok {
+		_spec.AddField(privateshare.FieldAssetInfoID, field.TypeUint, value)
 	}
 	if value, ok := psu.mutation.CreatedAt(); ok {
 		_spec.SetField(privateshare.FieldCreatedAt, field.TypeTime, value)
@@ -231,28 +213,16 @@ func (psuo *PrivateShareUpdateOne) ClearUserID() *PrivateShareUpdateOne {
 	return psuo
 }
 
-// SetName sets the "name" field.
-func (psuo *PrivateShareUpdateOne) SetName(s string) *PrivateShareUpdateOne {
-	psuo.mutation.SetName(s)
+// SetAssetInfoID sets the "asset_info_id" field.
+func (psuo *PrivateShareUpdateOne) SetAssetInfoID(u uint) *PrivateShareUpdateOne {
+	psuo.mutation.ResetAssetInfoID()
+	psuo.mutation.SetAssetInfoID(u)
 	return psuo
 }
 
-// SetCompanyName sets the "company_name" field.
-func (psuo *PrivateShareUpdateOne) SetCompanyName(s string) *PrivateShareUpdateOne {
-	psuo.mutation.SetCompanyName(s)
-	return psuo
-}
-
-// SetQuantity sets the "quantity" field.
-func (psuo *PrivateShareUpdateOne) SetQuantity(i int32) *PrivateShareUpdateOne {
-	psuo.mutation.ResetQuantity()
-	psuo.mutation.SetQuantity(i)
-	return psuo
-}
-
-// AddQuantity adds i to the "quantity" field.
-func (psuo *PrivateShareUpdateOne) AddQuantity(i int32) *PrivateShareUpdateOne {
-	psuo.mutation.AddQuantity(i)
+// AddAssetInfoID adds u to the "asset_info_id" field.
+func (psuo *PrivateShareUpdateOne) AddAssetInfoID(u int) *PrivateShareUpdateOne {
+	psuo.mutation.AddAssetInfoID(u)
 	return psuo
 }
 
@@ -350,17 +320,11 @@ func (psuo *PrivateShareUpdateOne) sqlSave(ctx context.Context) (_node *PrivateS
 			}
 		}
 	}
-	if value, ok := psuo.mutation.Name(); ok {
-		_spec.SetField(privateshare.FieldName, field.TypeString, value)
+	if value, ok := psuo.mutation.AssetInfoID(); ok {
+		_spec.SetField(privateshare.FieldAssetInfoID, field.TypeUint, value)
 	}
-	if value, ok := psuo.mutation.CompanyName(); ok {
-		_spec.SetField(privateshare.FieldCompanyName, field.TypeString, value)
-	}
-	if value, ok := psuo.mutation.Quantity(); ok {
-		_spec.SetField(privateshare.FieldQuantity, field.TypeInt32, value)
-	}
-	if value, ok := psuo.mutation.AddedQuantity(); ok {
-		_spec.AddField(privateshare.FieldQuantity, field.TypeInt32, value)
+	if value, ok := psuo.mutation.AddedAssetInfoID(); ok {
+		_spec.AddField(privateshare.FieldAssetInfoID, field.TypeUint, value)
 	}
 	if value, ok := psuo.mutation.CreatedAt(); ok {
 		_spec.SetField(privateshare.FieldCreatedAt, field.TypeTime, value)

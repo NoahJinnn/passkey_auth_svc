@@ -60,14 +60,9 @@ func UserID(v uint) predicate.BankAccount {
 	return predicate.BankAccount(sql.FieldEQ(FieldUserID, v))
 }
 
-// AccountID applies equality check predicate on the "account_id" field. It's identical to AccountIDEQ.
-func AccountID(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldEQ(FieldAccountID, v))
-}
-
-// SensibleData applies equality check predicate on the "sensible_data" field. It's identical to SensibleDataEQ.
-func SensibleData(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldEQ(FieldSensibleData, v))
+// AssetInfoID applies equality check predicate on the "asset_info_id" field. It's identical to AssetInfoIDEQ.
+func AssetInfoID(v uint) predicate.BankAccount {
+	return predicate.BankAccount(sql.FieldEQ(FieldAssetInfoID, v))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -110,134 +105,44 @@ func UserIDNotNil() predicate.BankAccount {
 	return predicate.BankAccount(sql.FieldNotNull(FieldUserID))
 }
 
-// AccountIDEQ applies the EQ predicate on the "account_id" field.
-func AccountIDEQ(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldEQ(FieldAccountID, v))
+// AssetInfoIDEQ applies the EQ predicate on the "asset_info_id" field.
+func AssetInfoIDEQ(v uint) predicate.BankAccount {
+	return predicate.BankAccount(sql.FieldEQ(FieldAssetInfoID, v))
 }
 
-// AccountIDNEQ applies the NEQ predicate on the "account_id" field.
-func AccountIDNEQ(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldNEQ(FieldAccountID, v))
+// AssetInfoIDNEQ applies the NEQ predicate on the "asset_info_id" field.
+func AssetInfoIDNEQ(v uint) predicate.BankAccount {
+	return predicate.BankAccount(sql.FieldNEQ(FieldAssetInfoID, v))
 }
 
-// AccountIDIn applies the In predicate on the "account_id" field.
-func AccountIDIn(vs ...string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldIn(FieldAccountID, vs...))
+// AssetInfoIDIn applies the In predicate on the "asset_info_id" field.
+func AssetInfoIDIn(vs ...uint) predicate.BankAccount {
+	return predicate.BankAccount(sql.FieldIn(FieldAssetInfoID, vs...))
 }
 
-// AccountIDNotIn applies the NotIn predicate on the "account_id" field.
-func AccountIDNotIn(vs ...string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldNotIn(FieldAccountID, vs...))
+// AssetInfoIDNotIn applies the NotIn predicate on the "asset_info_id" field.
+func AssetInfoIDNotIn(vs ...uint) predicate.BankAccount {
+	return predicate.BankAccount(sql.FieldNotIn(FieldAssetInfoID, vs...))
 }
 
-// AccountIDGT applies the GT predicate on the "account_id" field.
-func AccountIDGT(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldGT(FieldAccountID, v))
+// AssetInfoIDGT applies the GT predicate on the "asset_info_id" field.
+func AssetInfoIDGT(v uint) predicate.BankAccount {
+	return predicate.BankAccount(sql.FieldGT(FieldAssetInfoID, v))
 }
 
-// AccountIDGTE applies the GTE predicate on the "account_id" field.
-func AccountIDGTE(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldGTE(FieldAccountID, v))
+// AssetInfoIDGTE applies the GTE predicate on the "asset_info_id" field.
+func AssetInfoIDGTE(v uint) predicate.BankAccount {
+	return predicate.BankAccount(sql.FieldGTE(FieldAssetInfoID, v))
 }
 
-// AccountIDLT applies the LT predicate on the "account_id" field.
-func AccountIDLT(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldLT(FieldAccountID, v))
+// AssetInfoIDLT applies the LT predicate on the "asset_info_id" field.
+func AssetInfoIDLT(v uint) predicate.BankAccount {
+	return predicate.BankAccount(sql.FieldLT(FieldAssetInfoID, v))
 }
 
-// AccountIDLTE applies the LTE predicate on the "account_id" field.
-func AccountIDLTE(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldLTE(FieldAccountID, v))
-}
-
-// AccountIDContains applies the Contains predicate on the "account_id" field.
-func AccountIDContains(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldContains(FieldAccountID, v))
-}
-
-// AccountIDHasPrefix applies the HasPrefix predicate on the "account_id" field.
-func AccountIDHasPrefix(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldHasPrefix(FieldAccountID, v))
-}
-
-// AccountIDHasSuffix applies the HasSuffix predicate on the "account_id" field.
-func AccountIDHasSuffix(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldHasSuffix(FieldAccountID, v))
-}
-
-// AccountIDEqualFold applies the EqualFold predicate on the "account_id" field.
-func AccountIDEqualFold(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldEqualFold(FieldAccountID, v))
-}
-
-// AccountIDContainsFold applies the ContainsFold predicate on the "account_id" field.
-func AccountIDContainsFold(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldContainsFold(FieldAccountID, v))
-}
-
-// SensibleDataEQ applies the EQ predicate on the "sensible_data" field.
-func SensibleDataEQ(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldEQ(FieldSensibleData, v))
-}
-
-// SensibleDataNEQ applies the NEQ predicate on the "sensible_data" field.
-func SensibleDataNEQ(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldNEQ(FieldSensibleData, v))
-}
-
-// SensibleDataIn applies the In predicate on the "sensible_data" field.
-func SensibleDataIn(vs ...string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldIn(FieldSensibleData, vs...))
-}
-
-// SensibleDataNotIn applies the NotIn predicate on the "sensible_data" field.
-func SensibleDataNotIn(vs ...string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldNotIn(FieldSensibleData, vs...))
-}
-
-// SensibleDataGT applies the GT predicate on the "sensible_data" field.
-func SensibleDataGT(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldGT(FieldSensibleData, v))
-}
-
-// SensibleDataGTE applies the GTE predicate on the "sensible_data" field.
-func SensibleDataGTE(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldGTE(FieldSensibleData, v))
-}
-
-// SensibleDataLT applies the LT predicate on the "sensible_data" field.
-func SensibleDataLT(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldLT(FieldSensibleData, v))
-}
-
-// SensibleDataLTE applies the LTE predicate on the "sensible_data" field.
-func SensibleDataLTE(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldLTE(FieldSensibleData, v))
-}
-
-// SensibleDataContains applies the Contains predicate on the "sensible_data" field.
-func SensibleDataContains(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldContains(FieldSensibleData, v))
-}
-
-// SensibleDataHasPrefix applies the HasPrefix predicate on the "sensible_data" field.
-func SensibleDataHasPrefix(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldHasPrefix(FieldSensibleData, v))
-}
-
-// SensibleDataHasSuffix applies the HasSuffix predicate on the "sensible_data" field.
-func SensibleDataHasSuffix(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldHasSuffix(FieldSensibleData, v))
-}
-
-// SensibleDataEqualFold applies the EqualFold predicate on the "sensible_data" field.
-func SensibleDataEqualFold(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldEqualFold(FieldSensibleData, v))
-}
-
-// SensibleDataContainsFold applies the ContainsFold predicate on the "sensible_data" field.
-func SensibleDataContainsFold(v string) predicate.BankAccount {
-	return predicate.BankAccount(sql.FieldContainsFold(FieldSensibleData, v))
+// AssetInfoIDLTE applies the LTE predicate on the "asset_info_id" field.
+func AssetInfoIDLTE(v uint) predicate.BankAccount {
+	return predicate.BankAccount(sql.FieldLTE(FieldAssetInfoID, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

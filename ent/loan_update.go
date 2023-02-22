@@ -49,41 +49,16 @@ func (lu *LoanUpdate) ClearUserID() *LoanUpdate {
 	return lu
 }
 
-// SetLenderName sets the "lender_name" field.
-func (lu *LoanUpdate) SetLenderName(s string) *LoanUpdate {
-	lu.mutation.SetLenderName(s)
+// SetAssetInfoID sets the "asset_info_id" field.
+func (lu *LoanUpdate) SetAssetInfoID(u uint) *LoanUpdate {
+	lu.mutation.ResetAssetInfoID()
+	lu.mutation.SetAssetInfoID(u)
 	return lu
 }
 
-// SetLoanType sets the "loan_type" field.
-func (lu *LoanUpdate) SetLoanType(s string) *LoanUpdate {
-	lu.mutation.SetLoanType(s)
-	return lu
-}
-
-// SetBalance sets the "balance" field.
-func (lu *LoanUpdate) SetBalance(f float64) *LoanUpdate {
-	lu.mutation.ResetBalance()
-	lu.mutation.SetBalance(f)
-	return lu
-}
-
-// AddBalance adds f to the "balance" field.
-func (lu *LoanUpdate) AddBalance(f float64) *LoanUpdate {
-	lu.mutation.AddBalance(f)
-	return lu
-}
-
-// SetInterestRate sets the "interest_rate" field.
-func (lu *LoanUpdate) SetInterestRate(f float64) *LoanUpdate {
-	lu.mutation.ResetInterestRate()
-	lu.mutation.SetInterestRate(f)
-	return lu
-}
-
-// AddInterestRate adds f to the "interest_rate" field.
-func (lu *LoanUpdate) AddInterestRate(f float64) *LoanUpdate {
-	lu.mutation.AddInterestRate(f)
+// AddAssetInfoID adds u to the "asset_info_id" field.
+func (lu *LoanUpdate) AddAssetInfoID(u int) *LoanUpdate {
+	lu.mutation.AddAssetInfoID(u)
 	return lu
 }
 
@@ -151,23 +126,11 @@ func (lu *LoanUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := lu.mutation.LenderName(); ok {
-		_spec.SetField(loan.FieldLenderName, field.TypeString, value)
+	if value, ok := lu.mutation.AssetInfoID(); ok {
+		_spec.SetField(loan.FieldAssetInfoID, field.TypeUint, value)
 	}
-	if value, ok := lu.mutation.LoanType(); ok {
-		_spec.SetField(loan.FieldLoanType, field.TypeString, value)
-	}
-	if value, ok := lu.mutation.Balance(); ok {
-		_spec.SetField(loan.FieldBalance, field.TypeFloat64, value)
-	}
-	if value, ok := lu.mutation.AddedBalance(); ok {
-		_spec.AddField(loan.FieldBalance, field.TypeFloat64, value)
-	}
-	if value, ok := lu.mutation.InterestRate(); ok {
-		_spec.SetField(loan.FieldInterestRate, field.TypeFloat64, value)
-	}
-	if value, ok := lu.mutation.AddedInterestRate(); ok {
-		_spec.AddField(loan.FieldInterestRate, field.TypeFloat64, value)
+	if value, ok := lu.mutation.AddedAssetInfoID(); ok {
+		_spec.AddField(loan.FieldAssetInfoID, field.TypeUint, value)
 	}
 	if value, ok := lu.mutation.CreatedAt(); ok {
 		_spec.SetField(loan.FieldCreatedAt, field.TypeTime, value)
@@ -250,41 +213,16 @@ func (luo *LoanUpdateOne) ClearUserID() *LoanUpdateOne {
 	return luo
 }
 
-// SetLenderName sets the "lender_name" field.
-func (luo *LoanUpdateOne) SetLenderName(s string) *LoanUpdateOne {
-	luo.mutation.SetLenderName(s)
+// SetAssetInfoID sets the "asset_info_id" field.
+func (luo *LoanUpdateOne) SetAssetInfoID(u uint) *LoanUpdateOne {
+	luo.mutation.ResetAssetInfoID()
+	luo.mutation.SetAssetInfoID(u)
 	return luo
 }
 
-// SetLoanType sets the "loan_type" field.
-func (luo *LoanUpdateOne) SetLoanType(s string) *LoanUpdateOne {
-	luo.mutation.SetLoanType(s)
-	return luo
-}
-
-// SetBalance sets the "balance" field.
-func (luo *LoanUpdateOne) SetBalance(f float64) *LoanUpdateOne {
-	luo.mutation.ResetBalance()
-	luo.mutation.SetBalance(f)
-	return luo
-}
-
-// AddBalance adds f to the "balance" field.
-func (luo *LoanUpdateOne) AddBalance(f float64) *LoanUpdateOne {
-	luo.mutation.AddBalance(f)
-	return luo
-}
-
-// SetInterestRate sets the "interest_rate" field.
-func (luo *LoanUpdateOne) SetInterestRate(f float64) *LoanUpdateOne {
-	luo.mutation.ResetInterestRate()
-	luo.mutation.SetInterestRate(f)
-	return luo
-}
-
-// AddInterestRate adds f to the "interest_rate" field.
-func (luo *LoanUpdateOne) AddInterestRate(f float64) *LoanUpdateOne {
-	luo.mutation.AddInterestRate(f)
+// AddAssetInfoID adds u to the "asset_info_id" field.
+func (luo *LoanUpdateOne) AddAssetInfoID(u int) *LoanUpdateOne {
+	luo.mutation.AddAssetInfoID(u)
 	return luo
 }
 
@@ -382,23 +320,11 @@ func (luo *LoanUpdateOne) sqlSave(ctx context.Context) (_node *Loan, err error) 
 			}
 		}
 	}
-	if value, ok := luo.mutation.LenderName(); ok {
-		_spec.SetField(loan.FieldLenderName, field.TypeString, value)
+	if value, ok := luo.mutation.AssetInfoID(); ok {
+		_spec.SetField(loan.FieldAssetInfoID, field.TypeUint, value)
 	}
-	if value, ok := luo.mutation.LoanType(); ok {
-		_spec.SetField(loan.FieldLoanType, field.TypeString, value)
-	}
-	if value, ok := luo.mutation.Balance(); ok {
-		_spec.SetField(loan.FieldBalance, field.TypeFloat64, value)
-	}
-	if value, ok := luo.mutation.AddedBalance(); ok {
-		_spec.AddField(loan.FieldBalance, field.TypeFloat64, value)
-	}
-	if value, ok := luo.mutation.InterestRate(); ok {
-		_spec.SetField(loan.FieldInterestRate, field.TypeFloat64, value)
-	}
-	if value, ok := luo.mutation.AddedInterestRate(); ok {
-		_spec.AddField(loan.FieldInterestRate, field.TypeFloat64, value)
+	if value, ok := luo.mutation.AddedAssetInfoID(); ok {
+		_spec.AddField(loan.FieldAssetInfoID, field.TypeUint, value)
 	}
 	if value, ok := luo.mutation.CreatedAt(); ok {
 		_spec.SetField(loan.FieldCreatedAt, field.TypeTime, value)

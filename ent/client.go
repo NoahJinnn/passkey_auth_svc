@@ -10,6 +10,7 @@ import (
 
 	"github.com/hellohq/hqservice/ent/migrate"
 
+	"github.com/hellohq/hqservice/ent/assetinfo"
 	"github.com/hellohq/hqservice/ent/bankaccount"
 	"github.com/hellohq/hqservice/ent/car"
 	"github.com/hellohq/hqservice/ent/collectible"
@@ -28,6 +29,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// AssetInfo is the client for interacting with the AssetInfo builders.
+	AssetInfo *AssetInfoClient
 	// BankAccount is the client for interacting with the BankAccount builders.
 	BankAccount *BankAccountClient
 	// Car is the client for interacting with the Car builders.
@@ -55,6 +58,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.AssetInfo = NewAssetInfoClient(c.config)
 	c.BankAccount = NewBankAccountClient(c.config)
 	c.Car = NewCarClient(c.config)
 	c.Collectible = NewCollectibleClient(c.config)
@@ -95,6 +99,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:           ctx,
 		config:        cfg,
+		AssetInfo:     NewAssetInfoClient(cfg),
 		BankAccount:   NewBankAccountClient(cfg),
 		Car:           NewCarClient(cfg),
 		Collectible:   NewCollectibleClient(cfg),
@@ -121,6 +126,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:           ctx,
 		config:        cfg,
+		AssetInfo:     NewAssetInfoClient(cfg),
 		BankAccount:   NewBankAccountClient(cfg),
 		Car:           NewCarClient(cfg),
 		Collectible:   NewCollectibleClient(cfg),
@@ -134,7 +140,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		BankAccount.
+//		AssetInfo.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -156,6 +162,7 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.AssetInfo.Use(hooks...)
 	c.BankAccount.Use(hooks...)
 	c.Car.Use(hooks...)
 	c.Collectible.Use(hooks...)
@@ -168,6 +175,7 @@ func (c *Client) Use(hooks ...Hook) {
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.AssetInfo.Intercept(interceptors...)
 	c.BankAccount.Intercept(interceptors...)
 	c.Car.Intercept(interceptors...)
 	c.Collectible.Intercept(interceptors...)
@@ -180,6 +188,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *AssetInfoMutation:
+		return c.AssetInfo.mutate(ctx, m)
 	case *BankAccountMutation:
 		return c.BankAccount.mutate(ctx, m)
 	case *CarMutation:
@@ -196,6 +206,124 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.User.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// AssetInfoClient is a client for the AssetInfo schema.
+type AssetInfoClient struct {
+	config
+}
+
+// NewAssetInfoClient returns a client for the AssetInfo from the given config.
+func NewAssetInfoClient(c config) *AssetInfoClient {
+	return &AssetInfoClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `assetinfo.Hooks(f(g(h())))`.
+func (c *AssetInfoClient) Use(hooks ...Hook) {
+	c.hooks.AssetInfo = append(c.hooks.AssetInfo, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `assetinfo.Intercept(f(g(h())))`.
+func (c *AssetInfoClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AssetInfo = append(c.inters.AssetInfo, interceptors...)
+}
+
+// Create returns a builder for creating a AssetInfo entity.
+func (c *AssetInfoClient) Create() *AssetInfoCreate {
+	mutation := newAssetInfoMutation(c.config, OpCreate)
+	return &AssetInfoCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AssetInfo entities.
+func (c *AssetInfoClient) CreateBulk(builders ...*AssetInfoCreate) *AssetInfoCreateBulk {
+	return &AssetInfoCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AssetInfo.
+func (c *AssetInfoClient) Update() *AssetInfoUpdate {
+	mutation := newAssetInfoMutation(c.config, OpUpdate)
+	return &AssetInfoUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AssetInfoClient) UpdateOne(ai *AssetInfo) *AssetInfoUpdateOne {
+	mutation := newAssetInfoMutation(c.config, OpUpdateOne, withAssetInfo(ai))
+	return &AssetInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AssetInfoClient) UpdateOneID(id uint) *AssetInfoUpdateOne {
+	mutation := newAssetInfoMutation(c.config, OpUpdateOne, withAssetInfoID(id))
+	return &AssetInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AssetInfo.
+func (c *AssetInfoClient) Delete() *AssetInfoDelete {
+	mutation := newAssetInfoMutation(c.config, OpDelete)
+	return &AssetInfoDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AssetInfoClient) DeleteOne(ai *AssetInfo) *AssetInfoDeleteOne {
+	return c.DeleteOneID(ai.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AssetInfoClient) DeleteOneID(id uint) *AssetInfoDeleteOne {
+	builder := c.Delete().Where(assetinfo.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AssetInfoDeleteOne{builder}
+}
+
+// Query returns a query builder for AssetInfo.
+func (c *AssetInfoClient) Query() *AssetInfoQuery {
+	return &AssetInfoQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAssetInfo},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AssetInfo entity by its id.
+func (c *AssetInfoClient) Get(ctx context.Context, id uint) (*AssetInfo, error) {
+	return c.Query().Where(assetinfo.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AssetInfoClient) GetX(ctx context.Context, id uint) *AssetInfo {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AssetInfoClient) Hooks() []Hook {
+	return c.hooks.AssetInfo
+}
+
+// Interceptors returns the client interceptors.
+func (c *AssetInfoClient) Interceptors() []Interceptor {
+	return c.inters.AssetInfo
+}
+
+func (c *AssetInfoClient) mutate(ctx context.Context, m *AssetInfoMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AssetInfoCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AssetInfoUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AssetInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AssetInfoDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AssetInfo mutation op: %q", m.Op())
 	}
 }
 

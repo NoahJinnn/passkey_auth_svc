@@ -60,19 +60,9 @@ func UserID(v uint) predicate.CryptoAccount {
 	return predicate.CryptoAccount(sql.FieldEQ(FieldUserID, v))
 }
 
-// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldEQ(FieldName, v))
-}
-
-// CoinType applies equality check predicate on the "coin_type" field. It's identical to CoinTypeEQ.
-func CoinType(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldEQ(FieldCoinType, v))
-}
-
-// Balance applies equality check predicate on the "balance" field. It's identical to BalanceEQ.
-func Balance(v float64) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldEQ(FieldBalance, v))
+// AssetInfoID applies equality check predicate on the "asset_info_id" field. It's identical to AssetInfoIDEQ.
+func AssetInfoID(v uint) predicate.CryptoAccount {
+	return predicate.CryptoAccount(sql.FieldEQ(FieldAssetInfoID, v))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -115,174 +105,44 @@ func UserIDNotNil() predicate.CryptoAccount {
 	return predicate.CryptoAccount(sql.FieldNotNull(FieldUserID))
 }
 
-// NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldEQ(FieldName, v))
+// AssetInfoIDEQ applies the EQ predicate on the "asset_info_id" field.
+func AssetInfoIDEQ(v uint) predicate.CryptoAccount {
+	return predicate.CryptoAccount(sql.FieldEQ(FieldAssetInfoID, v))
 }
 
-// NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldNEQ(FieldName, v))
+// AssetInfoIDNEQ applies the NEQ predicate on the "asset_info_id" field.
+func AssetInfoIDNEQ(v uint) predicate.CryptoAccount {
+	return predicate.CryptoAccount(sql.FieldNEQ(FieldAssetInfoID, v))
 }
 
-// NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldIn(FieldName, vs...))
+// AssetInfoIDIn applies the In predicate on the "asset_info_id" field.
+func AssetInfoIDIn(vs ...uint) predicate.CryptoAccount {
+	return predicate.CryptoAccount(sql.FieldIn(FieldAssetInfoID, vs...))
 }
 
-// NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldNotIn(FieldName, vs...))
+// AssetInfoIDNotIn applies the NotIn predicate on the "asset_info_id" field.
+func AssetInfoIDNotIn(vs ...uint) predicate.CryptoAccount {
+	return predicate.CryptoAccount(sql.FieldNotIn(FieldAssetInfoID, vs...))
 }
 
-// NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldGT(FieldName, v))
+// AssetInfoIDGT applies the GT predicate on the "asset_info_id" field.
+func AssetInfoIDGT(v uint) predicate.CryptoAccount {
+	return predicate.CryptoAccount(sql.FieldGT(FieldAssetInfoID, v))
 }
 
-// NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldGTE(FieldName, v))
+// AssetInfoIDGTE applies the GTE predicate on the "asset_info_id" field.
+func AssetInfoIDGTE(v uint) predicate.CryptoAccount {
+	return predicate.CryptoAccount(sql.FieldGTE(FieldAssetInfoID, v))
 }
 
-// NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldLT(FieldName, v))
+// AssetInfoIDLT applies the LT predicate on the "asset_info_id" field.
+func AssetInfoIDLT(v uint) predicate.CryptoAccount {
+	return predicate.CryptoAccount(sql.FieldLT(FieldAssetInfoID, v))
 }
 
-// NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldLTE(FieldName, v))
-}
-
-// NameContains applies the Contains predicate on the "name" field.
-func NameContains(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldContains(FieldName, v))
-}
-
-// NameHasPrefix applies the HasPrefix predicate on the "name" field.
-func NameHasPrefix(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldHasPrefix(FieldName, v))
-}
-
-// NameHasSuffix applies the HasSuffix predicate on the "name" field.
-func NameHasSuffix(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldHasSuffix(FieldName, v))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldContainsFold(FieldName, v))
-}
-
-// CoinTypeEQ applies the EQ predicate on the "coin_type" field.
-func CoinTypeEQ(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldEQ(FieldCoinType, v))
-}
-
-// CoinTypeNEQ applies the NEQ predicate on the "coin_type" field.
-func CoinTypeNEQ(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldNEQ(FieldCoinType, v))
-}
-
-// CoinTypeIn applies the In predicate on the "coin_type" field.
-func CoinTypeIn(vs ...string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldIn(FieldCoinType, vs...))
-}
-
-// CoinTypeNotIn applies the NotIn predicate on the "coin_type" field.
-func CoinTypeNotIn(vs ...string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldNotIn(FieldCoinType, vs...))
-}
-
-// CoinTypeGT applies the GT predicate on the "coin_type" field.
-func CoinTypeGT(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldGT(FieldCoinType, v))
-}
-
-// CoinTypeGTE applies the GTE predicate on the "coin_type" field.
-func CoinTypeGTE(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldGTE(FieldCoinType, v))
-}
-
-// CoinTypeLT applies the LT predicate on the "coin_type" field.
-func CoinTypeLT(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldLT(FieldCoinType, v))
-}
-
-// CoinTypeLTE applies the LTE predicate on the "coin_type" field.
-func CoinTypeLTE(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldLTE(FieldCoinType, v))
-}
-
-// CoinTypeContains applies the Contains predicate on the "coin_type" field.
-func CoinTypeContains(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldContains(FieldCoinType, v))
-}
-
-// CoinTypeHasPrefix applies the HasPrefix predicate on the "coin_type" field.
-func CoinTypeHasPrefix(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldHasPrefix(FieldCoinType, v))
-}
-
-// CoinTypeHasSuffix applies the HasSuffix predicate on the "coin_type" field.
-func CoinTypeHasSuffix(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldHasSuffix(FieldCoinType, v))
-}
-
-// CoinTypeEqualFold applies the EqualFold predicate on the "coin_type" field.
-func CoinTypeEqualFold(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldEqualFold(FieldCoinType, v))
-}
-
-// CoinTypeContainsFold applies the ContainsFold predicate on the "coin_type" field.
-func CoinTypeContainsFold(v string) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldContainsFold(FieldCoinType, v))
-}
-
-// BalanceEQ applies the EQ predicate on the "balance" field.
-func BalanceEQ(v float64) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldEQ(FieldBalance, v))
-}
-
-// BalanceNEQ applies the NEQ predicate on the "balance" field.
-func BalanceNEQ(v float64) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldNEQ(FieldBalance, v))
-}
-
-// BalanceIn applies the In predicate on the "balance" field.
-func BalanceIn(vs ...float64) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldIn(FieldBalance, vs...))
-}
-
-// BalanceNotIn applies the NotIn predicate on the "balance" field.
-func BalanceNotIn(vs ...float64) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldNotIn(FieldBalance, vs...))
-}
-
-// BalanceGT applies the GT predicate on the "balance" field.
-func BalanceGT(v float64) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldGT(FieldBalance, v))
-}
-
-// BalanceGTE applies the GTE predicate on the "balance" field.
-func BalanceGTE(v float64) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldGTE(FieldBalance, v))
-}
-
-// BalanceLT applies the LT predicate on the "balance" field.
-func BalanceLT(v float64) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldLT(FieldBalance, v))
-}
-
-// BalanceLTE applies the LTE predicate on the "balance" field.
-func BalanceLTE(v float64) predicate.CryptoAccount {
-	return predicate.CryptoAccount(sql.FieldLTE(FieldBalance, v))
+// AssetInfoIDLTE applies the LTE predicate on the "asset_info_id" field.
+func AssetInfoIDLTE(v uint) predicate.CryptoAccount {
+	return predicate.CryptoAccount(sql.FieldLTE(FieldAssetInfoID, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

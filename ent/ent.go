@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/hellohq/hqservice/ent/assetinfo"
 	"github.com/hellohq/hqservice/ent/bankaccount"
 	"github.com/hellohq/hqservice/ent/car"
 	"github.com/hellohq/hqservice/ent/collectible"
@@ -45,6 +46,7 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
+		assetinfo.Table:     assetinfo.ValidColumn,
 		bankaccount.Table:   bankaccount.ValidColumn,
 		car.Table:           car.ValidColumn,
 		collectible.Table:   collectible.ValidColumn,

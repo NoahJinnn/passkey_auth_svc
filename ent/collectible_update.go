@@ -49,15 +49,16 @@ func (cu *CollectibleUpdate) ClearUserID() *CollectibleUpdate {
 	return cu
 }
 
-// SetName sets the "name" field.
-func (cu *CollectibleUpdate) SetName(s string) *CollectibleUpdate {
-	cu.mutation.SetName(s)
+// SetAssetInfoID sets the "asset_info_id" field.
+func (cu *CollectibleUpdate) SetAssetInfoID(u uint) *CollectibleUpdate {
+	cu.mutation.ResetAssetInfoID()
+	cu.mutation.SetAssetInfoID(u)
 	return cu
 }
 
-// SetDescription sets the "description" field.
-func (cu *CollectibleUpdate) SetDescription(s string) *CollectibleUpdate {
-	cu.mutation.SetDescription(s)
+// AddAssetInfoID adds u to the "asset_info_id" field.
+func (cu *CollectibleUpdate) AddAssetInfoID(u int) *CollectibleUpdate {
+	cu.mutation.AddAssetInfoID(u)
 	return cu
 }
 
@@ -125,11 +126,11 @@ func (cu *CollectibleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := cu.mutation.Name(); ok {
-		_spec.SetField(collectible.FieldName, field.TypeString, value)
+	if value, ok := cu.mutation.AssetInfoID(); ok {
+		_spec.SetField(collectible.FieldAssetInfoID, field.TypeUint, value)
 	}
-	if value, ok := cu.mutation.Description(); ok {
-		_spec.SetField(collectible.FieldDescription, field.TypeString, value)
+	if value, ok := cu.mutation.AddedAssetInfoID(); ok {
+		_spec.AddField(collectible.FieldAssetInfoID, field.TypeUint, value)
 	}
 	if value, ok := cu.mutation.CreatedAt(); ok {
 		_spec.SetField(collectible.FieldCreatedAt, field.TypeTime, value)
@@ -212,15 +213,16 @@ func (cuo *CollectibleUpdateOne) ClearUserID() *CollectibleUpdateOne {
 	return cuo
 }
 
-// SetName sets the "name" field.
-func (cuo *CollectibleUpdateOne) SetName(s string) *CollectibleUpdateOne {
-	cuo.mutation.SetName(s)
+// SetAssetInfoID sets the "asset_info_id" field.
+func (cuo *CollectibleUpdateOne) SetAssetInfoID(u uint) *CollectibleUpdateOne {
+	cuo.mutation.ResetAssetInfoID()
+	cuo.mutation.SetAssetInfoID(u)
 	return cuo
 }
 
-// SetDescription sets the "description" field.
-func (cuo *CollectibleUpdateOne) SetDescription(s string) *CollectibleUpdateOne {
-	cuo.mutation.SetDescription(s)
+// AddAssetInfoID adds u to the "asset_info_id" field.
+func (cuo *CollectibleUpdateOne) AddAssetInfoID(u int) *CollectibleUpdateOne {
+	cuo.mutation.AddAssetInfoID(u)
 	return cuo
 }
 
@@ -318,11 +320,11 @@ func (cuo *CollectibleUpdateOne) sqlSave(ctx context.Context) (_node *Collectibl
 			}
 		}
 	}
-	if value, ok := cuo.mutation.Name(); ok {
-		_spec.SetField(collectible.FieldName, field.TypeString, value)
+	if value, ok := cuo.mutation.AssetInfoID(); ok {
+		_spec.SetField(collectible.FieldAssetInfoID, field.TypeUint, value)
 	}
-	if value, ok := cuo.mutation.Description(); ok {
-		_spec.SetField(collectible.FieldDescription, field.TypeString, value)
+	if value, ok := cuo.mutation.AddedAssetInfoID(); ok {
+		_spec.AddField(collectible.FieldAssetInfoID, field.TypeUint, value)
 	}
 	if value, ok := cuo.mutation.CreatedAt(); ok {
 		_spec.SetField(collectible.FieldCreatedAt, field.TypeTime, value)

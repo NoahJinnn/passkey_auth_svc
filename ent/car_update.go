@@ -49,28 +49,16 @@ func (cu *CarUpdate) ClearUserID() *CarUpdate {
 	return cu
 }
 
-// SetMake sets the "make" field.
-func (cu *CarUpdate) SetMake(s string) *CarUpdate {
-	cu.mutation.SetMake(s)
+// SetAssetInfoID sets the "asset_info_id" field.
+func (cu *CarUpdate) SetAssetInfoID(u uint) *CarUpdate {
+	cu.mutation.ResetAssetInfoID()
+	cu.mutation.SetAssetInfoID(u)
 	return cu
 }
 
-// SetModel sets the "model" field.
-func (cu *CarUpdate) SetModel(s string) *CarUpdate {
-	cu.mutation.SetModel(s)
-	return cu
-}
-
-// SetYear sets the "year" field.
-func (cu *CarUpdate) SetYear(i int32) *CarUpdate {
-	cu.mutation.ResetYear()
-	cu.mutation.SetYear(i)
-	return cu
-}
-
-// AddYear adds i to the "year" field.
-func (cu *CarUpdate) AddYear(i int32) *CarUpdate {
-	cu.mutation.AddYear(i)
+// AddAssetInfoID adds u to the "asset_info_id" field.
+func (cu *CarUpdate) AddAssetInfoID(u int) *CarUpdate {
+	cu.mutation.AddAssetInfoID(u)
 	return cu
 }
 
@@ -138,17 +126,11 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := cu.mutation.Make(); ok {
-		_spec.SetField(car.FieldMake, field.TypeString, value)
+	if value, ok := cu.mutation.AssetInfoID(); ok {
+		_spec.SetField(car.FieldAssetInfoID, field.TypeUint, value)
 	}
-	if value, ok := cu.mutation.Model(); ok {
-		_spec.SetField(car.FieldModel, field.TypeString, value)
-	}
-	if value, ok := cu.mutation.Year(); ok {
-		_spec.SetField(car.FieldYear, field.TypeInt32, value)
-	}
-	if value, ok := cu.mutation.AddedYear(); ok {
-		_spec.AddField(car.FieldYear, field.TypeInt32, value)
+	if value, ok := cu.mutation.AddedAssetInfoID(); ok {
+		_spec.AddField(car.FieldAssetInfoID, field.TypeUint, value)
 	}
 	if value, ok := cu.mutation.CreatedAt(); ok {
 		_spec.SetField(car.FieldCreatedAt, field.TypeTime, value)
@@ -231,28 +213,16 @@ func (cuo *CarUpdateOne) ClearUserID() *CarUpdateOne {
 	return cuo
 }
 
-// SetMake sets the "make" field.
-func (cuo *CarUpdateOne) SetMake(s string) *CarUpdateOne {
-	cuo.mutation.SetMake(s)
+// SetAssetInfoID sets the "asset_info_id" field.
+func (cuo *CarUpdateOne) SetAssetInfoID(u uint) *CarUpdateOne {
+	cuo.mutation.ResetAssetInfoID()
+	cuo.mutation.SetAssetInfoID(u)
 	return cuo
 }
 
-// SetModel sets the "model" field.
-func (cuo *CarUpdateOne) SetModel(s string) *CarUpdateOne {
-	cuo.mutation.SetModel(s)
-	return cuo
-}
-
-// SetYear sets the "year" field.
-func (cuo *CarUpdateOne) SetYear(i int32) *CarUpdateOne {
-	cuo.mutation.ResetYear()
-	cuo.mutation.SetYear(i)
-	return cuo
-}
-
-// AddYear adds i to the "year" field.
-func (cuo *CarUpdateOne) AddYear(i int32) *CarUpdateOne {
-	cuo.mutation.AddYear(i)
+// AddAssetInfoID adds u to the "asset_info_id" field.
+func (cuo *CarUpdateOne) AddAssetInfoID(u int) *CarUpdateOne {
+	cuo.mutation.AddAssetInfoID(u)
 	return cuo
 }
 
@@ -350,17 +320,11 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 			}
 		}
 	}
-	if value, ok := cuo.mutation.Make(); ok {
-		_spec.SetField(car.FieldMake, field.TypeString, value)
+	if value, ok := cuo.mutation.AssetInfoID(); ok {
+		_spec.SetField(car.FieldAssetInfoID, field.TypeUint, value)
 	}
-	if value, ok := cuo.mutation.Model(); ok {
-		_spec.SetField(car.FieldModel, field.TypeString, value)
-	}
-	if value, ok := cuo.mutation.Year(); ok {
-		_spec.SetField(car.FieldYear, field.TypeInt32, value)
-	}
-	if value, ok := cuo.mutation.AddedYear(); ok {
-		_spec.AddField(car.FieldYear, field.TypeInt32, value)
+	if value, ok := cuo.mutation.AddedAssetInfoID(); ok {
+		_spec.AddField(car.FieldAssetInfoID, field.TypeUint, value)
 	}
 	if value, ok := cuo.mutation.CreatedAt(); ok {
 		_spec.SetField(car.FieldCreatedAt, field.TypeTime, value)

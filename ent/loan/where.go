@@ -60,24 +60,9 @@ func UserID(v uint) predicate.Loan {
 	return predicate.Loan(sql.FieldEQ(FieldUserID, v))
 }
 
-// LenderName applies equality check predicate on the "lender_name" field. It's identical to LenderNameEQ.
-func LenderName(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldEQ(FieldLenderName, v))
-}
-
-// LoanType applies equality check predicate on the "loan_type" field. It's identical to LoanTypeEQ.
-func LoanType(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldEQ(FieldLoanType, v))
-}
-
-// Balance applies equality check predicate on the "balance" field. It's identical to BalanceEQ.
-func Balance(v float64) predicate.Loan {
-	return predicate.Loan(sql.FieldEQ(FieldBalance, v))
-}
-
-// InterestRate applies equality check predicate on the "interest_rate" field. It's identical to InterestRateEQ.
-func InterestRate(v float64) predicate.Loan {
-	return predicate.Loan(sql.FieldEQ(FieldInterestRate, v))
+// AssetInfoID applies equality check predicate on the "asset_info_id" field. It's identical to AssetInfoIDEQ.
+func AssetInfoID(v uint) predicate.Loan {
+	return predicate.Loan(sql.FieldEQ(FieldAssetInfoID, v))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -120,214 +105,44 @@ func UserIDNotNil() predicate.Loan {
 	return predicate.Loan(sql.FieldNotNull(FieldUserID))
 }
 
-// LenderNameEQ applies the EQ predicate on the "lender_name" field.
-func LenderNameEQ(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldEQ(FieldLenderName, v))
+// AssetInfoIDEQ applies the EQ predicate on the "asset_info_id" field.
+func AssetInfoIDEQ(v uint) predicate.Loan {
+	return predicate.Loan(sql.FieldEQ(FieldAssetInfoID, v))
 }
 
-// LenderNameNEQ applies the NEQ predicate on the "lender_name" field.
-func LenderNameNEQ(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldNEQ(FieldLenderName, v))
+// AssetInfoIDNEQ applies the NEQ predicate on the "asset_info_id" field.
+func AssetInfoIDNEQ(v uint) predicate.Loan {
+	return predicate.Loan(sql.FieldNEQ(FieldAssetInfoID, v))
 }
 
-// LenderNameIn applies the In predicate on the "lender_name" field.
-func LenderNameIn(vs ...string) predicate.Loan {
-	return predicate.Loan(sql.FieldIn(FieldLenderName, vs...))
+// AssetInfoIDIn applies the In predicate on the "asset_info_id" field.
+func AssetInfoIDIn(vs ...uint) predicate.Loan {
+	return predicate.Loan(sql.FieldIn(FieldAssetInfoID, vs...))
 }
 
-// LenderNameNotIn applies the NotIn predicate on the "lender_name" field.
-func LenderNameNotIn(vs ...string) predicate.Loan {
-	return predicate.Loan(sql.FieldNotIn(FieldLenderName, vs...))
+// AssetInfoIDNotIn applies the NotIn predicate on the "asset_info_id" field.
+func AssetInfoIDNotIn(vs ...uint) predicate.Loan {
+	return predicate.Loan(sql.FieldNotIn(FieldAssetInfoID, vs...))
 }
 
-// LenderNameGT applies the GT predicate on the "lender_name" field.
-func LenderNameGT(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldGT(FieldLenderName, v))
+// AssetInfoIDGT applies the GT predicate on the "asset_info_id" field.
+func AssetInfoIDGT(v uint) predicate.Loan {
+	return predicate.Loan(sql.FieldGT(FieldAssetInfoID, v))
 }
 
-// LenderNameGTE applies the GTE predicate on the "lender_name" field.
-func LenderNameGTE(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldGTE(FieldLenderName, v))
+// AssetInfoIDGTE applies the GTE predicate on the "asset_info_id" field.
+func AssetInfoIDGTE(v uint) predicate.Loan {
+	return predicate.Loan(sql.FieldGTE(FieldAssetInfoID, v))
 }
 
-// LenderNameLT applies the LT predicate on the "lender_name" field.
-func LenderNameLT(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldLT(FieldLenderName, v))
+// AssetInfoIDLT applies the LT predicate on the "asset_info_id" field.
+func AssetInfoIDLT(v uint) predicate.Loan {
+	return predicate.Loan(sql.FieldLT(FieldAssetInfoID, v))
 }
 
-// LenderNameLTE applies the LTE predicate on the "lender_name" field.
-func LenderNameLTE(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldLTE(FieldLenderName, v))
-}
-
-// LenderNameContains applies the Contains predicate on the "lender_name" field.
-func LenderNameContains(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldContains(FieldLenderName, v))
-}
-
-// LenderNameHasPrefix applies the HasPrefix predicate on the "lender_name" field.
-func LenderNameHasPrefix(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldHasPrefix(FieldLenderName, v))
-}
-
-// LenderNameHasSuffix applies the HasSuffix predicate on the "lender_name" field.
-func LenderNameHasSuffix(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldHasSuffix(FieldLenderName, v))
-}
-
-// LenderNameEqualFold applies the EqualFold predicate on the "lender_name" field.
-func LenderNameEqualFold(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldEqualFold(FieldLenderName, v))
-}
-
-// LenderNameContainsFold applies the ContainsFold predicate on the "lender_name" field.
-func LenderNameContainsFold(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldContainsFold(FieldLenderName, v))
-}
-
-// LoanTypeEQ applies the EQ predicate on the "loan_type" field.
-func LoanTypeEQ(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldEQ(FieldLoanType, v))
-}
-
-// LoanTypeNEQ applies the NEQ predicate on the "loan_type" field.
-func LoanTypeNEQ(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldNEQ(FieldLoanType, v))
-}
-
-// LoanTypeIn applies the In predicate on the "loan_type" field.
-func LoanTypeIn(vs ...string) predicate.Loan {
-	return predicate.Loan(sql.FieldIn(FieldLoanType, vs...))
-}
-
-// LoanTypeNotIn applies the NotIn predicate on the "loan_type" field.
-func LoanTypeNotIn(vs ...string) predicate.Loan {
-	return predicate.Loan(sql.FieldNotIn(FieldLoanType, vs...))
-}
-
-// LoanTypeGT applies the GT predicate on the "loan_type" field.
-func LoanTypeGT(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldGT(FieldLoanType, v))
-}
-
-// LoanTypeGTE applies the GTE predicate on the "loan_type" field.
-func LoanTypeGTE(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldGTE(FieldLoanType, v))
-}
-
-// LoanTypeLT applies the LT predicate on the "loan_type" field.
-func LoanTypeLT(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldLT(FieldLoanType, v))
-}
-
-// LoanTypeLTE applies the LTE predicate on the "loan_type" field.
-func LoanTypeLTE(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldLTE(FieldLoanType, v))
-}
-
-// LoanTypeContains applies the Contains predicate on the "loan_type" field.
-func LoanTypeContains(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldContains(FieldLoanType, v))
-}
-
-// LoanTypeHasPrefix applies the HasPrefix predicate on the "loan_type" field.
-func LoanTypeHasPrefix(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldHasPrefix(FieldLoanType, v))
-}
-
-// LoanTypeHasSuffix applies the HasSuffix predicate on the "loan_type" field.
-func LoanTypeHasSuffix(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldHasSuffix(FieldLoanType, v))
-}
-
-// LoanTypeEqualFold applies the EqualFold predicate on the "loan_type" field.
-func LoanTypeEqualFold(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldEqualFold(FieldLoanType, v))
-}
-
-// LoanTypeContainsFold applies the ContainsFold predicate on the "loan_type" field.
-func LoanTypeContainsFold(v string) predicate.Loan {
-	return predicate.Loan(sql.FieldContainsFold(FieldLoanType, v))
-}
-
-// BalanceEQ applies the EQ predicate on the "balance" field.
-func BalanceEQ(v float64) predicate.Loan {
-	return predicate.Loan(sql.FieldEQ(FieldBalance, v))
-}
-
-// BalanceNEQ applies the NEQ predicate on the "balance" field.
-func BalanceNEQ(v float64) predicate.Loan {
-	return predicate.Loan(sql.FieldNEQ(FieldBalance, v))
-}
-
-// BalanceIn applies the In predicate on the "balance" field.
-func BalanceIn(vs ...float64) predicate.Loan {
-	return predicate.Loan(sql.FieldIn(FieldBalance, vs...))
-}
-
-// BalanceNotIn applies the NotIn predicate on the "balance" field.
-func BalanceNotIn(vs ...float64) predicate.Loan {
-	return predicate.Loan(sql.FieldNotIn(FieldBalance, vs...))
-}
-
-// BalanceGT applies the GT predicate on the "balance" field.
-func BalanceGT(v float64) predicate.Loan {
-	return predicate.Loan(sql.FieldGT(FieldBalance, v))
-}
-
-// BalanceGTE applies the GTE predicate on the "balance" field.
-func BalanceGTE(v float64) predicate.Loan {
-	return predicate.Loan(sql.FieldGTE(FieldBalance, v))
-}
-
-// BalanceLT applies the LT predicate on the "balance" field.
-func BalanceLT(v float64) predicate.Loan {
-	return predicate.Loan(sql.FieldLT(FieldBalance, v))
-}
-
-// BalanceLTE applies the LTE predicate on the "balance" field.
-func BalanceLTE(v float64) predicate.Loan {
-	return predicate.Loan(sql.FieldLTE(FieldBalance, v))
-}
-
-// InterestRateEQ applies the EQ predicate on the "interest_rate" field.
-func InterestRateEQ(v float64) predicate.Loan {
-	return predicate.Loan(sql.FieldEQ(FieldInterestRate, v))
-}
-
-// InterestRateNEQ applies the NEQ predicate on the "interest_rate" field.
-func InterestRateNEQ(v float64) predicate.Loan {
-	return predicate.Loan(sql.FieldNEQ(FieldInterestRate, v))
-}
-
-// InterestRateIn applies the In predicate on the "interest_rate" field.
-func InterestRateIn(vs ...float64) predicate.Loan {
-	return predicate.Loan(sql.FieldIn(FieldInterestRate, vs...))
-}
-
-// InterestRateNotIn applies the NotIn predicate on the "interest_rate" field.
-func InterestRateNotIn(vs ...float64) predicate.Loan {
-	return predicate.Loan(sql.FieldNotIn(FieldInterestRate, vs...))
-}
-
-// InterestRateGT applies the GT predicate on the "interest_rate" field.
-func InterestRateGT(v float64) predicate.Loan {
-	return predicate.Loan(sql.FieldGT(FieldInterestRate, v))
-}
-
-// InterestRateGTE applies the GTE predicate on the "interest_rate" field.
-func InterestRateGTE(v float64) predicate.Loan {
-	return predicate.Loan(sql.FieldGTE(FieldInterestRate, v))
-}
-
-// InterestRateLT applies the LT predicate on the "interest_rate" field.
-func InterestRateLT(v float64) predicate.Loan {
-	return predicate.Loan(sql.FieldLT(FieldInterestRate, v))
-}
-
-// InterestRateLTE applies the LTE predicate on the "interest_rate" field.
-func InterestRateLTE(v float64) predicate.Loan {
-	return predicate.Loan(sql.FieldLTE(FieldInterestRate, v))
+// AssetInfoIDLTE applies the LTE predicate on the "asset_info_id" field.
+func AssetInfoIDLTE(v uint) predicate.Loan {
+	return predicate.Loan(sql.FieldLTE(FieldAssetInfoID, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

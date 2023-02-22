@@ -3,7 +3,6 @@
 package ent
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -20,14 +19,8 @@ type BankAccount struct {
 	ID uint `json:"id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID uint `json:"user_id,omitempty"`
-	// AccountID holds the value of the "account_id" field.
-	AccountID string `json:"account_id,omitempty"`
-	// InstitutionInfo holds the value of the "institution_info" field.
-	InstitutionInfo struct{} `json:"institution_info,omitempty"`
-	// AccountInfo holds the value of the "account_info" field.
-	AccountInfo struct{} `json:"account_info,omitempty"`
-	// SensibleData holds the value of the "sensible_data" field.
-	SensibleData string `json:"sensible_data,omitempty"`
+	// AssetInfoID holds the value of the "asset_info_id" field.
+	AssetInfoID uint `json:"asset_info_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -64,12 +57,8 @@ func (*BankAccount) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case bankaccount.FieldInstitutionInfo, bankaccount.FieldAccountInfo:
-			values[i] = new([]byte)
-		case bankaccount.FieldID, bankaccount.FieldUserID:
+		case bankaccount.FieldID, bankaccount.FieldUserID, bankaccount.FieldAssetInfoID:
 			values[i] = new(sql.NullInt64)
-		case bankaccount.FieldAccountID, bankaccount.FieldSensibleData:
-			values[i] = new(sql.NullString)
 		case bankaccount.FieldCreatedAt, bankaccount.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
@@ -99,33 +88,11 @@ func (ba *BankAccount) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ba.UserID = uint(value.Int64)
 			}
-		case bankaccount.FieldAccountID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field account_id", values[i])
+		case bankaccount.FieldAssetInfoID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field asset_info_id", values[i])
 			} else if value.Valid {
-				ba.AccountID = value.String
-			}
-		case bankaccount.FieldInstitutionInfo:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field institution_info", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &ba.InstitutionInfo); err != nil {
-					return fmt.Errorf("unmarshal field institution_info: %w", err)
-				}
-			}
-		case bankaccount.FieldAccountInfo:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field account_info", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &ba.AccountInfo); err != nil {
-					return fmt.Errorf("unmarshal field account_info: %w", err)
-				}
-			}
-		case bankaccount.FieldSensibleData:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field sensible_data", values[i])
-			} else if value.Valid {
-				ba.SensibleData = value.String
+				ba.AssetInfoID = uint(value.Int64)
 			}
 		case bankaccount.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -175,17 +142,8 @@ func (ba *BankAccount) String() string {
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", ba.UserID))
 	builder.WriteString(", ")
-	builder.WriteString("account_id=")
-	builder.WriteString(ba.AccountID)
-	builder.WriteString(", ")
-	builder.WriteString("institution_info=")
-	builder.WriteString(fmt.Sprintf("%v", ba.InstitutionInfo))
-	builder.WriteString(", ")
-	builder.WriteString("account_info=")
-	builder.WriteString(fmt.Sprintf("%v", ba.AccountInfo))
-	builder.WriteString(", ")
-	builder.WriteString("sensible_data=")
-	builder.WriteString(ba.SensibleData)
+	builder.WriteString("asset_info_id=")
+	builder.WriteString(fmt.Sprintf("%v", ba.AssetInfoID))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(ba.CreatedAt.Format(time.ANSIC))

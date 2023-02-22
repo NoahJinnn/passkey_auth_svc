@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/hellohq/hqservice/ent/collectible"
@@ -35,15 +36,9 @@ func (cc *CollectibleCreate) SetNillableUserID(u *uint) *CollectibleCreate {
 	return cc
 }
 
-// SetName sets the "name" field.
-func (cc *CollectibleCreate) SetName(s string) *CollectibleCreate {
-	cc.mutation.SetName(s)
-	return cc
-}
-
-// SetDescription sets the "description" field.
-func (cc *CollectibleCreate) SetDescription(s string) *CollectibleCreate {
-	cc.mutation.SetDescription(s)
+// SetAssetInfoID sets the "asset_info_id" field.
+func (cc *CollectibleCreate) SetAssetInfoID(u uint) *CollectibleCreate {
+	cc.mutation.SetAssetInfoID(u)
 	return cc
 }
 
@@ -104,11 +99,11 @@ func (cc *CollectibleCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *CollectibleCreate) check() error {
-	if _, ok := cc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Collectible.name"`)}
-	}
-	if _, ok := cc.mutation.Description(); !ok {
-		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "Collectible.description"`)}
+	switch cc.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		if _, ok := cc.mutation.AssetInfoID(); !ok {
+			return &ValidationError{Name: "asset_info_id", err: errors.New(`ent: missing required field "Collectible.asset_info_id"`)}
+		}
 	}
 	if _, ok := cc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Collectible.created_at"`)}
@@ -148,13 +143,9 @@ func (cc *CollectibleCreate) createSpec() (*Collectible, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := cc.mutation.Name(); ok {
-		_spec.SetField(collectible.FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if value, ok := cc.mutation.Description(); ok {
-		_spec.SetField(collectible.FieldDescription, field.TypeString, value)
-		_node.Description = value
+	if value, ok := cc.mutation.AssetInfoID(); ok {
+		_spec.SetField(collectible.FieldAssetInfoID, field.TypeUint, value)
+		_node.AssetInfoID = value
 	}
 	if value, ok := cc.mutation.CreatedAt(); ok {
 		_spec.SetField(collectible.FieldCreatedAt, field.TypeTime, value)

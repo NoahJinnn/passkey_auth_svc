@@ -19,14 +19,8 @@ type Loan struct {
 	ID uint `json:"id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID uint `json:"user_id,omitempty"`
-	// LenderName holds the value of the "lender_name" field.
-	LenderName string `json:"lender_name,omitempty"`
-	// LoanType holds the value of the "loan_type" field.
-	LoanType string `json:"loan_type,omitempty"`
-	// Balance holds the value of the "balance" field.
-	Balance float64 `json:"balance,omitempty"`
-	// InterestRate holds the value of the "interest_rate" field.
-	InterestRate float64 `json:"interest_rate,omitempty"`
+	// AssetInfoID holds the value of the "asset_info_id" field.
+	AssetInfoID uint `json:"asset_info_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -63,12 +57,8 @@ func (*Loan) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case loan.FieldBalance, loan.FieldInterestRate:
-			values[i] = new(sql.NullFloat64)
-		case loan.FieldID, loan.FieldUserID:
+		case loan.FieldID, loan.FieldUserID, loan.FieldAssetInfoID:
 			values[i] = new(sql.NullInt64)
-		case loan.FieldLenderName, loan.FieldLoanType:
-			values[i] = new(sql.NullString)
 		case loan.FieldCreatedAt, loan.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
@@ -98,29 +88,11 @@ func (l *Loan) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				l.UserID = uint(value.Int64)
 			}
-		case loan.FieldLenderName:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field lender_name", values[i])
+		case loan.FieldAssetInfoID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field asset_info_id", values[i])
 			} else if value.Valid {
-				l.LenderName = value.String
-			}
-		case loan.FieldLoanType:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field loan_type", values[i])
-			} else if value.Valid {
-				l.LoanType = value.String
-			}
-		case loan.FieldBalance:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
-				return fmt.Errorf("unexpected type %T for field balance", values[i])
-			} else if value.Valid {
-				l.Balance = value.Float64
-			}
-		case loan.FieldInterestRate:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
-				return fmt.Errorf("unexpected type %T for field interest_rate", values[i])
-			} else if value.Valid {
-				l.InterestRate = value.Float64
+				l.AssetInfoID = uint(value.Int64)
 			}
 		case loan.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -170,17 +142,8 @@ func (l *Loan) String() string {
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", l.UserID))
 	builder.WriteString(", ")
-	builder.WriteString("lender_name=")
-	builder.WriteString(l.LenderName)
-	builder.WriteString(", ")
-	builder.WriteString("loan_type=")
-	builder.WriteString(l.LoanType)
-	builder.WriteString(", ")
-	builder.WriteString("balance=")
-	builder.WriteString(fmt.Sprintf("%v", l.Balance))
-	builder.WriteString(", ")
-	builder.WriteString("interest_rate=")
-	builder.WriteString(fmt.Sprintf("%v", l.InterestRate))
+	builder.WriteString("asset_info_id=")
+	builder.WriteString(fmt.Sprintf("%v", l.AssetInfoID))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(l.CreatedAt.Format(time.ANSIC))

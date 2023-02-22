@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// AssetInfo is the predicate function for assetinfo builders.
+type AssetInfo func(*sql.Selector)
+
 // BankAccount is the predicate function for bankaccount builders.
 type BankAccount func(*sql.Selector)
 

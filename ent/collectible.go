@@ -19,10 +19,8 @@ type Collectible struct {
 	ID uint `json:"id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID uint `json:"user_id,omitempty"`
-	// Name holds the value of the "name" field.
-	Name string `json:"name,omitempty"`
-	// Description holds the value of the "description" field.
-	Description string `json:"description,omitempty"`
+	// AssetInfoID holds the value of the "asset_info_id" field.
+	AssetInfoID uint `json:"asset_info_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -59,10 +57,8 @@ func (*Collectible) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case collectible.FieldID, collectible.FieldUserID:
+		case collectible.FieldID, collectible.FieldUserID, collectible.FieldAssetInfoID:
 			values[i] = new(sql.NullInt64)
-		case collectible.FieldName, collectible.FieldDescription:
-			values[i] = new(sql.NullString)
 		case collectible.FieldCreatedAt, collectible.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
@@ -92,17 +88,11 @@ func (c *Collectible) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				c.UserID = uint(value.Int64)
 			}
-		case collectible.FieldName:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
+		case collectible.FieldAssetInfoID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field asset_info_id", values[i])
 			} else if value.Valid {
-				c.Name = value.String
-			}
-		case collectible.FieldDescription:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field description", values[i])
-			} else if value.Valid {
-				c.Description = value.String
+				c.AssetInfoID = uint(value.Int64)
 			}
 		case collectible.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -152,11 +142,8 @@ func (c *Collectible) String() string {
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", c.UserID))
 	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(c.Name)
-	builder.WriteString(", ")
-	builder.WriteString("description=")
-	builder.WriteString(c.Description)
+	builder.WriteString("asset_info_id=")
+	builder.WriteString(fmt.Sprintf("%v", c.AssetInfoID))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(c.CreatedAt.Format(time.ANSIC))

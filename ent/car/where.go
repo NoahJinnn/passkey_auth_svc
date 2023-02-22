@@ -60,19 +60,9 @@ func UserID(v uint) predicate.Car {
 	return predicate.Car(sql.FieldEQ(FieldUserID, v))
 }
 
-// Make applies equality check predicate on the "make" field. It's identical to MakeEQ.
-func Make(v string) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldMake, v))
-}
-
-// Model applies equality check predicate on the "model" field. It's identical to ModelEQ.
-func Model(v string) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldModel, v))
-}
-
-// Year applies equality check predicate on the "year" field. It's identical to YearEQ.
-func Year(v int32) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldYear, v))
+// AssetInfoID applies equality check predicate on the "asset_info_id" field. It's identical to AssetInfoIDEQ.
+func AssetInfoID(v uint) predicate.Car {
+	return predicate.Car(sql.FieldEQ(FieldAssetInfoID, v))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -115,174 +105,44 @@ func UserIDNotNil() predicate.Car {
 	return predicate.Car(sql.FieldNotNull(FieldUserID))
 }
 
-// MakeEQ applies the EQ predicate on the "make" field.
-func MakeEQ(v string) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldMake, v))
+// AssetInfoIDEQ applies the EQ predicate on the "asset_info_id" field.
+func AssetInfoIDEQ(v uint) predicate.Car {
+	return predicate.Car(sql.FieldEQ(FieldAssetInfoID, v))
 }
 
-// MakeNEQ applies the NEQ predicate on the "make" field.
-func MakeNEQ(v string) predicate.Car {
-	return predicate.Car(sql.FieldNEQ(FieldMake, v))
+// AssetInfoIDNEQ applies the NEQ predicate on the "asset_info_id" field.
+func AssetInfoIDNEQ(v uint) predicate.Car {
+	return predicate.Car(sql.FieldNEQ(FieldAssetInfoID, v))
 }
 
-// MakeIn applies the In predicate on the "make" field.
-func MakeIn(vs ...string) predicate.Car {
-	return predicate.Car(sql.FieldIn(FieldMake, vs...))
+// AssetInfoIDIn applies the In predicate on the "asset_info_id" field.
+func AssetInfoIDIn(vs ...uint) predicate.Car {
+	return predicate.Car(sql.FieldIn(FieldAssetInfoID, vs...))
 }
 
-// MakeNotIn applies the NotIn predicate on the "make" field.
-func MakeNotIn(vs ...string) predicate.Car {
-	return predicate.Car(sql.FieldNotIn(FieldMake, vs...))
+// AssetInfoIDNotIn applies the NotIn predicate on the "asset_info_id" field.
+func AssetInfoIDNotIn(vs ...uint) predicate.Car {
+	return predicate.Car(sql.FieldNotIn(FieldAssetInfoID, vs...))
 }
 
-// MakeGT applies the GT predicate on the "make" field.
-func MakeGT(v string) predicate.Car {
-	return predicate.Car(sql.FieldGT(FieldMake, v))
+// AssetInfoIDGT applies the GT predicate on the "asset_info_id" field.
+func AssetInfoIDGT(v uint) predicate.Car {
+	return predicate.Car(sql.FieldGT(FieldAssetInfoID, v))
 }
 
-// MakeGTE applies the GTE predicate on the "make" field.
-func MakeGTE(v string) predicate.Car {
-	return predicate.Car(sql.FieldGTE(FieldMake, v))
+// AssetInfoIDGTE applies the GTE predicate on the "asset_info_id" field.
+func AssetInfoIDGTE(v uint) predicate.Car {
+	return predicate.Car(sql.FieldGTE(FieldAssetInfoID, v))
 }
 
-// MakeLT applies the LT predicate on the "make" field.
-func MakeLT(v string) predicate.Car {
-	return predicate.Car(sql.FieldLT(FieldMake, v))
+// AssetInfoIDLT applies the LT predicate on the "asset_info_id" field.
+func AssetInfoIDLT(v uint) predicate.Car {
+	return predicate.Car(sql.FieldLT(FieldAssetInfoID, v))
 }
 
-// MakeLTE applies the LTE predicate on the "make" field.
-func MakeLTE(v string) predicate.Car {
-	return predicate.Car(sql.FieldLTE(FieldMake, v))
-}
-
-// MakeContains applies the Contains predicate on the "make" field.
-func MakeContains(v string) predicate.Car {
-	return predicate.Car(sql.FieldContains(FieldMake, v))
-}
-
-// MakeHasPrefix applies the HasPrefix predicate on the "make" field.
-func MakeHasPrefix(v string) predicate.Car {
-	return predicate.Car(sql.FieldHasPrefix(FieldMake, v))
-}
-
-// MakeHasSuffix applies the HasSuffix predicate on the "make" field.
-func MakeHasSuffix(v string) predicate.Car {
-	return predicate.Car(sql.FieldHasSuffix(FieldMake, v))
-}
-
-// MakeEqualFold applies the EqualFold predicate on the "make" field.
-func MakeEqualFold(v string) predicate.Car {
-	return predicate.Car(sql.FieldEqualFold(FieldMake, v))
-}
-
-// MakeContainsFold applies the ContainsFold predicate on the "make" field.
-func MakeContainsFold(v string) predicate.Car {
-	return predicate.Car(sql.FieldContainsFold(FieldMake, v))
-}
-
-// ModelEQ applies the EQ predicate on the "model" field.
-func ModelEQ(v string) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldModel, v))
-}
-
-// ModelNEQ applies the NEQ predicate on the "model" field.
-func ModelNEQ(v string) predicate.Car {
-	return predicate.Car(sql.FieldNEQ(FieldModel, v))
-}
-
-// ModelIn applies the In predicate on the "model" field.
-func ModelIn(vs ...string) predicate.Car {
-	return predicate.Car(sql.FieldIn(FieldModel, vs...))
-}
-
-// ModelNotIn applies the NotIn predicate on the "model" field.
-func ModelNotIn(vs ...string) predicate.Car {
-	return predicate.Car(sql.FieldNotIn(FieldModel, vs...))
-}
-
-// ModelGT applies the GT predicate on the "model" field.
-func ModelGT(v string) predicate.Car {
-	return predicate.Car(sql.FieldGT(FieldModel, v))
-}
-
-// ModelGTE applies the GTE predicate on the "model" field.
-func ModelGTE(v string) predicate.Car {
-	return predicate.Car(sql.FieldGTE(FieldModel, v))
-}
-
-// ModelLT applies the LT predicate on the "model" field.
-func ModelLT(v string) predicate.Car {
-	return predicate.Car(sql.FieldLT(FieldModel, v))
-}
-
-// ModelLTE applies the LTE predicate on the "model" field.
-func ModelLTE(v string) predicate.Car {
-	return predicate.Car(sql.FieldLTE(FieldModel, v))
-}
-
-// ModelContains applies the Contains predicate on the "model" field.
-func ModelContains(v string) predicate.Car {
-	return predicate.Car(sql.FieldContains(FieldModel, v))
-}
-
-// ModelHasPrefix applies the HasPrefix predicate on the "model" field.
-func ModelHasPrefix(v string) predicate.Car {
-	return predicate.Car(sql.FieldHasPrefix(FieldModel, v))
-}
-
-// ModelHasSuffix applies the HasSuffix predicate on the "model" field.
-func ModelHasSuffix(v string) predicate.Car {
-	return predicate.Car(sql.FieldHasSuffix(FieldModel, v))
-}
-
-// ModelEqualFold applies the EqualFold predicate on the "model" field.
-func ModelEqualFold(v string) predicate.Car {
-	return predicate.Car(sql.FieldEqualFold(FieldModel, v))
-}
-
-// ModelContainsFold applies the ContainsFold predicate on the "model" field.
-func ModelContainsFold(v string) predicate.Car {
-	return predicate.Car(sql.FieldContainsFold(FieldModel, v))
-}
-
-// YearEQ applies the EQ predicate on the "year" field.
-func YearEQ(v int32) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldYear, v))
-}
-
-// YearNEQ applies the NEQ predicate on the "year" field.
-func YearNEQ(v int32) predicate.Car {
-	return predicate.Car(sql.FieldNEQ(FieldYear, v))
-}
-
-// YearIn applies the In predicate on the "year" field.
-func YearIn(vs ...int32) predicate.Car {
-	return predicate.Car(sql.FieldIn(FieldYear, vs...))
-}
-
-// YearNotIn applies the NotIn predicate on the "year" field.
-func YearNotIn(vs ...int32) predicate.Car {
-	return predicate.Car(sql.FieldNotIn(FieldYear, vs...))
-}
-
-// YearGT applies the GT predicate on the "year" field.
-func YearGT(v int32) predicate.Car {
-	return predicate.Car(sql.FieldGT(FieldYear, v))
-}
-
-// YearGTE applies the GTE predicate on the "year" field.
-func YearGTE(v int32) predicate.Car {
-	return predicate.Car(sql.FieldGTE(FieldYear, v))
-}
-
-// YearLT applies the LT predicate on the "year" field.
-func YearLT(v int32) predicate.Car {
-	return predicate.Car(sql.FieldLT(FieldYear, v))
-}
-
-// YearLTE applies the LTE predicate on the "year" field.
-func YearLTE(v int32) predicate.Car {
-	return predicate.Car(sql.FieldLTE(FieldYear, v))
+// AssetInfoIDLTE applies the LTE predicate on the "asset_info_id" field.
+func AssetInfoIDLTE(v uint) predicate.Car {
+	return predicate.Car(sql.FieldLTE(FieldAssetInfoID, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

@@ -60,19 +60,9 @@ func UserID(v uint) predicate.PrivateShare {
 	return predicate.PrivateShare(sql.FieldEQ(FieldUserID, v))
 }
 
-// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldEQ(FieldName, v))
-}
-
-// CompanyName applies equality check predicate on the "company_name" field. It's identical to CompanyNameEQ.
-func CompanyName(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldEQ(FieldCompanyName, v))
-}
-
-// Quantity applies equality check predicate on the "quantity" field. It's identical to QuantityEQ.
-func Quantity(v int32) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldEQ(FieldQuantity, v))
+// AssetInfoID applies equality check predicate on the "asset_info_id" field. It's identical to AssetInfoIDEQ.
+func AssetInfoID(v uint) predicate.PrivateShare {
+	return predicate.PrivateShare(sql.FieldEQ(FieldAssetInfoID, v))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -115,174 +105,44 @@ func UserIDNotNil() predicate.PrivateShare {
 	return predicate.PrivateShare(sql.FieldNotNull(FieldUserID))
 }
 
-// NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldEQ(FieldName, v))
+// AssetInfoIDEQ applies the EQ predicate on the "asset_info_id" field.
+func AssetInfoIDEQ(v uint) predicate.PrivateShare {
+	return predicate.PrivateShare(sql.FieldEQ(FieldAssetInfoID, v))
 }
 
-// NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldNEQ(FieldName, v))
+// AssetInfoIDNEQ applies the NEQ predicate on the "asset_info_id" field.
+func AssetInfoIDNEQ(v uint) predicate.PrivateShare {
+	return predicate.PrivateShare(sql.FieldNEQ(FieldAssetInfoID, v))
 }
 
-// NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldIn(FieldName, vs...))
+// AssetInfoIDIn applies the In predicate on the "asset_info_id" field.
+func AssetInfoIDIn(vs ...uint) predicate.PrivateShare {
+	return predicate.PrivateShare(sql.FieldIn(FieldAssetInfoID, vs...))
 }
 
-// NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldNotIn(FieldName, vs...))
+// AssetInfoIDNotIn applies the NotIn predicate on the "asset_info_id" field.
+func AssetInfoIDNotIn(vs ...uint) predicate.PrivateShare {
+	return predicate.PrivateShare(sql.FieldNotIn(FieldAssetInfoID, vs...))
 }
 
-// NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldGT(FieldName, v))
+// AssetInfoIDGT applies the GT predicate on the "asset_info_id" field.
+func AssetInfoIDGT(v uint) predicate.PrivateShare {
+	return predicate.PrivateShare(sql.FieldGT(FieldAssetInfoID, v))
 }
 
-// NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldGTE(FieldName, v))
+// AssetInfoIDGTE applies the GTE predicate on the "asset_info_id" field.
+func AssetInfoIDGTE(v uint) predicate.PrivateShare {
+	return predicate.PrivateShare(sql.FieldGTE(FieldAssetInfoID, v))
 }
 
-// NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldLT(FieldName, v))
+// AssetInfoIDLT applies the LT predicate on the "asset_info_id" field.
+func AssetInfoIDLT(v uint) predicate.PrivateShare {
+	return predicate.PrivateShare(sql.FieldLT(FieldAssetInfoID, v))
 }
 
-// NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldLTE(FieldName, v))
-}
-
-// NameContains applies the Contains predicate on the "name" field.
-func NameContains(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldContains(FieldName, v))
-}
-
-// NameHasPrefix applies the HasPrefix predicate on the "name" field.
-func NameHasPrefix(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldHasPrefix(FieldName, v))
-}
-
-// NameHasSuffix applies the HasSuffix predicate on the "name" field.
-func NameHasSuffix(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldHasSuffix(FieldName, v))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldContainsFold(FieldName, v))
-}
-
-// CompanyNameEQ applies the EQ predicate on the "company_name" field.
-func CompanyNameEQ(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldEQ(FieldCompanyName, v))
-}
-
-// CompanyNameNEQ applies the NEQ predicate on the "company_name" field.
-func CompanyNameNEQ(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldNEQ(FieldCompanyName, v))
-}
-
-// CompanyNameIn applies the In predicate on the "company_name" field.
-func CompanyNameIn(vs ...string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldIn(FieldCompanyName, vs...))
-}
-
-// CompanyNameNotIn applies the NotIn predicate on the "company_name" field.
-func CompanyNameNotIn(vs ...string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldNotIn(FieldCompanyName, vs...))
-}
-
-// CompanyNameGT applies the GT predicate on the "company_name" field.
-func CompanyNameGT(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldGT(FieldCompanyName, v))
-}
-
-// CompanyNameGTE applies the GTE predicate on the "company_name" field.
-func CompanyNameGTE(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldGTE(FieldCompanyName, v))
-}
-
-// CompanyNameLT applies the LT predicate on the "company_name" field.
-func CompanyNameLT(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldLT(FieldCompanyName, v))
-}
-
-// CompanyNameLTE applies the LTE predicate on the "company_name" field.
-func CompanyNameLTE(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldLTE(FieldCompanyName, v))
-}
-
-// CompanyNameContains applies the Contains predicate on the "company_name" field.
-func CompanyNameContains(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldContains(FieldCompanyName, v))
-}
-
-// CompanyNameHasPrefix applies the HasPrefix predicate on the "company_name" field.
-func CompanyNameHasPrefix(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldHasPrefix(FieldCompanyName, v))
-}
-
-// CompanyNameHasSuffix applies the HasSuffix predicate on the "company_name" field.
-func CompanyNameHasSuffix(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldHasSuffix(FieldCompanyName, v))
-}
-
-// CompanyNameEqualFold applies the EqualFold predicate on the "company_name" field.
-func CompanyNameEqualFold(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldEqualFold(FieldCompanyName, v))
-}
-
-// CompanyNameContainsFold applies the ContainsFold predicate on the "company_name" field.
-func CompanyNameContainsFold(v string) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldContainsFold(FieldCompanyName, v))
-}
-
-// QuantityEQ applies the EQ predicate on the "quantity" field.
-func QuantityEQ(v int32) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldEQ(FieldQuantity, v))
-}
-
-// QuantityNEQ applies the NEQ predicate on the "quantity" field.
-func QuantityNEQ(v int32) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldNEQ(FieldQuantity, v))
-}
-
-// QuantityIn applies the In predicate on the "quantity" field.
-func QuantityIn(vs ...int32) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldIn(FieldQuantity, vs...))
-}
-
-// QuantityNotIn applies the NotIn predicate on the "quantity" field.
-func QuantityNotIn(vs ...int32) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldNotIn(FieldQuantity, vs...))
-}
-
-// QuantityGT applies the GT predicate on the "quantity" field.
-func QuantityGT(v int32) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldGT(FieldQuantity, v))
-}
-
-// QuantityGTE applies the GTE predicate on the "quantity" field.
-func QuantityGTE(v int32) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldGTE(FieldQuantity, v))
-}
-
-// QuantityLT applies the LT predicate on the "quantity" field.
-func QuantityLT(v int32) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldLT(FieldQuantity, v))
-}
-
-// QuantityLTE applies the LTE predicate on the "quantity" field.
-func QuantityLTE(v int32) predicate.PrivateShare {
-	return predicate.PrivateShare(sql.FieldLTE(FieldQuantity, v))
+// AssetInfoIDLTE applies the LTE predicate on the "asset_info_id" field.
+func AssetInfoIDLTE(v uint) predicate.PrivateShare {
+	return predicate.PrivateShare(sql.FieldLTE(FieldAssetInfoID, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

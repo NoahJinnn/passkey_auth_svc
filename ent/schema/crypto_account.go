@@ -15,7 +15,7 @@ type CryptoAccount struct {
 }
 
 func (CryptoAccount) Fields() []ent.Field {
-	return []ent.Field{field.Uint("id").SchemaType(map[string]string{"postgres": "serial"}), field.Uint("user_id").Optional(), field.String("name"), field.String("coin_type"), field.Float("balance"), field.Time("created_at"), field.Time("updated_at")}
+	return []ent.Field{field.Uint("id").SchemaType(map[string]string{"postgres": "serial"}), field.Uint("user_id").Optional().SchemaType(map[string]string{"postgres": "serial"}), field.Uint("asset_info_id").SchemaType(map[string]string{"postgres": "serial"}), field.Time("created_at"), field.Time("updated_at")}
 }
 func (CryptoAccount) Edges() []ent.Edge {
 	return []ent.Edge{edge.From("user", User.Type).Ref("crypto_accounts").Unique().Field("user_id")}

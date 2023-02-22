@@ -9,13 +9,27 @@ import (
 )
 
 var (
+	// AssetInfoColumns holds the columns for the "asset_info" table.
+	AssetInfoColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "account_info", Type: field.TypeJSON},
+		{Name: "institution_info", Type: field.TypeJSON},
+		{Name: "asset_info", Type: field.TypeJSON},
+		{Name: "sensible_data", Type: field.TypeString},
+		{Name: "descriptions", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AssetInfoTable holds the schema information for the "asset_info" table.
+	AssetInfoTable = &schema.Table{
+		Name:       "asset_info",
+		Columns:    AssetInfoColumns,
+		PrimaryKey: []*schema.Column{AssetInfoColumns[0]},
+	}
 	// BankAccountColumns holds the columns for the "bank_account" table.
 	BankAccountColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "account_id", Type: field.TypeString},
-		{Name: "institution_info", Type: field.TypeJSON},
-		{Name: "account_info", Type: field.TypeJSON},
-		{Name: "sensible_data", Type: field.TypeString},
+		{Name: "asset_info_id", Type: field.TypeUint, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeUint, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -28,7 +42,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "bank_account_users_bank_accounts",
-				Columns:    []*schema.Column{BankAccountColumns[7]},
+				Columns:    []*schema.Column{BankAccountColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -37,9 +51,7 @@ var (
 	// CarsColumns holds the columns for the "cars" table.
 	CarsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "make", Type: field.TypeString},
-		{Name: "model", Type: field.TypeString},
-		{Name: "year", Type: field.TypeInt32},
+		{Name: "asset_info_id", Type: field.TypeUint, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeUint, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -52,7 +64,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "cars_users_cars",
-				Columns:    []*schema.Column{CarsColumns[6]},
+				Columns:    []*schema.Column{CarsColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -61,8 +73,7 @@ var (
 	// CollectiblesColumns holds the columns for the "collectibles" table.
 	CollectiblesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "name", Type: field.TypeString},
-		{Name: "description", Type: field.TypeString},
+		{Name: "asset_info_id", Type: field.TypeUint, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeUint, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -75,7 +86,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "collectibles_users_collectibles",
-				Columns:    []*schema.Column{CollectiblesColumns[5]},
+				Columns:    []*schema.Column{CollectiblesColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -84,9 +95,7 @@ var (
 	// CryptoAccountColumns holds the columns for the "crypto_account" table.
 	CryptoAccountColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "name", Type: field.TypeString},
-		{Name: "coin_type", Type: field.TypeString},
-		{Name: "balance", Type: field.TypeFloat64},
+		{Name: "asset_info_id", Type: field.TypeUint, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeUint, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -99,7 +108,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "crypto_account_users_crypto_accounts",
-				Columns:    []*schema.Column{CryptoAccountColumns[6]},
+				Columns:    []*schema.Column{CryptoAccountColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -108,10 +117,7 @@ var (
 	// LoansColumns holds the columns for the "loans" table.
 	LoansColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "lender_name", Type: field.TypeString},
-		{Name: "loan_type", Type: field.TypeString},
-		{Name: "balance", Type: field.TypeFloat64},
-		{Name: "interest_rate", Type: field.TypeFloat64},
+		{Name: "asset_info_id", Type: field.TypeUint, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeUint, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -124,7 +130,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "loans_users_loans",
-				Columns:    []*schema.Column{LoansColumns[7]},
+				Columns:    []*schema.Column{LoansColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -133,9 +139,7 @@ var (
 	// PrivateSharesColumns holds the columns for the "private_shares" table.
 	PrivateSharesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "name", Type: field.TypeString},
-		{Name: "company_name", Type: field.TypeString},
-		{Name: "quantity", Type: field.TypeInt32},
+		{Name: "asset_info_id", Type: field.TypeUint, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeUint, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -148,7 +152,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "private_shares_users_private_shares",
-				Columns:    []*schema.Column{PrivateSharesColumns[6]},
+				Columns:    []*schema.Column{PrivateSharesColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -174,6 +178,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AssetInfoTable,
 		BankAccountTable,
 		CarsTable,
 		CollectiblesTable,
@@ -185,6 +190,9 @@ var (
 )
 
 func init() {
+	AssetInfoTable.Annotation = &entsql.Annotation{
+		Table: "asset_info",
+	}
 	BankAccountTable.ForeignKeys[0].RefTable = UsersTable
 	BankAccountTable.Annotation = &entsql.Annotation{
 		Table: "bank_account",

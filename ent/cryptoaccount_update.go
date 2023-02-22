@@ -49,28 +49,16 @@ func (cau *CryptoAccountUpdate) ClearUserID() *CryptoAccountUpdate {
 	return cau
 }
 
-// SetName sets the "name" field.
-func (cau *CryptoAccountUpdate) SetName(s string) *CryptoAccountUpdate {
-	cau.mutation.SetName(s)
+// SetAssetInfoID sets the "asset_info_id" field.
+func (cau *CryptoAccountUpdate) SetAssetInfoID(u uint) *CryptoAccountUpdate {
+	cau.mutation.ResetAssetInfoID()
+	cau.mutation.SetAssetInfoID(u)
 	return cau
 }
 
-// SetCoinType sets the "coin_type" field.
-func (cau *CryptoAccountUpdate) SetCoinType(s string) *CryptoAccountUpdate {
-	cau.mutation.SetCoinType(s)
-	return cau
-}
-
-// SetBalance sets the "balance" field.
-func (cau *CryptoAccountUpdate) SetBalance(f float64) *CryptoAccountUpdate {
-	cau.mutation.ResetBalance()
-	cau.mutation.SetBalance(f)
-	return cau
-}
-
-// AddBalance adds f to the "balance" field.
-func (cau *CryptoAccountUpdate) AddBalance(f float64) *CryptoAccountUpdate {
-	cau.mutation.AddBalance(f)
+// AddAssetInfoID adds u to the "asset_info_id" field.
+func (cau *CryptoAccountUpdate) AddAssetInfoID(u int) *CryptoAccountUpdate {
+	cau.mutation.AddAssetInfoID(u)
 	return cau
 }
 
@@ -138,17 +126,11 @@ func (cau *CryptoAccountUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			}
 		}
 	}
-	if value, ok := cau.mutation.Name(); ok {
-		_spec.SetField(cryptoaccount.FieldName, field.TypeString, value)
+	if value, ok := cau.mutation.AssetInfoID(); ok {
+		_spec.SetField(cryptoaccount.FieldAssetInfoID, field.TypeUint, value)
 	}
-	if value, ok := cau.mutation.CoinType(); ok {
-		_spec.SetField(cryptoaccount.FieldCoinType, field.TypeString, value)
-	}
-	if value, ok := cau.mutation.Balance(); ok {
-		_spec.SetField(cryptoaccount.FieldBalance, field.TypeFloat64, value)
-	}
-	if value, ok := cau.mutation.AddedBalance(); ok {
-		_spec.AddField(cryptoaccount.FieldBalance, field.TypeFloat64, value)
+	if value, ok := cau.mutation.AddedAssetInfoID(); ok {
+		_spec.AddField(cryptoaccount.FieldAssetInfoID, field.TypeUint, value)
 	}
 	if value, ok := cau.mutation.CreatedAt(); ok {
 		_spec.SetField(cryptoaccount.FieldCreatedAt, field.TypeTime, value)
@@ -231,28 +213,16 @@ func (cauo *CryptoAccountUpdateOne) ClearUserID() *CryptoAccountUpdateOne {
 	return cauo
 }
 
-// SetName sets the "name" field.
-func (cauo *CryptoAccountUpdateOne) SetName(s string) *CryptoAccountUpdateOne {
-	cauo.mutation.SetName(s)
+// SetAssetInfoID sets the "asset_info_id" field.
+func (cauo *CryptoAccountUpdateOne) SetAssetInfoID(u uint) *CryptoAccountUpdateOne {
+	cauo.mutation.ResetAssetInfoID()
+	cauo.mutation.SetAssetInfoID(u)
 	return cauo
 }
 
-// SetCoinType sets the "coin_type" field.
-func (cauo *CryptoAccountUpdateOne) SetCoinType(s string) *CryptoAccountUpdateOne {
-	cauo.mutation.SetCoinType(s)
-	return cauo
-}
-
-// SetBalance sets the "balance" field.
-func (cauo *CryptoAccountUpdateOne) SetBalance(f float64) *CryptoAccountUpdateOne {
-	cauo.mutation.ResetBalance()
-	cauo.mutation.SetBalance(f)
-	return cauo
-}
-
-// AddBalance adds f to the "balance" field.
-func (cauo *CryptoAccountUpdateOne) AddBalance(f float64) *CryptoAccountUpdateOne {
-	cauo.mutation.AddBalance(f)
+// AddAssetInfoID adds u to the "asset_info_id" field.
+func (cauo *CryptoAccountUpdateOne) AddAssetInfoID(u int) *CryptoAccountUpdateOne {
+	cauo.mutation.AddAssetInfoID(u)
 	return cauo
 }
 
@@ -350,17 +320,11 @@ func (cauo *CryptoAccountUpdateOne) sqlSave(ctx context.Context) (_node *CryptoA
 			}
 		}
 	}
-	if value, ok := cauo.mutation.Name(); ok {
-		_spec.SetField(cryptoaccount.FieldName, field.TypeString, value)
+	if value, ok := cauo.mutation.AssetInfoID(); ok {
+		_spec.SetField(cryptoaccount.FieldAssetInfoID, field.TypeUint, value)
 	}
-	if value, ok := cauo.mutation.CoinType(); ok {
-		_spec.SetField(cryptoaccount.FieldCoinType, field.TypeString, value)
-	}
-	if value, ok := cauo.mutation.Balance(); ok {
-		_spec.SetField(cryptoaccount.FieldBalance, field.TypeFloat64, value)
-	}
-	if value, ok := cauo.mutation.AddedBalance(); ok {
-		_spec.AddField(cryptoaccount.FieldBalance, field.TypeFloat64, value)
+	if value, ok := cauo.mutation.AddedAssetInfoID(); ok {
+		_spec.AddField(cryptoaccount.FieldAssetInfoID, field.TypeUint, value)
 	}
 	if value, ok := cauo.mutation.CreatedAt(); ok {
 		_spec.SetField(cryptoaccount.FieldCreatedAt, field.TypeTime, value)

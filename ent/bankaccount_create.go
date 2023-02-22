@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/hellohq/hqservice/ent/bankaccount"
@@ -35,27 +36,9 @@ func (bac *BankAccountCreate) SetNillableUserID(u *uint) *BankAccountCreate {
 	return bac
 }
 
-// SetAccountID sets the "account_id" field.
-func (bac *BankAccountCreate) SetAccountID(s string) *BankAccountCreate {
-	bac.mutation.SetAccountID(s)
-	return bac
-}
-
-// SetInstitutionInfo sets the "institution_info" field.
-func (bac *BankAccountCreate) SetInstitutionInfo(s struct{}) *BankAccountCreate {
-	bac.mutation.SetInstitutionInfo(s)
-	return bac
-}
-
-// SetAccountInfo sets the "account_info" field.
-func (bac *BankAccountCreate) SetAccountInfo(s struct{}) *BankAccountCreate {
-	bac.mutation.SetAccountInfo(s)
-	return bac
-}
-
-// SetSensibleData sets the "sensible_data" field.
-func (bac *BankAccountCreate) SetSensibleData(s string) *BankAccountCreate {
-	bac.mutation.SetSensibleData(s)
+// SetAssetInfoID sets the "asset_info_id" field.
+func (bac *BankAccountCreate) SetAssetInfoID(u uint) *BankAccountCreate {
+	bac.mutation.SetAssetInfoID(u)
 	return bac
 }
 
@@ -116,17 +99,11 @@ func (bac *BankAccountCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (bac *BankAccountCreate) check() error {
-	if _, ok := bac.mutation.AccountID(); !ok {
-		return &ValidationError{Name: "account_id", err: errors.New(`ent: missing required field "BankAccount.account_id"`)}
-	}
-	if _, ok := bac.mutation.InstitutionInfo(); !ok {
-		return &ValidationError{Name: "institution_info", err: errors.New(`ent: missing required field "BankAccount.institution_info"`)}
-	}
-	if _, ok := bac.mutation.AccountInfo(); !ok {
-		return &ValidationError{Name: "account_info", err: errors.New(`ent: missing required field "BankAccount.account_info"`)}
-	}
-	if _, ok := bac.mutation.SensibleData(); !ok {
-		return &ValidationError{Name: "sensible_data", err: errors.New(`ent: missing required field "BankAccount.sensible_data"`)}
+	switch bac.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		if _, ok := bac.mutation.AssetInfoID(); !ok {
+			return &ValidationError{Name: "asset_info_id", err: errors.New(`ent: missing required field "BankAccount.asset_info_id"`)}
+		}
 	}
 	if _, ok := bac.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "BankAccount.created_at"`)}
@@ -166,21 +143,9 @@ func (bac *BankAccountCreate) createSpec() (*BankAccount, *sqlgraph.CreateSpec) 
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := bac.mutation.AccountID(); ok {
-		_spec.SetField(bankaccount.FieldAccountID, field.TypeString, value)
-		_node.AccountID = value
-	}
-	if value, ok := bac.mutation.InstitutionInfo(); ok {
-		_spec.SetField(bankaccount.FieldInstitutionInfo, field.TypeJSON, value)
-		_node.InstitutionInfo = value
-	}
-	if value, ok := bac.mutation.AccountInfo(); ok {
-		_spec.SetField(bankaccount.FieldAccountInfo, field.TypeJSON, value)
-		_node.AccountInfo = value
-	}
-	if value, ok := bac.mutation.SensibleData(); ok {
-		_spec.SetField(bankaccount.FieldSensibleData, field.TypeString, value)
-		_node.SensibleData = value
+	if value, ok := bac.mutation.AssetInfoID(); ok {
+		_spec.SetField(bankaccount.FieldAssetInfoID, field.TypeUint, value)
+		_node.AssetInfoID = value
 	}
 	if value, ok := bac.mutation.CreatedAt(); ok {
 		_spec.SetField(bankaccount.FieldCreatedAt, field.TypeTime, value)

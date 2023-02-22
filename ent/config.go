@@ -27,6 +27,7 @@ type config struct {
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
+		AssetInfo     []ent.Hook
 		BankAccount   []ent.Hook
 		Car           []ent.Hook
 		Collectible   []ent.Hook
@@ -36,6 +37,7 @@ type (
 		User          []ent.Hook
 	}
 	inters struct {
+		AssetInfo     []ent.Interceptor
 		BankAccount   []ent.Interceptor
 		Car           []ent.Interceptor
 		Collectible   []ent.Interceptor

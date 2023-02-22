@@ -19,12 +19,8 @@ type Car struct {
 	ID uint `json:"id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID uint `json:"user_id,omitempty"`
-	// Make holds the value of the "make" field.
-	Make string `json:"make,omitempty"`
-	// Model holds the value of the "model" field.
-	Model string `json:"model,omitempty"`
-	// Year holds the value of the "year" field.
-	Year int32 `json:"year,omitempty"`
+	// AssetInfoID holds the value of the "asset_info_id" field.
+	AssetInfoID uint `json:"asset_info_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -61,10 +57,8 @@ func (*Car) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case car.FieldID, car.FieldUserID, car.FieldYear:
+		case car.FieldID, car.FieldUserID, car.FieldAssetInfoID:
 			values[i] = new(sql.NullInt64)
-		case car.FieldMake, car.FieldModel:
-			values[i] = new(sql.NullString)
 		case car.FieldCreatedAt, car.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
@@ -94,23 +88,11 @@ func (c *Car) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				c.UserID = uint(value.Int64)
 			}
-		case car.FieldMake:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field make", values[i])
-			} else if value.Valid {
-				c.Make = value.String
-			}
-		case car.FieldModel:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field model", values[i])
-			} else if value.Valid {
-				c.Model = value.String
-			}
-		case car.FieldYear:
+		case car.FieldAssetInfoID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field year", values[i])
+				return fmt.Errorf("unexpected type %T for field asset_info_id", values[i])
 			} else if value.Valid {
-				c.Year = int32(value.Int64)
+				c.AssetInfoID = uint(value.Int64)
 			}
 		case car.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -160,14 +142,8 @@ func (c *Car) String() string {
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", c.UserID))
 	builder.WriteString(", ")
-	builder.WriteString("make=")
-	builder.WriteString(c.Make)
-	builder.WriteString(", ")
-	builder.WriteString("model=")
-	builder.WriteString(c.Model)
-	builder.WriteString(", ")
-	builder.WriteString("year=")
-	builder.WriteString(fmt.Sprintf("%v", c.Year))
+	builder.WriteString("asset_info_id=")
+	builder.WriteString(fmt.Sprintf("%v", c.AssetInfoID))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(c.CreatedAt.Format(time.ANSIC))

@@ -9,6 +9,18 @@ import (
 	"github.com/hellohq/hqservice/ent"
 )
 
+// The AssetInfoFunc type is an adapter to allow the use of ordinary
+// function as AssetInfo mutator.
+type AssetInfoFunc func(context.Context, *ent.AssetInfoMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AssetInfoFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AssetInfoMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AssetInfoMutation", m)
+}
+
 // The BankAccountFunc type is an adapter to allow the use of ordinary
 // function as BankAccount mutator.
 type BankAccountFunc func(context.Context, *ent.BankAccountMutation) (ent.Value, error)

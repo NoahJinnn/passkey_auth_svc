@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/hellohq/hqservice/ent/privateshare"
@@ -35,21 +36,9 @@ func (psc *PrivateShareCreate) SetNillableUserID(u *uint) *PrivateShareCreate {
 	return psc
 }
 
-// SetName sets the "name" field.
-func (psc *PrivateShareCreate) SetName(s string) *PrivateShareCreate {
-	psc.mutation.SetName(s)
-	return psc
-}
-
-// SetCompanyName sets the "company_name" field.
-func (psc *PrivateShareCreate) SetCompanyName(s string) *PrivateShareCreate {
-	psc.mutation.SetCompanyName(s)
-	return psc
-}
-
-// SetQuantity sets the "quantity" field.
-func (psc *PrivateShareCreate) SetQuantity(i int32) *PrivateShareCreate {
-	psc.mutation.SetQuantity(i)
+// SetAssetInfoID sets the "asset_info_id" field.
+func (psc *PrivateShareCreate) SetAssetInfoID(u uint) *PrivateShareCreate {
+	psc.mutation.SetAssetInfoID(u)
 	return psc
 }
 
@@ -110,14 +99,11 @@ func (psc *PrivateShareCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (psc *PrivateShareCreate) check() error {
-	if _, ok := psc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "PrivateShare.name"`)}
-	}
-	if _, ok := psc.mutation.CompanyName(); !ok {
-		return &ValidationError{Name: "company_name", err: errors.New(`ent: missing required field "PrivateShare.company_name"`)}
-	}
-	if _, ok := psc.mutation.Quantity(); !ok {
-		return &ValidationError{Name: "quantity", err: errors.New(`ent: missing required field "PrivateShare.quantity"`)}
+	switch psc.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		if _, ok := psc.mutation.AssetInfoID(); !ok {
+			return &ValidationError{Name: "asset_info_id", err: errors.New(`ent: missing required field "PrivateShare.asset_info_id"`)}
+		}
 	}
 	if _, ok := psc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "PrivateShare.created_at"`)}
@@ -157,17 +143,9 @@ func (psc *PrivateShareCreate) createSpec() (*PrivateShare, *sqlgraph.CreateSpec
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := psc.mutation.Name(); ok {
-		_spec.SetField(privateshare.FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if value, ok := psc.mutation.CompanyName(); ok {
-		_spec.SetField(privateshare.FieldCompanyName, field.TypeString, value)
-		_node.CompanyName = value
-	}
-	if value, ok := psc.mutation.Quantity(); ok {
-		_spec.SetField(privateshare.FieldQuantity, field.TypeInt32, value)
-		_node.Quantity = value
+	if value, ok := psc.mutation.AssetInfoID(); ok {
+		_spec.SetField(privateshare.FieldAssetInfoID, field.TypeUint, value)
+		_node.AssetInfoID = value
 	}
 	if value, ok := psc.mutation.CreatedAt(); ok {
 		_spec.SetField(privateshare.FieldCreatedAt, field.TypeTime, value)

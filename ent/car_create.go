@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/hellohq/hqservice/ent/car"
@@ -35,21 +36,9 @@ func (cc *CarCreate) SetNillableUserID(u *uint) *CarCreate {
 	return cc
 }
 
-// SetMake sets the "make" field.
-func (cc *CarCreate) SetMake(s string) *CarCreate {
-	cc.mutation.SetMake(s)
-	return cc
-}
-
-// SetModel sets the "model" field.
-func (cc *CarCreate) SetModel(s string) *CarCreate {
-	cc.mutation.SetModel(s)
-	return cc
-}
-
-// SetYear sets the "year" field.
-func (cc *CarCreate) SetYear(i int32) *CarCreate {
-	cc.mutation.SetYear(i)
+// SetAssetInfoID sets the "asset_info_id" field.
+func (cc *CarCreate) SetAssetInfoID(u uint) *CarCreate {
+	cc.mutation.SetAssetInfoID(u)
 	return cc
 }
 
@@ -110,14 +99,11 @@ func (cc *CarCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *CarCreate) check() error {
-	if _, ok := cc.mutation.Make(); !ok {
-		return &ValidationError{Name: "make", err: errors.New(`ent: missing required field "Car.make"`)}
-	}
-	if _, ok := cc.mutation.Model(); !ok {
-		return &ValidationError{Name: "model", err: errors.New(`ent: missing required field "Car.model"`)}
-	}
-	if _, ok := cc.mutation.Year(); !ok {
-		return &ValidationError{Name: "year", err: errors.New(`ent: missing required field "Car.year"`)}
+	switch cc.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		if _, ok := cc.mutation.AssetInfoID(); !ok {
+			return &ValidationError{Name: "asset_info_id", err: errors.New(`ent: missing required field "Car.asset_info_id"`)}
+		}
 	}
 	if _, ok := cc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Car.created_at"`)}
@@ -157,17 +143,9 @@ func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := cc.mutation.Make(); ok {
-		_spec.SetField(car.FieldMake, field.TypeString, value)
-		_node.Make = value
-	}
-	if value, ok := cc.mutation.Model(); ok {
-		_spec.SetField(car.FieldModel, field.TypeString, value)
-		_node.Model = value
-	}
-	if value, ok := cc.mutation.Year(); ok {
-		_spec.SetField(car.FieldYear, field.TypeInt32, value)
-		_node.Year = value
+	if value, ok := cc.mutation.AssetInfoID(); ok {
+		_spec.SetField(car.FieldAssetInfoID, field.TypeUint, value)
+		_node.AssetInfoID = value
 	}
 	if value, ok := cc.mutation.CreatedAt(); ok {
 		_spec.SetField(car.FieldCreatedAt, field.TypeTime, value)

@@ -9,10 +9,8 @@ const (
 	FieldID = "id"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
-	// FieldDescription holds the string denoting the description field in the database.
-	FieldDescription = "description"
+	// FieldAssetInfoID holds the string denoting the asset_info_id field in the database.
+	FieldAssetInfoID = "asset_info_id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -34,8 +32,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldUserID,
-	FieldName,
-	FieldDescription,
+	FieldAssetInfoID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }

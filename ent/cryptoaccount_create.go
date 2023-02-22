@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/hellohq/hqservice/ent/cryptoaccount"
@@ -35,21 +36,9 @@ func (cac *CryptoAccountCreate) SetNillableUserID(u *uint) *CryptoAccountCreate 
 	return cac
 }
 
-// SetName sets the "name" field.
-func (cac *CryptoAccountCreate) SetName(s string) *CryptoAccountCreate {
-	cac.mutation.SetName(s)
-	return cac
-}
-
-// SetCoinType sets the "coin_type" field.
-func (cac *CryptoAccountCreate) SetCoinType(s string) *CryptoAccountCreate {
-	cac.mutation.SetCoinType(s)
-	return cac
-}
-
-// SetBalance sets the "balance" field.
-func (cac *CryptoAccountCreate) SetBalance(f float64) *CryptoAccountCreate {
-	cac.mutation.SetBalance(f)
+// SetAssetInfoID sets the "asset_info_id" field.
+func (cac *CryptoAccountCreate) SetAssetInfoID(u uint) *CryptoAccountCreate {
+	cac.mutation.SetAssetInfoID(u)
 	return cac
 }
 
@@ -110,14 +99,11 @@ func (cac *CryptoAccountCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (cac *CryptoAccountCreate) check() error {
-	if _, ok := cac.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "CryptoAccount.name"`)}
-	}
-	if _, ok := cac.mutation.CoinType(); !ok {
-		return &ValidationError{Name: "coin_type", err: errors.New(`ent: missing required field "CryptoAccount.coin_type"`)}
-	}
-	if _, ok := cac.mutation.Balance(); !ok {
-		return &ValidationError{Name: "balance", err: errors.New(`ent: missing required field "CryptoAccount.balance"`)}
+	switch cac.driver.Dialect() {
+	case dialect.MySQL, dialect.SQLite:
+		if _, ok := cac.mutation.AssetInfoID(); !ok {
+			return &ValidationError{Name: "asset_info_id", err: errors.New(`ent: missing required field "CryptoAccount.asset_info_id"`)}
+		}
 	}
 	if _, ok := cac.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "CryptoAccount.created_at"`)}
@@ -157,17 +143,9 @@ func (cac *CryptoAccountCreate) createSpec() (*CryptoAccount, *sqlgraph.CreateSp
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := cac.mutation.Name(); ok {
-		_spec.SetField(cryptoaccount.FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if value, ok := cac.mutation.CoinType(); ok {
-		_spec.SetField(cryptoaccount.FieldCoinType, field.TypeString, value)
-		_node.CoinType = value
-	}
-	if value, ok := cac.mutation.Balance(); ok {
-		_spec.SetField(cryptoaccount.FieldBalance, field.TypeFloat64, value)
-		_node.Balance = value
+	if value, ok := cac.mutation.AssetInfoID(); ok {
+		_spec.SetField(cryptoaccount.FieldAssetInfoID, field.TypeUint, value)
+		_node.AssetInfoID = value
 	}
 	if value, ok := cac.mutation.CreatedAt(); ok {
 		_spec.SetField(cryptoaccount.FieldCreatedAt, field.TypeTime, value)

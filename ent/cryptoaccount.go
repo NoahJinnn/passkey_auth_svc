@@ -19,12 +19,8 @@ type CryptoAccount struct {
 	ID uint `json:"id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID uint `json:"user_id,omitempty"`
-	// Name holds the value of the "name" field.
-	Name string `json:"name,omitempty"`
-	// CoinType holds the value of the "coin_type" field.
-	CoinType string `json:"coin_type,omitempty"`
-	// Balance holds the value of the "balance" field.
-	Balance float64 `json:"balance,omitempty"`
+	// AssetInfoID holds the value of the "asset_info_id" field.
+	AssetInfoID uint `json:"asset_info_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -61,12 +57,8 @@ func (*CryptoAccount) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case cryptoaccount.FieldBalance:
-			values[i] = new(sql.NullFloat64)
-		case cryptoaccount.FieldID, cryptoaccount.FieldUserID:
+		case cryptoaccount.FieldID, cryptoaccount.FieldUserID, cryptoaccount.FieldAssetInfoID:
 			values[i] = new(sql.NullInt64)
-		case cryptoaccount.FieldName, cryptoaccount.FieldCoinType:
-			values[i] = new(sql.NullString)
 		case cryptoaccount.FieldCreatedAt, cryptoaccount.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
@@ -96,23 +88,11 @@ func (ca *CryptoAccount) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ca.UserID = uint(value.Int64)
 			}
-		case cryptoaccount.FieldName:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
+		case cryptoaccount.FieldAssetInfoID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field asset_info_id", values[i])
 			} else if value.Valid {
-				ca.Name = value.String
-			}
-		case cryptoaccount.FieldCoinType:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field coin_type", values[i])
-			} else if value.Valid {
-				ca.CoinType = value.String
-			}
-		case cryptoaccount.FieldBalance:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
-				return fmt.Errorf("unexpected type %T for field balance", values[i])
-			} else if value.Valid {
-				ca.Balance = value.Float64
+				ca.AssetInfoID = uint(value.Int64)
 			}
 		case cryptoaccount.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -162,14 +142,8 @@ func (ca *CryptoAccount) String() string {
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", ca.UserID))
 	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(ca.Name)
-	builder.WriteString(", ")
-	builder.WriteString("coin_type=")
-	builder.WriteString(ca.CoinType)
-	builder.WriteString(", ")
-	builder.WriteString("balance=")
-	builder.WriteString(fmt.Sprintf("%v", ca.Balance))
+	builder.WriteString("asset_info_id=")
+	builder.WriteString(fmt.Sprintf("%v", ca.AssetInfoID))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(ca.CreatedAt.Format(time.ANSIC))
