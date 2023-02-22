@@ -215,6 +215,101 @@ func init() {
           }
         }
       }
+    },
+    "/user": {
+      "post": {
+        "operationId": "CreateUser",
+        "parameters": [
+          {
+            "description": "Fields need to update a area",
+            "name": "user",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Create a user successfully.",
+            "schema": {
+              "$ref": "#/definitions/LinkTokenCreateResp"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/GenericError"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "UpdateUser",
+        "parameters": [
+          {
+            "description": "Fields need to update a area",
+            "name": "user",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Create a user successfully.",
+            "schema": {
+              "$ref": "#/definitions/LinkTokenCreateResp"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/GenericError"
+          }
+        }
+      }
+    },
+    "/user/{user_id}": {
+      "get": {
+        "operationId": "GetUserById",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "user_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get user by id successfully.",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/GenericError"
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "GetUsers",
+        "responses": {
+          "200": {
+            "description": "Get users successfully.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/responses/GenericError"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -1072,6 +1167,40 @@ func init() {
         },
         "unofficial_currency_code": {
           "$ref": "#/definitions/NullableString"
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "title": "User",
+      "required": [
+        "ID",
+        "FirstName",
+        "LastName",
+        "Email"
+      ],
+      "properties": {
+        "Address": {
+          "type": "string"
+        },
+        "Email": {
+          "type": "string"
+        },
+        "FirstName": {
+          "type": "string"
+        },
+        "ID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "LastName": {
+          "type": "string"
+        },
+        "Password": {
+          "type": "string"
+        },
+        "PhoneNumber": {
+          "type": "string"
         }
       }
     },
@@ -1317,6 +1446,113 @@ func init() {
           }
         }
       }
+    },
+    "/user": {
+      "post": {
+        "operationId": "CreateUser",
+        "parameters": [
+          {
+            "description": "Fields need to update a area",
+            "name": "user",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Create a user successfully.",
+            "schema": {
+              "$ref": "#/definitions/LinkTokenCreateResp"
+            }
+          },
+          "default": {
+            "description": "General errors using same model as used by go-swagger for validation errors.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "UpdateUser",
+        "parameters": [
+          {
+            "description": "Fields need to update a area",
+            "name": "user",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Create a user successfully.",
+            "schema": {
+              "$ref": "#/definitions/LinkTokenCreateResp"
+            }
+          },
+          "default": {
+            "description": "General errors using same model as used by go-swagger for validation errors.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/user/{user_id}": {
+      "get": {
+        "operationId": "GetUserById",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "user_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get user by id successfully.",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "default": {
+            "description": "General errors using same model as used by go-swagger for validation errors.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "GetUsers",
+        "responses": {
+          "200": {
+            "description": "Get users successfully.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          },
+          "default": {
+            "description": "General errors using same model as used by go-swagger for validation errors.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -2174,6 +2410,40 @@ func init() {
         },
         "unofficial_currency_code": {
           "$ref": "#/definitions/NullableString"
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "title": "User",
+      "required": [
+        "ID",
+        "FirstName",
+        "LastName",
+        "Email"
+      ],
+      "properties": {
+        "Address": {
+          "type": "string"
+        },
+        "Email": {
+          "type": "string"
+        },
+        "FirstName": {
+          "type": "string"
+        },
+        "ID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "LastName": {
+          "type": "string"
+        },
+        "Password": {
+          "type": "string"
+        },
+        "PhoneNumber": {
+          "type": "string"
         }
       }
     },

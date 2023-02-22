@@ -2,6 +2,7 @@
 // Any changes will be lost if this file is regenerated.
 // see https://github.com/cheekybits/genny
 
+
 package openapi
 
 import (
@@ -32,6 +33,7 @@ func errLinkTokenCreate(log Log, err error, code errCode) middleware.Responder {
 	})
 }
 
+
 func errGetAccessToken(log Log, err error, code errCode) middleware.Responder {
 	if code.status < http.StatusInternalServerError {
 		log.Info("client error", def.LogHTTPStatus, code.status, "code", code.extra, "err", err)
@@ -49,6 +51,7 @@ func errGetAccessToken(log Log, err error, code errCode) middleware.Responder {
 		Message: swag.String(msg),
 	})
 }
+
 
 func errGetAccounts(log Log, err error, code errCode) middleware.Responder {
 	if code.status < http.StatusInternalServerError {
@@ -68,6 +71,7 @@ func errGetAccounts(log Log, err error, code errCode) middleware.Responder {
 	})
 }
 
+
 func errGetAuthAccount(log Log, err error, code errCode) middleware.Responder {
 	if code.status < http.StatusInternalServerError {
 		log.Info("client error", def.LogHTTPStatus, code.status, "code", code.extra, "err", err)
@@ -85,6 +89,7 @@ func errGetAuthAccount(log Log, err error, code errCode) middleware.Responder {
 		Message: swag.String(msg),
 	})
 }
+
 
 func errGetBalance(log Log, err error, code errCode) middleware.Responder {
 	if code.status < http.StatusInternalServerError {
@@ -104,6 +109,7 @@ func errGetBalance(log Log, err error, code errCode) middleware.Responder {
 	})
 }
 
+
 func errGetIdentity(log Log, err error, code errCode) middleware.Responder {
 	if code.status < http.StatusInternalServerError {
 		log.Info("client error", def.LogHTTPStatus, code.status, "code", code.extra, "err", err)
@@ -121,6 +127,7 @@ func errGetIdentity(log Log, err error, code errCode) middleware.Responder {
 		Message: swag.String(msg),
 	})
 }
+
 
 func errGetSandboxAccessToken(log Log, err error, code errCode) middleware.Responder {
 	if code.status < http.StatusInternalServerError {
@@ -140,6 +147,7 @@ func errGetSandboxAccessToken(log Log, err error, code errCode) middleware.Respo
 	})
 }
 
+
 func errGetTransactions(log Log, err error, code errCode) middleware.Responder {
 	if code.status < http.StatusInternalServerError {
 		log.Info("client error", def.LogHTTPStatus, code.status, "code", code.extra, "err", err)
@@ -153,6 +161,82 @@ func errGetTransactions(log Log, err error, code errCode) middleware.Responder {
 	}
 
 	return op.NewGetTransactionsDefault(code.status).WithPayload(&model.Error{
+		Code:    swag.Int32(code.extra),
+		Message: swag.String(msg),
+	})
+}
+
+
+func errGetUsers(log Log, err error, code errCode) middleware.Responder {
+	if code.status < http.StatusInternalServerError {
+		log.Info("client error", def.LogHTTPStatus, code.status, "code", code.extra, "err", err)
+	} else {
+		log.PrintErr("server error", def.LogHTTPStatus, code.status, "code", code.extra, "err", err)
+	}
+
+	msg := err.Error()
+	if code.status == http.StatusInternalServerError { // Do no expose details about internal errors.
+		msg = "internal error" //nolint:goconst // Duplicated by go:generate.
+	}
+
+	return op.NewGetUsersDefault(code.status).WithPayload(&model.Error{
+		Code:    swag.Int32(code.extra),
+		Message: swag.String(msg),
+	})
+}
+
+
+func errGetUserByID(log Log, err error, code errCode) middleware.Responder {
+	if code.status < http.StatusInternalServerError {
+		log.Info("client error", def.LogHTTPStatus, code.status, "code", code.extra, "err", err)
+	} else {
+		log.PrintErr("server error", def.LogHTTPStatus, code.status, "code", code.extra, "err", err)
+	}
+
+	msg := err.Error()
+	if code.status == http.StatusInternalServerError { // Do no expose details about internal errors.
+		msg = "internal error" //nolint:goconst // Duplicated by go:generate.
+	}
+
+	return op.NewGetUserByIDDefault(code.status).WithPayload(&model.Error{
+		Code:    swag.Int32(code.extra),
+		Message: swag.String(msg),
+	})
+}
+
+
+func errCreateUser(log Log, err error, code errCode) middleware.Responder {
+	if code.status < http.StatusInternalServerError {
+		log.Info("client error", def.LogHTTPStatus, code.status, "code", code.extra, "err", err)
+	} else {
+		log.PrintErr("server error", def.LogHTTPStatus, code.status, "code", code.extra, "err", err)
+	}
+
+	msg := err.Error()
+	if code.status == http.StatusInternalServerError { // Do no expose details about internal errors.
+		msg = "internal error" //nolint:goconst // Duplicated by go:generate.
+	}
+
+	return op.NewCreateUserDefault(code.status).WithPayload(&model.Error{
+		Code:    swag.Int32(code.extra),
+		Message: swag.String(msg),
+	})
+}
+
+
+func errUpdateUser(log Log, err error, code errCode) middleware.Responder {
+	if code.status < http.StatusInternalServerError {
+		log.Info("client error", def.LogHTTPStatus, code.status, "code", code.extra, "err", err)
+	} else {
+		log.PrintErr("server error", def.LogHTTPStatus, code.status, "code", code.extra, "err", err)
+	}
+
+	msg := err.Error()
+	if code.status == http.StatusInternalServerError { // Do no expose details about internal errors.
+		msg = "internal error" //nolint:goconst // Duplicated by go:generate.
+	}
+
+	return op.NewUpdateUserDefault(code.status).WithPayload(&model.Error{
 		Code:    swag.Int32(code.extra),
 		Message: swag.String(msg),
 	})

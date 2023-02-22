@@ -43,6 +43,9 @@ func NewPlaidConnectorAPI(spec *loads.Document) *PlaidConnectorAPI {
 
 		JSONProducer: runtime.JSONProducer(),
 
+		CreateUserHandler: CreateUserHandlerFunc(func(params CreateUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation CreateUser has not yet been implemented")
+		}),
 		GetAccessTokenHandler: GetAccessTokenHandlerFunc(func(params GetAccessTokenParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetAccessToken has not yet been implemented")
 		}),
@@ -67,8 +70,17 @@ func NewPlaidConnectorAPI(spec *loads.Document) *PlaidConnectorAPI {
 		GetTransactionsHandler: GetTransactionsHandlerFunc(func(params GetTransactionsParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetTransactions has not yet been implemented")
 		}),
+		GetUserByIDHandler: GetUserByIDHandlerFunc(func(params GetUserByIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation GetUserByID has not yet been implemented")
+		}),
+		GetUsersHandler: GetUsersHandlerFunc(func(params GetUsersParams) middleware.Responder {
+			return middleware.NotImplemented("operation GetUsers has not yet been implemented")
+		}),
 		LinkTokenCreateHandler: LinkTokenCreateHandlerFunc(func(params LinkTokenCreateParams) middleware.Responder {
 			return middleware.NotImplemented("operation LinkTokenCreate has not yet been implemented")
+		}),
+		UpdateUserHandler: UpdateUserHandlerFunc(func(params UpdateUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation UpdateUser has not yet been implemented")
 		}),
 		HealthCheckHandler: HealthCheckHandlerFunc(func(params HealthCheckParams) middleware.Responder {
 			return middleware.NotImplemented("operation HealthCheck has not yet been implemented")
@@ -116,6 +128,8 @@ type PlaidConnectorAPI struct {
 	//   - application/json
 	JSONProducer runtime.Producer
 
+	// CreateUserHandler sets the operation handler for the create user operation
+	CreateUserHandler CreateUserHandler
 	// GetAccessTokenHandler sets the operation handler for the get access token operation
 	GetAccessTokenHandler GetAccessTokenHandler
 	// GetAccountsHandler sets the operation handler for the get accounts operation
@@ -132,8 +146,14 @@ type PlaidConnectorAPI struct {
 	GetSandboxAccessTokenHandler GetSandboxAccessTokenHandler
 	// GetTransactionsHandler sets the operation handler for the get transactions operation
 	GetTransactionsHandler GetTransactionsHandler
+	// GetUserByIDHandler sets the operation handler for the get user by Id operation
+	GetUserByIDHandler GetUserByIDHandler
+	// GetUsersHandler sets the operation handler for the get users operation
+	GetUsersHandler GetUsersHandler
 	// LinkTokenCreateHandler sets the operation handler for the link token create operation
 	LinkTokenCreateHandler LinkTokenCreateHandler
+	// UpdateUserHandler sets the operation handler for the update user operation
+	UpdateUserHandler UpdateUserHandler
 	// HealthCheckHandler sets the operation handler for the health check operation
 	HealthCheckHandler HealthCheckHandler
 
@@ -216,6 +236,9 @@ func (o *PlaidConnectorAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
+	if o.CreateUserHandler == nil {
+		unregistered = append(unregistered, "CreateUserHandler")
+	}
 	if o.GetAccessTokenHandler == nil {
 		unregistered = append(unregistered, "GetAccessTokenHandler")
 	}
@@ -240,8 +263,17 @@ func (o *PlaidConnectorAPI) Validate() error {
 	if o.GetTransactionsHandler == nil {
 		unregistered = append(unregistered, "GetTransactionsHandler")
 	}
+	if o.GetUserByIDHandler == nil {
+		unregistered = append(unregistered, "GetUserByIDHandler")
+	}
+	if o.GetUsersHandler == nil {
+		unregistered = append(unregistered, "GetUsersHandler")
+	}
 	if o.LinkTokenCreateHandler == nil {
 		unregistered = append(unregistered, "LinkTokenCreateHandler")
+	}
+	if o.UpdateUserHandler == nil {
+		unregistered = append(unregistered, "UpdateUserHandler")
 	}
 	if o.HealthCheckHandler == nil {
 		unregistered = append(unregistered, "HealthCheckHandler")
@@ -339,6 +371,10 @@ func (o *PlaidConnectorAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
+	o.handlers["POST"]["/user"] = NewCreateUser(o.context, o.CreateUserHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
 	o.handlers["POST"]["/set_access_token"] = NewGetAccessToken(o.context, o.GetAccessTokenHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -368,10 +404,22 @@ func (o *PlaidConnectorAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/transactions"] = NewGetTransactions(o.context, o.GetTransactionsHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/user/{user_id}"] = NewGetUserByID(o.context, o.GetUserByIDHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/users"] = NewGetUsers(o.context, o.GetUsersHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/create_link_token"] = NewLinkTokenCreate(o.context, o.LinkTokenCreateHandler)
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
+	o.handlers["PATCH"]["/user"] = NewUpdateUser(o.context, o.UpdateUserHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}

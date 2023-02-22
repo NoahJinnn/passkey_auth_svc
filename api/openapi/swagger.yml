@@ -29,6 +29,7 @@ definitions:
       message:
         type: string
 
+  # Plaid API
   AccountBalance:
     type: object
     properties:
@@ -627,6 +628,31 @@ definitions:
   mapstringinterface:
     type: object
     title: mapstringinterface
+# User API
+  User:
+    type: object
+    properties:
+      ID:
+        type: integer
+        format: int64
+      FirstName:
+        type: string
+      LastName:
+        type: string
+      Email:
+        type: string
+      Password:
+        type: string
+      PhoneNumber:
+        type: string
+      Address:
+        type: string
+    title: User
+    required:
+      - ID
+      - FirstName
+      - LastName
+      - Email
 responses:
   GenericError:
     description: General errors using same model as used by go-swagger for validation errors.
@@ -744,3 +770,63 @@ paths:
           schema:
             $ref: "#/definitions/GetTransactionsResp"
         default: { $ref: "#/responses/GenericError" }
+
+  # User API
+  /users:
+    get:
+      operationId: GetUsers
+      responses:
+        "200":
+          description: Get users successfully.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/User"
+        default: { $ref: "#/responses/GenericError" }
+  /user/{user_id}:
+    get:
+      operationId: GetUserByID
+      responses:
+        "200":
+          description: Get user by id successfully.
+          schema:
+            $ref: "#/definitions/User"
+        default: { $ref: "#/responses/GenericError" }
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          type: string
+  /user:
+    post:
+      operationId: CreateUser
+      responses:
+        "200":
+          description: Create a user successfully.
+          schema:
+            $ref: "#/definitions/LinkTokenCreateResp"
+        default: { $ref: "#/responses/GenericError" }
+      parameters:
+      - description: Fields need to update a area
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/User'
+
+    patch:
+      operationId: UpdateUser
+      responses:
+        "200":
+          description: Create a user successfully.
+          schema:
+            $ref: "#/definitions/LinkTokenCreateResp"
+        default: { $ref: "#/responses/GenericError" }
+      parameters:
+      - description: Fields need to update a area
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/User'
+    

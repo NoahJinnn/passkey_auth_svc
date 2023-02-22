@@ -28,6 +28,8 @@ type ClientOption func(*runtime.ClientOperation)
 
 // ClientService is the interface for Client methods
 type ClientService interface {
+	CreateUser(params *CreateUserParams, opts ...ClientOption) (*CreateUserOK, error)
+
 	GetAccessToken(params *GetAccessTokenParams, opts ...ClientOption) (*GetAccessTokenOK, error)
 
 	GetAccounts(params *GetAccountsParams, opts ...ClientOption) (*GetAccountsOK, error)
@@ -44,11 +46,54 @@ type ClientService interface {
 
 	GetTransactions(params *GetTransactionsParams, opts ...ClientOption) (*GetTransactionsOK, error)
 
+	GetUserByID(params *GetUserByIDParams, opts ...ClientOption) (*GetUserByIDOK, error)
+
+	GetUsers(params *GetUsersParams, opts ...ClientOption) (*GetUsersOK, error)
+
 	LinkTokenCreate(params *LinkTokenCreateParams, opts ...ClientOption) (*LinkTokenCreateOK, error)
+
+	UpdateUser(params *UpdateUserParams, opts ...ClientOption) (*UpdateUserOK, error)
 
 	HealthCheck(params *HealthCheckParams, opts ...ClientOption) (*HealthCheckOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
+}
+
+/*
+CreateUser create user API
+*/
+func (a *Client) CreateUser(params *CreateUserParams, opts ...ClientOption) (*CreateUserOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewCreateUserParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "CreateUser",
+		Method:             "POST",
+		PathPattern:        "/user",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &CreateUserReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*CreateUserOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*CreateUserDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
 /*
@@ -348,6 +393,80 @@ func (a *Client) GetTransactions(params *GetTransactionsParams, opts ...ClientOp
 }
 
 /*
+GetUserByID get user by Id API
+*/
+func (a *Client) GetUserByID(params *GetUserByIDParams, opts ...ClientOption) (*GetUserByIDOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetUserByIDParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "GetUserById",
+		Method:             "GET",
+		PathPattern:        "/user/{user_id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetUserByIDReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetUserByIDOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*GetUserByIDDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+GetUsers get users API
+*/
+func (a *Client) GetUsers(params *GetUsersParams, opts ...ClientOption) (*GetUsersOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetUsersParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "GetUsers",
+		Method:             "GET",
+		PathPattern:        "/users",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GetUsersReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetUsersOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*GetUsersDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
 LinkTokenCreate link token create API
 */
 func (a *Client) LinkTokenCreate(params *LinkTokenCreateParams, opts ...ClientOption) (*LinkTokenCreateOK, error) {
@@ -381,6 +500,43 @@ func (a *Client) LinkTokenCreate(params *LinkTokenCreateParams, opts ...ClientOp
 	}
 	// unexpected success response
 	unexpectedSuccess := result.(*LinkTokenCreateDefault)
+	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+UpdateUser update user API
+*/
+func (a *Client) UpdateUser(params *UpdateUserParams, opts ...ClientOption) (*UpdateUserOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewUpdateUserParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "UpdateUser",
+		Method:             "PATCH",
+		PathPattern:        "/user",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &UpdateUserReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*UpdateUserOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	unexpectedSuccess := result.(*UpdateUserDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
 }
 
