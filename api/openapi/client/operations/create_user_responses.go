@@ -52,7 +52,7 @@ CreateUserOK describes a response with status code 200, with default header valu
 Create a user successfully.
 */
 type CreateUserOK struct {
-	Payload *model.LinkTokenCreateResp
+	Payload *model.User
 }
 
 // IsSuccess returns true when this create user o k response has a 2xx status code
@@ -93,13 +93,13 @@ func (o *CreateUserOK) String() string {
 	return fmt.Sprintf("[POST /user][%d] createUserOK  %+v", 200, o.Payload)
 }
 
-func (o *CreateUserOK) GetPayload() *model.LinkTokenCreateResp {
+func (o *CreateUserOK) GetPayload() *model.User {
 	return o.Payload
 }
 
 func (o *CreateUserOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(model.LinkTokenCreateResp)
+	o.Payload = new(model.User)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

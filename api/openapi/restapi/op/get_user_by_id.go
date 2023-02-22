@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 )
 
-// GetUserByIDHandlerFunc turns a function with the right signature into a get user by Id handler
+// GetUserByIDHandlerFunc turns a function with the right signature into a get user by ID handler
 type GetUserByIDHandlerFunc func(GetUserByIDParams) middleware.Responder
 
 // Handle executing the request and returning a response
@@ -19,12 +19,12 @@ func (fn GetUserByIDHandlerFunc) Handle(params GetUserByIDParams) middleware.Res
 	return fn(params)
 }
 
-// GetUserByIDHandler interface for that can handle valid get user by Id params
+// GetUserByIDHandler interface for that can handle valid get user by ID params
 type GetUserByIDHandler interface {
 	Handle(GetUserByIDParams) middleware.Responder
 }
 
-// NewGetUserByID creates a new http.Handler for the get user by Id operation
+// NewGetUserByID creates a new http.Handler for the get user by ID operation
 func NewGetUserByID(ctx *middleware.Context, handler GetUserByIDHandler) *GetUserByID {
 	return &GetUserByID{Context: ctx, Handler: handler}
 }
@@ -32,7 +32,7 @@ func NewGetUserByID(ctx *middleware.Context, handler GetUserByIDHandler) *GetUse
 /*
 	GetUserByID swagger:route GET /user/{user_id} getUserById
 
-GetUserByID get user by Id API
+GetUserByID get user by ID API
 */
 type GetUserByID struct {
 	Context *middleware.Context

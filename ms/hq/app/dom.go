@@ -1,6 +1,9 @@
 package app
 
-import "github.com/hellohq/hqservice/ent"
+import (
+	"github.com/hellohq/hqservice/api/openapi/model"
+	"github.com/hellohq/hqservice/ent"
+)
 
 type User struct {
 	ID          uint
@@ -31,6 +34,31 @@ func UserListFromEnt(eus []*ent.User) []*User {
 		us = append(us, u.FromEnt(eu))
 	}
 	return us
+}
+
+func (u *User) ToOAIResp() *model.User {
+	respId := int64(u.ID)
+	return &model.User{
+		ID:          &respId,
+		FirstName:   &u.FirstName,
+		LastName:    &u.LastName,
+		Email:       &u.Email,
+		Password:    u.Password,
+		PhoneNumber: u.PhoneNumber,
+		Address:     u.Address,
+	}
+}
+
+func (u *User) FromOAIReq(oaiU *model.User) *User {
+	return &User{
+		ID:          uint(*oaiU.ID),
+		FirstName:   *oaiU.FirstName,
+		LastName:    *oaiU.LastName,
+		Email:       *oaiU.Email,
+		Password:    oaiU.Password,
+		PhoneNumber: oaiU.PhoneNumber,
+		Address:     oaiU.Address,
+	}
 }
 
 type AssetInfo struct {

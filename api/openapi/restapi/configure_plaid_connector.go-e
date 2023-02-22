@@ -13,7 +13,7 @@ import (
 	"github.com/hellohq/hqservice/api/openapi/restapi/op"
 )
 
-//go:generate swagger generate server --target ../../openapi --name PlaidConnector --spec ../../../../../../../../../var/folders/n2/j38sqmwd08s9_sy5l2zrdc1m0000gn/T/go-swagger-2446295957/swagger.yml --api-package op --model-package model --principal interface{} --exclude-main
+//go:generate swagger generate server --target ../../openapi --name PlaidConnector --spec ../../../../../../../../../var/folders/n2/j38sqmwd08s9_sy5l2zrdc1m0000gn/T/go-swagger-2819918220/swagger.yml --api-package op --model-package model --principal interface{} --exclude-main
 
 func configureFlags(api *op.PlaidConnectorAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }

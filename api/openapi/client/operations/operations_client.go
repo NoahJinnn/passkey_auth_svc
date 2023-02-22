@@ -393,7 +393,7 @@ func (a *Client) GetTransactions(params *GetTransactionsParams, opts ...ClientOp
 }
 
 /*
-GetUserByID get user by Id API
+GetUserByID get user by ID API
 */
 func (a *Client) GetUserByID(params *GetUserByIDParams, opts ...ClientOption) (*GetUserByIDOK, error) {
 	// TODO: Validate the params before sending
@@ -401,7 +401,7 @@ func (a *Client) GetUserByID(params *GetUserByIDParams, opts ...ClientOption) (*
 		params = NewGetUserByIDParams()
 	}
 	op := &runtime.ClientOperation{
-		ID:                 "GetUserById",
+		ID:                 "GetUserByID",
 		Method:             "GET",
 		PathPattern:        "/user/{user_id}",
 		ProducesMediaTypes: []string{"application/json"},

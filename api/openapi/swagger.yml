@@ -796,7 +796,7 @@ paths:
         - name: user_id
           in: path
           required: true
-          type: string
+          type: integer
   /user:
     post:
       operationId: CreateUser
@@ -804,7 +804,7 @@ paths:
         "200":
           description: Create a user successfully.
           schema:
-            $ref: "#/definitions/LinkTokenCreateResp"
+            $ref: "#/definitions/User"
         default: { $ref: "#/responses/GenericError" }
       parameters:
       - description: Fields need to update a area
@@ -820,7 +820,7 @@ paths:
         "200":
           description: Create a user successfully.
           schema:
-            $ref: "#/definitions/LinkTokenCreateResp"
+            $ref: "#/definitions/User"
         default: { $ref: "#/responses/GenericError" }
       parameters:
       - description: Fields need to update a area

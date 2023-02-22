@@ -26,7 +26,7 @@ type CreateUserOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *model.LinkTokenCreateResp `json:"body,omitempty"`
+	Payload *model.User `json:"body,omitempty"`
 }
 
 // NewCreateUserOK creates CreateUserOK with default headers values
@@ -36,13 +36,13 @@ func NewCreateUserOK() *CreateUserOK {
 }
 
 // WithPayload adds the payload to the create user o k response
-func (o *CreateUserOK) WithPayload(payload *model.LinkTokenCreateResp) *CreateUserOK {
+func (o *CreateUserOK) WithPayload(payload *model.User) *CreateUserOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the create user o k response
-func (o *CreateUserOK) SetPayload(payload *model.LinkTokenCreateResp) {
+func (o *CreateUserOK) SetPayload(payload *model.User) {
 	o.Payload = payload
 }
 

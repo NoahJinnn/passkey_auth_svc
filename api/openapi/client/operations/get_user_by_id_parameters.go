@@ -14,6 +14,7 @@ import (
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 )
 
 // NewGetUserByIDParams creates a new GetUserByIDParams object,
@@ -55,21 +56,21 @@ func NewGetUserByIDParamsWithHTTPClient(client *http.Client) *GetUserByIDParams 
 /*
 GetUserByIDParams contains all the parameters to send to the API endpoint
 
-	for the get user by Id operation.
+	for the get user by ID operation.
 
 	Typically these are written to a http.Request.
 */
 type GetUserByIDParams struct {
 
 	// UserID.
-	UserID string
+	UserID int64
 
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
 }
 
-// WithDefaults hydrates default values in the get user by Id params (not the query body).
+// WithDefaults hydrates default values in the get user by ID params (not the query body).
 //
 // All values with no default are reset to their zero value.
 func (o *GetUserByIDParams) WithDefaults() *GetUserByIDParams {
@@ -77,54 +78,54 @@ func (o *GetUserByIDParams) WithDefaults() *GetUserByIDParams {
 	return o
 }
 
-// SetDefaults hydrates default values in the get user by Id params (not the query body).
+// SetDefaults hydrates default values in the get user by ID params (not the query body).
 //
 // All values with no default are reset to their zero value.
 func (o *GetUserByIDParams) SetDefaults() {
 	// no default values defined for this parameter
 }
 
-// WithTimeout adds the timeout to the get user by Id params
+// WithTimeout adds the timeout to the get user by ID params
 func (o *GetUserByIDParams) WithTimeout(timeout time.Duration) *GetUserByIDParams {
 	o.SetTimeout(timeout)
 	return o
 }
 
-// SetTimeout adds the timeout to the get user by Id params
+// SetTimeout adds the timeout to the get user by ID params
 func (o *GetUserByIDParams) SetTimeout(timeout time.Duration) {
 	o.timeout = timeout
 }
 
-// WithContext adds the context to the get user by Id params
+// WithContext adds the context to the get user by ID params
 func (o *GetUserByIDParams) WithContext(ctx context.Context) *GetUserByIDParams {
 	o.SetContext(ctx)
 	return o
 }
 
-// SetContext adds the context to the get user by Id params
+// SetContext adds the context to the get user by ID params
 func (o *GetUserByIDParams) SetContext(ctx context.Context) {
 	o.Context = ctx
 }
 
-// WithHTTPClient adds the HTTPClient to the get user by Id params
+// WithHTTPClient adds the HTTPClient to the get user by ID params
 func (o *GetUserByIDParams) WithHTTPClient(client *http.Client) *GetUserByIDParams {
 	o.SetHTTPClient(client)
 	return o
 }
 
-// SetHTTPClient adds the HTTPClient to the get user by Id params
+// SetHTTPClient adds the HTTPClient to the get user by ID params
 func (o *GetUserByIDParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithUserID adds the userID to the get user by Id params
-func (o *GetUserByIDParams) WithUserID(userID string) *GetUserByIDParams {
+// WithUserID adds the userID to the get user by ID params
+func (o *GetUserByIDParams) WithUserID(userID int64) *GetUserByIDParams {
 	o.SetUserID(userID)
 	return o
 }
 
-// SetUserID adds the userId to the get user by Id params
-func (o *GetUserByIDParams) SetUserID(userID string) {
+// SetUserID adds the userId to the get user by ID params
+func (o *GetUserByIDParams) SetUserID(userID int64) {
 	o.UserID = userID
 }
 
@@ -137,7 +138,7 @@ func (o *GetUserByIDParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 	var res []error
 
 	// path param user_id
-	if err := r.SetPathParam("user_id", o.UserID); err != nil {
+	if err := r.SetPathParam("user_id", swag.FormatInt64(o.UserID)); err != nil {
 		return err
 	}
 

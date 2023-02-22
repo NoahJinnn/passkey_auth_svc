@@ -146,7 +146,7 @@ type PlaidConnectorAPI struct {
 	GetSandboxAccessTokenHandler GetSandboxAccessTokenHandler
 	// GetTransactionsHandler sets the operation handler for the get transactions operation
 	GetTransactionsHandler GetTransactionsHandler
-	// GetUserByIDHandler sets the operation handler for the get user by Id operation
+	// GetUserByIDHandler sets the operation handler for the get user by ID operation
 	GetUserByIDHandler GetUserByIDHandler
 	// GetUsersHandler sets the operation handler for the get users operation
 	GetUsersHandler GetUsersHandler

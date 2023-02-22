@@ -234,7 +234,7 @@ func init() {
           "200": {
             "description": "Create a user successfully.",
             "schema": {
-              "$ref": "#/definitions/LinkTokenCreateResp"
+              "$ref": "#/definitions/User"
             }
           },
           "default": {
@@ -259,7 +259,7 @@ func init() {
           "200": {
             "description": "Create a user successfully.",
             "schema": {
-              "$ref": "#/definitions/LinkTokenCreateResp"
+              "$ref": "#/definitions/User"
             }
           },
           "default": {
@@ -270,10 +270,10 @@ func init() {
     },
     "/user/{user_id}": {
       "get": {
-        "operationId": "GetUserById",
+        "operationId": "GetUserByID",
         "parameters": [
           {
-            "type": "string",
+            "type": "integer",
             "name": "user_id",
             "in": "path",
             "required": true
@@ -1465,7 +1465,7 @@ func init() {
           "200": {
             "description": "Create a user successfully.",
             "schema": {
-              "$ref": "#/definitions/LinkTokenCreateResp"
+              "$ref": "#/definitions/User"
             }
           },
           "default": {
@@ -1493,7 +1493,7 @@ func init() {
           "200": {
             "description": "Create a user successfully.",
             "schema": {
-              "$ref": "#/definitions/LinkTokenCreateResp"
+              "$ref": "#/definitions/User"
             }
           },
           "default": {
@@ -1507,10 +1507,10 @@ func init() {
     },
     "/user/{user_id}": {
       "get": {
-        "operationId": "GetUserById",
+        "operationId": "GetUserByID",
         "parameters": [
           {
-            "type": "string",
+            "type": "integer",
             "name": "user_id",
             "in": "path",
             "required": true

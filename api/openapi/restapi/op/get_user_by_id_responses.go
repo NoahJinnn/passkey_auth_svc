@@ -83,24 +83,24 @@ func NewGetUserByIDDefault(code int) *GetUserByIDDefault {
 	}
 }
 
-// WithStatusCode adds the status to the get user by Id default response
+// WithStatusCode adds the status to the get user by ID default response
 func (o *GetUserByIDDefault) WithStatusCode(code int) *GetUserByIDDefault {
 	o._statusCode = code
 	return o
 }
 
-// SetStatusCode sets the status to the get user by Id default response
+// SetStatusCode sets the status to the get user by ID default response
 func (o *GetUserByIDDefault) SetStatusCode(code int) {
 	o._statusCode = code
 }
 
-// WithPayload adds the payload to the get user by Id default response
+// WithPayload adds the payload to the get user by ID default response
 func (o *GetUserByIDDefault) WithPayload(payload *model.Error) *GetUserByIDDefault {
 	o.Payload = payload
 	return o
 }
 
-// SetPayload sets the payload to the get user by Id default response
+// SetPayload sets the payload to the get user by ID default response
 func (o *GetUserByIDDefault) SetPayload(payload *model.Error) {
 	o.Payload = payload
 }

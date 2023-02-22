@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/loads"
+	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/hellohq/hqservice/api/openapi/restapi"
 	"github.com/hellohq/hqservice/api/openapi/restapi/op"
@@ -34,6 +35,7 @@ type (
 		app app.Appl
 		cfg Config
 	}
+	CustomResponder func(http.ResponseWriter, runtime.Producer)
 )
 
 // NewServer returns OpenAPI server configured to listen on the TCP network
@@ -119,4 +121,13 @@ func fromRequest(r *http.Request) (Ctx, Log) {
 	log.SetDefaultKeyvals(def.LogUserID, "userID")
 
 	return ctx, log
+}
+
+func NewCustomResponder(r *http.Request, h http.Handler) middleware.Responder {
+	return CustomResponder(func(w http.ResponseWriter, _ runtime.Producer) {
+		h.ServeHTTP(w, r)
+	})
+}
+func (c CustomResponder) WriteResponse(w http.ResponseWriter, p runtime.Producer) {
+	c(w, p)
 }
