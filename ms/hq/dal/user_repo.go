@@ -59,9 +59,9 @@ func (repo *Repo) CreateUser(ctx Ctx, u *dom.User) (*ent.User, error) {
 	return eu, nil
 }
 
-func (repo *Repo) UpdateUser(ctx Ctx, id uint, u *dom.User) (*ent.User, error) {
+func (repo *Repo) UpdateUser(ctx Ctx, u *dom.User) (*ent.User, error) {
 	eu, err := repo.db.User.
-		UpdateOneID(id).
+		UpdateOneID(u.ID).
 		SetFirstName(u.FirstName).
 		SetLastName(u.LastName).
 		SetEmail(u.Email).

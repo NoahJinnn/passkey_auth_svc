@@ -30,7 +30,7 @@ func init() {
   "swagger": "2.0",
   "info": {
     "description": "# ...\n## List of all custom errors\nFirst number is HTTP Status code, second is value of \"code\" field in returned JSON object, text description may or may not match \"message\" field in returned JSON object.\n",
-    "title": "Plaid Connector",
+    "title": "HQ Service",
     "version": "0.2.0"
   },
   "basePath": "/api",
@@ -208,6 +208,101 @@ func init() {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/GetTransactionsResp"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/GenericError"
+          }
+        }
+      }
+    },
+    "/user": {
+      "post": {
+        "operationId": "CreateUser",
+        "parameters": [
+          {
+            "description": "Fields need to update a area",
+            "name": "user",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Create a user successfully.",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/GenericError"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "UpdateUser",
+        "parameters": [
+          {
+            "description": "Fields need to update a area",
+            "name": "user",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Create a user successfully.",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/GenericError"
+          }
+        }
+      }
+    },
+    "/user/{user_id}": {
+      "get": {
+        "operationId": "GetUserByID",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "user_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get user by id successfully.",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/GenericError"
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "GetUsers",
+        "responses": {
+          "200": {
+            "description": "Get users successfully.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
             }
           },
           "default": {
@@ -1072,6 +1167,40 @@ func init() {
         },
         "unofficial_currency_code": {
           "$ref": "#/definitions/NullableString"
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "title": "User",
+      "required": [
+        "ID",
+        "FirstName",
+        "LastName",
+        "Email"
+      ],
+      "properties": {
+        "Address": {
+          "type": "string"
+        },
+        "Email": {
+          "type": "string"
+        },
+        "FirstName": {
+          "type": "string"
+        },
+        "ID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "LastName": {
+          "type": "string"
+        },
+        "Password": {
+          "type": "string"
+        },
+        "PhoneNumber": {
+          "type": "string"
         }
       }
     },
@@ -1102,7 +1231,7 @@ func init() {
   "swagger": "2.0",
   "info": {
     "description": "# ...\n## List of all custom errors\nFirst number is HTTP Status code, second is value of \"code\" field in returned JSON object, text description may or may not match \"message\" field in returned JSON object.\n",
-    "title": "Plaid Connector",
+    "title": "HQ Service",
     "version": "0.2.0"
   },
   "basePath": "/api",
@@ -1307,6 +1436,113 @@ func init() {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/GetTransactionsResp"
+            }
+          },
+          "default": {
+            "description": "General errors using same model as used by go-swagger for validation errors.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/user": {
+      "post": {
+        "operationId": "CreateUser",
+        "parameters": [
+          {
+            "description": "Fields need to update a area",
+            "name": "user",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Create a user successfully.",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "default": {
+            "description": "General errors using same model as used by go-swagger for validation errors.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "UpdateUser",
+        "parameters": [
+          {
+            "description": "Fields need to update a area",
+            "name": "user",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Create a user successfully.",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "default": {
+            "description": "General errors using same model as used by go-swagger for validation errors.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/user/{user_id}": {
+      "get": {
+        "operationId": "GetUserByID",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "user_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get user by id successfully.",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "default": {
+            "description": "General errors using same model as used by go-swagger for validation errors.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "GetUsers",
+        "responses": {
+          "200": {
+            "description": "Get users successfully.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
             }
           },
           "default": {
@@ -2174,6 +2410,40 @@ func init() {
         },
         "unofficial_currency_code": {
           "$ref": "#/definitions/NullableString"
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "title": "User",
+      "required": [
+        "ID",
+        "FirstName",
+        "LastName",
+        "Email"
+      ],
+      "properties": {
+        "Address": {
+          "type": "string"
+        },
+        "Email": {
+          "type": "string"
+        },
+        "FirstName": {
+          "type": "string"
+        },
+        "ID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "LastName": {
+          "type": "string"
+        },
+        "Password": {
+          "type": "string"
+        },
+        "PhoneNumber": {
+          "type": "string"
         }
       }
     },

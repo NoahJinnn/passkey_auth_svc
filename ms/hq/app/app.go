@@ -30,6 +30,7 @@ type Appl interface {
 	// Errors: none.
 	HealthCheck(Ctx) (interface{}, error)
 	IPlaidSvc
+	IUserSvc
 }
 
 // Repo provides data storage.
@@ -37,7 +38,7 @@ type Repo interface {
 	GetAllUsers(ctx Ctx) ([]*User, error)
 	GetUserById(ctx Ctx, id uint) (*User, error)
 	CreateUser(ctx Ctx, u *User) (*ent.User, error)
-	UpdateUser(ctx Ctx, id uint, u *User) (*ent.User, error)
+	UpdateUser(ctx Ctx, u *User) (*ent.User, error)
 }
 
 // Ref: https://github.com/plaid/quickstart/blob/master/.env.example

@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/go-openapi/loads"
-	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/runtime"
 	"github.com/hellohq/hqservice/api/openapi/restapi"
 	"github.com/hellohq/hqservice/api/openapi/restapi/op"
 	"github.com/hellohq/hqservice/internal/apix"
@@ -17,7 +17,6 @@ import (
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/structlog"
-	"github.com/sebest/xff"
 )
 
 type (
@@ -27,13 +26,13 @@ type (
 	Log = *structlog.Logger
 	// Config contains configuration for OpenAPI server.
 	Config struct {
-		Addr     netx.Addr
-		BasePath string
+		Addr netx.Addr
 	}
 	httpServer struct {
 		app app.Appl
 		cfg Config
 	}
+	CustomResponder func(http.ResponseWriter, runtime.Producer)
 )
 
 // NewServer returns OpenAPI server configured to listen on the TCP network
@@ -48,60 +47,19 @@ func NewServer(appl app.Appl, cfg Config) (*restapi.Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("load embedded swagger spec: %w", err)
 	}
-	if cfg.BasePath == "" {
-		cfg.BasePath = swaggerSpec.BasePath()
-	}
-	swaggerSpec.Spec().BasePath = cfg.BasePath
+	basePath := swaggerSpec.BasePath()
+	swaggerSpec.Spec().BasePath = basePath
+	api := op.NewHQServiceAPI(swaggerSpec)
+	log := structlog.New(structlog.KeyUnit, "swagger").SetDefaultKeyvals(structlog.KeyApp, config.ServiceName)
+	log.Info("OpenAPI protocol", "version", swaggerSpec.Spec().Info.Version)
+	api.Logger = log.Printf
 
-	api := op.NewPlaidConnectorAPI(swaggerSpec)
-	api.Logger = structlog.New(structlog.KeyUnit, "swagger").SetDefaultKeyvals(structlog.KeyApp, config.ServiceName).Printf
-
-	api.HealthCheckHandler = op.HealthCheckHandlerFunc(srv.HealthCheck)
-
-	// TODO: Only for testing, remove this route on production
-	api.GetInfoHandler = op.GetInfoHandlerFunc(srv.GetInfo)
-	api.GetSandboxAccessTokenHandler = op.GetSandboxAccessTokenHandlerFunc(srv.GetSandboxAccessToken)
-
-	// // TODO: Separate into other files
-	api.LinkTokenCreateHandler = op.LinkTokenCreateHandlerFunc(srv.LinkTokenCreate)
-	api.GetAuthAccountHandler = op.GetAuthAccountHandlerFunc(srv.GetAuthAccount)
-	api.GetAccessTokenHandler = op.GetAccessTokenHandlerFunc(srv.GetAccessToken)
-	api.GetTransactionsHandler = op.GetTransactionsHandlerFunc(srv.GetTransactions)
-	api.GetIdentityHandler = op.GetIdentityHandlerFunc(srv.GetIdentity)
-	api.GetBalanceHandler = op.GetBalanceHandlerFunc(srv.GetBalance)
-	api.GetAccountsHandler = op.GetAccountsHandlerFunc(srv.GetAccounts)
-
+	bindOAIHandlers(api, srv)
 	server := restapi.NewServer(api)
 	server.Host = cfg.Addr.Host()
 	server.Port = cfg.Addr.Port()
+	bindMiddlewares(api, server, basePath)
 
-	// The middleware executes before anything.
-	api.UseSwaggerUI()
-	globalMiddlewares := func(handler http.Handler) http.Handler {
-		xffmw, _ := xff.Default()
-		logger := makeLogger(cfg.BasePath)
-		accesslog := makeAccessLog(cfg.BasePath)
-		return noCache(
-			xffmw.Handler(
-				logger(
-					recovery(
-						accesslog( //FIXME: middleware log error
-							middleware.Spec(cfg.BasePath, restapi.FlatSwaggerJSON, cors(handler)),
-						),
-					),
-				),
-			),
-		)
-	}
-	// The middleware executes after serving /swagger.json and routing,
-	// but before authentication, binding and validation.
-	middlewares := func(handler http.Handler) http.Handler {
-		return handler
-	}
-	server.SetHandler(globalMiddlewares(api.Serve(middlewares)))
-
-	log := structlog.New(structlog.KeyApp, config.ServiceName)
-	log.Info("OpenAPI protocol", "version", swaggerSpec.Spec().Info.Version)
 	return server, nil
 }
 
@@ -119,4 +77,8 @@ func fromRequest(r *http.Request) (Ctx, Log) {
 	log.SetDefaultKeyvals(def.LogUserID, "userID")
 
 	return ctx, log
+}
+
+func (c CustomResponder) WriteResponse(w http.ResponseWriter, p runtime.Producer) {
+	c(w, p)
 }
