@@ -34,6 +34,8 @@ for more details.
     - [Cheatsheet](#cheatsheet)
 - [Run](#run)
   - [Docker](#docker)
+    - [Run local PostgresSQL DB](#run-local-postgressql-db)
+    - [Remove container storage](#remove-container-storage)
   - [Source](#source)
     - [Run directly, without building](#run-directly-without-building)
     - [Build first, then run](#build-first-then-run)
