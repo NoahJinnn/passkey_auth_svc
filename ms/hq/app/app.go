@@ -1,3 +1,7 @@
+//go:generate -command mockgen sh -c "$(git rev-parse --show-toplevel)/.gobincache/$DOLLAR{DOLLAR}0 \"$DOLLAR{DOLLAR}@\"" mockgen
+//go:generate mockgen -package=$GOPACKAGE -source=$GOFILE -destination=mock.$GOFILE -imports=
+
+// Package app provides business logic.
 package app
 
 import (
@@ -5,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/hellohq/hqservice/api/openapi/model"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/sharedconfig"
 	plaid "github.com/plaid/plaid-go/v3/plaid"
@@ -31,6 +36,27 @@ type Appl interface {
 	HealthCheck(Ctx) (interface{}, error)
 	IPlaidSvc
 	IUserSvc
+}
+
+type IPlaidSvc interface {
+	Info() *GetInfoResp
+	GetSandboxAccessToken(ctx Ctx, institutionID string) (*GetAccessTokenResp, error)
+	LinkTokenCreate(
+		ctx Ctx, paymentInitiation *plaid.LinkTokenCreateRequestPaymentInitiation,
+	) (*LinkTokenCreateResp, error)
+	GetAccessToken(ctx Ctx, publicToken string) (*GetAccessTokenResp, error)
+	GetAuthAccount(ctx Ctx) (*GetAuthAccountResp, error)
+	GetTransactions(ctx Ctx) (*GetTransactionsResp, error)
+	GetIdentity(ctx Ctx) (*GetIdentityResp, error)
+	GetBalance(ctx Ctx) (*GetAccountsResp, error)
+	GetAccounts(ctx Ctx) (*GetAccountsResp, error)
+}
+
+type IUserSvc interface {
+	GetAllUsers(ctx Ctx) ([]*User, error)
+	GetUserById(ctx Ctx, id uint) (*User, error)
+	CreateUser(ctx Ctx, u *model.User) (*User, error)
+	UpdateUser(ctx Ctx, u *model.User) (*User, error)
 }
 
 // Repo provides data storage.

@@ -92,7 +92,7 @@ func (s *Service) serveMetrics(ctx Ctx) error {
 }
 
 func (s *Service) serveOpenAPI(ctx Ctx) error {
-	return serve.OpenAPI(ctx, s.srv, "OpenAPI")
+	return openapi.OpenAPI(ctx, s.srv, "OpenAPI")
 }
 
 func (s *Service) connectRepo(ctx Ctx) (interface{}, error) {

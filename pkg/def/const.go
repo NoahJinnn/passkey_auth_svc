@@ -1,6 +1,7 @@
 package def
 
 import (
+	"context"
 	"os"
 	"path"
 	"runtime/debug"
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"github.com/powerman/getenv"
+	"github.com/powerman/structlog"
 )
 
 // Constants.
@@ -29,4 +31,10 @@ func Version() string {
 		return bi.Main.Version
 	}
 	return "(test)"
+}
+
+// NewContext returns context.Background() which contains logger
+// configured for given service.
+func NewContext(service string) context.Context {
+	return structlog.NewContext(context.Background(), structlog.New(structlog.KeyApp, service))
 }

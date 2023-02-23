@@ -6,13 +6,6 @@ import (
 	"github.com/hellohq/hqservice/api/openapi/model"
 )
 
-type IUserSvc interface {
-	GetAllUsers(ctx Ctx) ([]*User, error)
-	GetUserById(ctx Ctx, id uint) (*User, error)
-	CreateUser(ctx Ctx, u *model.User) (*User, error)
-	UpdateUser(ctx Ctx, u *model.User) (*User, error)
-}
-
 func (app *App) GetAllUsers(ctx Ctx) ([]*User, error) {
 	return app.repo.GetAllUsers(ctx)
 }
