@@ -202,6 +202,17 @@ available networks, then you'll have to restart docker service or reboot.
 
 ### Docker
 
+#### Run local PostgresSQL DB 
+```bash
+doppler run -- docker-compose up -d --remove-orphans
+```
+
+#### Remove container storage
+```bash
+docker-compose stop && docker-compose rm -f
+docker volume rm hqservice_postgres 
+```
+
 ### Source
 
 #### Run directly, without building
@@ -212,13 +223,6 @@ task scripts:run
 ```
 
 #### Build first, then run
-
-We can either build and run the binary only, or build the binary and then dockerize it.
-
-```bash
-task scripts:run_bin
-```
-
 
 In this example below, we demonstrate using the `Taskfile` command to build our binary, then, run our built `mono` binary.
 
@@ -279,7 +283,7 @@ $ ./bin/mono serve
 Functionality Group 1: add/connect assets and debts
 - [x] Plaid aggregator with dev env
 - [ ] Plaid aggregator with stg, prd env
-- [ ] Create database `User` model, and other models using PostgreSQL
+- [x] Create database `User` model, and other models using PostgreSQL
       1. Bank Account
       2. Crypto Account
       3. Cars

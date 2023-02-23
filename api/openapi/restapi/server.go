@@ -185,7 +185,7 @@ func (s *Server) Serve() (err error) {
 
 		servers = append(servers, domainSocket)
 		wg.Add(1)
-		s.Logf("Serving h q service at unix://%s", s.SocketPath)
+		s.Logf("Serving hq service at unix://%s", s.SocketPath)
 		go func(l net.Listener) {
 			defer wg.Done()
 			if err := domainSocket.Serve(l); err != nil && err != http.ErrServerClosed {
@@ -215,7 +215,7 @@ func (s *Server) Serve() (err error) {
 
 		servers = append(servers, httpServer)
 		wg.Add(1)
-		s.Logf("Serving h q service at http://%s", s.httpServerL.Addr())
+		s.Logf("Serving hq service at http://%s", s.httpServerL.Addr())
 		go func(l net.Listener) {
 			defer wg.Done()
 			if err := httpServer.Serve(l); err != nil && err != http.ErrServerClosed {
@@ -308,7 +308,7 @@ func (s *Server) Serve() (err error) {
 
 		servers = append(servers, httpsServer)
 		wg.Add(1)
-		s.Logf("Serving h q service at https://%s", s.httpsServerL.Addr())
+		s.Logf("Serving hq service at https://%s", s.httpsServerL.Addr())
 		go func(l net.Listener) {
 			defer wg.Done()
 			if err := httpsServer.Serve(l); err != nil && err != http.ErrServerClosed {
