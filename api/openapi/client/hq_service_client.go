@@ -12,7 +12,7 @@ import (
 	"github.com/hellohq/hqservice/api/openapi/client/operations"
 )
 
-// Default h q service HTTP client.
+// Default hq service HTTP client.
 var Default = NewHTTPClient(nil)
 
 const (
@@ -27,14 +27,14 @@ const (
 // DefaultSchemes are the default schemes found in Meta (info) section of spec file
 var DefaultSchemes = []string{"http"}
 
-// NewHTTPClient creates a new h q service HTTP client.
-func NewHTTPClient(formats strfmt.Registry) *HQService {
+// NewHTTPClient creates a new hq service HTTP client.
+func NewHTTPClient(formats strfmt.Registry) *HqService {
 	return NewHTTPClientWithConfig(formats, nil)
 }
 
-// NewHTTPClientWithConfig creates a new h q service HTTP client,
+// NewHTTPClientWithConfig creates a new hq service HTTP client,
 // using a customizable transport config.
-func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *HQService {
+func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *HqService {
 	// ensure nullable parameters have default
 	if cfg == nil {
 		cfg = DefaultTransportConfig()
@@ -45,14 +45,14 @@ func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *HQS
 	return New(transport, formats)
 }
 
-// New creates a new h q service client
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *HQService {
+// New creates a new hq service client
+func New(transport runtime.ClientTransport, formats strfmt.Registry) *HqService {
 	// ensure nullable parameters have default
 	if formats == nil {
 		formats = strfmt.Default
 	}
 
-	cli := new(HQService)
+	cli := new(HqService)
 	cli.Transport = transport
 	cli.Operations = operations.New(transport, formats)
 	return cli
@@ -97,15 +97,15 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 	return cfg
 }
 
-// HQService is a client for h q service
-type HQService struct {
+// HqService is a client for hq service
+type HqService struct {
 	Operations operations.ClientService
 
 	Transport runtime.ClientTransport
 }
 
 // SetTransport changes the transport on the client and all its subresources
-func (c *HQService) SetTransport(transport runtime.ClientTransport) {
+func (c *HqService) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 	c.Operations.SetTransport(transport)
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/sebest/xff"
 )
 
-func bindOAIHandlers(api *op.HQServiceAPI, srv *httpServer) {
+func bindOAIHandlers(api *op.HqServiceAPI, srv *httpServer) {
 	api.HealthCheckHandler = op.HealthCheckHandlerFunc(srv.HealthCheck)
 	// Plaid API
 	api.LinkTokenCreateHandler = op.LinkTokenCreateHandlerFunc(srv.LinkTokenCreate)
@@ -30,7 +30,7 @@ func bindOAIHandlers(api *op.HQServiceAPI, srv *httpServer) {
 	api.UpdateUserHandler = op.UpdateUserHandlerFunc(srv.UpdateUser)
 }
 
-func bindMiddlewares(api *op.HQServiceAPI, server *restapi.Server, basePath string) {
+func bindMiddlewares(api *op.HqServiceAPI, server *restapi.Server, basePath string) {
 	// The middleware executes before anything.
 	api.UseSwaggerUI()
 	globalMiddlewares := func(handler http.Handler) http.Handler {

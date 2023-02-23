@@ -13,13 +13,12 @@ import (
 	"github.com/hellohq/hqservice/api/openapi/restapi/op"
 )
 
-//go:generate swagger generate server --target ../../openapi --name HQService --spec ../../../../../../../../../var/folders/n2/j38sqmwd08s9_sy5l2zrdc1m0000gn/T/go-swagger-2225732835/swagger.yml --api-package op --model-package model --principal interface{} --exclude-main
 
-func configureFlags(api *op.HQServiceAPI) {
+func configureFlags(api *op.HqServiceAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }
 }
 
-func configureAPI(api *op.HQServiceAPI) http.Handler {
+func configureAPI(api *op.HqServiceAPI) http.Handler {
 	// configure the api here
 	api.ServeError = errors.ServeError
 

@@ -30,7 +30,7 @@ func init() {
   "swagger": "2.0",
   "info": {
     "description": "# ...\n## List of all custom errors\nFirst number is HTTP Status code, second is value of \"code\" field in returned JSON object, text description may or may not match \"message\" field in returned JSON object.\n",
-    "title": "HQ Service",
+    "title": "Hq Service",
     "version": "0.2.0"
   },
   "basePath": "/api",
@@ -1231,7 +1231,7 @@ func init() {
   "swagger": "2.0",
   "info": {
     "description": "# ...\n## List of all custom errors\nFirst number is HTTP Status code, second is value of \"code\" field in returned JSON object, text description may or may not match \"message\" field in returned JSON object.\n",
-    "title": "HQ Service",
+    "title": "Hq Service",
     "version": "0.2.0"
   },
   "basePath": "/api",

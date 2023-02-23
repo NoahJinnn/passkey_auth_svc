@@ -20,9 +20,9 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewHQServiceAPI creates a new HQService instance
-func NewHQServiceAPI(spec *loads.Document) *HQServiceAPI {
-	return &HQServiceAPI{
+// NewHqServiceAPI creates a new HqService instance
+func NewHqServiceAPI(spec *loads.Document) *HqServiceAPI {
+	return &HqServiceAPI{
 		handlers:            make(map[string]map[string]http.Handler),
 		formats:             strfmt.Default,
 		defaultConsumes:     "application/json",
@@ -89,11 +89,11 @@ func NewHQServiceAPI(spec *loads.Document) *HQServiceAPI {
 }
 
 /*
-HQServiceAPI # ...
+HqServiceAPI # ...
 ## List of all custom errors
 First number is HTTP Status code, second is value of "code" field in returned JSON object, text description may or may not match "message" field in returned JSON object.
 */
-type HQServiceAPI struct {
+type HqServiceAPI struct {
 	spec            *loads.Document
 	context         *middleware.Context
 	handlers        map[string]map[string]http.Handler
@@ -177,52 +177,52 @@ type HQServiceAPI struct {
 }
 
 // UseRedoc for documentation at /docs
-func (o *HQServiceAPI) UseRedoc() {
+func (o *HqServiceAPI) UseRedoc() {
 	o.useSwaggerUI = false
 }
 
 // UseSwaggerUI for documentation at /docs
-func (o *HQServiceAPI) UseSwaggerUI() {
+func (o *HqServiceAPI) UseSwaggerUI() {
 	o.useSwaggerUI = true
 }
 
 // SetDefaultProduces sets the default produces media type
-func (o *HQServiceAPI) SetDefaultProduces(mediaType string) {
+func (o *HqServiceAPI) SetDefaultProduces(mediaType string) {
 	o.defaultProduces = mediaType
 }
 
 // SetDefaultConsumes returns the default consumes media type
-func (o *HQServiceAPI) SetDefaultConsumes(mediaType string) {
+func (o *HqServiceAPI) SetDefaultConsumes(mediaType string) {
 	o.defaultConsumes = mediaType
 }
 
 // SetSpec sets a spec that will be served for the clients.
-func (o *HQServiceAPI) SetSpec(spec *loads.Document) {
+func (o *HqServiceAPI) SetSpec(spec *loads.Document) {
 	o.spec = spec
 }
 
 // DefaultProduces returns the default produces media type
-func (o *HQServiceAPI) DefaultProduces() string {
+func (o *HqServiceAPI) DefaultProduces() string {
 	return o.defaultProduces
 }
 
 // DefaultConsumes returns the default consumes media type
-func (o *HQServiceAPI) DefaultConsumes() string {
+func (o *HqServiceAPI) DefaultConsumes() string {
 	return o.defaultConsumes
 }
 
 // Formats returns the registered string formats
-func (o *HQServiceAPI) Formats() strfmt.Registry {
+func (o *HqServiceAPI) Formats() strfmt.Registry {
 	return o.formats
 }
 
 // RegisterFormat registers a custom format validator
-func (o *HQServiceAPI) RegisterFormat(name string, format strfmt.Format, validator strfmt.Validator) {
+func (o *HqServiceAPI) RegisterFormat(name string, format strfmt.Format, validator strfmt.Validator) {
 	o.formats.Add(name, format, validator)
 }
 
-// Validate validates the registrations in the HQServiceAPI
-func (o *HQServiceAPI) Validate() error {
+// Validate validates the registrations in the HqServiceAPI
+func (o *HqServiceAPI) Validate() error {
 	var unregistered []string
 
 	if o.JSONConsumer == nil {
@@ -287,23 +287,23 @@ func (o *HQServiceAPI) Validate() error {
 }
 
 // ServeErrorFor gets a error handler for a given operation id
-func (o *HQServiceAPI) ServeErrorFor(operationID string) func(http.ResponseWriter, *http.Request, error) {
+func (o *HqServiceAPI) ServeErrorFor(operationID string) func(http.ResponseWriter, *http.Request, error) {
 	return o.ServeError
 }
 
 // AuthenticatorsFor gets the authenticators for the specified security schemes
-func (o *HQServiceAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
+func (o *HqServiceAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
 	return nil
 }
 
 // Authorizer returns the registered authorizer
-func (o *HQServiceAPI) Authorizer() runtime.Authorizer {
+func (o *HqServiceAPI) Authorizer() runtime.Authorizer {
 	return nil
 }
 
 // ConsumersFor gets the consumers for the specified media types.
 // MIME type parameters are ignored here.
-func (o *HQServiceAPI) ConsumersFor(mediaTypes []string) map[string]runtime.Consumer {
+func (o *HqServiceAPI) ConsumersFor(mediaTypes []string) map[string]runtime.Consumer {
 	result := make(map[string]runtime.Consumer, len(mediaTypes))
 	for _, mt := range mediaTypes {
 		switch mt {
@@ -322,7 +322,7 @@ func (o *HQServiceAPI) ConsumersFor(mediaTypes []string) map[string]runtime.Cons
 
 // ProducersFor gets the producers for the specified media types.
 // MIME type parameters are ignored here.
-func (o *HQServiceAPI) ProducersFor(mediaTypes []string) map[string]runtime.Producer {
+func (o *HqServiceAPI) ProducersFor(mediaTypes []string) map[string]runtime.Producer {
 	result := make(map[string]runtime.Producer, len(mediaTypes))
 	for _, mt := range mediaTypes {
 		switch mt {
@@ -338,7 +338,7 @@ func (o *HQServiceAPI) ProducersFor(mediaTypes []string) map[string]runtime.Prod
 }
 
 // HandlerFor gets a http.Handler for the provided operation method and path
-func (o *HQServiceAPI) HandlerFor(method, path string) (http.Handler, bool) {
+func (o *HqServiceAPI) HandlerFor(method, path string) (http.Handler, bool) {
 	if o.handlers == nil {
 		return nil, false
 	}
@@ -353,8 +353,8 @@ func (o *HQServiceAPI) HandlerFor(method, path string) (http.Handler, bool) {
 	return h, ok
 }
 
-// Context returns the middleware context for the h q service API
-func (o *HQServiceAPI) Context() *middleware.Context {
+// Context returns the middleware context for the hq service API
+func (o *HqServiceAPI) Context() *middleware.Context {
 	if o.context == nil {
 		o.context = middleware.NewRoutableContext(o.spec, o, nil)
 	}
@@ -362,7 +362,7 @@ func (o *HQServiceAPI) Context() *middleware.Context {
 	return o.context
 }
 
-func (o *HQServiceAPI) initHandlerCache() {
+func (o *HqServiceAPI) initHandlerCache() {
 	o.Context() // don't care about the result, just that the initialization happened
 	if o.handlers == nil {
 		o.handlers = make(map[string]map[string]http.Handler)
@@ -428,7 +428,7 @@ func (o *HQServiceAPI) initHandlerCache() {
 
 // Serve creates a http handler to serve the API over HTTP
 // can be used directly in http.ListenAndServe(":8000", api.Serve(nil))
-func (o *HQServiceAPI) Serve(builder middleware.Builder) http.Handler {
+func (o *HqServiceAPI) Serve(builder middleware.Builder) http.Handler {
 	o.Init()
 
 	if o.Middleware != nil {
@@ -441,24 +441,24 @@ func (o *HQServiceAPI) Serve(builder middleware.Builder) http.Handler {
 }
 
 // Init allows you to just initialize the handler cache, you can then recompose the middleware as you see fit
-func (o *HQServiceAPI) Init() {
+func (o *HqServiceAPI) Init() {
 	if len(o.handlers) == 0 {
 		o.initHandlerCache()
 	}
 }
 
 // RegisterConsumer allows you to add (or override) a consumer for a media type.
-func (o *HQServiceAPI) RegisterConsumer(mediaType string, consumer runtime.Consumer) {
+func (o *HqServiceAPI) RegisterConsumer(mediaType string, consumer runtime.Consumer) {
 	o.customConsumers[mediaType] = consumer
 }
 
 // RegisterProducer allows you to add (or override) a producer for a media type.
-func (o *HQServiceAPI) RegisterProducer(mediaType string, producer runtime.Producer) {
+func (o *HqServiceAPI) RegisterProducer(mediaType string, producer runtime.Producer) {
 	o.customProducers[mediaType] = producer
 }
 
 // AddMiddlewareFor adds a http middleware to existing handler
-func (o *HQServiceAPI) AddMiddlewareFor(method, path string, builder middleware.Builder) {
+func (o *HqServiceAPI) AddMiddlewareFor(method, path string, builder middleware.Builder) {
 	um := strings.ToUpper(method)
 	if path == "/" {
 		path = ""

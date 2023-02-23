@@ -2,7 +2,6 @@
 package openapi
 
 import (
-	"context"
 	"fmt"
 	"net"
 	"net/http"
@@ -11,7 +10,6 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/hellohq/hqservice/api/openapi/restapi"
 	"github.com/hellohq/hqservice/api/openapi/restapi/op"
-	"github.com/hellohq/hqservice/internal/apix"
 	"github.com/hellohq/hqservice/ms/hq/app"
 	"github.com/hellohq/hqservice/ms/hq/config"
 	"github.com/hellohq/hqservice/pkg/def"
@@ -20,8 +18,6 @@ import (
 )
 
 type (
-	// Ctx is a synonym for convenience.
-	Ctx = context.Context
 	// Log is a synonym for convenience.
 	Log = *structlog.Logger
 	// Config contains configuration for OpenAPI server.
@@ -49,7 +45,7 @@ func NewServer(appl app.Appl, cfg Config) (*restapi.Server, error) {
 	}
 	basePath := swaggerSpec.BasePath()
 	swaggerSpec.Spec().BasePath = basePath
-	api := op.NewHQServiceAPI(swaggerSpec)
+	api := op.NewHqServiceAPI(swaggerSpec)
 	log := structlog.New(structlog.KeyUnit, "swagger").SetDefaultKeyvals(structlog.KeyApp, config.ServiceName)
 	log.Info("OpenAPI protocol", "version", swaggerSpec.Spec().Info.Version)
 	api.Logger = log.Printf
@@ -66,7 +62,7 @@ func NewServer(appl app.Appl, cfg Config) (*restapi.Server, error) {
 func fromRequest(r *http.Request) (Ctx, Log) {
 	ctx := r.Context()
 	remoteIP, _, _ := net.SplitHostPort(r.RemoteAddr)
-	ctx = apix.NewContextWithRemoteIP(ctx, remoteIP)
+	ctx = NewContextWithRemoteIP(ctx, remoteIP)
 	log := structlog.FromContext(ctx, nil)
 
 	// TODO: Add token or userId to log
