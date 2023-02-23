@@ -20,9 +20,9 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// NewPlaidConnectorAPI creates a new PlaidConnector instance
-func NewPlaidConnectorAPI(spec *loads.Document) *PlaidConnectorAPI {
-	return &PlaidConnectorAPI{
+// NewHQServiceAPI creates a new HQService instance
+func NewHQServiceAPI(spec *loads.Document) *HQServiceAPI {
+	return &HQServiceAPI{
 		handlers:            make(map[string]map[string]http.Handler),
 		formats:             strfmt.Default,
 		defaultConsumes:     "application/json",
@@ -43,6 +43,9 @@ func NewPlaidConnectorAPI(spec *loads.Document) *PlaidConnectorAPI {
 
 		JSONProducer: runtime.JSONProducer(),
 
+		CreateUserHandler: CreateUserHandlerFunc(func(params CreateUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation CreateUser has not yet been implemented")
+		}),
 		GetAccessTokenHandler: GetAccessTokenHandlerFunc(func(params GetAccessTokenParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetAccessToken has not yet been implemented")
 		}),
@@ -67,8 +70,17 @@ func NewPlaidConnectorAPI(spec *loads.Document) *PlaidConnectorAPI {
 		GetTransactionsHandler: GetTransactionsHandlerFunc(func(params GetTransactionsParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetTransactions has not yet been implemented")
 		}),
+		GetUserByIDHandler: GetUserByIDHandlerFunc(func(params GetUserByIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation GetUserByID has not yet been implemented")
+		}),
+		GetUsersHandler: GetUsersHandlerFunc(func(params GetUsersParams) middleware.Responder {
+			return middleware.NotImplemented("operation GetUsers has not yet been implemented")
+		}),
 		LinkTokenCreateHandler: LinkTokenCreateHandlerFunc(func(params LinkTokenCreateParams) middleware.Responder {
 			return middleware.NotImplemented("operation LinkTokenCreate has not yet been implemented")
+		}),
+		UpdateUserHandler: UpdateUserHandlerFunc(func(params UpdateUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation UpdateUser has not yet been implemented")
 		}),
 		HealthCheckHandler: HealthCheckHandlerFunc(func(params HealthCheckParams) middleware.Responder {
 			return middleware.NotImplemented("operation HealthCheck has not yet been implemented")
@@ -77,11 +89,11 @@ func NewPlaidConnectorAPI(spec *loads.Document) *PlaidConnectorAPI {
 }
 
 /*
-PlaidConnectorAPI # ...
+HQServiceAPI # ...
 ## List of all custom errors
 First number is HTTP Status code, second is value of "code" field in returned JSON object, text description may or may not match "message" field in returned JSON object.
 */
-type PlaidConnectorAPI struct {
+type HQServiceAPI struct {
 	spec            *loads.Document
 	context         *middleware.Context
 	handlers        map[string]map[string]http.Handler
@@ -116,6 +128,8 @@ type PlaidConnectorAPI struct {
 	//   - application/json
 	JSONProducer runtime.Producer
 
+	// CreateUserHandler sets the operation handler for the create user operation
+	CreateUserHandler CreateUserHandler
 	// GetAccessTokenHandler sets the operation handler for the get access token operation
 	GetAccessTokenHandler GetAccessTokenHandler
 	// GetAccountsHandler sets the operation handler for the get accounts operation
@@ -132,8 +146,14 @@ type PlaidConnectorAPI struct {
 	GetSandboxAccessTokenHandler GetSandboxAccessTokenHandler
 	// GetTransactionsHandler sets the operation handler for the get transactions operation
 	GetTransactionsHandler GetTransactionsHandler
+	// GetUserByIDHandler sets the operation handler for the get user by ID operation
+	GetUserByIDHandler GetUserByIDHandler
+	// GetUsersHandler sets the operation handler for the get users operation
+	GetUsersHandler GetUsersHandler
 	// LinkTokenCreateHandler sets the operation handler for the link token create operation
 	LinkTokenCreateHandler LinkTokenCreateHandler
+	// UpdateUserHandler sets the operation handler for the update user operation
+	UpdateUserHandler UpdateUserHandler
 	// HealthCheckHandler sets the operation handler for the health check operation
 	HealthCheckHandler HealthCheckHandler
 
@@ -157,52 +177,52 @@ type PlaidConnectorAPI struct {
 }
 
 // UseRedoc for documentation at /docs
-func (o *PlaidConnectorAPI) UseRedoc() {
+func (o *HQServiceAPI) UseRedoc() {
 	o.useSwaggerUI = false
 }
 
 // UseSwaggerUI for documentation at /docs
-func (o *PlaidConnectorAPI) UseSwaggerUI() {
+func (o *HQServiceAPI) UseSwaggerUI() {
 	o.useSwaggerUI = true
 }
 
 // SetDefaultProduces sets the default produces media type
-func (o *PlaidConnectorAPI) SetDefaultProduces(mediaType string) {
+func (o *HQServiceAPI) SetDefaultProduces(mediaType string) {
 	o.defaultProduces = mediaType
 }
 
 // SetDefaultConsumes returns the default consumes media type
-func (o *PlaidConnectorAPI) SetDefaultConsumes(mediaType string) {
+func (o *HQServiceAPI) SetDefaultConsumes(mediaType string) {
 	o.defaultConsumes = mediaType
 }
 
 // SetSpec sets a spec that will be served for the clients.
-func (o *PlaidConnectorAPI) SetSpec(spec *loads.Document) {
+func (o *HQServiceAPI) SetSpec(spec *loads.Document) {
 	o.spec = spec
 }
 
 // DefaultProduces returns the default produces media type
-func (o *PlaidConnectorAPI) DefaultProduces() string {
+func (o *HQServiceAPI) DefaultProduces() string {
 	return o.defaultProduces
 }
 
 // DefaultConsumes returns the default consumes media type
-func (o *PlaidConnectorAPI) DefaultConsumes() string {
+func (o *HQServiceAPI) DefaultConsumes() string {
 	return o.defaultConsumes
 }
 
 // Formats returns the registered string formats
-func (o *PlaidConnectorAPI) Formats() strfmt.Registry {
+func (o *HQServiceAPI) Formats() strfmt.Registry {
 	return o.formats
 }
 
 // RegisterFormat registers a custom format validator
-func (o *PlaidConnectorAPI) RegisterFormat(name string, format strfmt.Format, validator strfmt.Validator) {
+func (o *HQServiceAPI) RegisterFormat(name string, format strfmt.Format, validator strfmt.Validator) {
 	o.formats.Add(name, format, validator)
 }
 
-// Validate validates the registrations in the PlaidConnectorAPI
-func (o *PlaidConnectorAPI) Validate() error {
+// Validate validates the registrations in the HQServiceAPI
+func (o *HQServiceAPI) Validate() error {
 	var unregistered []string
 
 	if o.JSONConsumer == nil {
@@ -216,6 +236,9 @@ func (o *PlaidConnectorAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
+	if o.CreateUserHandler == nil {
+		unregistered = append(unregistered, "CreateUserHandler")
+	}
 	if o.GetAccessTokenHandler == nil {
 		unregistered = append(unregistered, "GetAccessTokenHandler")
 	}
@@ -240,8 +263,17 @@ func (o *PlaidConnectorAPI) Validate() error {
 	if o.GetTransactionsHandler == nil {
 		unregistered = append(unregistered, "GetTransactionsHandler")
 	}
+	if o.GetUserByIDHandler == nil {
+		unregistered = append(unregistered, "GetUserByIDHandler")
+	}
+	if o.GetUsersHandler == nil {
+		unregistered = append(unregistered, "GetUsersHandler")
+	}
 	if o.LinkTokenCreateHandler == nil {
 		unregistered = append(unregistered, "LinkTokenCreateHandler")
+	}
+	if o.UpdateUserHandler == nil {
+		unregistered = append(unregistered, "UpdateUserHandler")
 	}
 	if o.HealthCheckHandler == nil {
 		unregistered = append(unregistered, "HealthCheckHandler")
@@ -255,23 +287,23 @@ func (o *PlaidConnectorAPI) Validate() error {
 }
 
 // ServeErrorFor gets a error handler for a given operation id
-func (o *PlaidConnectorAPI) ServeErrorFor(operationID string) func(http.ResponseWriter, *http.Request, error) {
+func (o *HQServiceAPI) ServeErrorFor(operationID string) func(http.ResponseWriter, *http.Request, error) {
 	return o.ServeError
 }
 
 // AuthenticatorsFor gets the authenticators for the specified security schemes
-func (o *PlaidConnectorAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
+func (o *HQServiceAPI) AuthenticatorsFor(schemes map[string]spec.SecurityScheme) map[string]runtime.Authenticator {
 	return nil
 }
 
 // Authorizer returns the registered authorizer
-func (o *PlaidConnectorAPI) Authorizer() runtime.Authorizer {
+func (o *HQServiceAPI) Authorizer() runtime.Authorizer {
 	return nil
 }
 
 // ConsumersFor gets the consumers for the specified media types.
 // MIME type parameters are ignored here.
-func (o *PlaidConnectorAPI) ConsumersFor(mediaTypes []string) map[string]runtime.Consumer {
+func (o *HQServiceAPI) ConsumersFor(mediaTypes []string) map[string]runtime.Consumer {
 	result := make(map[string]runtime.Consumer, len(mediaTypes))
 	for _, mt := range mediaTypes {
 		switch mt {
@@ -290,7 +322,7 @@ func (o *PlaidConnectorAPI) ConsumersFor(mediaTypes []string) map[string]runtime
 
 // ProducersFor gets the producers for the specified media types.
 // MIME type parameters are ignored here.
-func (o *PlaidConnectorAPI) ProducersFor(mediaTypes []string) map[string]runtime.Producer {
+func (o *HQServiceAPI) ProducersFor(mediaTypes []string) map[string]runtime.Producer {
 	result := make(map[string]runtime.Producer, len(mediaTypes))
 	for _, mt := range mediaTypes {
 		switch mt {
@@ -306,7 +338,7 @@ func (o *PlaidConnectorAPI) ProducersFor(mediaTypes []string) map[string]runtime
 }
 
 // HandlerFor gets a http.Handler for the provided operation method and path
-func (o *PlaidConnectorAPI) HandlerFor(method, path string) (http.Handler, bool) {
+func (o *HQServiceAPI) HandlerFor(method, path string) (http.Handler, bool) {
 	if o.handlers == nil {
 		return nil, false
 	}
@@ -321,8 +353,8 @@ func (o *PlaidConnectorAPI) HandlerFor(method, path string) (http.Handler, bool)
 	return h, ok
 }
 
-// Context returns the middleware context for the plaid connector API
-func (o *PlaidConnectorAPI) Context() *middleware.Context {
+// Context returns the middleware context for the h q service API
+func (o *HQServiceAPI) Context() *middleware.Context {
 	if o.context == nil {
 		o.context = middleware.NewRoutableContext(o.spec, o, nil)
 	}
@@ -330,12 +362,16 @@ func (o *PlaidConnectorAPI) Context() *middleware.Context {
 	return o.context
 }
 
-func (o *PlaidConnectorAPI) initHandlerCache() {
+func (o *HQServiceAPI) initHandlerCache() {
 	o.Context() // don't care about the result, just that the initialization happened
 	if o.handlers == nil {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
 
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/user"] = NewCreateUser(o.context, o.CreateUserHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
@@ -368,10 +404,22 @@ func (o *PlaidConnectorAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/transactions"] = NewGetTransactions(o.context, o.GetTransactionsHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/user/{user_id}"] = NewGetUserByID(o.context, o.GetUserByIDHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/users"] = NewGetUsers(o.context, o.GetUsersHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/create_link_token"] = NewLinkTokenCreate(o.context, o.LinkTokenCreateHandler)
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
+	o.handlers["PATCH"]["/user"] = NewUpdateUser(o.context, o.UpdateUserHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
@@ -380,7 +428,7 @@ func (o *PlaidConnectorAPI) initHandlerCache() {
 
 // Serve creates a http handler to serve the API over HTTP
 // can be used directly in http.ListenAndServe(":8000", api.Serve(nil))
-func (o *PlaidConnectorAPI) Serve(builder middleware.Builder) http.Handler {
+func (o *HQServiceAPI) Serve(builder middleware.Builder) http.Handler {
 	o.Init()
 
 	if o.Middleware != nil {
@@ -393,24 +441,24 @@ func (o *PlaidConnectorAPI) Serve(builder middleware.Builder) http.Handler {
 }
 
 // Init allows you to just initialize the handler cache, you can then recompose the middleware as you see fit
-func (o *PlaidConnectorAPI) Init() {
+func (o *HQServiceAPI) Init() {
 	if len(o.handlers) == 0 {
 		o.initHandlerCache()
 	}
 }
 
 // RegisterConsumer allows you to add (or override) a consumer for a media type.
-func (o *PlaidConnectorAPI) RegisterConsumer(mediaType string, consumer runtime.Consumer) {
+func (o *HQServiceAPI) RegisterConsumer(mediaType string, consumer runtime.Consumer) {
 	o.customConsumers[mediaType] = consumer
 }
 
 // RegisterProducer allows you to add (or override) a producer for a media type.
-func (o *PlaidConnectorAPI) RegisterProducer(mediaType string, producer runtime.Producer) {
+func (o *HQServiceAPI) RegisterProducer(mediaType string, producer runtime.Producer) {
 	o.customProducers[mediaType] = producer
 }
 
 // AddMiddlewareFor adds a http middleware to existing handler
-func (o *PlaidConnectorAPI) AddMiddlewareFor(method, path string, builder middleware.Builder) {
+func (o *HQServiceAPI) AddMiddlewareFor(method, path string, builder middleware.Builder) {
 	um := strings.ToUpper(method)
 	if path == "/" {
 		path = ""

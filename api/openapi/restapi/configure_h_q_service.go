@@ -13,13 +13,12 @@ import (
 	"github.com/hellohq/hqservice/api/openapi/restapi/op"
 )
 
-//go:generate swagger generate server --target ../../openapi --name PlaidConnector --spec ../../../../../../../../../var/folders/n2/j38sqmwd08s9_sy5l2zrdc1m0000gn/T/go-swagger-3589011842/swagger.yml --api-package op --model-package model --principal interface{} --exclude-main
 
-func configureFlags(api *op.PlaidConnectorAPI) {
+func configureFlags(api *op.HQServiceAPI) {
 	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }
 }
 
-func configureAPI(api *op.PlaidConnectorAPI) http.Handler {
+func configureAPI(api *op.HQServiceAPI) http.Handler {
 	// configure the api here
 	api.ServeError = errors.ServeError
 
@@ -41,6 +40,11 @@ func configureAPI(api *op.PlaidConnectorAPI) http.Handler {
 	// You may change here the memory limit for this multipart form parser. Below is the default (32 MB).
 	// op.GetAccessTokenMaxParseMemory = 32 << 20
 
+	if api.CreateUserHandler == nil {
+		api.CreateUserHandler = op.CreateUserHandlerFunc(func(params op.CreateUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation op.CreateUser has not yet been implemented")
+		})
+	}
 	if api.GetAccessTokenHandler == nil {
 		api.GetAccessTokenHandler = op.GetAccessTokenHandlerFunc(func(params op.GetAccessTokenParams) middleware.Responder {
 			return middleware.NotImplemented("operation op.GetAccessToken has not yet been implemented")
@@ -81,9 +85,24 @@ func configureAPI(api *op.PlaidConnectorAPI) http.Handler {
 			return middleware.NotImplemented("operation op.GetTransactions has not yet been implemented")
 		})
 	}
+	if api.GetUserByIDHandler == nil {
+		api.GetUserByIDHandler = op.GetUserByIDHandlerFunc(func(params op.GetUserByIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation op.GetUserByID has not yet been implemented")
+		})
+	}
+	if api.GetUsersHandler == nil {
+		api.GetUsersHandler = op.GetUsersHandlerFunc(func(params op.GetUsersParams) middleware.Responder {
+			return middleware.NotImplemented("operation op.GetUsers has not yet been implemented")
+		})
+	}
 	if api.LinkTokenCreateHandler == nil {
 		api.LinkTokenCreateHandler = op.LinkTokenCreateHandlerFunc(func(params op.LinkTokenCreateParams) middleware.Responder {
 			return middleware.NotImplemented("operation op.LinkTokenCreate has not yet been implemented")
+		})
+	}
+	if api.UpdateUserHandler == nil {
+		api.UpdateUserHandler = op.UpdateUserHandlerFunc(func(params op.UpdateUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation op.UpdateUser has not yet been implemented")
 		})
 	}
 	if api.HealthCheckHandler == nil {

@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/hellohq/hqservice/ent/user"
@@ -14,11 +15,99 @@ import (
 type User struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
-	// Age holds the value of the "age" field.
-	Age int `json:"age,omitempty"`
-	// Name holds the value of the "name" field.
-	Name string `json:"name,omitempty"`
+	ID uint `json:"id,omitempty"`
+	// FirstName holds the value of the "first_name" field.
+	FirstName string `json:"first_name,omitempty"`
+	// LastName holds the value of the "last_name" field.
+	LastName string `json:"last_name,omitempty"`
+	// Email holds the value of the "email" field.
+	Email string `json:"email,omitempty"`
+	// Password holds the value of the "password" field.
+	Password string `json:"password,omitempty"`
+	// PhoneNumber holds the value of the "phone_number" field.
+	PhoneNumber string `json:"phone_number,omitempty"`
+	// Address holds the value of the "address" field.
+	Address string `json:"address,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserQuery when eager-loading is set.
+	Edges UserEdges `json:"edges"`
+}
+
+// UserEdges holds the relations/edges for other nodes in the graph.
+type UserEdges struct {
+	// BankAccounts holds the value of the bank_accounts edge.
+	BankAccounts []*BankAccount `json:"bank_accounts,omitempty"`
+	// Cars holds the value of the cars edge.
+	Cars []*Car `json:"cars,omitempty"`
+	// Collectibles holds the value of the collectibles edge.
+	Collectibles []*Collectible `json:"collectibles,omitempty"`
+	// CryptoAccounts holds the value of the crypto_accounts edge.
+	CryptoAccounts []*CryptoAccount `json:"crypto_accounts,omitempty"`
+	// Loans holds the value of the loans edge.
+	Loans []*Loan `json:"loans,omitempty"`
+	// PrivateShares holds the value of the private_shares edge.
+	PrivateShares []*PrivateShare `json:"private_shares,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [6]bool
+}
+
+// BankAccountsOrErr returns the BankAccounts value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) BankAccountsOrErr() ([]*BankAccount, error) {
+	if e.loadedTypes[0] {
+		return e.BankAccounts, nil
+	}
+	return nil, &NotLoadedError{edge: "bank_accounts"}
+}
+
+// CarsOrErr returns the Cars value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) CarsOrErr() ([]*Car, error) {
+	if e.loadedTypes[1] {
+		return e.Cars, nil
+	}
+	return nil, &NotLoadedError{edge: "cars"}
+}
+
+// CollectiblesOrErr returns the Collectibles value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) CollectiblesOrErr() ([]*Collectible, error) {
+	if e.loadedTypes[2] {
+		return e.Collectibles, nil
+	}
+	return nil, &NotLoadedError{edge: "collectibles"}
+}
+
+// CryptoAccountsOrErr returns the CryptoAccounts value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) CryptoAccountsOrErr() ([]*CryptoAccount, error) {
+	if e.loadedTypes[3] {
+		return e.CryptoAccounts, nil
+	}
+	return nil, &NotLoadedError{edge: "crypto_accounts"}
+}
+
+// LoansOrErr returns the Loans value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) LoansOrErr() ([]*Loan, error) {
+	if e.loadedTypes[4] {
+		return e.Loans, nil
+	}
+	return nil, &NotLoadedError{edge: "loans"}
+}
+
+// PrivateSharesOrErr returns the PrivateShares value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) PrivateSharesOrErr() ([]*PrivateShare, error) {
+	if e.loadedTypes[5] {
+		return e.PrivateShares, nil
+	}
+	return nil, &NotLoadedError{edge: "private_shares"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -26,10 +115,12 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldID, user.FieldAge:
+		case user.FieldID:
 			values[i] = new(sql.NullInt64)
-		case user.FieldName:
+		case user.FieldFirstName, user.FieldLastName, user.FieldEmail, user.FieldPassword, user.FieldPhoneNumber, user.FieldAddress:
 			values[i] = new(sql.NullString)
+		case user.FieldCreatedAt, user.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
 		}
@@ -50,22 +141,88 @@ func (u *User) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			u.ID = int(value.Int64)
-		case user.FieldAge:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field age", values[i])
-			} else if value.Valid {
-				u.Age = int(value.Int64)
-			}
-		case user.FieldName:
+			u.ID = uint(value.Int64)
+		case user.FieldFirstName:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
+				return fmt.Errorf("unexpected type %T for field first_name", values[i])
 			} else if value.Valid {
-				u.Name = value.String
+				u.FirstName = value.String
+			}
+		case user.FieldLastName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field last_name", values[i])
+			} else if value.Valid {
+				u.LastName = value.String
+			}
+		case user.FieldEmail:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field email", values[i])
+			} else if value.Valid {
+				u.Email = value.String
+			}
+		case user.FieldPassword:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field password", values[i])
+			} else if value.Valid {
+				u.Password = value.String
+			}
+		case user.FieldPhoneNumber:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field phone_number", values[i])
+			} else if value.Valid {
+				u.PhoneNumber = value.String
+			}
+		case user.FieldAddress:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field address", values[i])
+			} else if value.Valid {
+				u.Address = value.String
+			}
+		case user.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				u.CreatedAt = value.Time
+			}
+		case user.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				u.UpdatedAt = value.Time
 			}
 		}
 	}
 	return nil
+}
+
+// QueryBankAccounts queries the "bank_accounts" edge of the User entity.
+func (u *User) QueryBankAccounts() *BankAccountQuery {
+	return NewUserClient(u.config).QueryBankAccounts(u)
+}
+
+// QueryCars queries the "cars" edge of the User entity.
+func (u *User) QueryCars() *CarQuery {
+	return NewUserClient(u.config).QueryCars(u)
+}
+
+// QueryCollectibles queries the "collectibles" edge of the User entity.
+func (u *User) QueryCollectibles() *CollectibleQuery {
+	return NewUserClient(u.config).QueryCollectibles(u)
+}
+
+// QueryCryptoAccounts queries the "crypto_accounts" edge of the User entity.
+func (u *User) QueryCryptoAccounts() *CryptoAccountQuery {
+	return NewUserClient(u.config).QueryCryptoAccounts(u)
+}
+
+// QueryLoans queries the "loans" edge of the User entity.
+func (u *User) QueryLoans() *LoanQuery {
+	return NewUserClient(u.config).QueryLoans(u)
+}
+
+// QueryPrivateShares queries the "private_shares" edge of the User entity.
+func (u *User) QueryPrivateShares() *PrivateShareQuery {
+	return NewUserClient(u.config).QueryPrivateShares(u)
 }
 
 // Update returns a builder for updating this User.
@@ -91,11 +248,29 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
-	builder.WriteString("age=")
-	builder.WriteString(fmt.Sprintf("%v", u.Age))
+	builder.WriteString("first_name=")
+	builder.WriteString(u.FirstName)
 	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(u.Name)
+	builder.WriteString("last_name=")
+	builder.WriteString(u.LastName)
+	builder.WriteString(", ")
+	builder.WriteString("email=")
+	builder.WriteString(u.Email)
+	builder.WriteString(", ")
+	builder.WriteString("password=")
+	builder.WriteString(u.Password)
+	builder.WriteString(", ")
+	builder.WriteString("phone_number=")
+	builder.WriteString(u.PhoneNumber)
+	builder.WriteString(", ")
+	builder.WriteString("address=")
+	builder.WriteString(u.Address)
+	builder.WriteString(", ")
+	builder.WriteString("created_at=")
+	builder.WriteString(u.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

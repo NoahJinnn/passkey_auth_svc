@@ -4,23 +4,36 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/hellohq/hqservice/ent/bankaccount"
+	"github.com/hellohq/hqservice/ent/car"
+	"github.com/hellohq/hqservice/ent/collectible"
+	"github.com/hellohq/hqservice/ent/cryptoaccount"
+	"github.com/hellohq/hqservice/ent/loan"
 	"github.com/hellohq/hqservice/ent/predicate"
+	"github.com/hellohq/hqservice/ent/privateshare"
 	"github.com/hellohq/hqservice/ent/user"
 )
 
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx        *QueryContext
-	order      []OrderFunc
-	inters     []Interceptor
-	predicates []predicate.User
+	ctx                *QueryContext
+	order              []OrderFunc
+	inters             []Interceptor
+	predicates         []predicate.User
+	withBankAccounts   *BankAccountQuery
+	withCars           *CarQuery
+	withCollectibles   *CollectibleQuery
+	withCryptoAccounts *CryptoAccountQuery
+	withLoans          *LoanQuery
+	withPrivateShares  *PrivateShareQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -57,6 +70,138 @@ func (uq *UserQuery) Order(o ...OrderFunc) *UserQuery {
 	return uq
 }
 
+// QueryBankAccounts chains the current query on the "bank_accounts" edge.
+func (uq *UserQuery) QueryBankAccounts() *BankAccountQuery {
+	query := (&BankAccountClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(bankaccount.Table, bankaccount.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.BankAccountsTable, user.BankAccountsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCars chains the current query on the "cars" edge.
+func (uq *UserQuery) QueryCars() *CarQuery {
+	query := (&CarClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(car.Table, car.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CarsTable, user.CarsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCollectibles chains the current query on the "collectibles" edge.
+func (uq *UserQuery) QueryCollectibles() *CollectibleQuery {
+	query := (&CollectibleClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(collectible.Table, collectible.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CollectiblesTable, user.CollectiblesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCryptoAccounts chains the current query on the "crypto_accounts" edge.
+func (uq *UserQuery) QueryCryptoAccounts() *CryptoAccountQuery {
+	query := (&CryptoAccountClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(cryptoaccount.Table, cryptoaccount.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CryptoAccountsTable, user.CryptoAccountsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLoans chains the current query on the "loans" edge.
+func (uq *UserQuery) QueryLoans() *LoanQuery {
+	query := (&LoanClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(loan.Table, loan.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.LoansTable, user.LoansColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPrivateShares chains the current query on the "private_shares" edge.
+func (uq *UserQuery) QueryPrivateShares() *PrivateShareQuery {
+	query := (&PrivateShareClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(privateshare.Table, privateshare.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PrivateSharesTable, user.PrivateSharesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first User entity from the query.
 // Returns a *NotFoundError when no User was found.
 func (uq *UserQuery) First(ctx context.Context) (*User, error) {
@@ -81,8 +226,8 @@ func (uq *UserQuery) FirstX(ctx context.Context) *User {
 
 // FirstID returns the first User ID from the query.
 // Returns a *NotFoundError when no User ID was found.
-func (uq *UserQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (uq *UserQuery) FirstID(ctx context.Context) (id uint, err error) {
+	var ids []uint
 	if ids, err = uq.Limit(1).IDs(setContextOp(ctx, uq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -94,7 +239,7 @@ func (uq *UserQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (uq *UserQuery) FirstIDX(ctx context.Context) int {
+func (uq *UserQuery) FirstIDX(ctx context.Context) uint {
 	id, err := uq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -132,8 +277,8 @@ func (uq *UserQuery) OnlyX(ctx context.Context) *User {
 // OnlyID is like Only, but returns the only User ID in the query.
 // Returns a *NotSingularError when more than one User ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (uq *UserQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (uq *UserQuery) OnlyID(ctx context.Context) (id uint, err error) {
+	var ids []uint
 	if ids, err = uq.Limit(2).IDs(setContextOp(ctx, uq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -149,7 +294,7 @@ func (uq *UserQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (uq *UserQuery) OnlyIDX(ctx context.Context) int {
+func (uq *UserQuery) OnlyIDX(ctx context.Context) uint {
 	id, err := uq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -177,7 +322,7 @@ func (uq *UserQuery) AllX(ctx context.Context) []*User {
 }
 
 // IDs executes the query and returns a list of User IDs.
-func (uq *UserQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (uq *UserQuery) IDs(ctx context.Context) (ids []uint, err error) {
 	if uq.ctx.Unique == nil && uq.path != nil {
 		uq.Unique(true)
 	}
@@ -189,7 +334,7 @@ func (uq *UserQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (uq *UserQuery) IDsX(ctx context.Context) []int {
+func (uq *UserQuery) IDsX(ctx context.Context) []uint {
 	ids, err := uq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -244,15 +389,87 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:     uq.config,
-		ctx:        uq.ctx.Clone(),
-		order:      append([]OrderFunc{}, uq.order...),
-		inters:     append([]Interceptor{}, uq.inters...),
-		predicates: append([]predicate.User{}, uq.predicates...),
+		config:             uq.config,
+		ctx:                uq.ctx.Clone(),
+		order:              append([]OrderFunc{}, uq.order...),
+		inters:             append([]Interceptor{}, uq.inters...),
+		predicates:         append([]predicate.User{}, uq.predicates...),
+		withBankAccounts:   uq.withBankAccounts.Clone(),
+		withCars:           uq.withCars.Clone(),
+		withCollectibles:   uq.withCollectibles.Clone(),
+		withCryptoAccounts: uq.withCryptoAccounts.Clone(),
+		withLoans:          uq.withLoans.Clone(),
+		withPrivateShares:  uq.withPrivateShares.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
 	}
+}
+
+// WithBankAccounts tells the query-builder to eager-load the nodes that are connected to
+// the "bank_accounts" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithBankAccounts(opts ...func(*BankAccountQuery)) *UserQuery {
+	query := (&BankAccountClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withBankAccounts = query
+	return uq
+}
+
+// WithCars tells the query-builder to eager-load the nodes that are connected to
+// the "cars" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithCars(opts ...func(*CarQuery)) *UserQuery {
+	query := (&CarClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withCars = query
+	return uq
+}
+
+// WithCollectibles tells the query-builder to eager-load the nodes that are connected to
+// the "collectibles" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithCollectibles(opts ...func(*CollectibleQuery)) *UserQuery {
+	query := (&CollectibleClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withCollectibles = query
+	return uq
+}
+
+// WithCryptoAccounts tells the query-builder to eager-load the nodes that are connected to
+// the "crypto_accounts" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithCryptoAccounts(opts ...func(*CryptoAccountQuery)) *UserQuery {
+	query := (&CryptoAccountClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withCryptoAccounts = query
+	return uq
+}
+
+// WithLoans tells the query-builder to eager-load the nodes that are connected to
+// the "loans" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithLoans(opts ...func(*LoanQuery)) *UserQuery {
+	query := (&LoanClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withLoans = query
+	return uq
+}
+
+// WithPrivateShares tells the query-builder to eager-load the nodes that are connected to
+// the "private_shares" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithPrivateShares(opts ...func(*PrivateShareQuery)) *UserQuery {
+	query := (&PrivateShareClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withPrivateShares = query
+	return uq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -261,12 +478,12 @@ func (uq *UserQuery) Clone() *UserQuery {
 // Example:
 //
 //	var v []struct {
-//		Age int `json:"age,omitempty"`
+//		FirstName string `json:"first_name,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		GroupBy(user.FieldAge).
+//		GroupBy(user.FieldFirstName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
@@ -284,11 +501,11 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Age int `json:"age,omitempty"`
+//		FirstName string `json:"first_name,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		Select(user.FieldAge).
+//		Select(user.FieldFirstName).
 //		Scan(ctx, &v)
 func (uq *UserQuery) Select(fields ...string) *UserSelect {
 	uq.ctx.Fields = append(uq.ctx.Fields, fields...)
@@ -331,8 +548,16 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 
 func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, error) {
 	var (
-		nodes = []*User{}
-		_spec = uq.querySpec()
+		nodes       = []*User{}
+		_spec       = uq.querySpec()
+		loadedTypes = [6]bool{
+			uq.withBankAccounts != nil,
+			uq.withCars != nil,
+			uq.withCollectibles != nil,
+			uq.withCryptoAccounts != nil,
+			uq.withLoans != nil,
+			uq.withPrivateShares != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*User).scanValues(nil, columns)
@@ -340,6 +565,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &User{config: uq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -351,7 +577,212 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := uq.withBankAccounts; query != nil {
+		if err := uq.loadBankAccounts(ctx, query, nodes,
+			func(n *User) { n.Edges.BankAccounts = []*BankAccount{} },
+			func(n *User, e *BankAccount) { n.Edges.BankAccounts = append(n.Edges.BankAccounts, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withCars; query != nil {
+		if err := uq.loadCars(ctx, query, nodes,
+			func(n *User) { n.Edges.Cars = []*Car{} },
+			func(n *User, e *Car) { n.Edges.Cars = append(n.Edges.Cars, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withCollectibles; query != nil {
+		if err := uq.loadCollectibles(ctx, query, nodes,
+			func(n *User) { n.Edges.Collectibles = []*Collectible{} },
+			func(n *User, e *Collectible) { n.Edges.Collectibles = append(n.Edges.Collectibles, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withCryptoAccounts; query != nil {
+		if err := uq.loadCryptoAccounts(ctx, query, nodes,
+			func(n *User) { n.Edges.CryptoAccounts = []*CryptoAccount{} },
+			func(n *User, e *CryptoAccount) { n.Edges.CryptoAccounts = append(n.Edges.CryptoAccounts, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withLoans; query != nil {
+		if err := uq.loadLoans(ctx, query, nodes,
+			func(n *User) { n.Edges.Loans = []*Loan{} },
+			func(n *User, e *Loan) { n.Edges.Loans = append(n.Edges.Loans, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withPrivateShares; query != nil {
+		if err := uq.loadPrivateShares(ctx, query, nodes,
+			func(n *User) { n.Edges.PrivateShares = []*PrivateShare{} },
+			func(n *User, e *PrivateShare) { n.Edges.PrivateShares = append(n.Edges.PrivateShares, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (uq *UserQuery) loadBankAccounts(ctx context.Context, query *BankAccountQuery, nodes []*User, init func(*User), assign func(*User, *BankAccount)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uint]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.Where(predicate.BankAccount(func(s *sql.Selector) {
+		s.Where(sql.InValues(user.BankAccountsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadCars(ctx context.Context, query *CarQuery, nodes []*User, init func(*User), assign func(*User, *Car)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uint]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.Where(predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.InValues(user.CarsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadCollectibles(ctx context.Context, query *CollectibleQuery, nodes []*User, init func(*User), assign func(*User, *Collectible)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uint]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.Where(predicate.Collectible(func(s *sql.Selector) {
+		s.Where(sql.InValues(user.CollectiblesColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadCryptoAccounts(ctx context.Context, query *CryptoAccountQuery, nodes []*User, init func(*User), assign func(*User, *CryptoAccount)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uint]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.Where(predicate.CryptoAccount(func(s *sql.Selector) {
+		s.Where(sql.InValues(user.CryptoAccountsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadLoans(ctx context.Context, query *LoanQuery, nodes []*User, init func(*User), assign func(*User, *Loan)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uint]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.Where(predicate.Loan(func(s *sql.Selector) {
+		s.Where(sql.InValues(user.LoansColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadPrivateShares(ctx context.Context, query *PrivateShareQuery, nodes []*User, init func(*User), assign func(*User, *PrivateShare)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uint]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.Where(predicate.PrivateShare(func(s *sql.Selector) {
+		s.Where(sql.InValues(user.PrivateSharesColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (uq *UserQuery) sqlCount(ctx context.Context) (int, error) {
@@ -364,7 +795,7 @@ func (uq *UserQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUint))
 	_spec.From = uq.sql
 	if unique := uq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

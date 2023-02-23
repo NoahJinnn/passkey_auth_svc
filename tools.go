@@ -4,6 +4,7 @@
 package tools
 
 import (
+	_ "ariga.io/entimport/cmd/entimport"
 	_ "entgo.io/ent/cmd/ent"
 	_ "github.com/bufbuild/buf/cmd/buf"
 	_ "github.com/cheekybits/genny"

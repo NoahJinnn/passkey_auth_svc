@@ -1,5 +1,5 @@
 //go:generate -command genny sh -c "$(git rev-parse --show-toplevel)/.gobincache/$DOLLAR{DOLLAR}0 \"$DOLLAR{DOLLAR}@\"" genny
-//go:generate genny -in=$GOFILE -out=gen.$GOFILE gen "HealthCheck=LinkTokenCreate,GetAccessToken,GetAccounts,GetAuthAccount,GetBalance,GetIdentity,GetSandboxAccessToken,GetTransactions"
+//go:generate genny -in=$GOFILE -out=gen.$GOFILE gen "HealthCheck=LinkTokenCreate,GetAccessToken,GetAccounts,GetAuthAccount,GetBalance,GetIdentity,GetSandboxAccessToken,GetTransactions,GetUsers,GetUserByID,CreateUser,UpdateUser"
 //go:generate sed -i -e "\\,^//go:generate,d" gen.$GOFILE
 
 package openapi

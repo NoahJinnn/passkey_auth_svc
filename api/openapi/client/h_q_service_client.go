@@ -12,7 +12,7 @@ import (
 	"github.com/hellohq/hqservice/api/openapi/client/operations"
 )
 
-// Default plaid connector HTTP client.
+// Default h q service HTTP client.
 var Default = NewHTTPClient(nil)
 
 const (
@@ -27,14 +27,14 @@ const (
 // DefaultSchemes are the default schemes found in Meta (info) section of spec file
 var DefaultSchemes = []string{"http"}
 
-// NewHTTPClient creates a new plaid connector HTTP client.
-func NewHTTPClient(formats strfmt.Registry) *PlaidConnector {
+// NewHTTPClient creates a new h q service HTTP client.
+func NewHTTPClient(formats strfmt.Registry) *HQService {
 	return NewHTTPClientWithConfig(formats, nil)
 }
 
-// NewHTTPClientWithConfig creates a new plaid connector HTTP client,
+// NewHTTPClientWithConfig creates a new h q service HTTP client,
 // using a customizable transport config.
-func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *PlaidConnector {
+func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *HQService {
 	// ensure nullable parameters have default
 	if cfg == nil {
 		cfg = DefaultTransportConfig()
@@ -45,14 +45,14 @@ func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *Pla
 	return New(transport, formats)
 }
 
-// New creates a new plaid connector client
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *PlaidConnector {
+// New creates a new h q service client
+func New(transport runtime.ClientTransport, formats strfmt.Registry) *HQService {
 	// ensure nullable parameters have default
 	if formats == nil {
 		formats = strfmt.Default
 	}
 
-	cli := new(PlaidConnector)
+	cli := new(HQService)
 	cli.Transport = transport
 	cli.Operations = operations.New(transport, formats)
 	return cli
@@ -97,15 +97,15 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 	return cfg
 }
 
-// PlaidConnector is a client for plaid connector
-type PlaidConnector struct {
+// HQService is a client for h q service
+type HQService struct {
 	Operations operations.ClientService
 
 	Transport runtime.ClientTransport
 }
 
 // SetTransport changes the transport on the client and all its subresources
-func (c *PlaidConnector) SetTransport(transport runtime.ClientTransport) {
+func (c *HQService) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 	c.Operations.SetTransport(transport)
 }

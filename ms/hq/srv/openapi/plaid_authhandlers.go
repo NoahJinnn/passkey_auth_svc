@@ -27,7 +27,6 @@ func (srv *httpServer) GetInfo(params op.GetInfoParams) middleware.Responder {
 			panic(err) // let the recovery middleware deal with this
 		}
 	})
-
 }
 
 func (srv *httpServer) GetSandboxAccessToken(params op.GetSandboxAccessTokenParams) middleware.Responder {
@@ -38,9 +37,8 @@ func (srv *httpServer) GetSandboxAccessToken(params op.GetSandboxAccessTokenPara
 	default:
 		return errGetSandboxAccessToken(log, err, codeInternal)
 	case err == nil:
-		return op.NewGetSandboxAccessTokenOK().WithPayload(apiGetSandboxAccessToken(t))
+		return op.NewGetSandboxAccessTokenOK().WithPayload(t.ToOAIResp())
 	}
-
 }
 
 // // For OAuth flows, the process looks as follows.
@@ -59,7 +57,7 @@ func (srv *httpServer) LinkTokenCreate(params op.LinkTokenCreateParams) middlewa
 	default:
 		return errLinkTokenCreate(log, err, codeInternal)
 	case err == nil:
-		return op.NewLinkTokenCreateOK().WithPayload(apiLinkTokenCreate(l))
+		return op.NewLinkTokenCreateOK().WithPayload(l.ToOAIResp())
 	}
 }
 
@@ -71,6 +69,6 @@ func (srv *httpServer) GetAccessToken(params op.GetAccessTokenParams) middleware
 	default:
 		return errGetAccessToken(log, err, codeInternal)
 	case err == nil:
-		return op.NewGetAccessTokenOK().WithPayload(apiGetAccessToken(t))
+		return op.NewGetAccessTokenOK().WithPayload(t.ToOAIResp())
 	}
 }

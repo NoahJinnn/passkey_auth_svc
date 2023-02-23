@@ -37,7 +37,6 @@ func New(ctx Ctx, cfg *config.PostgresConfig) (_ *Repo, err error) {
 		log.Fatalf("failed opening connection to postgres: %v", err)
 	}
 
-	defer client.Close()
 	// Run the auto migration tool.
 	if err := client.Schema.WriteTo(ctx, os.Stdout); err != nil {
 		log.Fatalf("failed printing schema changes: %v", err)

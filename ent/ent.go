@@ -11,6 +11,13 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/hellohq/hqservice/ent/assetinfo"
+	"github.com/hellohq/hqservice/ent/bankaccount"
+	"github.com/hellohq/hqservice/ent/car"
+	"github.com/hellohq/hqservice/ent/collectible"
+	"github.com/hellohq/hqservice/ent/cryptoaccount"
+	"github.com/hellohq/hqservice/ent/loan"
+	"github.com/hellohq/hqservice/ent/privateshare"
 	"github.com/hellohq/hqservice/ent/user"
 )
 
@@ -39,7 +46,14 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		user.Table: user.ValidColumn,
+		assetinfo.Table:     assetinfo.ValidColumn,
+		bankaccount.Table:   bankaccount.ValidColumn,
+		car.Table:           car.ValidColumn,
+		collectible.Table:   collectible.ValidColumn,
+		cryptoaccount.Table: cryptoaccount.ValidColumn,
+		loan.Table:          loan.ValidColumn,
+		privateshare.Table:  privateshare.ValidColumn,
+		user.Table:          user.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

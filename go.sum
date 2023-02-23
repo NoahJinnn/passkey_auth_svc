@@ -3,6 +3,8 @@
 4d63.com/gochecknoglobals v0.2.1/go.mod h1:KRE8wtJB3CXCsb1xy421JfTHIIbmT3U5ruxw2Qu8fSU=
 ariga.io/atlas v0.9.1-0.20230119145809-92243f7c55cb h1:mbsFtavDqGdYwdDpP50LGOOZ2hgyGoJcZeOpbgKMyu4=
 ariga.io/atlas v0.9.1-0.20230119145809-92243f7c55cb/go.mod h1:T230JFcENj4ZZzMkZrXFDSkv+2kXkUgpJ5FQQ5hMcKU=
+ariga.io/entimport v0.0.0-20220722070026-e5b57d96ab7c h1:qMQHrhOa2tzQ0b3GQZhDowWAEVPmpJQO6L1+pHcp1/Q=
+ariga.io/entimport v0.0.0-20220722070026-e5b57d96ab7c/go.mod h1:mykvrSs3zMMXq7yWPES2cULzoWElJStfKSEplRxryRo=
 bitbucket.org/creachadair/shell v0.0.6/go.mod h1:8Qqi/cYk7vPnsOePHroKXDJYmb5x7ENhtiFtfZq8K+M=
 bitbucket.org/creachadair/stringset v0.0.9/go.mod h1:t+4WcQ4+PXTa8aQdNKe40ZP6iwesoMFWAxPGd3UGjyY=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
@@ -52,6 +54,8 @@ cloud.google.com/go/storage v1.10.0/go.mod h1:FLPqc6j+Ki4BU591ie1oL6qBQGu2Bl/tZ9
 cloud.google.com/go/storage v1.14.0/go.mod h1:GrKmX003DSIwi9o29oFT7YDnHYwZoctc3fOKtUw0Xmo=
 contrib.go.opencensus.io/exporter/stackdriver v0.13.4/go.mod h1:aXENhDJ1Y4lIg4EUaVTwzvYETVNZk10Pu26tevFKLUc=
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
+entgo.io/contrib v0.2.1-0.20220405071655-7dbe27ee8fec h1:2tglVwq2CdtCyiyIpQWepaFryHKNzksvP2dEaOKNGhM=
+entgo.io/contrib v0.2.1-0.20220405071655-7dbe27ee8fec/go.mod h1:sQnSIhUoDHuXamN7gUYpJkscmszTNe07qaFmqHSzlA8=
 entgo.io/ent v0.11.8 h1:M/M0QL1CYCUSdqGRXUrXhFYSDRJPsOOrr+RLEej/gyQ=
 entgo.io/ent v0.11.8/go.mod h1:ericBi6Q8l3wBH1wEIDfKxw7rcQEuRPyBfbIzjtxJ18=
 github.com/Abirdcfly/dupword v0.0.9 h1:MxprGjKq3yDBICXDgEEsyGirIXfMYXkLNT/agPsE1tk=
@@ -758,11 +762,16 @@ github.com/jgautheron/goconst v0.0.0-20201117150253-ccae5bf973f3/go.mod h1:aAose
 github.com/jgautheron/goconst v1.4.0/go.mod h1:aAosetZ5zaeC/2EfMeRswtxUFBpe2Hr7HzkgX4fanO4=
 github.com/jgautheron/goconst v1.5.1 h1:HxVbL1MhydKs8R8n/HE5NPvzfaYmQJA3o879lE4+WcM=
 github.com/jgautheron/goconst v1.5.1/go.mod h1:aAosetZ5zaeC/2EfMeRswtxUFBpe2Hr7HzkgX4fanO4=
+github.com/jhump/gopoet v0.0.0-20190322174617-17282ff210b3/go.mod h1:me9yfT6IJSlOL3FCfrg+L6yzUEZ+5jW6WHt4Sk+UPUI=
+github.com/jhump/gopoet v0.1.0/go.mod h1:me9yfT6IJSlOL3FCfrg+L6yzUEZ+5jW6WHt4Sk+UPUI=
+github.com/jhump/goprotoc v0.5.0/go.mod h1:VrbvcYrQOrTi3i0Vf+m+oqQWk9l72mjkJCYo7UvLHRQ=
 github.com/jhump/protoreflect v1.6.1/go.mod h1:RZQ/lnuN+zqeRVpQigTwO6o0AJUkxbnSnpuG7toUTG4=
 github.com/jhump/protoreflect v1.8.1/go.mod h1:7GcYQDdMU/O/BBrl/cX6PNHpXh6cenjd8pneu5yW7Tg=
 github.com/jhump/protoreflect v1.8.2/go.mod h1:7GcYQDdMU/O/BBrl/cX6PNHpXh6cenjd8pneu5yW7Tg=
 github.com/jhump/protoreflect v1.8.3-0.20210302193947-8255811fc3c0/go.mod h1:7GcYQDdMU/O/BBrl/cX6PNHpXh6cenjd8pneu5yW7Tg=
+github.com/jhump/protoreflect v1.11.0/go.mod h1:U7aMIjN0NWq9swDP7xDdoMfRHb35uiuTd3Z9nFXJf5E=
 github.com/jhump/protoreflect v1.14.1 h1:N88q7JkxTHWFEqReuTsYH1dPIwXxA0ITNQp7avLY10s=
+github.com/jhump/protoreflect v1.14.1/go.mod h1:JytZfP5d0r8pVNLZvai7U/MCuTWITgrI4tTg7puQFKI=
 github.com/jingyugao/rowserrcheck v0.0.0-20191204022205-72ab7603b68a/go.mod h1:xRskid8CManxVta/ALEhJha/pweKBaVG6fWgc0yH25s=
 github.com/jingyugao/rowserrcheck v0.0.0-20210315055705-d907ca737bb1/go.mod h1:TOQpc2SLx6huPfoFGK3UOnEG+u02D3C1GeosjupAKCA=
 github.com/jingyugao/rowserrcheck v1.1.0/go.mod h1:TOQpc2SLx6huPfoFGK3UOnEG+u02D3C1GeosjupAKCA=

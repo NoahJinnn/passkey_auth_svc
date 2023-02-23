@@ -35,6 +35,20 @@ var (
 	}
 )
 
+type IPlaidSvc interface {
+	Info() *GetInfoResp
+	GetSandboxAccessToken(ctx Ctx, institutionID string) (*GetAccessTokenResp, error)
+	LinkTokenCreate(
+		ctx Ctx, paymentInitiation *plaid.LinkTokenCreateRequestPaymentInitiation,
+	) (*LinkTokenCreateResp, error)
+	GetAccessToken(ctx Ctx, publicToken string) (*GetAccessTokenResp, error)
+	GetAuthAccount(ctx Ctx) (*GetAuthAccountResp, error)
+	GetTransactions(ctx Ctx) (*GetTransactionsResp, error)
+	GetIdentity(ctx Ctx) (*GetIdentityResp, error)
+	GetBalance(ctx Ctx) (*GetAccountsResp, error)
+	GetAccounts(ctx Ctx) (*GetAccountsResp, error)
+}
+
 func NewPlaidClient(cfg Config) *plaid.APIClient {
 	// create Plaid client
 	configuration := plaid.NewConfiguration()
