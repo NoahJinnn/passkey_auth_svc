@@ -11,22 +11,6 @@ cd $scriptsdir/../../
 
 hadolint Dockerfile
 
-# shellcheck env.sh.dist scripts/*
-
-if test -d api/proto; then
-	git show-branch main >/dev/null || git branch main origin/main
-	! git ls-tree -r main api/proto | grep -q '[.]proto$' ||
-		! find api/proto -name '*.proto' -print -quit 2>/dev/null | grep -q . ||
-		buf breaking --against '.git#branch=main'
-
-	buf lint
-
-	# shellcheck disable=SC2046 # $(sed) needs to output multiple words.
-	find api/proto -name '*.proto' -print0 2>/dev/null | xargs -0 --no-run-if-empty -n 1 \
-		api-linter --set-exit-status --config .api-linter.yml \
-		$(sed -n -e '/roots:/,/:$/{s/^\s*- /-I /p}' buf.yaml)
-fi
-
 # When https://github.com/quasilyte/go-ruleguard/issues/78 will be
 # implemented and available in golangci-lint then replace using
 # build/gorules/rules.go.

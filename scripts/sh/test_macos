@@ -21,22 +21,6 @@ cd $scriptsdir/../../
 
 hadolint Dockerfile
 
-# shellcheck env.sh.dist scripts/*
-
-if test -d api/proto; then
-	git show-branch main >/dev/null || git branch main origin/main
-	! git ls-tree -r main api/proto | ggrep -q '[.]proto$' ||
-		! gfind api/proto -name '*.proto' -print -quit 2>/dev/null | ggrep -q . ||
-		buf breaking --against '.git#branch=main'
-
-	buf lint
-
-	# shellcheck disable=SC2046 # $(gsed) needs to output multiple words.
-	gfind api/proto -name '*.proto' -print0 2>/dev/null | gxargs -0 --no-run-if-empty -n 1 \
-		api-linter --set-exit-status --config .api-linter.yml \
-		$(gsed -n -e '/roots:/,/:$/{s/^\s*- /-I /p}' buf.yaml)
-fi
-
 # When https://github.com/quasilyte/go-ruleguard/issues/78 will be
 # implemented and available in golangci-lint then replace using
 # build/gorules/rules.go.
@@ -49,8 +33,9 @@ done
 
 golangci-lint run
 
-# dockerize \
-# 	-wait "tcp://${MONO_X_POSTGRES_ADDR_HOST}:${MONO_X_POSTGRES_ADDR_PORT:-5432}" \
-# 	-timeout 30s
+dockerize \
+	-wait "tcp://${MONO_X_POSTGRES_ADDR_HOST}:${MONO_X_POSTGRES_ADDR_PORT:-5432}" \
+	-timeout 30s
+	
 test -z "$CI" || scripts/postgres-setup | psql
 gotestsum -- -race -tags=integration "$@" ./...

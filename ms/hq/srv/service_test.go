@@ -41,7 +41,6 @@ func TestSmoke(tt *testing.T) {
 		BasePath: client.DefaultBasePath,
 	})
 	{ // health-check
-		// TODO: Find ways to debug test cases
 		resp, _ := openapiClient.Operations.HealthCheck(operations.NewHealthCheckParams())
 		t.Nil(resp)
 	}
