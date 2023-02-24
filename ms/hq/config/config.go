@@ -21,10 +21,15 @@ import (
 	"github.com/spf13/pflag"
 )
 
+// FlagSets for all CLI subcommands which use flags to set config values.
+type FlagSets struct {
+	Serve *pflag.FlagSet
+}
+
 //nolint:gochecknoglobals // Config, flags and metrics are global anyway.
 var (
 	ServiceName = "hq"
-	fs          *pflag.FlagSet
+	fs          FlagSets
 	shared      *sharedconfig.Shared
 	own         = &struct {
 		Port            appcfg.Port           `env:"HQ_ADDR_PORT"`
@@ -47,8 +52,8 @@ type Config struct {
 // Init updates config defaults (from env) and setup subcommands flags.
 //
 // Init must be called once before using this package.
-func Init(svcName string, flagsets *pflag.FlagSet, sharedCfg *sharedconfig.Shared) error {
-	fs, shared = flagsets, sharedCfg
+func Init(svcName string, sharedCfg *sharedconfig.Shared, flagsets FlagSets) error {
+	shared, fs = sharedCfg, flagsets
 	fromEnv := appcfg.NewFromEnv(sharedconfig.EnvPrefix)
 	err := appcfg.ProvideStruct(own, fromEnv)
 	if err != nil {
@@ -56,13 +61,13 @@ func Init(svcName string, flagsets *pflag.FlagSet, sharedCfg *sharedconfig.Share
 	}
 
 	pfx := svcName + "."
-	appcfg.AddPFlag(fs, &shared.AddrHostInt, "host-int", "internal host to serve")
-	appcfg.AddPFlag(fs, &own.Port, pfx+"port", "port to serve monolith introspection")
-	appcfg.AddPFlag(fs, &shared.XPostgresAddrHost, "postgres.host", "host to connect to PostgreSQL")
-	appcfg.AddPFlag(fs, &shared.XPostgresAddrPort, "postgres.port", "port to connect to PostgreSQL")
-	appcfg.AddPFlag(fs, &shared.XPostgresDBName, "postgres.dbname", "PostgreSQL database name")
-	appcfg.AddPFlag(fs, &own.PostgresUser, pfx+"postgres.user", "PostgreSQL username")
-	appcfg.AddPFlag(fs, &own.PostgresPass, pfx+"postgres.pass", "PostgreSQL password")
+	appcfg.AddPFlag(fs.Serve, &shared.AddrHostInt, "host-int", "internal host to serve")
+	appcfg.AddPFlag(fs.Serve, &own.Port, pfx+"port", "port to serve monolith introspection")
+	appcfg.AddPFlag(fs.Serve, &shared.XPostgresAddrHost, "postgres.host", "host to connect to PostgreSQL")
+	appcfg.AddPFlag(fs.Serve, &shared.XPostgresAddrPort, "postgres.port", "port to connect to PostgreSQL")
+	appcfg.AddPFlag(fs.Serve, &shared.XPostgresDBName, "postgres.dbname", "PostgreSQL database name")
+	appcfg.AddPFlag(fs.Serve, &own.PostgresUser, pfx+"postgres.user", "PostgreSQL username")
+	appcfg.AddPFlag(fs.Serve, &own.PostgresPass, pfx+"postgres.pass", "PostgreSQL password")
 
 	return nil
 }
@@ -84,7 +89,7 @@ func GetServe() (c *Config, err error) {
 	}
 
 	if err != nil {
-		return nil, appcfg.WrapPErr(err, fs, own)
+		return nil, appcfg.WrapPErr(err, fs.Serve, own)
 	}
 	return c, nil
 }
