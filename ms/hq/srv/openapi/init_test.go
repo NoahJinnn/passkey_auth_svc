@@ -1,4 +1,4 @@
-package srv
+package openapi_test
 
 import (
 	"bufio"
@@ -16,13 +16,14 @@ import (
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/check"
 	"github.com/powerman/structlog"
+	"github.com/prometheus/client_golang/prometheus"
 	_ "github.com/smartystreets/goconvey/convey"
 )
 
 func TestMain(m *testing.M) {
 	//nolint:errcheck
+	reg := prometheus.NewPedanticRegistry()
 	def.Init()
-	initMetrics(reg, "test")
 	app.InitMetrics(reg)
 	openapi.InitMetrics(reg, "test")
 	check.TestMain(m)
@@ -31,7 +32,6 @@ func TestMain(m *testing.M) {
 // Const shared by tests. Recommended naming scheme: <dataType><Variant>.
 var (
 	// nolint:unused
-	ctx         = def.NewContext((&Service{}).Name())
 	apiError500 = openapi.APIError(500, "internal error")
 )
 

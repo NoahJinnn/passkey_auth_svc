@@ -1,4 +1,4 @@
-package srv
+package openapi_test
 
 import (
 	"io"
