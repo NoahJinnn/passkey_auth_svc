@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/hellohq/hqservice/internal/sharedconfig"
-	hq "github.com/hellohq/hqservice/ms/hq/srv"
+	"github.com/hellohq/hqservice/ms/hq"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/powerman/appcfg"
 	"github.com/powerman/go-monolith-example/pkg/cobrax"
