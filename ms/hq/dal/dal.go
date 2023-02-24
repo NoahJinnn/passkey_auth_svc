@@ -48,3 +48,7 @@ func New(ctx Ctx, cfg *config.PostgresConfig) (_ *Repo, err error) {
 	}
 	return r, nil
 }
+
+func (r *Repo) Close() {
+	r.db.Close()
+}
