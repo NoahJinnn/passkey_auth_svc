@@ -7,7 +7,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/hellohq/hqservice/ms/hq/config"
+	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/check"

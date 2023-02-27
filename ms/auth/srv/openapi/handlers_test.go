@@ -7,7 +7,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/hellohq/hqservice/api/openapi/client/operations"
 	"github.com/hellohq/hqservice/api/openapi/model"
-	"github.com/hellohq/hqservice/ms/hq/srv/openapi"
+	"github.com/hellohq/hqservice/ms/auth/srv/openapi"
 	"github.com/powerman/check"
 )
 

@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/hellohq/hqservice/internal/sharedconfig"
-	"github.com/hellohq/hqservice/ms/hq"
+	auth "github.com/hellohq/hqservice/ms/auth"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/powerman/appcfg"
 	"github.com/powerman/go-monolith-example/pkg/cobrax"
@@ -33,7 +33,7 @@ type embeddedService interface {
 //nolint:gochecknoglobals // Main.
 var (
 	embeddedServices = []embeddedService{
-		&hq.Service{},
+		&auth.Service{},
 	}
 
 	log = structlog.New(structlog.KeyUnit, "main")

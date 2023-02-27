@@ -28,14 +28,14 @@ type FlagSets struct {
 
 //nolint:gochecknoglobals // Config, flags and metrics are global anyway.
 var (
-	ServiceName = "hq"
+	ServiceName = "auth"
 	fs          FlagSets
 	shared      *sharedconfig.Shared
 	own         = &struct {
-		Port            appcfg.Port           `env:"HQ_ADDR_PORT"`
-		MetricsAddrPort appcfg.Port           `env:"HQ_METRICS_ADDR_PORT"`
-		PostgresUser    appcfg.NotEmptyString `env:"HQ_POSTGRES_AUTH_LOGIN"`
-		PostgresPass    appcfg.NotEmptyString `env:"HQ_POSTGRES_AUTH_PASS"`
+		Port            appcfg.Port           `env:"AUTH_ADDR_PORT"`
+		MetricsAddrPort appcfg.Port           `env:"AUTH_METRICS_ADDR_PORT"`
+		PostgresUser    appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_LOGIN"`
+		PostgresPass    appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_PASS"`
 	}{
 		Port:            appcfg.MustPort(strconv.Itoa(sharedconfig.MonoPort)),
 		MetricsAddrPort: appcfg.MustPort(strconv.Itoa(sharedconfig.MetricsPort)),
@@ -44,7 +44,9 @@ var (
 )
 
 type Config struct {
+	AuthAddr        netx.Addr
 	BindAddr        netx.Addr
+	BindAddrInt     netx.Addr
 	BindMetricsAddr netx.Addr
 	Postgres        *PostgresConfig
 }
@@ -52,7 +54,7 @@ type Config struct {
 // Init updates config defaults (from env) and setup subcommands flags.
 //
 // Init must be called once before using this package.
-func Init(svcName string, sharedCfg *sharedconfig.Shared, flagsets FlagSets) error {
+func Init(sharedCfg *sharedconfig.Shared, flagsets FlagSets) error {
 	shared, fs = sharedCfg, flagsets
 	fromEnv := appcfg.NewFromEnv(sharedconfig.EnvPrefix)
 	err := appcfg.ProvideStruct(own, fromEnv)
@@ -60,14 +62,17 @@ func Init(svcName string, sharedCfg *sharedconfig.Shared, flagsets FlagSets) err
 		return err
 	}
 
-	pfx := svcName + "."
+	appcfg.AddPFlag(fs.Serve, &shared.AddrHost, "host", "host to serve")
 	appcfg.AddPFlag(fs.Serve, &shared.AddrHostInt, "host-int", "internal host to serve")
-	appcfg.AddPFlag(fs.Serve, &own.Port, pfx+"port", "port to serve monolith introspection")
+	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrHost, "auth.host", "ms/auth API host")
+	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrPort, "auth.port", "ms/auth API port")
+	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrPortInt, "auth.port-int", "ms/auth internal API port")
+	appcfg.AddPFlag(fs.Serve, &own.Port, "port", "port to serve monolith introspection")
 	appcfg.AddPFlag(fs.Serve, &shared.XPostgresAddrHost, "postgres.host", "host to connect to PostgreSQL")
 	appcfg.AddPFlag(fs.Serve, &shared.XPostgresAddrPort, "postgres.port", "port to connect to PostgreSQL")
 	appcfg.AddPFlag(fs.Serve, &shared.XPostgresDBName, "postgres.dbname", "PostgreSQL database name")
-	appcfg.AddPFlag(fs.Serve, &own.PostgresUser, pfx+"postgres.user", "PostgreSQL username")
-	appcfg.AddPFlag(fs.Serve, &own.PostgresPass, pfx+"postgres.pass", "PostgreSQL password")
+	appcfg.AddPFlag(fs.Serve, &own.PostgresUser, "postgres.user", "PostgreSQL username")
+	appcfg.AddPFlag(fs.Serve, &own.PostgresPass, "postgres.pass", "PostgreSQL password")
 
 	return nil
 }
@@ -77,7 +82,9 @@ func GetServe() (c *Config, err error) {
 	defer cleanup()
 
 	c = &Config{
-		BindAddr:        netx.NewAddr(shared.AddrHostInt.Value(&err), own.Port.Value(&err)),
+		AuthAddr:        netx.NewAddr(shared.AuthAddrHost.Value(&err), shared.AuthAddrPort.Value(&err)),
+		BindAddr:        netx.NewAddr(shared.AddrHost.Value(&err), shared.AuthAddrPort.Value(&err)),
+		BindAddrInt:     netx.NewAddr(shared.AddrHostInt.Value(&err), shared.AuthAddrPortInt.Value(&err)),
 		BindMetricsAddr: netx.NewAddr(shared.AddrHostInt.Value(&err), own.MetricsAddrPort.Value(&err)),
 		Postgres: NewPostgresConfig(pqx.Config{
 			Host:   shared.XPostgresAddrHost.Value(&err),
@@ -89,7 +96,7 @@ func GetServe() (c *Config, err error) {
 	}
 
 	if err != nil {
-		return nil, appcfg.WrapPErr(err, fs.Serve, own)
+		return nil, appcfg.WrapPErr(err, fs.Serve, own, shared)
 	}
 	return c, nil
 }
@@ -98,4 +105,5 @@ func GetServe() (c *Config, err error) {
 // any of them will panic.
 func cleanup() {
 	own = nil
+	shared = nil
 }

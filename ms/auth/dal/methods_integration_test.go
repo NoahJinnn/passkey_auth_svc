@@ -8,11 +8,6 @@ import (
 	"github.com/powerman/check"
 )
 
-// var (
-// 	errDupToken = errors.New(`duplicate key value violates unique constraint "access_tokens_pkey"`)
-// 	now         = time.Now().Truncate(time.Second)
-// )
-
 func TestUser(tt *testing.T) {
 	t := check.T(tt)
 	t.Parallel()
