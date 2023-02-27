@@ -21,7 +21,7 @@ const (
 )
 
 type Repo struct {
-	db  *ent.Client
+	Db  *ent.Client
 	log *structlog.Logger
 }
 type Ctx = context.Context
@@ -43,12 +43,12 @@ func New(ctx Ctx, cfg *config.PostgresConfig) (_ *Repo, err error) {
 	}
 
 	r := &Repo{
-		db:  client,
+		Db:  client,
 		log: log,
 	}
 	return r, nil
 }
 
 func (r *Repo) Close() {
-	r.db.Close()
+	r.Db.Close()
 }
