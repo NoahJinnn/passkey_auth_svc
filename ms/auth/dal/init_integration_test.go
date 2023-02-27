@@ -3,9 +3,9 @@ package dal_test
 import (
 	"testing"
 
-	"github.com/hellohq/hqservice/ms/hq/app"
-	"github.com/hellohq/hqservice/ms/hq/config"
-	"github.com/hellohq/hqservice/ms/hq/dal"
+	"github.com/hellohq/hqservice/ms/auth/app"
+	"github.com/hellohq/hqservice/ms/auth/config"
+	"github.com/hellohq/hqservice/ms/auth/dal"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/powerman/check"
 	"github.com/prometheus/client_golang/prometheus"

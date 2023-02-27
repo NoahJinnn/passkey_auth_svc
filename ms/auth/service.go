@@ -7,10 +7,10 @@ import (
 
 	"github.com/hellohq/hqservice/api/openapi/restapi"
 	"github.com/hellohq/hqservice/internal/sharedconfig"
-	"github.com/hellohq/hqservice/ms/hq/app"
-	"github.com/hellohq/hqservice/ms/hq/config"
-	"github.com/hellohq/hqservice/ms/hq/dal"
-	"github.com/hellohq/hqservice/ms/hq/srv/openapi"
+	"github.com/hellohq/hqservice/ms/auth/app"
+	"github.com/hellohq/hqservice/ms/auth/config"
+	"github.com/hellohq/hqservice/ms/auth/dal"
+	"github.com/hellohq/hqservice/ms/auth/srv/openapi"
 	"github.com/hellohq/hqservice/pkg/concurrent"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/hellohq/hqservice/pkg/serve"
@@ -41,7 +41,7 @@ func (s *Service) Init(sharedCfg *sharedconfig.Shared, _, serveCmd *cobra.Comman
 	initMetrics(reg, namespace)
 	openapi.InitMetrics(reg, namespace)
 
-	return config.Init(s.Name(), sharedCfg, config.FlagSets{
+	return config.Init(sharedCfg, config.FlagSets{
 		Serve: serveCmd.Flags(),
 	})
 }

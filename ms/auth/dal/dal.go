@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/ms/hq/config"
+	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/powerman/pqx"
 	"github.com/powerman/structlog"
 )

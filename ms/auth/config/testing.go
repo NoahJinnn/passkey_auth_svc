@@ -16,7 +16,7 @@ import (
 func MustGetServeTest() *Config {
 	sharedCfg, err := sharedconfig.Get()
 	must.NoErr(err)
-	err = Init("test", sharedCfg, FlagSets{
+	err = Init(sharedCfg, FlagSets{
 		Serve: pflag.NewFlagSet("", pflag.ContinueOnError),
 	})
 	must.NoErr(err)

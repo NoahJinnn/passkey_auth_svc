@@ -10,8 +10,8 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/hellohq/hqservice/api/openapi/client"
-	"github.com/hellohq/hqservice/ms/hq/app"
-	"github.com/hellohq/hqservice/ms/hq/srv/openapi"
+	"github.com/hellohq/hqservice/ms/auth/app"
+	"github.com/hellohq/hqservice/ms/auth/srv/openapi"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/check"

@@ -22,7 +22,6 @@ var (
 func TestMain(m *testing.M) {
 	def.Init()
 	os.Clearenv()
-	os.Setenv("MONO_TLS_CA_CERT", "ca.crt")
 	os.Setenv("MONO_X_POSTGRES_ADDR_HOST", "postgres")
 	testShared, _ = sharedconfig.Get()
 	check.TestMain(m)
@@ -30,7 +29,7 @@ func TestMain(m *testing.M) {
 
 func testGetServe(flags ...string) (*Config, error) {
 	own = testOwn
-	err := Init("test", testShared, testFlagsets)
+	err := Init(testShared, testFlagsets)
 	if err != nil {
 		return nil, err
 	}

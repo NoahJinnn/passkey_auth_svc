@@ -6,7 +6,7 @@ import (
 
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ent/user"
-	dom "github.com/hellohq/hqservice/ms/hq/app"
+	dom "github.com/hellohq/hqservice/ms/auth/app"
 )
 
 func (repo *Repo) GetAllUsers(ctx Ctx) ([]*dom.User, error) {
