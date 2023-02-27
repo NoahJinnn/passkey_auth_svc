@@ -31,12 +31,12 @@ func Test(t *testing.T) {
 		require(t, "PostgresPass")
 		os.Setenv("MONO_AUTH_POSTGRES_AUTH_PASS", "authpass")
 	})
-	// t.Run("default", func(tt *testing.T) {
-	// 	t := check.T(tt)
-	// 	c, err := testGetServe()
-	// 	t.Nil(err)
-	// 	t.DeepEqual(c, want)
-	// })
+	t.Run("default", func(tt *testing.T) {
+		t := check.T(tt)
+		c, err := testGetServe()
+		t.Nil(err)
+		t.DeepEqual(c, want)
+	})
 	t.Run("constraint", func(tt *testing.T) {
 		t := check.T(tt)
 		constraint(t, "MONO_AUTH_POSTGRES_AUTH_LOGIN", "", `^PostgresUser .* empty`)

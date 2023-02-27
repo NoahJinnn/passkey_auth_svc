@@ -8,7 +8,6 @@ import (
 	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/must"
-	"github.com/powerman/pqx"
 	"github.com/spf13/pflag"
 )
 
@@ -27,13 +26,6 @@ func MustGetServeTest() *Config {
 	const host = "localhost"
 	cfg.BindAddr = netx.NewAddr(host, netx.UnusedTCPPort(host))
 	cfg.BindMetricsAddr = netx.NewAddr(hostInt, 0)
-	cfg.Postgres = NewPostgresConfig(pqx.Config{
-		Host:   shared.XPostgresAddrHost.Value(&err),
-		Port:   shared.XPostgresAddrPort.Value(&err),
-		DBName: shared.XPostgresDBName.Value(&err),
-		User:   own.PostgresUser.Value(&err),
-		Pass:   own.PostgresPass.Value(&err),
-	})
 
 	rootDir, err := os.Getwd()
 	must.NoErr(err)

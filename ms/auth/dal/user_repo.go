@@ -10,7 +10,7 @@ import (
 )
 
 func (repo *Repo) GetAllUsers(ctx Ctx) ([]*dom.User, error) {
-	eus, err := repo.db.User.
+	eus, err := repo.Db.User.
 		Query().
 		All(ctx)
 
@@ -25,7 +25,7 @@ func (repo *Repo) GetAllUsers(ctx Ctx) ([]*dom.User, error) {
 }
 
 func (repo *Repo) GetUserById(ctx Ctx, id uint) (*dom.User, error) {
-	eu, err := repo.db.User.
+	eu, err := repo.Db.User.
 		Query().
 		Where(user.ID(id)).
 		Only(ctx)
@@ -41,7 +41,7 @@ func (repo *Repo) GetUserById(ctx Ctx, id uint) (*dom.User, error) {
 }
 
 func (repo *Repo) CreateUser(ctx Ctx, u *dom.User) (*ent.User, error) {
-	eu, err := repo.db.User.
+	eu, err := repo.Db.User.
 		Create().
 		SetFirstName(u.FirstName).
 		SetLastName(u.LastName).
@@ -60,7 +60,7 @@ func (repo *Repo) CreateUser(ctx Ctx, u *dom.User) (*ent.User, error) {
 }
 
 func (repo *Repo) UpdateUser(ctx Ctx, u *dom.User) (*ent.User, error) {
-	eu, err := repo.db.User.
+	eu, err := repo.Db.User.
 		UpdateOneID(u.ID).
 		SetFirstName(u.FirstName).
 		SetLastName(u.LastName).
