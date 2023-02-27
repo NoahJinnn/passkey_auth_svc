@@ -18,7 +18,7 @@ func TestMain(m *testing.M) {
 	def.Init()
 	reg := prometheus.NewPedanticRegistry()
 	app.InitMetrics(reg)
-	dal.InitMetrics(reg)
+	dal.InitMetrics(reg, "test")
 	cfg = config.MustGetServeTest()
 	check.TestMain(m)
 }
