@@ -16,8 +16,8 @@ services:
       - "${mono_postgres_tls_cert}:/dev.crt"
       - "${mono_postgres_tls_key}:/dev.key"
     environment:
-      POSTGRES_USER: "${MONO_HQ_POSTGRES_AUTH_LOGIN}"
-      POSTGRES_PASSWORD: "${MONO_HQ_POSTGRES_AUTH_PASS}"
+      POSTGRES_USER: "${MONO_AUTH_POSTGRES_AUTH_LOGIN}"
+      POSTGRES_PASSWORD: "${MONO_AUTH_POSTGRES_AUTH_PASS}"
     entrypoint:
       - bash
       - -c
@@ -37,8 +37,8 @@ services:
   #   volumes:
   #     - "./scripts/postgres-setup:/usr/local/bin/postgres-setup"
   #   environment:
-  #     MONO_HQ_POSTGRES_AUTH_LOGIN: "${MONO_HQ_POSTGRES_AUTH_LOGIN}"
-  #     MONO_HQ_POSTGRES_AUTH_PASS: "${MONO_HQ_POSTGRES_AUTH_PASS}"
+  #     MONO_AUTH_POSTGRES_AUTH_LOGIN: "${MONO_AUTH_POSTGRES_AUTH_LOGIN}"
+  #     MONO_AUTH_POSTGRES_AUTH_PASS: "${MONO_AUTH_POSTGRES_AUTH_PASS}"
   #     PGHOST: "postgres"
   #     PGUSER: "postgres"
   #     PGPASSWORD: "postgres"
@@ -61,21 +61,21 @@ services:
   #   container_name: hqservice
   #   restart: always
   #   ports:
-  #     - "${MONO_HQ_ADDR_PORT:-0}:17000"
+  #     - "${MONO_AUTH_ADDR_PORT:-0}:17000"
   #   volumes:
   #     - "${MONO_TLS_CA_CERT}:/ca.crt"
-  #     - "${MONO_HQ_TLS_CERT}:/auth.crt"
-  #     - "${MONO_HQ_TLS_CERT_INT}:/auth-int.crt"
-  #     - "${MONO_HQ_TLS_KEY}:/auth.key"
-  #     - "${MONO_HQ_TLS_KEY_INT}:/auth-int.key"
+  #     - "${MONO_AUTH_TLS_CERT}:/auth.crt"
+  #     - "${MONO_AUTH_TLS_CERT_INT}:/auth-int.crt"
+  #     - "${MONO_AUTH_TLS_KEY}:/auth.key"
+  #     - "${MONO_AUTH_TLS_KEY_INT}:/auth-int.key"
   #   environment:
   #     MONO_ADDR_HOST: "${MONO_ADDR_HOST}"
   #     MONO_ADDR_HOST_INT: "${MONO_ADDR_HOST_INT}"
   #     MONO_TLS_CA_CERT: "/ca.crt"
   #     MONO_X_POSTGRES_ADDR_HOST: "postgres"
-  #     MONO_HQ_POSTGRES_AUTH_LOGIN: "${MONO_HQ_POSTGRES_AUTH_LOGIN}"
-  #     MONO_HQ_POSTGRES_AUTH_PASS: "${MONO_HQ_POSTGRES_AUTH_PASS}"
-  #     MONO_HQ_TLS_CERT: "/auth.crt"
-  #     MONO_HQ_TLS_CERT_INT: "/auth-int.crt"
-  #     MONO_HQ_TLS_KEY: "/auth.key"
-  #     MONO_HQ_TLS_KEY_INT: "/auth-int.key"
+  #     MONO_AUTH_POSTGRES_AUTH_LOGIN: "${MONO_AUTH_POSTGRES_AUTH_LOGIN}"
+  #     MONO_AUTH_POSTGRES_AUTH_PASS: "${MONO_AUTH_POSTGRES_AUTH_PASS}"
+  #     MONO_AUTH_TLS_CERT: "/auth.crt"
+  #     MONO_AUTH_TLS_CERT_INT: "/auth-int.crt"
+  #     MONO_AUTH_TLS_KEY: "/auth.key"
+  #     MONO_AUTH_TLS_KEY_INT: "/auth-int.key"

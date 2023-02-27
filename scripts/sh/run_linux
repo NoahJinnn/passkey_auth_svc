@@ -3,7 +3,8 @@
 scriptsdir=$( dirname -- "$0"; )
 cd $scriptsdir/../../
 
-source env.sh
+source env.sh # Bind env vars that need for local development
+
 if ! command -v doppler &> /dev/null; then
     echo "Doppler is not installed or not in PATH, please run 'task scripts:install:doppler' and try again"
 

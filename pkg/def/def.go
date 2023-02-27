@@ -3,7 +3,6 @@ package def
 
 import (
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/powerman/getenv"
@@ -21,16 +20,11 @@ func init() { //nolint:gochecknoinits // Ensure time.Now() assigned to global va
 // It provides common initialization for both commands and tests.
 func Init() error {
 	// Make sure no one occasionally uses global objects.
-	http.DefaultServeMux = nil
 	prometheus.DefaultRegisterer = nil
 	prometheus.DefaultGatherer = nil
-
 	must.AbortIf = must.PanicIf
-
 	sensitive.Redact()
-
 	setupLog()
-
 	if hostnameErr != nil {
 		return fmt.Errorf("os.Hostname: %w", hostnameErr)
 	}

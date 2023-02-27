@@ -25,17 +25,27 @@ type Shared struct {
 	XPostgresAddrHost appcfg.NotEmptyString `env:"X_POSTGRES_ADDR_HOST"`
 	XPostgresAddrPort appcfg.Port           `env:"X_POSTGRES_ADDR_PORT"`
 	XPostgresDBName   appcfg.NotEmptyString `env:"X_POSTGRES_DB_NAME"`
+	AuthAddrHost      appcfg.NotEmptyString `env:"AUTH_ADDR_HOST"`
+	AuthAddrHostInt   appcfg.NotEmptyString `env:"AUTH_ADDR_HOST_INT"`
+	AuthAddrPort      appcfg.Port           `env:"AUTH_ADDR_PORT"`
+	AuthAddrPortInt   appcfg.Port           `env:"AUTH_ADDR_PORT_INT"`
 }
 
 // Default ports.
 const (
 	MonoPort = 17000 + iota
 	MetricsPort
+	AuthPort
+	AuthPortInt
 )
 
 var shared = &Shared{ //nolint:gochecknoglobals // Config is global anyway.
 	AddrHost:          appcfg.MustNotEmptyString(def.Hostname),
 	AddrHostInt:       appcfg.MustNotEmptyString(def.Hostname),
+	AuthAddrHost:      appcfg.MustNotEmptyString(def.Hostname),
+	AuthAddrHostInt:   appcfg.MustNotEmptyString(def.Hostname),
+	AuthAddrPort:      appcfg.MustPort(strconv.Itoa(AuthPort)),
+	AuthAddrPortInt:   appcfg.MustPort(strconv.Itoa(AuthPortInt)),
 	MetricsAddrPort:   appcfg.MustPort(strconv.Itoa(MetricsPort)),
 	XPostgresAddrPort: appcfg.MustPort("5432"),
 	XPostgresDBName:   appcfg.MustNotEmptyString("postgres"),
