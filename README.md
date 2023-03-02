@@ -247,9 +247,9 @@ Functionality Group 1: add/connect assets and debts
 - [ ] Implement authorization with `casbin`
 - [ ] Create `User` table
 - [ ] Create CRUD REST API for `User` model
-- [ ] Integration test for `auth` svc APIs
 - [ ] Create asset tables based on Kubera features
 - [ ] Create CRUD REST API for asset models
+- [ ] Integration test for `auth` svc APIs
 
 Functionality Group 2: Recap feature (‘reflections’)
 - [ ] Create DB models:
