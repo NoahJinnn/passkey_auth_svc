@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/hellohq/hqservice/api/openapi/model"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/sharedconfig"
@@ -86,6 +87,7 @@ type Config struct {
 // App implements interface Appl.
 type App struct {
 	cfg         *Config
+	wAuthn      *webauthn.WebAuthn
 	plaidClient *plaid.APIClient
 	repo        Repo
 }

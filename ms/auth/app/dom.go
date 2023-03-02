@@ -1,6 +1,9 @@
 package app
 
 import (
+	"encoding/binary"
+
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/hellohq/hqservice/api/openapi/model"
 	"github.com/hellohq/hqservice/ent"
 )
@@ -10,9 +13,14 @@ type User struct {
 	FirstName   string
 	LastName    string
 	Email       string
-	Password    string
 	PhoneNumber string
 	Address     string
+}
+
+type UserSession struct {
+	Username string
+	Webauthn *webauthn.SessionData
+	// U2F      *u2f.Challenge
 }
 
 func (u *User) FromEnt(eu *ent.User) *User {
@@ -21,7 +29,6 @@ func (u *User) FromEnt(eu *ent.User) *User {
 		FirstName:   eu.FirstName,
 		LastName:    eu.LastName,
 		Email:       eu.Email,
-		Password:    eu.Password,
 		PhoneNumber: eu.PhoneNumber,
 		Address:     eu.Address,
 	}
@@ -43,7 +50,6 @@ func (u *User) ToOAIResp() *model.User {
 		FirstName:   &u.FirstName,
 		LastName:    &u.LastName,
 		Email:       &u.Email,
-		Password:    u.Password,
 		PhoneNumber: u.PhoneNumber,
 		Address:     u.Address,
 	}
@@ -55,53 +61,30 @@ func (u *User) FromOAIReq(oaiU *model.User) *User {
 		FirstName:   *oaiU.FirstName,
 		LastName:    *oaiU.LastName,
 		Email:       *oaiU.Email,
-		Password:    oaiU.Password,
 		PhoneNumber: oaiU.PhoneNumber,
 		Address:     oaiU.Address,
 	}
 }
 
-type AssetInfo struct {
-	ID              uint
-	AccountInfo     struct{}
-	InstitutionInfo struct{}
-	AssetInfo       struct{}
-	SensibleData    string
-	Descriptions    string
+func (u *User) WebAuthnID() []byte {
+	a := make([]byte, 4)
+	h := uint64(u.ID)
+	binary.LittleEndian.PutUint64(a, h)
+	return a
 }
 
-type BankAccount struct {
-	ID          uint
-	UserID      uint
-	AssetInfoID uint
+func (u *User) WebAuthnName() string {
+	return "newUser"
 }
 
-type Car struct {
-	ID          uint
-	UserID      uint
-	AssetInfoID uint
+func (u *User) WebAuthnDisplayName() string {
+	return "New User"
 }
 
-type Collectible struct {
-	ID          uint
-	UserID      uint
-	AssetInfoID uint
+func (u *User) WebAuthnIcon() string {
+	return "https://pics.com/avatar.png"
 }
 
-type CryptoAccount struct {
-	ID          uint
-	UserID      uint
-	AssetInfoID uint
-}
-
-type Loan struct {
-	ID          uint
-	UserID      uint
-	AssetInfoID uint
-}
-
-type PrivateShare struct {
-	ID          uint
-	UserID      uint
-	AssetInfoID uint
+func (u *User) WebAuthnCredentials() []webauthn.Credential {
+	return []webauthn.Credential{}
 }

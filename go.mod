@@ -35,6 +35,7 @@ require (
 	entgo.io/ent v0.11.9
 	github.com/bufbuild/buf v1.15.1
 	github.com/cosmtrek/air v1.41.0
+	github.com/go-webauthn/webauthn v0.8.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.0
 	github.com/mattn/goveralls v0.0.11
 	github.com/powerman/dockerize v0.18.1
@@ -52,6 +53,7 @@ require (
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/creack/pty v1.1.18 // indirect
+	github.com/fxamacker/cbor/v2 v2.4.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/analysis v0.21.4 // indirect
@@ -60,8 +62,11 @@ require (
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/gofrs/uuid/v5 v5.0.0 // indirect
+	github.com/go-webauthn/revoke v0.1.9 // indirect
+	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang/glog v1.0.0 // indirect
 	github.com/golangci/golangci-lint v1.50.1 // indirect
+	github.com/google/go-tpm v0.3.3 // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect
 	github.com/hashicorp/hcl/v2 v2.13.0 // indirect
 	github.com/jhump/protoreflect v1.15.1 // indirect
@@ -81,6 +86,7 @@ require (
 	github.com/t-yuki/gocover-cobertura v0.0.0-20180217150009-aaee18c8195c // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/toqueteos/webbrowser v1.2.0 // indirect
+	github.com/x448/float16 v0.8.4 // indirect
 	github.com/zclconf/go-cty v1.8.0 // indirect
 	go.mongodb.org/mongo-driver v1.11.1 // indirect
 	go.opentelemetry.io/otel v1.14.0 // indirect

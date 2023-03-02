@@ -46,7 +46,6 @@ func (repo *Repo) CreateUser(ctx Ctx, u *dom.User) (*ent.User, error) {
 		SetFirstName(u.FirstName).
 		SetLastName(u.LastName).
 		SetEmail(u.Email).
-		SetPassword(u.Password).
 		SetPhoneNumber(u.PhoneNumber).
 		SetAddress(u.Address).
 		Save(ctx)
@@ -65,7 +64,6 @@ func (repo *Repo) UpdateUser(ctx Ctx, u *dom.User) (*ent.User, error) {
 		SetFirstName(u.FirstName).
 		SetLastName(u.LastName).
 		SetEmail(u.Email).
-		SetPassword(u.Password).
 		SetPhoneNumber(u.PhoneNumber).
 		SetAddress(u.Address).
 		Save(ctx)
