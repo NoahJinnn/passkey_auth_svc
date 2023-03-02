@@ -1,4 +1,3 @@
-DROP TABLE users;
 DROP TABLE bank_account;
 DROP TABLE crypto_account;
 DROP TABLE cars;

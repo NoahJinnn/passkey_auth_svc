@@ -1,15 +1,5 @@
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    phone_number TEXT,
-    address TEXT,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL
-);
 
+-- TODO: Create table based on Kubera features
 CREATE TABLE asset_info (
     id SERIAL PRIMARY KEY,
     account_info JSON NOT NULL,

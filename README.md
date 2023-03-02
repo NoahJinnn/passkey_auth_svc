@@ -1,47 +1,4 @@
-# Example Go monolith with embedded microservices and The Clean Architecture
-
-[![PkgGoDev](https://pkg.go.dev/badge/github.com/powerman/go-monolith-example)](https://pkg.go.dev/github.com/powerman/go-monolith-example)
-[![Go Report Card](https://goreportcard.com/badge/github.com/powerman/go-monolith-example)](https://goreportcard.com/report/github.com/powerman/go-monolith-example)
-[![CI/CD](https://github.com/powerman/go-monolith-example/workflows/CI/CD/badge.svg?event=push)](https://github.com/powerman/go-monolith-example/actions?query=workflow%3ACI%2FCD)
-[![Coverage Status](https://coveralls.io/repos/github/powerman/go-monolith-example/badge.svg?branch=master)](https://coveralls.io/github/powerman/go-monolith-example?branch=master)
-[![Project Layout](https://img.shields.io/badge/Standard%20Go-Project%20Layout-informational)](https://github.com/golang-standards/project-layout)
-[![Release](https://img.shields.io/github/v/release/powerman/go-monolith-example)](https://github.com/powerman/go-monolith-example/releases/latest)
-
-This project shows an example of how to implement monolith with embedded
-microservices (a.k.a. modular monolith). This way you'll get many upsides
-of monorepo without it complexity and at same time most of upsides of
-microservice architecture without some of it complexity.
-
-The embedded microservices use Uncle Bob's "Clean Architecture", check
-[Example Go microservice](https://github.com/powerman/go-service-example)
-for more details.
-
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**
-
-- [Overview](#overview)
-  - [Structure of Go packages](#structure-of-go-packages)
-  - [Features](#features)
-- [Development](#development)
-  - [Requirements](#requirements)
-  - [Setup](#setup)
-    - [Environment vars](#environment-vars)
-    - [Secrets](#secrets)
-    - [docker-compose](#docker-compose)
-    - [HTTPS](#https)
-  - [Usage](#usage)
-    - [Cheatsheet](#cheatsheet)
-- [Run](#run)
-  - [Docker](#docker)
-    - [Run local PostgresSQL DB](#run-local-postgressql-db)
-    - [Remove container storage](#remove-container-storage)
-  - [Source](#source)
-    - [Run directly, without building](#run-directly-without-building)
-    - [Build first, then run](#build-first-then-run)
-- [TODO](#todo)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+# HQ Service modulith
 
 ## Overview
 
@@ -285,15 +242,14 @@ $ ./bin/mono serve
 Functionality Group 1: add/connect assets and debts
 - [x] Plaid aggregator with dev env
 - [ ] Plaid aggregator with stg, prd env
-- [x] Create database `User` model, and other models using PostgreSQL
-      1. Bank Account
-      2. Crypto Account
-      3. Cars
-      4. Collectibles
-      5. Loans
-      6. Private Shares
-- [ ] Create CRUD REST API for all types of asset, debt and user model
-- [ ] Integration test APIs
+- [ ] Implement [webauthn](https://github.com/go-webauthn/webauthn) API
+- [ ] Implement [Lago](https://www.getlago.com/resources/compare/lago-vs-stripe) for billing service
+- [ ] Implement authorization with `casbin`
+- [ ] Create `User` table
+- [ ] Create CRUD REST API for `User` model
+- [ ] Integration test for `auth` svc APIs
+- [ ] Create asset tables based on Kubera features
+- [ ] Create CRUD REST API for asset models
 
 Functionality Group 2: Recap feature (‘reflections’)
 - [ ] Create DB models:
