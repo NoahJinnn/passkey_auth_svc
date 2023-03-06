@@ -18,6 +18,8 @@ import (
 	"github.com/go-openapi/spec"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+
+	"github.com/hellohq/hqservice/api/openapi/restapi/op/web_authn"
 )
 
 // NewHqServiceAPI creates a new HqService instance
@@ -84,6 +86,12 @@ func NewHqServiceAPI(spec *loads.Document) *HqServiceAPI {
 		}),
 		HealthCheckHandler: HealthCheckHandlerFunc(func(params HealthCheckParams) middleware.Responder {
 			return middleware.NotImplemented("operation HealthCheck has not yet been implemented")
+		}),
+		WebAuthnWebauthnRegFinalHandler: web_authn.WebauthnRegFinalHandlerFunc(func(params web_authn.WebauthnRegFinalParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation web_authn.WebauthnRegFinal has not yet been implemented")
+		}),
+		WebAuthnWebauthnRegInitHandler: web_authn.WebauthnRegInitHandlerFunc(func(params web_authn.WebauthnRegInitParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation web_authn.WebauthnRegInit has not yet been implemented")
 		}),
 	}
 }
@@ -156,6 +164,10 @@ type HqServiceAPI struct {
 	UpdateUserHandler UpdateUserHandler
 	// HealthCheckHandler sets the operation handler for the health check operation
 	HealthCheckHandler HealthCheckHandler
+	// WebAuthnWebauthnRegFinalHandler sets the operation handler for the webauthn reg final operation
+	WebAuthnWebauthnRegFinalHandler web_authn.WebauthnRegFinalHandler
+	// WebAuthnWebauthnRegInitHandler sets the operation handler for the webauthn reg init operation
+	WebAuthnWebauthnRegInitHandler web_authn.WebauthnRegInitHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -277,6 +289,12 @@ func (o *HqServiceAPI) Validate() error {
 	}
 	if o.HealthCheckHandler == nil {
 		unregistered = append(unregistered, "HealthCheckHandler")
+	}
+	if o.WebAuthnWebauthnRegFinalHandler == nil {
+		unregistered = append(unregistered, "web_authn.WebauthnRegFinalHandler")
+	}
+	if o.WebAuthnWebauthnRegInitHandler == nil {
+		unregistered = append(unregistered, "web_authn.WebauthnRegInitHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -424,6 +442,14 @@ func (o *HqServiceAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/health-check"] = NewHealthCheck(o.context, o.HealthCheckHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/webauthn/registration/finalize"] = web_authn.NewWebauthnRegFinal(o.context, o.WebAuthnWebauthnRegFinalHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/webauthn/registration/initialize"] = web_authn.NewWebauthnRegInit(o.context, o.WebAuthnWebauthnRegInitHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

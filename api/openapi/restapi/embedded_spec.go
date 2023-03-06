@@ -310,6 +310,84 @@ func init() {
           }
         }
       }
+    },
+    "/webauthn/registration/finalize": {
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          },
+          {
+            "BearerTokenAuth": []
+          }
+        ],
+        "description": "Finalize a registration with Webauthn using the WebAuthn API response to a ` + "`" + `navigator.credentials.create()` + "`" + ` call.\n",
+        "tags": [
+          "WebAuthn"
+        ],
+        "summary": "Finalize WebAuthn registration",
+        "operationId": "webauthnRegFinal",
+        "parameters": [
+          {
+            "description": "Fields need to update a area",
+            "name": "user",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PublicKeyCredentialAttestationResponse"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful registration",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "credential_id": {
+                  "description": "The ID of the created credential",
+                  "type": "string",
+                  "format": "base64"
+                },
+                "user_id": {
+                  "description": "The ID of the user on whose behalf a credential was created",
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/UUID4"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webauthn/registration/initialize": {
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          },
+          {
+            "BearerTokenAuth": []
+          }
+        ],
+        "description": "Initialize a registration with Webauthn. Returns a JSON representation of CredentialCreationOptions for use\nwith the Webauthn API's ` + "`" + `navigator.credentials.create()` + "`" + `.\n",
+        "tags": [
+          "WebAuthn"
+        ],
+        "summary": "Initialize WebAuthn registration",
+        "operationId": "webauthnRegInit",
+        "responses": {
+          "200": {
+            "description": "Challenge",
+            "schema": {
+              "$ref": "#/definitions/CredentialCreationOptions"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -535,6 +613,185 @@ func init() {
             "$ref": "#/definitions/NumbersInternational"
           }
         }
+      }
+    },
+    "CredentialCreationOptions": {
+      "description": "Options for credential creation with the WebAuthn API",
+      "type": "object",
+      "properties": {
+        "publicKey": {
+          "type": "object",
+          "properties": {
+            "attestation": {
+              "type": "string",
+              "enum": [
+                "none",
+                "indirect",
+                "direct",
+                "enterprise"
+              ],
+              "example": "none"
+            },
+            "authenticatorSelection": {
+              "type": "object",
+              "properties": {
+                "authenticatorAttachment": {
+                  "type": "string",
+                  "enum": [
+                    "platform",
+                    "cross-platform"
+                  ],
+                  "example": "platform"
+                },
+                "requireResidentKey": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "residentKey": {
+                  "type": "string",
+                  "enum": [
+                    "discouraged",
+                    "preferred",
+                    "required"
+                  ],
+                  "example": "preferred"
+                },
+                "userVerification": {
+                  "type": "string",
+                  "enum": [
+                    "discouraged",
+                    "preferred",
+                    "required"
+                  ],
+                  "example": "required"
+                }
+              }
+            },
+            "challenge": {
+              "type": "string",
+              "format": "base64url",
+              "example": "7qmkJUXR0dOFnsW48evX3qKdCzlGjvvqAAvMDN+KTN0="
+            },
+            "pubKeyCredParams": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "alg": {
+                    "type": "number"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "public-key"
+                    ]
+                  }
+                }
+              },
+              "example": [
+                {
+                  "alg": -7,
+                  "type": "public-key"
+                }
+              ]
+            },
+            "rp": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "localhost"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "Hanko Authentication Service"
+                }
+              }
+            },
+            "timeout": {
+              "type": "number",
+              "format": "int64",
+              "example": 60000
+            },
+            "user": {
+              "type": "object",
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "example": "user@example.com"
+                },
+                "id": {
+                  "type": "string",
+                  "example": "pPQT9rwJRD7gVncsnCDNyN"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "user@example.com"
+                }
+              }
+            }
+          }
+        }
+      },
+      "externalDocs": {
+        "url": "https://www.w3.org/TR/webauthn-2/#dictionary-makecredentialoptions"
+      }
+    },
+    "CredentialRequestOptions": {
+      "description": "Options for assertion generation with the WebAuthn API",
+      "type": "object",
+      "properties": {
+        "publicKey": {
+          "type": "object",
+          "properties": {
+            "allowCredentials": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "base64url",
+                    "example": "Mepptysj5ZZrTlg0qiLbsZ068OtQMeGVAikVy2n1hvvG..."
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "public-key"
+                    ],
+                    "example": "public-key"
+                  }
+                }
+              }
+            },
+            "challenge": {
+              "type": "string",
+              "format": "base64url",
+              "example": "qgOI+0KpGnl9NOqaT6dfsYvi96R87LgpErnvePeOgSU="
+            },
+            "rpId": {
+              "type": "string",
+              "example": "localhost"
+            },
+            "timeout": {
+              "type": "number",
+              "format": "int64",
+              "example": 60000
+            },
+            "userVerification": {
+              "type": "string",
+              "enum": [
+                "required",
+                "preferred",
+                "discouraged"
+              ],
+              "example": "required"
+            }
+          }
+        }
+      },
+      "externalDocs": {
+        "url": "https://www.w3.org/TR/webauthn-2/#dictionary-assertion-options"
       }
     },
     "Email": {
@@ -1061,6 +1318,52 @@ func init() {
         }
       }
     },
+    "PublicKeyCredentialAttestationResponse": {
+      "description": "WebAuthn API response to a navigator.credentials.create() call",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "_18q6IjW09tiM4NSbsZjocUtGx00Muv5mN6LZCelCMDD..."
+        },
+        "rawId": {
+          "type": "string",
+          "example": "_18q6IjW09tiM4NSbsZjocUtGx00Muv5mN6LZCelCMDD..."
+        },
+        "response": {
+          "type": "object",
+          "properties": {
+            "attestationObject": {
+              "type": "string",
+              "format": "base64url",
+              "example": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVjfSZYN..."
+            },
+            "clientDataJson": {
+              "type": "string",
+              "format": "base64url",
+              "example": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdl..."
+            },
+            "transports": {
+              "type": "string",
+              "enum": [
+                "usb",
+                "nfc",
+                "ble",
+                "internal"
+              ],
+              "example": "internal"
+            }
+          }
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "public-key"
+          ],
+          "example": "public-key"
+        }
+      }
+    },
     "Transaction": {
       "type": "object",
       "title": "Transaction",
@@ -1169,6 +1472,11 @@ func init() {
           "$ref": "#/definitions/NullableString"
         }
       }
+    },
+    "UUID4": {
+      "type": "string",
+      "format": "uuid4",
+      "example": "c339547d-e17d-4ba7-8a1d-b3d5a4d17c1c"
     },
     "User": {
       "type": "object",
@@ -1553,6 +1861,84 @@ func init() {
           }
         }
       }
+    },
+    "/webauthn/registration/finalize": {
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          },
+          {
+            "BearerTokenAuth": []
+          }
+        ],
+        "description": "Finalize a registration with Webauthn using the WebAuthn API response to a ` + "`" + `navigator.credentials.create()` + "`" + ` call.\n",
+        "tags": [
+          "WebAuthn"
+        ],
+        "summary": "Finalize WebAuthn registration",
+        "operationId": "webauthnRegFinal",
+        "parameters": [
+          {
+            "description": "Fields need to update a area",
+            "name": "user",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PublicKeyCredentialAttestationResponse"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful registration",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "credential_id": {
+                  "description": "The ID of the created credential",
+                  "type": "string",
+                  "format": "base64"
+                },
+                "user_id": {
+                  "description": "The ID of the user on whose behalf a credential was created",
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/UUID4"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webauthn/registration/initialize": {
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          },
+          {
+            "BearerTokenAuth": []
+          }
+        ],
+        "description": "Initialize a registration with Webauthn. Returns a JSON representation of CredentialCreationOptions for use\nwith the Webauthn API's ` + "`" + `navigator.credentials.create()` + "`" + `.\n",
+        "tags": [
+          "WebAuthn"
+        ],
+        "summary": "Initialize WebAuthn registration",
+        "operationId": "webauthnRegInit",
+        "responses": {
+          "200": {
+            "description": "Challenge",
+            "schema": {
+              "$ref": "#/definitions/CredentialCreationOptions"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -1777,6 +2163,392 @@ func init() {
           "items": {
             "$ref": "#/definitions/NumbersInternational"
           }
+        }
+      }
+    },
+    "CredentialCreationOptions": {
+      "description": "Options for credential creation with the WebAuthn API",
+      "type": "object",
+      "properties": {
+        "publicKey": {
+          "type": "object",
+          "properties": {
+            "attestation": {
+              "type": "string",
+              "enum": [
+                "none",
+                "indirect",
+                "direct",
+                "enterprise"
+              ],
+              "example": "none"
+            },
+            "authenticatorSelection": {
+              "type": "object",
+              "properties": {
+                "authenticatorAttachment": {
+                  "type": "string",
+                  "enum": [
+                    "platform",
+                    "cross-platform"
+                  ],
+                  "example": "platform"
+                },
+                "requireResidentKey": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "residentKey": {
+                  "type": "string",
+                  "enum": [
+                    "discouraged",
+                    "preferred",
+                    "required"
+                  ],
+                  "example": "preferred"
+                },
+                "userVerification": {
+                  "type": "string",
+                  "enum": [
+                    "discouraged",
+                    "preferred",
+                    "required"
+                  ],
+                  "example": "required"
+                }
+              }
+            },
+            "challenge": {
+              "type": "string",
+              "format": "base64url",
+              "example": "7qmkJUXR0dOFnsW48evX3qKdCzlGjvvqAAvMDN+KTN0="
+            },
+            "pubKeyCredParams": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CredentialCreationOptionsPublicKeyPubKeyCredParamsItems0"
+              },
+              "example": [
+                {
+                  "alg": -7,
+                  "type": "public-key"
+                }
+              ]
+            },
+            "rp": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "localhost"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "Hanko Authentication Service"
+                }
+              }
+            },
+            "timeout": {
+              "type": "number",
+              "format": "int64",
+              "example": 60000
+            },
+            "user": {
+              "type": "object",
+              "properties": {
+                "displayName": {
+                  "type": "string",
+                  "example": "user@example.com"
+                },
+                "id": {
+                  "type": "string",
+                  "example": "pPQT9rwJRD7gVncsnCDNyN"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "user@example.com"
+                }
+              }
+            }
+          }
+        }
+      },
+      "externalDocs": {
+        "url": "https://www.w3.org/TR/webauthn-2/#dictionary-makecredentialoptions"
+      }
+    },
+    "CredentialCreationOptionsPublicKey": {
+      "type": "object",
+      "properties": {
+        "attestation": {
+          "type": "string",
+          "enum": [
+            "none",
+            "indirect",
+            "direct",
+            "enterprise"
+          ],
+          "example": "none"
+        },
+        "authenticatorSelection": {
+          "type": "object",
+          "properties": {
+            "authenticatorAttachment": {
+              "type": "string",
+              "enum": [
+                "platform",
+                "cross-platform"
+              ],
+              "example": "platform"
+            },
+            "requireResidentKey": {
+              "type": "boolean",
+              "example": true
+            },
+            "residentKey": {
+              "type": "string",
+              "enum": [
+                "discouraged",
+                "preferred",
+                "required"
+              ],
+              "example": "preferred"
+            },
+            "userVerification": {
+              "type": "string",
+              "enum": [
+                "discouraged",
+                "preferred",
+                "required"
+              ],
+              "example": "required"
+            }
+          }
+        },
+        "challenge": {
+          "type": "string",
+          "format": "base64url",
+          "example": "7qmkJUXR0dOFnsW48evX3qKdCzlGjvvqAAvMDN+KTN0="
+        },
+        "pubKeyCredParams": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CredentialCreationOptionsPublicKeyPubKeyCredParamsItems0"
+          },
+          "example": [
+            {
+              "alg": -7,
+              "type": "public-key"
+            }
+          ]
+        },
+        "rp": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "example": "localhost"
+            },
+            "name": {
+              "type": "string",
+              "example": "Hanko Authentication Service"
+            }
+          }
+        },
+        "timeout": {
+          "type": "number",
+          "format": "int64",
+          "example": 60000
+        },
+        "user": {
+          "type": "object",
+          "properties": {
+            "displayName": {
+              "type": "string",
+              "example": "user@example.com"
+            },
+            "id": {
+              "type": "string",
+              "example": "pPQT9rwJRD7gVncsnCDNyN"
+            },
+            "name": {
+              "type": "string",
+              "example": "user@example.com"
+            }
+          }
+        }
+      }
+    },
+    "CredentialCreationOptionsPublicKeyAuthenticatorSelection": {
+      "type": "object",
+      "properties": {
+        "authenticatorAttachment": {
+          "type": "string",
+          "enum": [
+            "platform",
+            "cross-platform"
+          ],
+          "example": "platform"
+        },
+        "requireResidentKey": {
+          "type": "boolean",
+          "example": true
+        },
+        "residentKey": {
+          "type": "string",
+          "enum": [
+            "discouraged",
+            "preferred",
+            "required"
+          ],
+          "example": "preferred"
+        },
+        "userVerification": {
+          "type": "string",
+          "enum": [
+            "discouraged",
+            "preferred",
+            "required"
+          ],
+          "example": "required"
+        }
+      }
+    },
+    "CredentialCreationOptionsPublicKeyPubKeyCredParamsItems0": {
+      "type": "object",
+      "properties": {
+        "alg": {
+          "type": "number"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "public-key"
+          ]
+        }
+      }
+    },
+    "CredentialCreationOptionsPublicKeyRp": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "localhost"
+        },
+        "name": {
+          "type": "string",
+          "example": "Hanko Authentication Service"
+        }
+      }
+    },
+    "CredentialCreationOptionsPublicKeyUser": {
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "example": "user@example.com"
+        },
+        "id": {
+          "type": "string",
+          "example": "pPQT9rwJRD7gVncsnCDNyN"
+        },
+        "name": {
+          "type": "string",
+          "example": "user@example.com"
+        }
+      }
+    },
+    "CredentialRequestOptions": {
+      "description": "Options for assertion generation with the WebAuthn API",
+      "type": "object",
+      "properties": {
+        "publicKey": {
+          "type": "object",
+          "properties": {
+            "allowCredentials": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/CredentialRequestOptionsPublicKeyAllowCredentialsItems0"
+              }
+            },
+            "challenge": {
+              "type": "string",
+              "format": "base64url",
+              "example": "qgOI+0KpGnl9NOqaT6dfsYvi96R87LgpErnvePeOgSU="
+            },
+            "rpId": {
+              "type": "string",
+              "example": "localhost"
+            },
+            "timeout": {
+              "type": "number",
+              "format": "int64",
+              "example": 60000
+            },
+            "userVerification": {
+              "type": "string",
+              "enum": [
+                "required",
+                "preferred",
+                "discouraged"
+              ],
+              "example": "required"
+            }
+          }
+        }
+      },
+      "externalDocs": {
+        "url": "https://www.w3.org/TR/webauthn-2/#dictionary-assertion-options"
+      }
+    },
+    "CredentialRequestOptionsPublicKey": {
+      "type": "object",
+      "properties": {
+        "allowCredentials": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CredentialRequestOptionsPublicKeyAllowCredentialsItems0"
+          }
+        },
+        "challenge": {
+          "type": "string",
+          "format": "base64url",
+          "example": "qgOI+0KpGnl9NOqaT6dfsYvi96R87LgpErnvePeOgSU="
+        },
+        "rpId": {
+          "type": "string",
+          "example": "localhost"
+        },
+        "timeout": {
+          "type": "number",
+          "format": "int64",
+          "example": 60000
+        },
+        "userVerification": {
+          "type": "string",
+          "enum": [
+            "required",
+            "preferred",
+            "discouraged"
+          ],
+          "example": "required"
+        }
+      }
+    },
+    "CredentialRequestOptionsPublicKeyAllowCredentialsItems0": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "base64url",
+          "example": "Mepptysj5ZZrTlg0qiLbsZ068OtQMeGVAikVy2n1hvvG..."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "public-key"
+          ],
+          "example": "public-key"
         }
       }
     },
@@ -2304,6 +3076,77 @@ func init() {
         }
       }
     },
+    "PublicKeyCredentialAttestationResponse": {
+      "description": "WebAuthn API response to a navigator.credentials.create() call",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "_18q6IjW09tiM4NSbsZjocUtGx00Muv5mN6LZCelCMDD..."
+        },
+        "rawId": {
+          "type": "string",
+          "example": "_18q6IjW09tiM4NSbsZjocUtGx00Muv5mN6LZCelCMDD..."
+        },
+        "response": {
+          "type": "object",
+          "properties": {
+            "attestationObject": {
+              "type": "string",
+              "format": "base64url",
+              "example": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVjfSZYN..."
+            },
+            "clientDataJson": {
+              "type": "string",
+              "format": "base64url",
+              "example": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdl..."
+            },
+            "transports": {
+              "type": "string",
+              "enum": [
+                "usb",
+                "nfc",
+                "ble",
+                "internal"
+              ],
+              "example": "internal"
+            }
+          }
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "public-key"
+          ],
+          "example": "public-key"
+        }
+      }
+    },
+    "PublicKeyCredentialAttestationResponseResponse": {
+      "type": "object",
+      "properties": {
+        "attestationObject": {
+          "type": "string",
+          "format": "base64url",
+          "example": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVjfSZYN..."
+        },
+        "clientDataJson": {
+          "type": "string",
+          "format": "base64url",
+          "example": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdl..."
+        },
+        "transports": {
+          "type": "string",
+          "enum": [
+            "usb",
+            "nfc",
+            "ble",
+            "internal"
+          ],
+          "example": "internal"
+        }
+      }
+    },
     "Transaction": {
       "type": "object",
       "title": "Transaction",
@@ -2412,6 +3255,11 @@ func init() {
           "$ref": "#/definitions/NullableString"
         }
       }
+    },
+    "UUID4": {
+      "type": "string",
+      "format": "uuid4",
+      "example": "c339547d-e17d-4ba7-8a1d-b3d5a4d17c1c"
     },
     "User": {
       "type": "object",

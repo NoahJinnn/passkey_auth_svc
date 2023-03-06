@@ -11,6 +11,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 
 	"github.com/hellohq/hqservice/api/openapi/restapi/op"
+	"github.com/hellohq/hqservice/api/openapi/restapi/op/web_authn"
 )
 
 
@@ -108,6 +109,16 @@ func configureAPI(api *op.HqServiceAPI) http.Handler {
 	if api.HealthCheckHandler == nil {
 		api.HealthCheckHandler = op.HealthCheckHandlerFunc(func(params op.HealthCheckParams) middleware.Responder {
 			return middleware.NotImplemented("operation op.HealthCheck has not yet been implemented")
+		})
+	}
+	if api.WebAuthnWebauthnRegFinalHandler == nil {
+		api.WebAuthnWebauthnRegFinalHandler = web_authn.WebauthnRegFinalHandlerFunc(func(params web_authn.WebauthnRegFinalParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation web_authn.WebauthnRegFinal has not yet been implemented")
+		})
+	}
+	if api.WebAuthnWebauthnRegInitHandler == nil {
+		api.WebAuthnWebauthnRegInitHandler = web_authn.WebauthnRegInitHandlerFunc(func(params web_authn.WebauthnRegInitParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation web_authn.WebauthnRegInit has not yet been implemented")
 		})
 	}
 

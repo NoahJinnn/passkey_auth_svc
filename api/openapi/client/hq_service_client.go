@@ -9,7 +9,9 @@ import (
 	"github.com/go-openapi/runtime"
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+
 	"github.com/hellohq/hqservice/api/openapi/client/operations"
+	"github.com/hellohq/hqservice/api/openapi/client/web_authn"
 )
 
 // Default hq service HTTP client.
@@ -55,6 +57,7 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *HqService 
 	cli := new(HqService)
 	cli.Transport = transport
 	cli.Operations = operations.New(transport, formats)
+	cli.WebAuthn = web_authn.New(transport, formats)
 	return cli
 }
 
@@ -101,6 +104,8 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 type HqService struct {
 	Operations operations.ClientService
 
+	WebAuthn web_authn.ClientService
+
 	Transport runtime.ClientTransport
 }
 
@@ -108,4 +113,5 @@ type HqService struct {
 func (c *HqService) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 	c.Operations.SetTransport(transport)
+	c.WebAuthn.SetTransport(transport)
 }

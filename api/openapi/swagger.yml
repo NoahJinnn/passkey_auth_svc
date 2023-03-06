@@ -28,6 +28,173 @@ definitions:
         format: int32
       message:
         type: string
+  UUID4:
+    type: string
+    format: uuid4
+    example: c339547d-e17d-4ba7-8a1d-b3d5a4d17c1c
+
+  # Webauthn API
+  CredentialCreationOptions:
+    description: "Options for credential creation with the WebAuthn API"
+    externalDocs:
+      url: https://www.w3.org/TR/webauthn-2/#dictionary-makecredentialoptions
+    type: object
+    properties:
+      publicKey:
+        type: object
+        properties:
+          rp:
+            type: object
+            properties:
+              name:
+                type: string
+                example: Hanko Authentication Service
+              id:
+                type: string
+                example: localhost
+          user:
+            type: object
+            properties:
+              id:
+                type: string
+                example: pPQT9rwJRD7gVncsnCDNyN
+              name:
+                type: string
+                example: user@example.com
+              displayName:
+                type: string
+                example: user@example.com
+          challenge:
+            type: string
+            format: base64url
+            example: 7qmkJUXR0dOFnsW48evX3qKdCzlGjvvqAAvMDN+KTN0=
+          pubKeyCredParams:
+            type: array
+            items:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - public-key
+                alg:
+                  type: number
+            example:
+              - type: public-key
+                alg: -7
+          timeout:
+            type: number
+            format: int64
+            example: 60000
+          authenticatorSelection:
+            type: object
+            properties:
+              authenticatorAttachment:
+                type: string
+                enum:
+                  - platform
+                  - cross-platform
+                example: platform
+              requireResidentKey:
+                type: boolean
+                example: true
+              residentKey:
+                type: string
+                enum:
+                  - discouraged
+                  - preferred
+                  - required
+                example: preferred
+              userVerification:
+                type: string
+                enum:
+                  - discouraged
+                  - preferred
+                  - required
+                example: required
+          attestation:
+            type: string
+            enum:
+              - none
+              - indirect
+              - direct
+              - enterprise
+            example: none
+  CredentialRequestOptions:
+    description: "Options for assertion generation with the WebAuthn API"
+    externalDocs:
+      url: https://www.w3.org/TR/webauthn-2/#dictionary-assertion-options
+    type: object
+    properties:
+      publicKey:
+        type: object
+        properties:
+          challenge:
+            type: string
+            format: base64url
+            example: qgOI+0KpGnl9NOqaT6dfsYvi96R87LgpErnvePeOgSU=
+          timeout:
+            type: number
+            format: int64
+            example: 60000
+          rpId:
+            type: string
+            example: localhost
+          allowCredentials:
+            type: array
+            items:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - public-key
+                  example: public-key
+                id:
+                  type: string
+                  format: base64url
+                  example: Mepptysj5ZZrTlg0qiLbsZ068OtQMeGVAikVy2n1hvvG...
+          userVerification:
+            type: string
+            enum:
+              - required
+              - preferred
+              - discouraged
+            example: required
+  PublicKeyCredentialAttestationResponse:
+    description: "WebAuthn API response to a navigator.credentials.create() call"
+    type: object
+    properties:
+      id:
+        type: string
+        example: _18q6IjW09tiM4NSbsZjocUtGx00Muv5mN6LZCelCMDD...
+      rawId:
+        type: string
+        example: _18q6IjW09tiM4NSbsZjocUtGx00Muv5mN6LZCelCMDD...
+      type:
+        type: string
+        enum:
+          - public-key
+        example: public-key
+      response:
+        type: object
+        properties:
+          clientDataJson:
+            type: string
+            format: base64url
+            example: eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdl...
+          attestationObject:
+            type: string
+            format: base64url
+            example: o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVjfSZYN...
+          transports:
+            type: string
+            enum:
+              - usb
+              - nfc
+              - ble
+              - internal
+            example: internal
 
   # Plaid API
   AccountBalance:
@@ -628,7 +795,7 @@ definitions:
   mapstringinterface:
     type: object
     title: mapstringinterface
-# User API
+  # User API
   User:
     type: object
     properties:
@@ -807,12 +974,12 @@ paths:
             $ref: "#/definitions/User"
         default: { $ref: "#/responses/GenericError" }
       parameters:
-      - description: Fields need to update a area
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/User'
+        - description: Fields need to update a area
+          in: body
+          name: user
+          required: true
+          schema:
+            $ref: "#/definitions/User"
 
     patch:
       operationId: UpdateUser
@@ -823,10 +990,63 @@ paths:
             $ref: "#/definitions/User"
         default: { $ref: "#/responses/GenericError" }
       parameters:
-      - description: Fields need to update a area
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/User'
-    
+        - description: Fields need to update a area
+          in: body
+          name: user
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+
+  # Webauthn API
+  /webauthn/registration/initialize:
+    post:
+      summary: "Initialize WebAuthn registration"
+      description: |
+        Initialize a registration with Webauthn. Returns a JSON representation of CredentialCreationOptions for use
+        with the Webauthn API's `navigator.credentials.create()`.
+
+      operationId: webauthnRegInit
+      tags:
+        - WebAuthn
+      security:
+        - CookieAuth: []
+        - BearerTokenAuth: []
+      responses:
+        "200":
+          description: "Challenge"
+          schema:
+            $ref: "#/definitions/CredentialCreationOptions"
+  /webauthn/registration/finalize:
+    post:
+      summary: "Finalize WebAuthn registration"
+      description: |
+        Finalize a registration with Webauthn using the WebAuthn API response to a `navigator.credentials.create()` call.
+
+      operationId: webauthnRegFinal
+      tags:
+        - WebAuthn
+      security:
+        - CookieAuth: []
+        - BearerTokenAuth: []
+      parameters:
+        - description: Fields need to update a area
+          in: body
+          name: user
+          required: true
+          schema:
+            $ref: "#/definitions/PublicKeyCredentialAttestationResponse"
+
+      responses:
+        "200":
+          description: "Successful registration"
+          schema:
+            type: object
+            properties:
+              credential_id:
+                description: The ID of the created credential
+                type: string
+                format: base64
+              user_id:
+                description: The ID of the user on whose behalf a credential was created
+                allOf:
+                  - $ref: "#/definitions/UUID4"
