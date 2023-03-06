@@ -43,18 +43,18 @@ func NewServer(appl app.Appl, cfg Config) (*restapi.Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("load embedded swagger spec: %w", err)
 	}
-	basePath := swaggerSpec.BasePath()
-	swaggerSpec.Spec().BasePath = basePath
-	api := op.NewHqServiceAPI(swaggerSpec)
+
 	log := structlog.New(structlog.KeyUnit, "swagger").SetDefaultKeyvals(structlog.KeyApp, config.ServiceName)
 	log.Info("OpenAPI protocol", "version", swaggerSpec.Spec().Info.Version)
+	log.Info("Base path", "base", swaggerSpec.BasePath())
+	api := op.NewHqServiceAPI(swaggerSpec)
 	api.Logger = log.Printf
 
 	bindOAIHandlers(api, srv)
 	server := restapi.NewServer(api)
 	server.Host = cfg.Addr.Host()
 	server.Port = cfg.Addr.Port()
-	bindMiddlewares(api, server, basePath)
+	bindMiddlewares(api, server, swaggerSpec.BasePath())
 
 	return server, nil
 }
@@ -64,12 +64,6 @@ func fromRequest(r *http.Request) (Ctx, Log) {
 	remoteIP, _, _ := net.SplitHostPort(r.RemoteAddr)
 	ctx = NewContextWithRemoteIP(ctx, remoteIP)
 	log := structlog.FromContext(ctx, nil)
-
-	// TODO: Add token or userId to log
-	// userID := ""
-	// if auth != nil {
-	// 	userID = auth.UserID
-	// }
 	log.SetDefaultKeyvals(def.LogUserID, "userID")
 
 	return ctx, log
