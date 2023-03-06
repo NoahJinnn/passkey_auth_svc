@@ -6,6 +6,8 @@ package operations
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"fmt"
+
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
 )
@@ -55,6 +57,12 @@ type ClientService interface {
 	UpdateUser(params *UpdateUserParams, opts ...ClientOption) (*UpdateUserOK, error)
 
 	HealthCheck(params *HealthCheckParams, opts ...ClientOption) (*HealthCheckOK, error)
+
+	WebauthnLoginInit(params *WebauthnLoginInitParams, opts ...ClientOption) (*WebauthnLoginInitOK, error)
+
+	WebauthnRegFinal(params *WebauthnRegFinalParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*WebauthnRegFinalOK, error)
+
+	WebauthnRegInit(params *WebauthnRegInitParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*WebauthnRegInitOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -575,6 +583,137 @@ func (a *Client) HealthCheck(params *HealthCheckParams, opts ...ClientOption) (*
 	// unexpected success response
 	unexpectedSuccess := result.(*HealthCheckDefault)
 	return nil, runtime.NewAPIError("unexpected success response: content available as default response in error", unexpectedSuccess, unexpectedSuccess.Code())
+}
+
+/*
+	WebauthnLoginInit initializes web authn login
+
+	Initialize a login with Webauthn. Returns a JSON representation of CredentialRequestOptions for use
+
+with the Webauthn API's `navigator.credentials.get()`.
+
+Omitting the optional request body or using an empty JSON object results in generation of request options for a
+login using a [discoverable credential](https://www.w3.org/TR/webauthn-2/#client-side-discoverable-public-key-credential-source)
+(i.e. they will not contain
+[allowCredentials](https://www.w3.org/TR/webauthn-2/#dom-publickeycredentialrequestoptions-allowcredentials)).
+*/
+func (a *Client) WebauthnLoginInit(params *WebauthnLoginInitParams, opts ...ClientOption) (*WebauthnLoginInitOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewWebauthnLoginInitParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "webauthnLoginInit",
+		Method:             "POST",
+		PathPattern:        "/webauthn/login/initialize",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &WebauthnLoginInitReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*WebauthnLoginInitOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for webauthnLoginInit: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+WebauthnRegFinal finalizes web authn registration
+
+Finalize a registration with Webauthn using the WebAuthn API response to a `navigator.credentials.create()` call.
+*/
+func (a *Client) WebauthnRegFinal(params *WebauthnRegFinalParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*WebauthnRegFinalOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewWebauthnRegFinalParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "webauthnRegFinal",
+		Method:             "POST",
+		PathPattern:        "/webauthn/registration/finalize",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &WebauthnRegFinalReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*WebauthnRegFinalOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for webauthnRegFinal: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+	WebauthnRegInit initializes web authn registration
+
+	Initialize a registration with Webauthn. Returns a JSON representation of CredentialCreationOptions for use
+
+with the Webauthn API's `navigator.credentials.create()`.
+*/
+func (a *Client) WebauthnRegInit(params *WebauthnRegInitParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*WebauthnRegInitOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewWebauthnRegInitParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "webauthnRegInit",
+		Method:             "POST",
+		PathPattern:        "/webauthn/registration/initialize",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &WebauthnRegInitReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*WebauthnRegInitOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for webauthnRegInit: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 // SetTransport changes the transport on the client

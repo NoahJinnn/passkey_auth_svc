@@ -311,6 +311,110 @@ func init() {
         }
       }
     },
+    "/webauthn/login/finalize": {
+      "post": {
+        "description": "Finalize a login with Webauthn using the WebAuthn API response to a ` + "`" + `navigator.credentials.get()` + "`" + ` call.\n",
+        "tags": [
+          "WebAuthn"
+        ],
+        "summary": "Finalize WebAuthn login",
+        "operationId": "webauthnLoginFinal",
+        "parameters": [
+          {
+            "description": "Fields need to update a area",
+            "name": "user",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PublicKeyCredentialAssertionResponse"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful login",
+            "schema": {
+              "$ref": "#/definitions/WebauthnLoginResponse"
+            },
+            "headers": {
+              "Set-Cookie": {
+                "type": "string",
+                "description": "Contains the JSON Web Token (JWT) that must be provided to protected endpoints.\nCookie attributes (e.g. domain) can be set via [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config) option ` + "`" + `session.cookie` + "`" + `.\nValue ` + "`" + `\u003cJWT\u003e` + "`" + ` is a [JSON Web Token](https://www.rfc-editor.org/rfc/rfc7519.html)\n"
+              },
+              "X-Auth-Token": {
+                "type": "string",
+                "format": "JWT",
+                "description": "Present only when enabled via [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config) option ` + "`" + `session.enable_auth_token_header` + "`" + `\nfor purposes of cross-domain communication between client and Hanko API.\n"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webauthn/login/initialize": {
+      "post": {
+        "description": "Initialize a login with Webauthn. Returns a JSON representation of CredentialRequestOptions for use\nwith the Webauthn API's ` + "`" + `navigator.credentials.get()` + "`" + `.\n\nOmitting the optional request body or using an empty JSON object results in generation of request options for a\nlogin using a [discoverable credential](https://www.w3.org/TR/webauthn-2/#client-side-discoverable-public-key-credential-source)\n(i.e. they will not contain\n[allowCredentials](https://www.w3.org/TR/webauthn-2/#dom-publickeycredentialrequestoptions-allowcredentials)).\n",
+        "summary": "Initialize WebAuthn login",
+        "operationId": "webauthnLoginInit",
+        "parameters": [
+          {
+            "description": "Fields need to update a area",
+            "name": "user",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "user_id": {
+                  "description": "The ID of the user on whose behalf WebAuthn login should be performed",
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/UUID4"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful initialization",
+            "schema": {
+              "$ref": "#/definitions/CredentialRequestOptions"
+            },
+            "examples": {
+              "disco": {
+                "summary": "Discoverable credentials",
+                "value": {
+                  "challenge": "qgOI+0KpGnl9NOqaT6dfsYvi96R87LgpErnvePeOgSU=",
+                  "rpId": "localhost",
+                  "timeout": 60000,
+                  "userVerification": "required"
+                }
+              },
+              "non-disco": {
+                "summary": "Non-Discoverable credentials",
+                "value": {
+                  "publicKey": {
+                    "allowCredentials": [
+                      {
+                        "id": "Mepptysj5ZZrTlg0qiLbsZ068OtQMeGVAikVy2n1hvvG...",
+                        "type": "public-key"
+                      }
+                    ],
+                    "challenge": "qgOI+0KpGnl9NOqaT6dfsYvi96R87LgpErnvePeOgSU=",
+                    "rpId": "localhost",
+                    "timeout": 60000,
+                    "userVerification": "required"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/webauthn/registration/finalize": {
       "post": {
         "security": [
@@ -322,9 +426,6 @@ func init() {
           }
         ],
         "description": "Finalize a registration with Webauthn using the WebAuthn API response to a ` + "`" + `navigator.credentials.create()` + "`" + ` call.\n",
-        "tags": [
-          "WebAuthn"
-        ],
         "summary": "Finalize WebAuthn registration",
         "operationId": "webauthnRegFinal",
         "parameters": [
@@ -374,9 +475,6 @@ func init() {
           }
         ],
         "description": "Initialize a registration with Webauthn. Returns a JSON representation of CredentialCreationOptions for use\nwith the Webauthn API's ` + "`" + `navigator.credentials.create()` + "`" + `.\n",
-        "tags": [
-          "WebAuthn"
-        ],
         "summary": "Initialize WebAuthn registration",
         "operationId": "webauthnRegInit",
         "responses": {
@@ -1318,6 +1416,52 @@ func init() {
         }
       }
     },
+    "PublicKeyCredentialAssertionResponse": {
+      "description": "WebAuthn API response to a navigator.credentials.get() call",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "_18q6IjW09tiM4NSbsZjocUtGx00Muv5mN6LZCelCMDD..."
+        },
+        "rawId": {
+          "type": "string",
+          "example": "_18q6IjW09tiM4NSbsZjocUtGx00Muv5mN6LZCelCMDD..."
+        },
+        "response": {
+          "type": "object",
+          "properties": {
+            "authenticatorData": {
+              "type": "string",
+              "format": "base64url",
+              "example": "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MF..."
+            },
+            "clientDataJson": {
+              "type": "string",
+              "format": "base64url",
+              "example": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdl..."
+            },
+            "signature": {
+              "type": "string",
+              "format": "base64url",
+              "example": "MEQCIHe2RXqh6dyZw1LNXgeTTxljCV_qK2ydQjp02CiF..."
+            },
+            "userHandle": {
+              "type": "string",
+              "format": "base64url",
+              "example": "rpe_EkgaSEeZG0TwzZyZJw"
+            }
+          }
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "public-key"
+          ],
+          "example": "public-key"
+        }
+      }
+    },
     "PublicKeyCredentialAttestationResponse": {
       "description": "WebAuthn API response to a navigator.credentials.create() call",
       "type": "object",
@@ -1509,6 +1653,20 @@ func init() {
         },
         "PhoneNumber": {
           "type": "string"
+        }
+      }
+    },
+    "WebauthnLoginResponse": {
+      "description": "Response after a successful login with webauthn",
+      "type": "object",
+      "properties": {
+        "credential_id": {
+          "type": "string",
+          "format": "base64url"
+        },
+        "user_id": {
+          "type": "string",
+          "format": "uuid4"
         }
       }
     },
@@ -1862,6 +2020,110 @@ func init() {
         }
       }
     },
+    "/webauthn/login/finalize": {
+      "post": {
+        "description": "Finalize a login with Webauthn using the WebAuthn API response to a ` + "`" + `navigator.credentials.get()` + "`" + ` call.\n",
+        "tags": [
+          "WebAuthn"
+        ],
+        "summary": "Finalize WebAuthn login",
+        "operationId": "webauthnLoginFinal",
+        "parameters": [
+          {
+            "description": "Fields need to update a area",
+            "name": "user",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PublicKeyCredentialAssertionResponse"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful login",
+            "schema": {
+              "$ref": "#/definitions/WebauthnLoginResponse"
+            },
+            "headers": {
+              "Set-Cookie": {
+                "type": "string",
+                "description": "Contains the JSON Web Token (JWT) that must be provided to protected endpoints.\nCookie attributes (e.g. domain) can be set via [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config) option ` + "`" + `session.cookie` + "`" + `.\nValue ` + "`" + `\u003cJWT\u003e` + "`" + ` is a [JSON Web Token](https://www.rfc-editor.org/rfc/rfc7519.html)\n"
+              },
+              "X-Auth-Token": {
+                "type": "string",
+                "format": "JWT",
+                "description": "Present only when enabled via [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config) option ` + "`" + `session.enable_auth_token_header` + "`" + `\nfor purposes of cross-domain communication between client and Hanko API.\n"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/webauthn/login/initialize": {
+      "post": {
+        "description": "Initialize a login with Webauthn. Returns a JSON representation of CredentialRequestOptions for use\nwith the Webauthn API's ` + "`" + `navigator.credentials.get()` + "`" + `.\n\nOmitting the optional request body or using an empty JSON object results in generation of request options for a\nlogin using a [discoverable credential](https://www.w3.org/TR/webauthn-2/#client-side-discoverable-public-key-credential-source)\n(i.e. they will not contain\n[allowCredentials](https://www.w3.org/TR/webauthn-2/#dom-publickeycredentialrequestoptions-allowcredentials)).\n",
+        "summary": "Initialize WebAuthn login",
+        "operationId": "webauthnLoginInit",
+        "parameters": [
+          {
+            "description": "Fields need to update a area",
+            "name": "user",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "user_id": {
+                  "description": "The ID of the user on whose behalf WebAuthn login should be performed",
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/UUID4"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful initialization",
+            "schema": {
+              "$ref": "#/definitions/CredentialRequestOptions"
+            },
+            "examples": {
+              "disco": {
+                "summary": "Discoverable credentials",
+                "value": {
+                  "challenge": "qgOI+0KpGnl9NOqaT6dfsYvi96R87LgpErnvePeOgSU=",
+                  "rpId": "localhost",
+                  "timeout": 60000,
+                  "userVerification": "required"
+                }
+              },
+              "non-disco": {
+                "summary": "Non-Discoverable credentials",
+                "value": {
+                  "publicKey": {
+                    "allowCredentials": [
+                      {
+                        "id": "Mepptysj5ZZrTlg0qiLbsZ068OtQMeGVAikVy2n1hvvG...",
+                        "type": "public-key"
+                      }
+                    ],
+                    "challenge": "qgOI+0KpGnl9NOqaT6dfsYvi96R87LgpErnvePeOgSU=",
+                    "rpId": "localhost",
+                    "timeout": 60000,
+                    "userVerification": "required"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/webauthn/registration/finalize": {
       "post": {
         "security": [
@@ -1873,9 +2135,6 @@ func init() {
           }
         ],
         "description": "Finalize a registration with Webauthn using the WebAuthn API response to a ` + "`" + `navigator.credentials.create()` + "`" + ` call.\n",
-        "tags": [
-          "WebAuthn"
-        ],
         "summary": "Finalize WebAuthn registration",
         "operationId": "webauthnRegFinal",
         "parameters": [
@@ -1925,9 +2184,6 @@ func init() {
           }
         ],
         "description": "Initialize a registration with Webauthn. Returns a JSON representation of CredentialCreationOptions for use\nwith the Webauthn API's ` + "`" + `navigator.credentials.create()` + "`" + `.\n",
-        "tags": [
-          "WebAuthn"
-        ],
         "summary": "Initialize WebAuthn registration",
         "operationId": "webauthnRegInit",
         "responses": {
@@ -3076,6 +3332,77 @@ func init() {
         }
       }
     },
+    "PublicKeyCredentialAssertionResponse": {
+      "description": "WebAuthn API response to a navigator.credentials.get() call",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "_18q6IjW09tiM4NSbsZjocUtGx00Muv5mN6LZCelCMDD..."
+        },
+        "rawId": {
+          "type": "string",
+          "example": "_18q6IjW09tiM4NSbsZjocUtGx00Muv5mN6LZCelCMDD..."
+        },
+        "response": {
+          "type": "object",
+          "properties": {
+            "authenticatorData": {
+              "type": "string",
+              "format": "base64url",
+              "example": "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MF..."
+            },
+            "clientDataJson": {
+              "type": "string",
+              "format": "base64url",
+              "example": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdl..."
+            },
+            "signature": {
+              "type": "string",
+              "format": "base64url",
+              "example": "MEQCIHe2RXqh6dyZw1LNXgeTTxljCV_qK2ydQjp02CiF..."
+            },
+            "userHandle": {
+              "type": "string",
+              "format": "base64url",
+              "example": "rpe_EkgaSEeZG0TwzZyZJw"
+            }
+          }
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "public-key"
+          ],
+          "example": "public-key"
+        }
+      }
+    },
+    "PublicKeyCredentialAssertionResponseResponse": {
+      "type": "object",
+      "properties": {
+        "authenticatorData": {
+          "type": "string",
+          "format": "base64url",
+          "example": "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MF..."
+        },
+        "clientDataJson": {
+          "type": "string",
+          "format": "base64url",
+          "example": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdl..."
+        },
+        "signature": {
+          "type": "string",
+          "format": "base64url",
+          "example": "MEQCIHe2RXqh6dyZw1LNXgeTTxljCV_qK2ydQjp02CiF..."
+        },
+        "userHandle": {
+          "type": "string",
+          "format": "base64url",
+          "example": "rpe_EkgaSEeZG0TwzZyZJw"
+        }
+      }
+    },
     "PublicKeyCredentialAttestationResponse": {
       "description": "WebAuthn API response to a navigator.credentials.create() call",
       "type": "object",
@@ -3292,6 +3619,20 @@ func init() {
         },
         "PhoneNumber": {
           "type": "string"
+        }
+      }
+    },
+    "WebauthnLoginResponse": {
+      "description": "Response after a successful login with webauthn",
+      "type": "object",
+      "properties": {
+        "credential_id": {
+          "type": "string",
+          "format": "base64url"
+        },
+        "user_id": {
+          "type": "string",
+          "format": "uuid4"
         }
       }
     },

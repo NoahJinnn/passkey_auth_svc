@@ -30,33 +30,30 @@ type ClientOption func(*runtime.ClientOperation)
 
 // ClientService is the interface for Client methods
 type ClientService interface {
-	WebauthnRegFinal(params *WebauthnRegFinalParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*WebauthnRegFinalOK, error)
-
-	WebauthnRegInit(params *WebauthnRegInitParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*WebauthnRegInitOK, error)
+	WebauthnLoginFinal(params *WebauthnLoginFinalParams, opts ...ClientOption) (*WebauthnLoginFinalOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
 
 /*
-WebauthnRegFinal finalizes web authn registration
+WebauthnLoginFinal finalizes web authn login
 
-Finalize a registration with Webauthn using the WebAuthn API response to a `navigator.credentials.create()` call.
+Finalize a login with Webauthn using the WebAuthn API response to a `navigator.credentials.get()` call.
 */
-func (a *Client) WebauthnRegFinal(params *WebauthnRegFinalParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*WebauthnRegFinalOK, error) {
+func (a *Client) WebauthnLoginFinal(params *WebauthnLoginFinalParams, opts ...ClientOption) (*WebauthnLoginFinalOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewWebauthnRegFinalParams()
+		params = NewWebauthnLoginFinalParams()
 	}
 	op := &runtime.ClientOperation{
-		ID:                 "webauthnRegFinal",
+		ID:                 "webauthnLoginFinal",
 		Method:             "POST",
-		PathPattern:        "/webauthn/registration/finalize",
+		PathPattern:        "/webauthn/login/finalize",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &WebauthnRegFinalReader{formats: a.formats},
-		AuthInfo:           authInfo,
+		Reader:             &WebauthnLoginFinalReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	}
@@ -68,56 +65,13 @@ func (a *Client) WebauthnRegFinal(params *WebauthnRegFinalParams, authInfo runti
 	if err != nil {
 		return nil, err
 	}
-	success, ok := result.(*WebauthnRegFinalOK)
+	success, ok := result.(*WebauthnLoginFinalOK)
 	if ok {
 		return success, nil
 	}
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
-	msg := fmt.Sprintf("unexpected success response for webauthnRegFinal: API contract not enforced by server. Client expected to get an error, but got: %T", result)
-	panic(msg)
-}
-
-/*
-	WebauthnRegInit initializes web authn registration
-
-	Initialize a registration with Webauthn. Returns a JSON representation of CredentialCreationOptions for use
-
-with the Webauthn API's `navigator.credentials.create()`.
-*/
-func (a *Client) WebauthnRegInit(params *WebauthnRegInitParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*WebauthnRegInitOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewWebauthnRegInitParams()
-	}
-	op := &runtime.ClientOperation{
-		ID:                 "webauthnRegInit",
-		Method:             "POST",
-		PathPattern:        "/webauthn/registration/initialize",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http"},
-		Params:             params,
-		Reader:             &WebauthnRegInitReader{formats: a.formats},
-		AuthInfo:           authInfo,
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	}
-	for _, opt := range opts {
-		opt(op)
-	}
-
-	result, err := a.transport.Submit(op)
-	if err != nil {
-		return nil, err
-	}
-	success, ok := result.(*WebauthnRegInitOK)
-	if ok {
-		return success, nil
-	}
-	// unexpected success response
-	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
-	msg := fmt.Sprintf("unexpected success response for webauthnRegInit: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	msg := fmt.Sprintf("unexpected success response for webauthnLoginFinal: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 

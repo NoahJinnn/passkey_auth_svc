@@ -161,6 +161,40 @@ definitions:
               - preferred
               - discouraged
             example: required
+  PublicKeyCredentialAssertionResponse:
+      description: 'WebAuthn API response to a navigator.credentials.get() call'
+      type: object
+      properties:
+        id:
+          type: string
+          example: _18q6IjW09tiM4NSbsZjocUtGx00Muv5mN6LZCelCMDD...
+        rawId:
+          type: string
+          example: _18q6IjW09tiM4NSbsZjocUtGx00Muv5mN6LZCelCMDD...
+        type:
+          type: string
+          enum:
+            - public-key
+          example: public-key
+        response:
+          type: object
+          properties:
+            clientDataJson:
+              type: string
+              format: base64url
+              example: eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdl...
+            authenticatorData:
+              type: string
+              format: base64url
+              example: SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MF...
+            signature:
+              type: string
+              format: base64url
+              example: MEQCIHe2RXqh6dyZw1LNXgeTTxljCV_qK2ydQjp02CiF...
+            userHandle:
+              type: string
+              format: base64url
+              example: rpe_EkgaSEeZG0TwzZyZJw
   PublicKeyCredentialAttestationResponse:
     description: "WebAuthn API response to a navigator.credentials.create() call"
     type: object
@@ -195,6 +229,16 @@ definitions:
               - ble
               - internal
             example: internal
+  WebauthnLoginResponse:
+        description: 'Response after a successful login with webauthn'
+        type: object
+        properties:
+          credential_id:
+            type: string
+            format: base64url
+          user_id:
+            type: string
+            format: uuid4
 
   # Plaid API
   AccountBalance:
@@ -1006,8 +1050,6 @@ paths:
         with the Webauthn API's `navigator.credentials.create()`.
 
       operationId: webauthnRegInit
-      tags:
-        - WebAuthn
       security:
         - CookieAuth: []
         - BearerTokenAuth: []
@@ -1023,8 +1065,6 @@ paths:
         Finalize a registration with Webauthn using the WebAuthn API response to a `navigator.credentials.create()` call.
 
       operationId: webauthnRegFinal
-      tags:
-        - WebAuthn
       security:
         - CookieAuth: []
         - BearerTokenAuth: []
@@ -1050,3 +1090,89 @@ paths:
                 description: The ID of the user on whose behalf a credential was created
                 allOf:
                   - $ref: "#/definitions/UUID4"
+  /webauthn/login/initialize:
+    post:
+      summary: 'Initialize WebAuthn login'
+      description: |
+        Initialize a login with Webauthn. Returns a JSON representation of CredentialRequestOptions for use
+        with the Webauthn API's `navigator.credentials.get()`.
+
+        Omitting the optional request body or using an empty JSON object results in generation of request options for a
+        login using a [discoverable credential](https://www.w3.org/TR/webauthn-2/#client-side-discoverable-public-key-credential-source)
+        (i.e. they will not contain
+        [allowCredentials](https://www.w3.org/TR/webauthn-2/#dom-publickeycredentialrequestoptions-allowcredentials)).
+
+      operationId: webauthnLoginInit
+      parameters:
+        - description: Fields need to update a area
+          in: body
+          name: user
+          required: true
+          schema:
+            type: object
+            properties:
+              user_id:
+                description: The ID of the user on whose behalf WebAuthn login should be performed
+                allOf:
+                  - $ref: '#/definitions/UUID4'
+      responses:
+        '200':
+          description: 'Successful initialization'
+          schema:
+            $ref: '#/definitions/CredentialRequestOptions'
+          examples:
+            non-disco:
+              summary: Non-Discoverable credentials
+              value:
+                publicKey:
+                  challenge: qgOI+0KpGnl9NOqaT6dfsYvi96R87LgpErnvePeOgSU=
+                  timeout: 60000
+                  rpId: localhost
+                  allowCredentials:
+                    - type: public-key
+                      id: Mepptysj5ZZrTlg0qiLbsZ068OtQMeGVAikVy2n1hvvG...
+                  userVerification: required
+            disco:
+              summary: Discoverable credentials
+              value:
+                challenge: qgOI+0KpGnl9NOqaT6dfsYvi96R87LgpErnvePeOgSU=
+                timeout: 60000
+                rpId: localhost
+                userVerification: required
+       
+  /webauthn/login/finalize:
+    post:
+      summary: 'Finalize WebAuthn login'
+      description: |
+        Finalize a login with Webauthn using the WebAuthn API response to a `navigator.credentials.get()` call.
+
+      operationId: webauthnLoginFinal
+      tags:
+        - WebAuthn
+      parameters:
+        - description: Fields need to update a area
+          in: body
+          name: user
+          required: true
+          schema:
+            $ref: '#/definitions/PublicKeyCredentialAssertionResponse'
+      responses:
+        '200':
+          description: 'Successful login'
+          headers:
+            X-Auth-Token:
+              type: string
+              description: |
+                Present only when enabled via [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config) option `session.enable_auth_token_header`
+                for purposes of cross-domain communication between client and Hanko API.
+              format: JWT
+
+            Set-Cookie:
+              type: string
+              description: |
+                Contains the JSON Web Token (JWT) that must be provided to protected endpoints.
+                Cookie attributes (e.g. domain) can be set via [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config) option `session.cookie`.
+                Value `<JWT>` is a [JSON Web Token](https://www.rfc-editor.org/rfc/rfc7519.html)
+
+          schema:
+            $ref: '#/definitions/WebauthnLoginResponse'

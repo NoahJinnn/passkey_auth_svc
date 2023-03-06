@@ -111,14 +111,24 @@ func configureAPI(api *op.HqServiceAPI) http.Handler {
 			return middleware.NotImplemented("operation op.HealthCheck has not yet been implemented")
 		})
 	}
-	if api.WebAuthnWebauthnRegFinalHandler == nil {
-		api.WebAuthnWebauthnRegFinalHandler = web_authn.WebauthnRegFinalHandlerFunc(func(params web_authn.WebauthnRegFinalParams, principal interface{}) middleware.Responder {
-			return middleware.NotImplemented("operation web_authn.WebauthnRegFinal has not yet been implemented")
+	if api.WebAuthnWebauthnLoginFinalHandler == nil {
+		api.WebAuthnWebauthnLoginFinalHandler = web_authn.WebauthnLoginFinalHandlerFunc(func(params web_authn.WebauthnLoginFinalParams) middleware.Responder {
+			return middleware.NotImplemented("operation web_authn.WebauthnLoginFinal has not yet been implemented")
 		})
 	}
-	if api.WebAuthnWebauthnRegInitHandler == nil {
-		api.WebAuthnWebauthnRegInitHandler = web_authn.WebauthnRegInitHandlerFunc(func(params web_authn.WebauthnRegInitParams, principal interface{}) middleware.Responder {
-			return middleware.NotImplemented("operation web_authn.WebauthnRegInit has not yet been implemented")
+	if api.WebauthnLoginInitHandler == nil {
+		api.WebauthnLoginInitHandler = op.WebauthnLoginInitHandlerFunc(func(params op.WebauthnLoginInitParams) middleware.Responder {
+			return middleware.NotImplemented("operation op.WebauthnLoginInit has not yet been implemented")
+		})
+	}
+	if api.WebauthnRegFinalHandler == nil {
+		api.WebauthnRegFinalHandler = op.WebauthnRegFinalHandlerFunc(func(params op.WebauthnRegFinalParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation op.WebauthnRegFinal has not yet been implemented")
+		})
+	}
+	if api.WebauthnRegInitHandler == nil {
+		api.WebauthnRegInitHandler = op.WebauthnRegInitHandlerFunc(func(params op.WebauthnRegInitParams, principal interface{}) middleware.Responder {
+			return middleware.NotImplemented("operation op.WebauthnRegInit has not yet been implemented")
 		})
 	}
 
