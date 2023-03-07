@@ -3,7 +3,9 @@ package openapi
 import (
 	"fmt"
 	"net"
+	"net/http"
 
+	"github.com/go-openapi/runtime"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/powerman/must"
 	"github.com/powerman/structlog"
@@ -41,4 +43,8 @@ func OpenAPI(ctx Ctx, srv OpenAPIServer, service string) error {
 	}
 	log.Info("shutdown")
 	return nil
+}
+
+func (c CustomResponder) WriteResponse(w http.ResponseWriter, p runtime.Producer) {
+	c(w, p)
 }

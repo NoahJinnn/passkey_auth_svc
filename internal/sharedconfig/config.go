@@ -19,8 +19,6 @@ const EnvPrefix = "MONO_"
 
 // Shared contains configurable values shared by microservices.
 type Shared struct {
-	AddrHost          appcfg.NotEmptyString `env:"ADDR_HOST"`
-	AddrHostInt       appcfg.NotEmptyString `env:"ADDR_HOST_INT"`
 	MetricsAddrPort   appcfg.Port           `env:"METRICS_ADDR_PORT"`
 	XPostgresAddrHost appcfg.NotEmptyString `env:"X_POSTGRES_ADDR_HOST"`
 	XPostgresAddrPort appcfg.Port           `env:"X_POSTGRES_ADDR_PORT"`
@@ -40,8 +38,6 @@ const (
 )
 
 var shared = &Shared{ //nolint:gochecknoglobals // Config is global anyway.
-	AddrHost:          appcfg.MustNotEmptyString(def.Hostname),
-	AddrHostInt:       appcfg.MustNotEmptyString(def.Hostname),
 	AuthAddrHost:      appcfg.MustNotEmptyString(def.Hostname),
 	AuthAddrHostInt:   appcfg.MustNotEmptyString(def.Hostname),
 	AuthAddrPort:      appcfg.MustPort(strconv.Itoa(AuthPort)),

@@ -23,7 +23,6 @@ func Test(t *testing.T) {
 		BindAddr:        netx.NewAddr(def.Hostname, sharedconfig.AuthPort),
 		BindAddrInt:     netx.NewAddr(def.Hostname, sharedconfig.AuthPortInt),
 		BindMetricsAddr: netx.NewAddr(def.Hostname, sharedconfig.MetricsPort),
-		AuthAddr:        netx.NewAddr(def.Hostname, sharedconfig.AuthPort),
 	}
 
 	t.Run("required", func(tt *testing.T) {

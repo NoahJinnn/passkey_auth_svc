@@ -68,7 +68,7 @@ type Repo interface {
 
 // Ref: https://github.com/plaid/quickstart/blob/master/.env.example
 // Config contains configuration for business-logic.
-type Config struct {
+type config struct {
 	// See https://dashboard.plaid.com/account/keys
 	ClientId appcfg.String `env:"PLAID_CLIENT_ID"`
 	Secret   appcfg.String `env:"PLAID_SECRET"`
@@ -84,7 +84,7 @@ type Config struct {
 
 // App implements interface Appl.
 type App struct {
-	cfg         *Config
+	cfg         *config
 	wAuthn      *webauthn.WebAuthn
 	plaidClient *plaid.APIClient
 	repo        Repo
@@ -92,7 +92,7 @@ type App struct {
 
 // New creates and returns new App.
 func New(repo Repo) (*App, error) {
-	var cfg = &Config{}
+	var cfg = &config{}
 	fromEnv := appcfg.NewFromEnv(sharedconfig.EnvPrefix)
 	err := appcfg.ProvideStruct(cfg, fromEnv)
 

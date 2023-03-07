@@ -68,7 +68,3 @@ func fromRequest(r *http.Request) (Ctx, Log) {
 
 	return ctx, log
 }
-
-func (c CustomResponder) WriteResponse(w http.ResponseWriter, p runtime.Producer) {
-	c(w, p)
-}

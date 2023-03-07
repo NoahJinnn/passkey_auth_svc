@@ -8,7 +8,7 @@ import (
 	"github.com/go-webauthn/webauthn/webauthn"
 )
 
-func NewWebAuthn(cfg Config) *webauthn.WebAuthn {
+func NewWebAuthn(cfg config) *webauthn.WebAuthn {
 	var w *webauthn.WebAuthn
 	var err error
 	wconfig := &webauthn.Config{

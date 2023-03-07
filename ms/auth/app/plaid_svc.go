@@ -35,7 +35,7 @@ var (
 	}
 )
 
-func NewPlaidClient(cfg Config) *plaid.APIClient {
+func NewPlaidClient(cfg config) *plaid.APIClient {
 	// create Plaid client
 	configuration := plaid.NewConfiguration()
 	configuration.AddDefaultHeader("PLAID-CLIENT-ID", cfg.ClientId.String())
