@@ -1,9 +1,6 @@
-package app
+package dom
 
 import (
-	"encoding/binary"
-
-	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/hellohq/hqservice/api/openapi/model"
 	"github.com/hellohq/hqservice/ent"
 )
@@ -15,12 +12,6 @@ type User struct {
 	Email       string
 	PhoneNumber string
 	Address     string
-}
-
-type UserSession struct {
-	Username string
-	Webauthn *webauthn.SessionData
-	// U2F      *u2f.Challenge
 }
 
 func (u *User) FromEnt(eu *ent.User) *User {
@@ -64,27 +55,4 @@ func (u *User) FromOAIReq(oaiU *model.User) *User {
 		PhoneNumber: oaiU.PhoneNumber,
 		Address:     oaiU.Address,
 	}
-}
-
-func (u *User) WebAuthnID() []byte {
-	a := make([]byte, 4)
-	h := uint64(u.ID)
-	binary.LittleEndian.PutUint64(a, h)
-	return a
-}
-
-func (u *User) WebAuthnName() string {
-	return "newUser"
-}
-
-func (u *User) WebAuthnDisplayName() string {
-	return "New User"
-}
-
-func (u *User) WebAuthnIcon() string {
-	return "https://pics.com/avatar.png"
-}
-
-func (u *User) WebAuthnCredentials() []webauthn.Credential {
-	return []webauthn.Credential{}
 }

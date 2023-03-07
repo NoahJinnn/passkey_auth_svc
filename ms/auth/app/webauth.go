@@ -1,7 +1,6 @@
 package app
 
 import (
-	"bytes"
 	"fmt"
 
 	"github.com/go-webauthn/webauthn/protocol"
@@ -23,7 +22,7 @@ func NewWebAuthn(cfg config) *webauthn.WebAuthn {
 	return w
 }
 
-func (app *App) BeginRegistration() (*protocol.CredentialCreation, *webauthn.SessionData, error) {
+func (app *App) WebauthnBeginRegistration(ctx Ctx) (*protocol.CredentialCreation, *webauthn.SessionData, error) {
 	// user := datastore.GetUser() // Find or create the new user
 	user := &User{}
 	return app.wAuthn.BeginRegistration(user)
@@ -32,32 +31,7 @@ func (app *App) BeginRegistration() (*protocol.CredentialCreation, *webauthn.Ses
 	// options.publicKey contain our registration options
 }
 
-func (app *App) FinishRegistration(postBody []byte) *webauthn.Credential {
-	response, err := protocol.ParseCredentialCreationResponseBody(bytes.NewReader(postBody))
-	if err != nil {
-		// Handle Error and return.
+// func (app *App) WebauthnFinishRegistration(postBody []byte) *webauthn.Credential {
 
-		return nil
-	}
-
-	// user := datastore.GetUser() // Get the user
-
-	// Get the session data stored from the function above
-	// session := datastore.GetSession()
-	user := &User{}
-	session := &UserSession{}
-	credential, err := app.wAuthn.CreateCredential(user, *session.Webauthn, response)
-	if err != nil {
-		// Handle Error and return.
-
-		return nil
-	}
-
-	// If creation was successful, store the credential object
-
-	// Pseudocode to add the user credential.
-	// user.AddCredential(credential)
-	// datastore.SaveUser(user)
-
-	return credential
-}
+// 	return credential
+// }

@@ -5,20 +5,26 @@ import (
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/hellohq/hqservice/api/openapi/model"
 	"github.com/hellohq/hqservice/api/openapi/restapi/op"
-	dom "github.com/hellohq/hqservice/ms/auth/app"
+	"github.com/hellohq/hqservice/ms/auth/app/dom"
 )
 
 func (srv *httpServer) GetUsers(params op.GetUsersParams) middleware.Responder {
 	ctx, log := fromRequest(params.HTTPRequest)
 	us, err := srv.app.GetAllUsers(ctx)
 
+	resp := make([]*model.User, len(us))
+	for _, u := range us {
+		resp = append(resp, u.ToOAIResp())
+	}
+
 	switch {
 	default:
 		return errGetUsers(log, err, codeInternal)
 	case err == nil:
 		return CustomResponder(func(w http.ResponseWriter, producer runtime.Producer) {
-			if err := producer.Produce(w, us); err != nil {
+			if err := producer.Produce(w, resp); err != nil {
 				panic(err) // let the recovery middleware deal with this
 			}
 		})

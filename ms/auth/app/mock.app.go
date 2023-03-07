@@ -7,7 +7,10 @@ package app
 import (
 	reflect "reflect"
 
+	protocol "github.com/go-webauthn/webauthn/protocol"
+	webauthn "github.com/go-webauthn/webauthn/webauthn"
 	gomock "github.com/golang/mock/gomock"
+	dom "github.com/hellohq/hqservice/ms/auth/app/dom"
 	plaid "github.com/plaid/plaid-go/v3/plaid"
 )
 
@@ -35,10 +38,10 @@ func (m *MockAppl) EXPECT() *MockApplMockRecorder {
 }
 
 // CreateUser mocks base method.
-func (m *MockAppl) CreateUser(ctx Ctx, u *User) (*User, error) {
+func (m *MockAppl) CreateUser(ctx Ctx, u *dom.User) (*dom.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", ctx, u)
-	ret0, _ := ret[0].(*User)
+	ret0, _ := ret[0].(*dom.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -80,10 +83,10 @@ func (mr *MockApplMockRecorder) GetAccounts(ctx interface{}) *gomock.Call {
 }
 
 // GetAllUsers mocks base method.
-func (m *MockAppl) GetAllUsers(ctx Ctx) ([]*User, error) {
+func (m *MockAppl) GetAllUsers(ctx Ctx) ([]*dom.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllUsers", ctx)
-	ret0, _ := ret[0].([]*User)
+	ret0, _ := ret[0].([]*dom.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -170,10 +173,10 @@ func (mr *MockApplMockRecorder) GetTransactions(ctx interface{}) *gomock.Call {
 }
 
 // GetUserById mocks base method.
-func (m *MockAppl) GetUserById(ctx Ctx, id uint) (*User, error) {
+func (m *MockAppl) GetUserById(ctx Ctx, id uint) (*dom.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserById", ctx, id)
-	ret0, _ := ret[0].(*User)
+	ret0, _ := ret[0].(*dom.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -229,10 +232,10 @@ func (mr *MockApplMockRecorder) LinkTokenCreate(ctx, paymentInitiation interface
 }
 
 // UpdateUser mocks base method.
-func (m *MockAppl) UpdateUser(ctx Ctx, u *User) (*User, error) {
+func (m *MockAppl) UpdateUser(ctx Ctx, u *dom.User) (*dom.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUser", ctx, u)
-	ret0, _ := ret[0].(*User)
+	ret0, _ := ret[0].(*dom.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -241,6 +244,22 @@ func (m *MockAppl) UpdateUser(ctx Ctx, u *User) (*User, error) {
 func (mr *MockApplMockRecorder) UpdateUser(ctx, u interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockAppl)(nil).UpdateUser), ctx, u)
+}
+
+// WebauthnBeginRegistration mocks base method.
+func (m *MockAppl) WebauthnBeginRegistration(ctx Ctx) (*protocol.CredentialCreation, *webauthn.SessionData, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WebauthnBeginRegistration", ctx)
+	ret0, _ := ret[0].(*protocol.CredentialCreation)
+	ret1, _ := ret[1].(*webauthn.SessionData)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// WebauthnBeginRegistration indicates an expected call of WebauthnBeginRegistration.
+func (mr *MockApplMockRecorder) WebauthnBeginRegistration(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WebauthnBeginRegistration", reflect.TypeOf((*MockAppl)(nil).WebauthnBeginRegistration), ctx)
 }
 
 // MockIPlaidSvc is a mock of IPlaidSvc interface.
@@ -424,10 +443,10 @@ func (m *MockIUserSvc) EXPECT() *MockIUserSvcMockRecorder {
 }
 
 // CreateUser mocks base method.
-func (m *MockIUserSvc) CreateUser(ctx Ctx, u *User) (*User, error) {
+func (m *MockIUserSvc) CreateUser(ctx Ctx, u *dom.User) (*dom.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", ctx, u)
-	ret0, _ := ret[0].(*User)
+	ret0, _ := ret[0].(*dom.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -439,10 +458,10 @@ func (mr *MockIUserSvcMockRecorder) CreateUser(ctx, u interface{}) *gomock.Call 
 }
 
 // GetAllUsers mocks base method.
-func (m *MockIUserSvc) GetAllUsers(ctx Ctx) ([]*User, error) {
+func (m *MockIUserSvc) GetAllUsers(ctx Ctx) ([]*dom.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllUsers", ctx)
-	ret0, _ := ret[0].([]*User)
+	ret0, _ := ret[0].([]*dom.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -454,10 +473,10 @@ func (mr *MockIUserSvcMockRecorder) GetAllUsers(ctx interface{}) *gomock.Call {
 }
 
 // GetUserById mocks base method.
-func (m *MockIUserSvc) GetUserById(ctx Ctx, id uint) (*User, error) {
+func (m *MockIUserSvc) GetUserById(ctx Ctx, id uint) (*dom.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserById", ctx, id)
-	ret0, _ := ret[0].(*User)
+	ret0, _ := ret[0].(*dom.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -469,10 +488,10 @@ func (mr *MockIUserSvcMockRecorder) GetUserById(ctx, id interface{}) *gomock.Cal
 }
 
 // UpdateUser mocks base method.
-func (m *MockIUserSvc) UpdateUser(ctx Ctx, u *User) (*User, error) {
+func (m *MockIUserSvc) UpdateUser(ctx Ctx, u *dom.User) (*dom.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUser", ctx, u)
-	ret0, _ := ret[0].(*User)
+	ret0, _ := ret[0].(*dom.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -481,6 +500,45 @@ func (m *MockIUserSvc) UpdateUser(ctx Ctx, u *User) (*User, error) {
 func (mr *MockIUserSvcMockRecorder) UpdateUser(ctx, u interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockIUserSvc)(nil).UpdateUser), ctx, u)
+}
+
+// MockIWebauthnSvc is a mock of IWebauthnSvc interface.
+type MockIWebauthnSvc struct {
+	ctrl     *gomock.Controller
+	recorder *MockIWebauthnSvcMockRecorder
+}
+
+// MockIWebauthnSvcMockRecorder is the mock recorder for MockIWebauthnSvc.
+type MockIWebauthnSvcMockRecorder struct {
+	mock *MockIWebauthnSvc
+}
+
+// NewMockIWebauthnSvc creates a new mock instance.
+func NewMockIWebauthnSvc(ctrl *gomock.Controller) *MockIWebauthnSvc {
+	mock := &MockIWebauthnSvc{ctrl: ctrl}
+	mock.recorder = &MockIWebauthnSvcMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockIWebauthnSvc) EXPECT() *MockIWebauthnSvcMockRecorder {
+	return m.recorder
+}
+
+// WebauthnBeginRegistration mocks base method.
+func (m *MockIWebauthnSvc) WebauthnBeginRegistration(ctx Ctx) (*protocol.CredentialCreation, *webauthn.SessionData, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WebauthnBeginRegistration", ctx)
+	ret0, _ := ret[0].(*protocol.CredentialCreation)
+	ret1, _ := ret[1].(*webauthn.SessionData)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// WebauthnBeginRegistration indicates an expected call of WebauthnBeginRegistration.
+func (mr *MockIWebauthnSvcMockRecorder) WebauthnBeginRegistration(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WebauthnBeginRegistration", reflect.TypeOf((*MockIWebauthnSvc)(nil).WebauthnBeginRegistration), ctx)
 }
 
 // MockRepo is a mock of Repo interface.
@@ -507,10 +565,10 @@ func (m *MockRepo) EXPECT() *MockRepoMockRecorder {
 }
 
 // CreateUser mocks base method.
-func (m *MockRepo) CreateUser(ctx Ctx, u *User) (*User, error) {
+func (m *MockRepo) CreateUser(ctx Ctx, u *dom.User) (*dom.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", ctx, u)
-	ret0, _ := ret[0].(*User)
+	ret0, _ := ret[0].(*dom.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -522,10 +580,10 @@ func (mr *MockRepoMockRecorder) CreateUser(ctx, u interface{}) *gomock.Call {
 }
 
 // GetAllUsers mocks base method.
-func (m *MockRepo) GetAllUsers(ctx Ctx) ([]*User, error) {
+func (m *MockRepo) GetAllUsers(ctx Ctx) ([]*dom.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllUsers", ctx)
-	ret0, _ := ret[0].([]*User)
+	ret0, _ := ret[0].([]*dom.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -537,10 +595,10 @@ func (mr *MockRepoMockRecorder) GetAllUsers(ctx interface{}) *gomock.Call {
 }
 
 // GetUserById mocks base method.
-func (m *MockRepo) GetUserById(ctx Ctx, id uint) (*User, error) {
+func (m *MockRepo) GetUserById(ctx Ctx, id uint) (*dom.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserById", ctx, id)
-	ret0, _ := ret[0].(*User)
+	ret0, _ := ret[0].(*dom.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -552,10 +610,10 @@ func (mr *MockRepoMockRecorder) GetUserById(ctx, id interface{}) *gomock.Call {
 }
 
 // UpdateUser mocks base method.
-func (m *MockRepo) UpdateUser(ctx Ctx, u *User) (*User, error) {
+func (m *MockRepo) UpdateUser(ctx Ctx, u *dom.User) (*dom.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUser", ctx, u)
-	ret0, _ := ret[0].(*User)
+	ret0, _ := ret[0].(*dom.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
