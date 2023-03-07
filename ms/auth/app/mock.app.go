@@ -8,8 +8,6 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	model "github.com/hellohq/hqservice/api/openapi/model"
-	ent "github.com/hellohq/hqservice/ent"
 	plaid "github.com/plaid/plaid-go/v3/plaid"
 )
 
@@ -37,7 +35,7 @@ func (m *MockAppl) EXPECT() *MockApplMockRecorder {
 }
 
 // CreateUser mocks base method.
-func (m *MockAppl) CreateUser(ctx Ctx, u *model.User) (*User, error) {
+func (m *MockAppl) CreateUser(ctx Ctx, u *User) (*User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", ctx, u)
 	ret0, _ := ret[0].(*User)
@@ -231,7 +229,7 @@ func (mr *MockApplMockRecorder) LinkTokenCreate(ctx, paymentInitiation interface
 }
 
 // UpdateUser mocks base method.
-func (m *MockAppl) UpdateUser(ctx Ctx, u *model.User) (*User, error) {
+func (m *MockAppl) UpdateUser(ctx Ctx, u *User) (*User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUser", ctx, u)
 	ret0, _ := ret[0].(*User)
@@ -426,7 +424,7 @@ func (m *MockIUserSvc) EXPECT() *MockIUserSvcMockRecorder {
 }
 
 // CreateUser mocks base method.
-func (m *MockIUserSvc) CreateUser(ctx Ctx, u *model.User) (*User, error) {
+func (m *MockIUserSvc) CreateUser(ctx Ctx, u *User) (*User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", ctx, u)
 	ret0, _ := ret[0].(*User)
@@ -471,7 +469,7 @@ func (mr *MockIUserSvcMockRecorder) GetUserById(ctx, id interface{}) *gomock.Cal
 }
 
 // UpdateUser mocks base method.
-func (m *MockIUserSvc) UpdateUser(ctx Ctx, u *model.User) (*User, error) {
+func (m *MockIUserSvc) UpdateUser(ctx Ctx, u *User) (*User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUser", ctx, u)
 	ret0, _ := ret[0].(*User)
@@ -509,10 +507,10 @@ func (m *MockRepo) EXPECT() *MockRepoMockRecorder {
 }
 
 // CreateUser mocks base method.
-func (m *MockRepo) CreateUser(ctx Ctx, u *User) (*ent.User, error) {
+func (m *MockRepo) CreateUser(ctx Ctx, u *User) (*User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", ctx, u)
-	ret0, _ := ret[0].(*ent.User)
+	ret0, _ := ret[0].(*User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -554,10 +552,10 @@ func (mr *MockRepoMockRecorder) GetUserById(ctx, id interface{}) *gomock.Call {
 }
 
 // UpdateUser mocks base method.
-func (m *MockRepo) UpdateUser(ctx Ctx, u *User) (*ent.User, error) {
+func (m *MockRepo) UpdateUser(ctx Ctx, u *User) (*User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUser", ctx, u)
-	ret0, _ := ret[0].(*ent.User)
+	ret0, _ := ret[0].(*User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

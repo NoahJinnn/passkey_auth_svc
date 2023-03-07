@@ -10,8 +10,6 @@ import (
 	"fmt"
 
 	"github.com/go-webauthn/webauthn/webauthn"
-	"github.com/hellohq/hqservice/api/openapi/model"
-	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/sharedconfig"
 	plaid "github.com/plaid/plaid-go/v3/plaid"
 	"github.com/powerman/appcfg"
@@ -56,16 +54,16 @@ type IPlaidSvc interface {
 type IUserSvc interface {
 	GetAllUsers(ctx Ctx) ([]*User, error)
 	GetUserById(ctx Ctx, id uint) (*User, error)
-	CreateUser(ctx Ctx, u *model.User) (*User, error)
-	UpdateUser(ctx Ctx, u *model.User) (*User, error)
+	CreateUser(ctx Ctx, u *User) (*User, error)
+	UpdateUser(ctx Ctx, u *User) (*User, error)
 }
 
 // Repo provides data storage.
 type Repo interface {
 	GetAllUsers(ctx Ctx) ([]*User, error)
 	GetUserById(ctx Ctx, id uint) (*User, error)
-	CreateUser(ctx Ctx, u *User) (*ent.User, error)
-	UpdateUser(ctx Ctx, u *User) (*ent.User, error)
+	CreateUser(ctx Ctx, u *User) (*User, error)
+	UpdateUser(ctx Ctx, u *User) (*User, error)
 }
 
 // Ref: https://github.com/plaid/quickstart/blob/master/.env.example

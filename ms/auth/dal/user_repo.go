@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ent/user"
 	dom "github.com/hellohq/hqservice/ms/auth/app"
 )
@@ -40,7 +39,7 @@ func (repo *Repo) GetUserById(ctx Ctx, id uint) (*dom.User, error) {
 	return u, nil
 }
 
-func (repo *Repo) CreateUser(ctx Ctx, u *dom.User) (*ent.User, error) {
+func (repo *Repo) CreateUser(ctx Ctx, u *dom.User) (*dom.User, error) {
 	eu, err := repo.Db.User.
 		Create().
 		SetFirstName(u.FirstName).
@@ -53,13 +52,13 @@ func (repo *Repo) CreateUser(ctx Ctx, u *dom.User) (*ent.User, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed querying user by id: %w", err)
 	}
-
+	u.ID = eu.ID
 	log.Println("users returned: ", u)
-	return eu, nil
+	return u, nil
 }
 
-func (repo *Repo) UpdateUser(ctx Ctx, u *dom.User) (*ent.User, error) {
-	eu, err := repo.Db.User.
+func (repo *Repo) UpdateUser(ctx Ctx, u *dom.User) (*dom.User, error) {
+	_, err := repo.Db.User.
 		UpdateOneID(u.ID).
 		SetFirstName(u.FirstName).
 		SetLastName(u.LastName).
@@ -73,5 +72,5 @@ func (repo *Repo) UpdateUser(ctx Ctx, u *dom.User) (*ent.User, error) {
 	}
 
 	log.Println("users returned: ", u)
-	return eu, nil
+	return u, nil
 }

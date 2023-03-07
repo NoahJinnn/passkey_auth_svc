@@ -6,6 +6,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/hellohq/hqservice/api/openapi/restapi/op"
+	dom "github.com/hellohq/hqservice/ms/auth/app"
 )
 
 func (srv *httpServer) GetUsers(params op.GetUsersParams) middleware.Responder {
@@ -38,7 +39,9 @@ func (srv *httpServer) GetUserById(params op.GetUserByIDParams) middleware.Respo
 
 func (srv *httpServer) CreateUser(params op.CreateUserParams) middleware.Responder {
 	ctx, log := fromRequest(params.HTTPRequest)
-	u, err := srv.app.CreateUser(ctx, params.User)
+	domU := &dom.User{}
+	domU = domU.FromOAIReq(params.User)
+	u, err := srv.app.CreateUser(ctx, domU)
 
 	switch {
 	default:
@@ -50,7 +53,9 @@ func (srv *httpServer) CreateUser(params op.CreateUserParams) middleware.Respond
 
 func (srv *httpServer) UpdateUser(params op.UpdateUserParams) middleware.Responder {
 	ctx, log := fromRequest(params.HTTPRequest)
-	u, err := srv.app.UpdateUser(ctx, params.User)
+	domU := &dom.User{}
+	domU = domU.FromOAIReq(params.User)
+	u, err := srv.app.UpdateUser(ctx, domU)
 
 	switch {
 	default:

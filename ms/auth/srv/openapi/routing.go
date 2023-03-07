@@ -28,6 +28,9 @@ func bindOAIHandlers(api *op.HqServiceAPI, srv *httpServer) {
 	api.GetUserByIDHandler = op.GetUserByIDHandlerFunc(srv.GetUserById)
 	api.CreateUserHandler = op.CreateUserHandlerFunc(srv.CreateUser)
 	api.UpdateUserHandler = op.UpdateUserHandlerFunc(srv.UpdateUser)
+
+	// Webauthn API
+
 }
 
 func bindMiddlewares(api *op.HqServiceAPI, server *restapi.Server, basePath string) {
