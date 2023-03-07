@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/gofrs/uuid"
 )
 
 // User holds the schema definition for the User entity.
@@ -15,13 +16,12 @@ type User struct {
 
 // Fields of the User.
 func (User) Fields() []ent.Field {
-	return []ent.Field{field.Uint("id").SchemaType(map[string]string{"postgres": "serial"}), field.String("first_name"), field.String("last_name"), field.String("email").Unique(
+	return []ent.Field{field.UUID("id", uuid.UUID{}), field.Time("created_at"), field.Time("updated_at")}
 
 	// Edges of the User.
-	), field.String("password"), field.String("phone_number").Optional(), field.String("address").Optional(), field.Time("created_at"), field.Time("updated_at")}
 
 }
 
 func (User) Edges() []ent.Edge {
-	return []ent.Edge{edge.To("bank_accounts", BankAccount.Type), edge.To("cars", Car.Type), edge.To("collectibles", Collectible.Type), edge.To("crypto_accounts", CryptoAccount.Type), edge.To("loans", Loan.Type), edge.To("private_shares", PrivateShare.Type)}
+	return []ent.Edge{edge.To("emails", Email.Type), edge.To("passcodes", Passcode.Type), edge.To("password_credential", PasswordCredential.Type).Unique(), edge.To("primary_email", PrimaryEmail.Type).Unique(), edge.To("webauthn_credentials", WebauthnCredential.Type)}
 }
