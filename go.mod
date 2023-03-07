@@ -15,11 +15,11 @@ require (
 	github.com/go-swagger/go-swagger v0.30.4
 	github.com/golang/mock v1.6.0
 	github.com/jessevdk/go-flags v1.5.0
-	github.com/oklog/ulid v1.3.1
+	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/powerman/appcfg v0.9.0
 	github.com/powerman/check v1.6.0
 	github.com/powerman/getenv v0.1.0
-	github.com/powerman/goose/v2 v2.7.0
+	github.com/powerman/goose/v2 v2.7.0 // indirect
 	github.com/powerman/must v0.1.1
 	github.com/powerman/sensitive v0.0.7
 	github.com/powerman/structlog v0.7.3
@@ -31,26 +31,22 @@ require (
 )
 
 require (
-	entgo.io/ent v0.11.8
+	ariga.io/entimport v0.0.0-20220722070026-e5b57d96ab7c
+	entgo.io/ent v0.11.9
 	github.com/bufbuild/buf v1.14.0
 	github.com/cosmtrek/air v1.41.0
-	github.com/go-sql-driver/mysql v1.7.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.0
-	github.com/jmoiron/sqlx v1.3.5
 	github.com/mattn/goveralls v0.0.11
 	github.com/powerman/dockerize v0.18.1
 	github.com/powerman/go-monolith-example v0.5.2
 	github.com/powerman/pqx v0.7.0
-	github.com/powerman/rpc-codec v1.2.2
-	github.com/powerman/sqlxx v0.2.0
-	golang.org/x/tools v0.5.0
+	golang.org/x/tools v0.6.1-0.20230222164832-25d2519c8696
 	google.golang.org/grpc v1.52.0
 	google.golang.org/protobuf v1.28.2-0.20220831092852-f930b1dc76e8
 )
 
 require (
-	ariga.io/atlas v0.9.1-0.20230119145809-92243f7c55cb // indirect
-	ariga.io/entimport v0.0.0-20220722070026-e5b57d96ab7c // indirect
+	ariga.io/atlas v0.9.1 // indirect
 	entgo.io/contrib v0.2.1-0.20220405071655-7dbe27ee8fec // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
@@ -62,11 +58,13 @@ require (
 	github.com/go-openapi/inflect v0.19.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.6 // indirect
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
+	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/golang/glog v1.0.0 // indirect
 	github.com/golangci/golangci-lint v1.50.1 // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect
 	github.com/hashicorp/hcl/v2 v2.13.0 // indirect
 	github.com/jhump/protoreflect v1.14.1 // indirect
+	github.com/jmoiron/sqlx v1.3.5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
@@ -75,6 +73,7 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/powerman/deepequal v0.1.0 // indirect
+	github.com/powerman/sqlxx v0.2.0 // indirect
 	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/streadway/amqp v1.0.0 // indirect
@@ -92,8 +91,6 @@ require (
 
 require (
 	4d63.com/gochecknoglobals v0.2.1 // indirect
-	cloud.google.com/go/compute v1.18.0 // indirect
-	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/Abirdcfly/dupword v0.0.9 // indirect
 	github.com/Antonboom/errname v0.1.7 // indirect
 	github.com/Antonboom/nilnil v0.1.1 // indirect
@@ -178,8 +175,6 @@ require (
 	github.com/gostaticanalysis/comment v1.4.2 // indirect
 	github.com/gostaticanalysis/forcetypeassert v0.1.0 // indirect
 	github.com/gostaticanalysis/nilerr v0.1.1 // indirect
-	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
-	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
@@ -241,7 +236,7 @@ require (
 	github.com/polyfloyd/go-errorlint v1.0.6 // indirect
 	github.com/powerman/goose v2.7.0-rc4.0.20200329145851-5c15923690fa+incompatible // indirect
 	github.com/powerman/mysqlx v0.3.3 // indirect
-	github.com/powerman/narada4d v1.7.1
+	github.com/powerman/narada4d v1.7.1 // indirect
 	github.com/powerman/tail v0.1.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.39.0 // indirect
@@ -274,7 +269,7 @@ require (
 	github.com/ssgreg/nlreturn/v2 v2.2.1 // indirect
 	github.com/stbenjam/no-sprintf-host-port v0.1.1 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
-	github.com/stretchr/testify v1.8.1 // indirect
+	github.com/stretchr/testify v1.8.2 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/tdakkota/asciicheck v0.1.1 // indirect
 	github.com/tetafro/godot v1.4.11 // indirect
