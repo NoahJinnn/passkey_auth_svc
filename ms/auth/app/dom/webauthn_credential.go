@@ -7,6 +7,7 @@ import (
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ent"
 )
 
 func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID, backupEligible bool, backupState bool) *models.WebauthnCredential {
@@ -14,7 +15,7 @@ func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID
 	aaguid, _ := uuid.FromBytes(credential.Authenticator.AAGUID)
 	credentialID := base64.RawURLEncoding.EncodeToString(credential.ID)
 
-	c := &models.WebauthnCredential{
+	c := &ent.WebauthnCredential{
 		ID:              credentialID,
 		UserId:          userId,
 		PublicKey:       base64.RawURLEncoding.EncodeToString(credential.PublicKey),
@@ -31,7 +32,7 @@ func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID
 	for _, name := range credential.Transport {
 		if string(name) != "" {
 			id, _ := uuid.NewV4()
-			t := models.WebauthnCredentialTransport{
+			t := ent.WebauthnCredentialTransport{
 				ID:                   id,
 				Name:                 string(name),
 				WebauthnCredentialID: credentialID,
@@ -43,7 +44,7 @@ func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID
 	return c
 }
 
-func WebauthnCredentialFromModel(credential *models.WebauthnCredential) *webauthn.Credential {
+func WebauthnCredentialFromModel(credential *ent.WebauthnCredential) *webauthn.Credential {
 	credId, _ := base64.RawURLEncoding.DecodeString(credential.ID)
 	pKey, _ := base64.RawURLEncoding.DecodeString(credential.PublicKey)
 	transport := make([]protocol.AuthenticatorTransport, len(credential.Transports))

@@ -15,7 +15,7 @@ type Email struct {
 }
 
 func (Email) Fields() []ent.Field {
-	return []ent.Field{field.UUID("id", uuid.UUID{}), field.UUID("user_id").Optional(uuid.UUID{}), field.String("address").Unique(), field.Bool("verified"), field.Time("created_at"), field.Time("updated_at")}
+	return []ent.Field{field.UUID("id", uuid.UUID{}), field.UUID("user_id", uuid.UUID{}).Optional(), field.String("address").Unique(), field.Bool("verified"), field.Time("created_at"), field.Time("updated_at")}
 }
 func (Email) Edges() []ent.Edge {
 	return []ent.Edge{edge.From("user", User.Type).Ref("emails").Unique().Field("user_id"), edge.To("identities", Identity.Type), edge.To("passcodes", Passcode.Type), edge.To("primary_email", PrimaryEmail.Type).Unique()}

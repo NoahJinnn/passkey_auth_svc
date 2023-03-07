@@ -6,26 +6,35 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// AssetInfo is the predicate function for assetinfo builders.
-type AssetInfo func(*sql.Selector)
+// Email is the predicate function for email builders.
+type Email func(*sql.Selector)
 
-// BankAccount is the predicate function for bankaccount builders.
-type BankAccount func(*sql.Selector)
+// Identity is the predicate function for identity builders.
+type Identity func(*sql.Selector)
 
-// Car is the predicate function for car builders.
-type Car func(*sql.Selector)
+// Jwk is the predicate function for jwk builders.
+type Jwk func(*sql.Selector)
 
-// Collectible is the predicate function for collectible builders.
-type Collectible func(*sql.Selector)
+// Passcode is the predicate function for passcode builders.
+type Passcode func(*sql.Selector)
 
-// CryptoAccount is the predicate function for cryptoaccount builders.
-type CryptoAccount func(*sql.Selector)
+// PasswordCredential is the predicate function for passwordcredential builders.
+type PasswordCredential func(*sql.Selector)
 
-// Loan is the predicate function for loan builders.
-type Loan func(*sql.Selector)
-
-// PrivateShare is the predicate function for privateshare builders.
-type PrivateShare func(*sql.Selector)
+// PrimaryEmail is the predicate function for primaryemail builders.
+type PrimaryEmail func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
+
+// WebauthnCredential is the predicate function for webauthncredential builders.
+type WebauthnCredential func(*sql.Selector)
+
+// WebauthnCredentialTransport is the predicate function for webauthncredentialtransport builders.
+type WebauthnCredentialTransport func(*sql.Selector)
+
+// WebauthnSessionDataAllowedCredential is the predicate function for webauthnsessiondataallowedcredential builders.
+type WebauthnSessionDataAllowedCredential func(*sql.Selector)
+
+// WebauthnSessionDatum is the predicate function for webauthnsessiondatum builders.
+type WebauthnSessionDatum func(*sql.Selector)

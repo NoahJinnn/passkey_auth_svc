@@ -12,22 +12,28 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// AssetInfo is the client for interacting with the AssetInfo builders.
-	AssetInfo *AssetInfoClient
-	// BankAccount is the client for interacting with the BankAccount builders.
-	BankAccount *BankAccountClient
-	// Car is the client for interacting with the Car builders.
-	Car *CarClient
-	// Collectible is the client for interacting with the Collectible builders.
-	Collectible *CollectibleClient
-	// CryptoAccount is the client for interacting with the CryptoAccount builders.
-	CryptoAccount *CryptoAccountClient
-	// Loan is the client for interacting with the Loan builders.
-	Loan *LoanClient
-	// PrivateShare is the client for interacting with the PrivateShare builders.
-	PrivateShare *PrivateShareClient
+	// Email is the client for interacting with the Email builders.
+	Email *EmailClient
+	// Identity is the client for interacting with the Identity builders.
+	Identity *IdentityClient
+	// Jwk is the client for interacting with the Jwk builders.
+	Jwk *JwkClient
+	// Passcode is the client for interacting with the Passcode builders.
+	Passcode *PasscodeClient
+	// PasswordCredential is the client for interacting with the PasswordCredential builders.
+	PasswordCredential *PasswordCredentialClient
+	// PrimaryEmail is the client for interacting with the PrimaryEmail builders.
+	PrimaryEmail *PrimaryEmailClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// WebauthnCredential is the client for interacting with the WebauthnCredential builders.
+	WebauthnCredential *WebauthnCredentialClient
+	// WebauthnCredentialTransport is the client for interacting with the WebauthnCredentialTransport builders.
+	WebauthnCredentialTransport *WebauthnCredentialTransportClient
+	// WebauthnSessionDataAllowedCredential is the client for interacting with the WebauthnSessionDataAllowedCredential builders.
+	WebauthnSessionDataAllowedCredential *WebauthnSessionDataAllowedCredentialClient
+	// WebauthnSessionDatum is the client for interacting with the WebauthnSessionDatum builders.
+	WebauthnSessionDatum *WebauthnSessionDatumClient
 
 	// lazily loaded.
 	client     *Client
@@ -159,14 +165,17 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.AssetInfo = NewAssetInfoClient(tx.config)
-	tx.BankAccount = NewBankAccountClient(tx.config)
-	tx.Car = NewCarClient(tx.config)
-	tx.Collectible = NewCollectibleClient(tx.config)
-	tx.CryptoAccount = NewCryptoAccountClient(tx.config)
-	tx.Loan = NewLoanClient(tx.config)
-	tx.PrivateShare = NewPrivateShareClient(tx.config)
+	tx.Email = NewEmailClient(tx.config)
+	tx.Identity = NewIdentityClient(tx.config)
+	tx.Jwk = NewJwkClient(tx.config)
+	tx.Passcode = NewPasscodeClient(tx.config)
+	tx.PasswordCredential = NewPasswordCredentialClient(tx.config)
+	tx.PrimaryEmail = NewPrimaryEmailClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.WebauthnCredential = NewWebauthnCredentialClient(tx.config)
+	tx.WebauthnCredentialTransport = NewWebauthnCredentialTransportClient(tx.config)
+	tx.WebauthnSessionDataAllowedCredential = NewWebauthnSessionDataAllowedCredentialClient(tx.config)
+	tx.WebauthnSessionDatum = NewWebauthnSessionDatumClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -176,7 +185,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: AssetInfo.QueryXXX(), the query will be executed
+// applies a query, for example: Email.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

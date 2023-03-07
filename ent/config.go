@@ -27,24 +27,30 @@ type config struct {
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		AssetInfo     []ent.Hook
-		BankAccount   []ent.Hook
-		Car           []ent.Hook
-		Collectible   []ent.Hook
-		CryptoAccount []ent.Hook
-		Loan          []ent.Hook
-		PrivateShare  []ent.Hook
-		User          []ent.Hook
+		Email                                []ent.Hook
+		Identity                             []ent.Hook
+		Jwk                                  []ent.Hook
+		Passcode                             []ent.Hook
+		PasswordCredential                   []ent.Hook
+		PrimaryEmail                         []ent.Hook
+		User                                 []ent.Hook
+		WebauthnCredential                   []ent.Hook
+		WebauthnCredentialTransport          []ent.Hook
+		WebauthnSessionDataAllowedCredential []ent.Hook
+		WebauthnSessionDatum                 []ent.Hook
 	}
 	inters struct {
-		AssetInfo     []ent.Interceptor
-		BankAccount   []ent.Interceptor
-		Car           []ent.Interceptor
-		Collectible   []ent.Interceptor
-		CryptoAccount []ent.Interceptor
-		Loan          []ent.Interceptor
-		PrivateShare  []ent.Interceptor
-		User          []ent.Interceptor
+		Email                                []ent.Interceptor
+		Identity                             []ent.Interceptor
+		Jwk                                  []ent.Interceptor
+		Passcode                             []ent.Interceptor
+		PasswordCredential                   []ent.Interceptor
+		PrimaryEmail                         []ent.Interceptor
+		User                                 []ent.Interceptor
+		WebauthnCredential                   []ent.Interceptor
+		WebauthnCredentialTransport          []ent.Interceptor
+		WebauthnSessionDataAllowedCredential []ent.Interceptor
+		WebauthnSessionDatum                 []ent.Interceptor
 	}
 )
 

@@ -15,7 +15,7 @@ type PasswordCredential struct {
 }
 
 func (PasswordCredential) Fields() []ent.Field {
-	return []ent.Field{field.UUID("id", uuid.UUID{}), field.UUID("user_id").Optional().Unique(uuid.UUID{}), field.String("password"), field.Time("created_at"), field.Time("updated_at")}
+	return []ent.Field{field.UUID("id", uuid.UUID{}), field.UUID("user_id", uuid.UUID{}).Optional().Unique(), field.String("password"), field.Time("created_at"), field.Time("updated_at")}
 }
 func (PasswordCredential) Edges() []ent.Edge {
 	return []ent.Edge{edge.From("user", User.Type).Ref("password_credential").Unique().Field("user_id")}

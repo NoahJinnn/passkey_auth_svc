@@ -15,7 +15,7 @@ type Identity struct {
 }
 
 func (Identity) Fields() []ent.Field {
-	return []ent.Field{field.UUID("id", uuid.UUID{}), field.String("provider_id"), field.String("provider_name"), field.String("data").Optional(), field.UUID("email_id").Optional(uuid.UUID{}), field.Time("created_at"), field.Time("updated_at")}
+	return []ent.Field{field.UUID("id", uuid.UUID{}), field.String("provider_id"), field.String("provider_name"), field.String("data").Optional(), field.UUID("email_id" ,uuid.UUID{}).Optional(), field.Time("created_at"), field.Time("updated_at")}
 }
 func (Identity) Edges() []ent.Edge {
 	return []ent.Edge{edge.From("email", Email.Type).Ref("identities").Unique().Field("email_id")}

@@ -15,7 +15,7 @@ type Passcode struct {
 }
 
 func (Passcode) Fields() []ent.Field {
-	return []ent.Field{field.UUID("id", uuid.UUID{}), field.UUID("user_id").Optional(uuid.UUID{}), field.Int32("ttl"), field.String("code"), field.Int32("try_count"), field.Time("created_at"), field.Time("updated_at"), field.UUID("email_id").Optional(uuid.UUID{})}
+	return []ent.Field{field.UUID("id", uuid.UUID{}), field.UUID("user_id", uuid.UUID{}).Optional(), field.Int32("ttl"), field.String("code"), field.Int32("try_count"), field.Time("created_at"), field.Time("updated_at"), field.UUID("email_id", uuid.UUID{}).Optional()}
 }
 func (Passcode) Edges() []ent.Edge {
 	return []ent.Edge{edge.From("email", Email.Type).Ref("passcodes").Unique().Field("email_id"), edge.From("user", User.Type).Ref("passcodes").Unique().Field("user_id")}

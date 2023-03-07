@@ -5,9 +5,10 @@ import (
 
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ent"
 )
 
-func NewWebauthnUser(user models.User, credentials []models.WebauthnCredential) (*WebauthnUser, error) {
+func NewWebauthnUser(user ent.User, credentials []ent.WebauthnCredential) (*WebauthnUser, error) {
 	email := user.Emails.GetPrimary()
 	if email == nil {
 		return nil, errors.New("primary email unavailable")
@@ -23,7 +24,7 @@ func NewWebauthnUser(user models.User, credentials []models.WebauthnCredential) 
 type WebauthnUser struct {
 	UserId              uuid.UUID
 	Email               string
-	WebauthnCredentials []models.WebauthnCredential
+	WebauthnCredentials []ent.WebauthnCredential
 }
 
 func (u *WebauthnUser) WebAuthnID() []byte {

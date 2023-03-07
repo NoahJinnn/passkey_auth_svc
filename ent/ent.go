@@ -11,14 +11,17 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/hellohq/hqservice/ent/assetinfo"
-	"github.com/hellohq/hqservice/ent/bankaccount"
-	"github.com/hellohq/hqservice/ent/car"
-	"github.com/hellohq/hqservice/ent/collectible"
-	"github.com/hellohq/hqservice/ent/cryptoaccount"
-	"github.com/hellohq/hqservice/ent/loan"
-	"github.com/hellohq/hqservice/ent/privateshare"
+	"github.com/hellohq/hqservice/ent/email"
+	"github.com/hellohq/hqservice/ent/identity"
+	"github.com/hellohq/hqservice/ent/jwk"
+	"github.com/hellohq/hqservice/ent/passcode"
+	"github.com/hellohq/hqservice/ent/passwordcredential"
+	"github.com/hellohq/hqservice/ent/primaryemail"
 	"github.com/hellohq/hqservice/ent/user"
+	"github.com/hellohq/hqservice/ent/webauthncredential"
+	"github.com/hellohq/hqservice/ent/webauthncredentialtransport"
+	"github.com/hellohq/hqservice/ent/webauthnsessiondataallowedcredential"
+	"github.com/hellohq/hqservice/ent/webauthnsessiondatum"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -46,14 +49,17 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		assetinfo.Table:     assetinfo.ValidColumn,
-		bankaccount.Table:   bankaccount.ValidColumn,
-		car.Table:           car.ValidColumn,
-		collectible.Table:   collectible.ValidColumn,
-		cryptoaccount.Table: cryptoaccount.ValidColumn,
-		loan.Table:          loan.ValidColumn,
-		privateshare.Table:  privateshare.ValidColumn,
-		user.Table:          user.ValidColumn,
+		email.Table:                       email.ValidColumn,
+		identity.Table:                    identity.ValidColumn,
+		jwk.Table:                         jwk.ValidColumn,
+		passcode.Table:                    passcode.ValidColumn,
+		passwordcredential.Table:          passwordcredential.ValidColumn,
+		primaryemail.Table:                primaryemail.ValidColumn,
+		user.Table:                        user.ValidColumn,
+		webauthncredential.Table:          webauthncredential.ValidColumn,
+		webauthncredentialtransport.Table: webauthncredentialtransport.ValidColumn,
+		webauthnsessiondataallowedcredential.Table: webauthnsessiondataallowedcredential.ValidColumn,
+		webauthnsessiondatum.Table:                 webauthnsessiondatum.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

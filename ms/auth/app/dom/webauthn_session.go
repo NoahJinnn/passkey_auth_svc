@@ -7,9 +7,10 @@ import (
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ent"
 )
 
-func WebauthnSessionDataFromModel(data *models.WebauthnSessionData) *webauthn.SessionData {
+func WebauthnSessionDataFromModel(data *ent.WebauthnSessionData) *webauthn.SessionData {
 	var allowedCredentials [][]byte
 	for _, credential := range data.AllowedCredentials {
 		credentialId, err := base64.RawURLEncoding.DecodeString(credential.CredentialId)
@@ -30,15 +31,15 @@ func WebauthnSessionDataFromModel(data *models.WebauthnSessionData) *webauthn.Se
 	}
 }
 
-func WebauthnSessionDataToModel(data *webauthn.SessionData, operation models.Operation) *models.WebauthnSessionData {
+func WebauthnSessionDataToModel(data *webauthn.SessionData, operation ent.Operation) *ent.WebauthnSessionData {
 	id, _ := uuid.NewV4()
 	userId, _ := uuid.FromBytes(data.UserID)
 	now := time.Now()
 
-	var allowedCredentials []models.WebauthnSessionDataAllowedCredential
+	var allowedCredentials []ent.WebauthnSessionDataAllowedCredential
 	for _, credentialID := range data.AllowedCredentialIDs {
 		aId, _ := uuid.NewV4()
-		allowedCredential := models.WebauthnSessionDataAllowedCredential{
+		allowedCredential := ent.WebauthnSessionDataAllowedCredential{
 			ID:                    aId,
 			CredentialId:          base64.RawURLEncoding.EncodeToString(credentialID),
 			WebauthnSessionDataID: id,
@@ -49,7 +50,7 @@ func WebauthnSessionDataToModel(data *webauthn.SessionData, operation models.Ope
 		allowedCredentials = append(allowedCredentials, allowedCredential)
 	}
 
-	return &models.WebauthnSessionData{
+	return &ent.WebauthnSessionData{
 		ID:                 id,
 		Challenge:          data.Challenge,
 		UserId:             userId,
