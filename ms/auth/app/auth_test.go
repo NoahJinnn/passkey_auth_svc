@@ -3,17 +3,15 @@ package app_test
 import (
 	"testing"
 
-	gomock "github.com/golang/mock/gomock"
-	"github.com/hellohq/hqservice/ms/auth/app/dom"
 	"github.com/powerman/check"
 )
 
 func TestRegister(tt *testing.T) {
 	t := check.T(tt)
 	t.Parallel()
-	_, mockRepo := testNew(t)
+	// _, mockRepo := testNew(t)
 	// var uAnon = &app.User{}
-	mockRepo.EXPECT().CreateUser(gomock.Any(), &dom.User{})
+	// mockRepo.EXPECT().CreateUser(gomock.Any(), &dom.User{})
 
 	// tests := []struct {
 	// 	user    *model.User

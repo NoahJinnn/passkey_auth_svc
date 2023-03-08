@@ -24,10 +24,9 @@ func bindOAIHandlers(api *op.HqServiceAPI, srv *httpServer) {
 	api.GetSandboxAccessTokenHandler = op.GetSandboxAccessTokenHandlerFunc(srv.GetSandboxAccessToken)
 
 	// User API
-	api.GetUsersHandler = op.GetUsersHandlerFunc(srv.GetUsers)
-	api.GetUserByIDHandler = op.GetUserByIDHandlerFunc(srv.GetUserById)
-	api.CreateUserHandler = op.CreateUserHandlerFunc(srv.CreateUser)
-	api.UpdateUserHandler = op.UpdateUserHandlerFunc(srv.UpdateUser)
+	// api.GetUsersHandler = op.GetUsersHandlerFunc(srv.GetUsers)
+	// api.GetUserByIDHandler = op.GetUserByIDHandlerFunc(srv.GetUserById)
+	// api.CreateUserHandler = op.CreateUserHandlerFunc(srv.CreateUser)
 
 	// Webauthn API
 

@@ -11,8 +11,9 @@ import (
 
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
+	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/sharedconfig"
-	"github.com/hellohq/hqservice/ms/auth/app/dom"
 	plaid "github.com/plaid/plaid-go/v3/plaid"
 	"github.com/powerman/appcfg"
 )
@@ -36,7 +37,6 @@ type Appl interface {
 	// Errors: none.
 	HealthCheck(Ctx) (interface{}, error)
 	IPlaidSvc
-	IUserSvc
 	IWebauthnSvc
 }
 
@@ -54,23 +54,15 @@ type IPlaidSvc interface {
 	GetAccounts(ctx Ctx) (*GetAccountsResp, error)
 }
 
-type IUserSvc interface {
-	GetAllUsers(ctx Ctx) ([]*dom.User, error)
-	GetUserById(ctx Ctx, id uint) (*dom.User, error)
-	CreateUser(ctx Ctx, u *dom.User) (*dom.User, error)
-	UpdateUser(ctx Ctx, u *dom.User) (*dom.User, error)
-}
-
 type IWebauthnSvc interface {
 	WebauthnBeginRegistration(ctx Ctx) (*protocol.CredentialCreation, *webauthn.SessionData, error)
 }
 
 // Repo provides data storage.
 type Repo interface {
-	GetAllUsers(ctx Ctx) ([]*dom.User, error)
-	GetUserById(ctx Ctx, id uint) (*dom.User, error)
-	CreateUser(ctx Ctx, u *dom.User) (*dom.User, error)
-	UpdateUser(ctx Ctx, u *dom.User) (*dom.User, error)
+	GetAllUsers(ctx Ctx) ([]*ent.User, error)
+	GetUserById(ctx Ctx, id uuid.UUID) (*ent.User, error)
+	CreateUser(ctx Ctx, u *ent.User) (*ent.User, error)
 }
 
 // Ref: https://github.com/plaid/quickstart/blob/master/.env.example
