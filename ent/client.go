@@ -20,8 +20,8 @@ import (
 	"github.com/hellohq/hqservice/ent/user"
 	"github.com/hellohq/hqservice/ent/webauthncredential"
 	"github.com/hellohq/hqservice/ent/webauthncredentialtransport"
+	"github.com/hellohq/hqservice/ent/webauthnsessiondata"
 	"github.com/hellohq/hqservice/ent/webauthnsessiondataallowedcredential"
-	"github.com/hellohq/hqservice/ent/webauthnsessiondatum"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -51,10 +51,10 @@ type Client struct {
 	WebauthnCredential *WebauthnCredentialClient
 	// WebauthnCredentialTransport is the client for interacting with the WebauthnCredentialTransport builders.
 	WebauthnCredentialTransport *WebauthnCredentialTransportClient
+	// WebauthnSessionData is the client for interacting with the WebauthnSessionData builders.
+	WebauthnSessionData *WebauthnSessionDataClient
 	// WebauthnSessionDataAllowedCredential is the client for interacting with the WebauthnSessionDataAllowedCredential builders.
 	WebauthnSessionDataAllowedCredential *WebauthnSessionDataAllowedCredentialClient
-	// WebauthnSessionDatum is the client for interacting with the WebauthnSessionDatum builders.
-	WebauthnSessionDatum *WebauthnSessionDatumClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -77,8 +77,8 @@ func (c *Client) init() {
 	c.User = NewUserClient(c.config)
 	c.WebauthnCredential = NewWebauthnCredentialClient(c.config)
 	c.WebauthnCredentialTransport = NewWebauthnCredentialTransportClient(c.config)
+	c.WebauthnSessionData = NewWebauthnSessionDataClient(c.config)
 	c.WebauthnSessionDataAllowedCredential = NewWebauthnSessionDataAllowedCredentialClient(c.config)
-	c.WebauthnSessionDatum = NewWebauthnSessionDatumClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -121,8 +121,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		User:                                 NewUserClient(cfg),
 		WebauthnCredential:                   NewWebauthnCredentialClient(cfg),
 		WebauthnCredentialTransport:          NewWebauthnCredentialTransportClient(cfg),
+		WebauthnSessionData:                  NewWebauthnSessionDataClient(cfg),
 		WebauthnSessionDataAllowedCredential: NewWebauthnSessionDataAllowedCredentialClient(cfg),
-		WebauthnSessionDatum:                 NewWebauthnSessionDatumClient(cfg),
 	}, nil
 }
 
@@ -151,8 +151,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		User:                                 NewUserClient(cfg),
 		WebauthnCredential:                   NewWebauthnCredentialClient(cfg),
 		WebauthnCredentialTransport:          NewWebauthnCredentialTransportClient(cfg),
+		WebauthnSessionData:                  NewWebauthnSessionDataClient(cfg),
 		WebauthnSessionDataAllowedCredential: NewWebauthnSessionDataAllowedCredentialClient(cfg),
-		WebauthnSessionDatum:                 NewWebauthnSessionDatumClient(cfg),
 	}, nil
 }
 
@@ -190,8 +190,8 @@ func (c *Client) Use(hooks ...Hook) {
 	c.User.Use(hooks...)
 	c.WebauthnCredential.Use(hooks...)
 	c.WebauthnCredentialTransport.Use(hooks...)
+	c.WebauthnSessionData.Use(hooks...)
 	c.WebauthnSessionDataAllowedCredential.Use(hooks...)
-	c.WebauthnSessionDatum.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
@@ -206,8 +206,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.User.Intercept(interceptors...)
 	c.WebauthnCredential.Intercept(interceptors...)
 	c.WebauthnCredentialTransport.Intercept(interceptors...)
+	c.WebauthnSessionData.Intercept(interceptors...)
 	c.WebauthnSessionDataAllowedCredential.Intercept(interceptors...)
-	c.WebauthnSessionDatum.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -231,10 +231,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.WebauthnCredential.mutate(ctx, m)
 	case *WebauthnCredentialTransportMutation:
 		return c.WebauthnCredentialTransport.mutate(ctx, m)
+	case *WebauthnSessionDataMutation:
+		return c.WebauthnSessionData.mutate(ctx, m)
 	case *WebauthnSessionDataAllowedCredentialMutation:
 		return c.WebauthnSessionDataAllowedCredential.mutate(ctx, m)
-	case *WebauthnSessionDatumMutation:
-		return c.WebauthnSessionDatum.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -1590,6 +1590,140 @@ func (c *WebauthnCredentialTransportClient) mutate(ctx context.Context, m *Webau
 	}
 }
 
+// WebauthnSessionDataClient is a client for the WebauthnSessionData schema.
+type WebauthnSessionDataClient struct {
+	config
+}
+
+// NewWebauthnSessionDataClient returns a client for the WebauthnSessionData from the given config.
+func NewWebauthnSessionDataClient(c config) *WebauthnSessionDataClient {
+	return &WebauthnSessionDataClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `webauthnsessiondata.Hooks(f(g(h())))`.
+func (c *WebauthnSessionDataClient) Use(hooks ...Hook) {
+	c.hooks.WebauthnSessionData = append(c.hooks.WebauthnSessionData, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `webauthnsessiondata.Intercept(f(g(h())))`.
+func (c *WebauthnSessionDataClient) Intercept(interceptors ...Interceptor) {
+	c.inters.WebauthnSessionData = append(c.inters.WebauthnSessionData, interceptors...)
+}
+
+// Create returns a builder for creating a WebauthnSessionData entity.
+func (c *WebauthnSessionDataClient) Create() *WebauthnSessionDataCreate {
+	mutation := newWebauthnSessionDataMutation(c.config, OpCreate)
+	return &WebauthnSessionDataCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of WebauthnSessionData entities.
+func (c *WebauthnSessionDataClient) CreateBulk(builders ...*WebauthnSessionDataCreate) *WebauthnSessionDataCreateBulk {
+	return &WebauthnSessionDataCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for WebauthnSessionData.
+func (c *WebauthnSessionDataClient) Update() *WebauthnSessionDataUpdate {
+	mutation := newWebauthnSessionDataMutation(c.config, OpUpdate)
+	return &WebauthnSessionDataUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *WebauthnSessionDataClient) UpdateOne(wsd *WebauthnSessionData) *WebauthnSessionDataUpdateOne {
+	mutation := newWebauthnSessionDataMutation(c.config, OpUpdateOne, withWebauthnSessionData(wsd))
+	return &WebauthnSessionDataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *WebauthnSessionDataClient) UpdateOneID(id uuid.UUID) *WebauthnSessionDataUpdateOne {
+	mutation := newWebauthnSessionDataMutation(c.config, OpUpdateOne, withWebauthnSessionDataID(id))
+	return &WebauthnSessionDataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for WebauthnSessionData.
+func (c *WebauthnSessionDataClient) Delete() *WebauthnSessionDataDelete {
+	mutation := newWebauthnSessionDataMutation(c.config, OpDelete)
+	return &WebauthnSessionDataDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *WebauthnSessionDataClient) DeleteOne(wsd *WebauthnSessionData) *WebauthnSessionDataDeleteOne {
+	return c.DeleteOneID(wsd.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *WebauthnSessionDataClient) DeleteOneID(id uuid.UUID) *WebauthnSessionDataDeleteOne {
+	builder := c.Delete().Where(webauthnsessiondata.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &WebauthnSessionDataDeleteOne{builder}
+}
+
+// Query returns a query builder for WebauthnSessionData.
+func (c *WebauthnSessionDataClient) Query() *WebauthnSessionDataQuery {
+	return &WebauthnSessionDataQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeWebauthnSessionData},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a WebauthnSessionData entity by its id.
+func (c *WebauthnSessionDataClient) Get(ctx context.Context, id uuid.UUID) (*WebauthnSessionData, error) {
+	return c.Query().Where(webauthnsessiondata.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *WebauthnSessionDataClient) GetX(ctx context.Context, id uuid.UUID) *WebauthnSessionData {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryWebauthnSessionDataAllowedCredentials queries the webauthn_session_data_allowed_credentials edge of a WebauthnSessionData.
+func (c *WebauthnSessionDataClient) QueryWebauthnSessionDataAllowedCredentials(wsd *WebauthnSessionData) *WebauthnSessionDataAllowedCredentialQuery {
+	query := (&WebauthnSessionDataAllowedCredentialClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := wsd.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(webauthnsessiondata.Table, webauthnsessiondata.FieldID, id),
+			sqlgraph.To(webauthnsessiondataallowedcredential.Table, webauthnsessiondataallowedcredential.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, webauthnsessiondata.WebauthnSessionDataAllowedCredentialsTable, webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn),
+		)
+		fromV = sqlgraph.Neighbors(wsd.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *WebauthnSessionDataClient) Hooks() []Hook {
+	return c.hooks.WebauthnSessionData
+}
+
+// Interceptors returns the client interceptors.
+func (c *WebauthnSessionDataClient) Interceptors() []Interceptor {
+	return c.inters.WebauthnSessionData
+}
+
+func (c *WebauthnSessionDataClient) mutate(ctx context.Context, m *WebauthnSessionDataMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&WebauthnSessionDataCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&WebauthnSessionDataUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&WebauthnSessionDataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&WebauthnSessionDataDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown WebauthnSessionData mutation op: %q", m.Op())
+	}
+}
+
 // WebauthnSessionDataAllowedCredentialClient is a client for the WebauthnSessionDataAllowedCredential schema.
 type WebauthnSessionDataAllowedCredentialClient struct {
 	config
@@ -1683,15 +1817,15 @@ func (c *WebauthnSessionDataAllowedCredentialClient) GetX(ctx context.Context, i
 	return obj
 }
 
-// QueryWebauthnSessionDatum queries the webauthn_session_datum edge of a WebauthnSessionDataAllowedCredential.
-func (c *WebauthnSessionDataAllowedCredentialClient) QueryWebauthnSessionDatum(wsdac *WebauthnSessionDataAllowedCredential) *WebauthnSessionDatumQuery {
-	query := (&WebauthnSessionDatumClient{config: c.config}).Query()
+// QueryWebauthnSessionData queries the webauthn_session_data edge of a WebauthnSessionDataAllowedCredential.
+func (c *WebauthnSessionDataAllowedCredentialClient) QueryWebauthnSessionData(wsdac *WebauthnSessionDataAllowedCredential) *WebauthnSessionDataQuery {
+	query := (&WebauthnSessionDataClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := wsdac.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(webauthnsessiondataallowedcredential.Table, webauthnsessiondataallowedcredential.FieldID, id),
-			sqlgraph.To(webauthnsessiondatum.Table, webauthnsessiondatum.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, webauthnsessiondataallowedcredential.WebauthnSessionDatumTable, webauthnsessiondataallowedcredential.WebauthnSessionDatumColumn),
+			sqlgraph.To(webauthnsessiondata.Table, webauthnsessiondata.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, webauthnsessiondataallowedcredential.WebauthnSessionDataTable, webauthnsessiondataallowedcredential.WebauthnSessionDataColumn),
 		)
 		fromV = sqlgraph.Neighbors(wsdac.driver.Dialect(), step)
 		return fromV, nil
@@ -1721,139 +1855,5 @@ func (c *WebauthnSessionDataAllowedCredentialClient) mutate(ctx context.Context,
 		return (&WebauthnSessionDataAllowedCredentialDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown WebauthnSessionDataAllowedCredential mutation op: %q", m.Op())
-	}
-}
-
-// WebauthnSessionDatumClient is a client for the WebauthnSessionDatum schema.
-type WebauthnSessionDatumClient struct {
-	config
-}
-
-// NewWebauthnSessionDatumClient returns a client for the WebauthnSessionDatum from the given config.
-func NewWebauthnSessionDatumClient(c config) *WebauthnSessionDatumClient {
-	return &WebauthnSessionDatumClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `webauthnsessiondatum.Hooks(f(g(h())))`.
-func (c *WebauthnSessionDatumClient) Use(hooks ...Hook) {
-	c.hooks.WebauthnSessionDatum = append(c.hooks.WebauthnSessionDatum, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `webauthnsessiondatum.Intercept(f(g(h())))`.
-func (c *WebauthnSessionDatumClient) Intercept(interceptors ...Interceptor) {
-	c.inters.WebauthnSessionDatum = append(c.inters.WebauthnSessionDatum, interceptors...)
-}
-
-// Create returns a builder for creating a WebauthnSessionDatum entity.
-func (c *WebauthnSessionDatumClient) Create() *WebauthnSessionDatumCreate {
-	mutation := newWebauthnSessionDatumMutation(c.config, OpCreate)
-	return &WebauthnSessionDatumCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of WebauthnSessionDatum entities.
-func (c *WebauthnSessionDatumClient) CreateBulk(builders ...*WebauthnSessionDatumCreate) *WebauthnSessionDatumCreateBulk {
-	return &WebauthnSessionDatumCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for WebauthnSessionDatum.
-func (c *WebauthnSessionDatumClient) Update() *WebauthnSessionDatumUpdate {
-	mutation := newWebauthnSessionDatumMutation(c.config, OpUpdate)
-	return &WebauthnSessionDatumUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *WebauthnSessionDatumClient) UpdateOne(wsd *WebauthnSessionDatum) *WebauthnSessionDatumUpdateOne {
-	mutation := newWebauthnSessionDatumMutation(c.config, OpUpdateOne, withWebauthnSessionDatum(wsd))
-	return &WebauthnSessionDatumUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *WebauthnSessionDatumClient) UpdateOneID(id uuid.UUID) *WebauthnSessionDatumUpdateOne {
-	mutation := newWebauthnSessionDatumMutation(c.config, OpUpdateOne, withWebauthnSessionDatumID(id))
-	return &WebauthnSessionDatumUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for WebauthnSessionDatum.
-func (c *WebauthnSessionDatumClient) Delete() *WebauthnSessionDatumDelete {
-	mutation := newWebauthnSessionDatumMutation(c.config, OpDelete)
-	return &WebauthnSessionDatumDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *WebauthnSessionDatumClient) DeleteOne(wsd *WebauthnSessionDatum) *WebauthnSessionDatumDeleteOne {
-	return c.DeleteOneID(wsd.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *WebauthnSessionDatumClient) DeleteOneID(id uuid.UUID) *WebauthnSessionDatumDeleteOne {
-	builder := c.Delete().Where(webauthnsessiondatum.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &WebauthnSessionDatumDeleteOne{builder}
-}
-
-// Query returns a query builder for WebauthnSessionDatum.
-func (c *WebauthnSessionDatumClient) Query() *WebauthnSessionDatumQuery {
-	return &WebauthnSessionDatumQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeWebauthnSessionDatum},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a WebauthnSessionDatum entity by its id.
-func (c *WebauthnSessionDatumClient) Get(ctx context.Context, id uuid.UUID) (*WebauthnSessionDatum, error) {
-	return c.Query().Where(webauthnsessiondatum.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *WebauthnSessionDatumClient) GetX(ctx context.Context, id uuid.UUID) *WebauthnSessionDatum {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryWebauthnSessionDataAllowedCredentials queries the webauthn_session_data_allowed_credentials edge of a WebauthnSessionDatum.
-func (c *WebauthnSessionDatumClient) QueryWebauthnSessionDataAllowedCredentials(wsd *WebauthnSessionDatum) *WebauthnSessionDataAllowedCredentialQuery {
-	query := (&WebauthnSessionDataAllowedCredentialClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := wsd.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(webauthnsessiondatum.Table, webauthnsessiondatum.FieldID, id),
-			sqlgraph.To(webauthnsessiondataallowedcredential.Table, webauthnsessiondataallowedcredential.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, webauthnsessiondatum.WebauthnSessionDataAllowedCredentialsTable, webauthnsessiondatum.WebauthnSessionDataAllowedCredentialsColumn),
-		)
-		fromV = sqlgraph.Neighbors(wsd.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *WebauthnSessionDatumClient) Hooks() []Hook {
-	return c.hooks.WebauthnSessionDatum
-}
-
-// Interceptors returns the client interceptors.
-func (c *WebauthnSessionDatumClient) Interceptors() []Interceptor {
-	return c.inters.WebauthnSessionDatum
-}
-
-func (c *WebauthnSessionDatumClient) mutate(ctx context.Context, m *WebauthnSessionDatumMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&WebauthnSessionDatumCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&WebauthnSessionDatumUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&WebauthnSessionDatumUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&WebauthnSessionDatumDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown WebauthnSessionDatum mutation op: %q", m.Op())
 	}
 }

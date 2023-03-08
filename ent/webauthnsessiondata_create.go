@@ -11,67 +11,67 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ent/webauthnsessiondata"
 	"github.com/hellohq/hqservice/ent/webauthnsessiondataallowedcredential"
-	"github.com/hellohq/hqservice/ent/webauthnsessiondatum"
 )
 
-// WebauthnSessionDatumCreate is the builder for creating a WebauthnSessionDatum entity.
-type WebauthnSessionDatumCreate struct {
+// WebauthnSessionDataCreate is the builder for creating a WebauthnSessionData entity.
+type WebauthnSessionDataCreate struct {
 	config
-	mutation *WebauthnSessionDatumMutation
+	mutation *WebauthnSessionDataMutation
 	hooks    []Hook
 }
 
 // SetChallenge sets the "challenge" field.
-func (wsdc *WebauthnSessionDatumCreate) SetChallenge(s string) *WebauthnSessionDatumCreate {
+func (wsdc *WebauthnSessionDataCreate) SetChallenge(s string) *WebauthnSessionDataCreate {
 	wsdc.mutation.SetChallenge(s)
 	return wsdc
 }
 
 // SetUserID sets the "user_id" field.
-func (wsdc *WebauthnSessionDatumCreate) SetUserID(u uuid.UUID) *WebauthnSessionDatumCreate {
+func (wsdc *WebauthnSessionDataCreate) SetUserID(u uuid.UUID) *WebauthnSessionDataCreate {
 	wsdc.mutation.SetUserID(u)
 	return wsdc
 }
 
 // SetUserVerification sets the "user_verification" field.
-func (wsdc *WebauthnSessionDatumCreate) SetUserVerification(s string) *WebauthnSessionDatumCreate {
+func (wsdc *WebauthnSessionDataCreate) SetUserVerification(s string) *WebauthnSessionDataCreate {
 	wsdc.mutation.SetUserVerification(s)
 	return wsdc
 }
 
 // SetOperation sets the "operation" field.
-func (wsdc *WebauthnSessionDatumCreate) SetOperation(s string) *WebauthnSessionDatumCreate {
+func (wsdc *WebauthnSessionDataCreate) SetOperation(s string) *WebauthnSessionDataCreate {
 	wsdc.mutation.SetOperation(s)
 	return wsdc
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (wsdc *WebauthnSessionDatumCreate) SetCreatedAt(t time.Time) *WebauthnSessionDatumCreate {
+func (wsdc *WebauthnSessionDataCreate) SetCreatedAt(t time.Time) *WebauthnSessionDataCreate {
 	wsdc.mutation.SetCreatedAt(t)
 	return wsdc
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (wsdc *WebauthnSessionDatumCreate) SetUpdatedAt(t time.Time) *WebauthnSessionDatumCreate {
+func (wsdc *WebauthnSessionDataCreate) SetUpdatedAt(t time.Time) *WebauthnSessionDataCreate {
 	wsdc.mutation.SetUpdatedAt(t)
 	return wsdc
 }
 
 // SetID sets the "id" field.
-func (wsdc *WebauthnSessionDatumCreate) SetID(u uuid.UUID) *WebauthnSessionDatumCreate {
+func (wsdc *WebauthnSessionDataCreate) SetID(u uuid.UUID) *WebauthnSessionDataCreate {
 	wsdc.mutation.SetID(u)
 	return wsdc
 }
 
 // AddWebauthnSessionDataAllowedCredentialIDs adds the "webauthn_session_data_allowed_credentials" edge to the WebauthnSessionDataAllowedCredential entity by IDs.
-func (wsdc *WebauthnSessionDatumCreate) AddWebauthnSessionDataAllowedCredentialIDs(ids ...uuid.UUID) *WebauthnSessionDatumCreate {
+func (wsdc *WebauthnSessionDataCreate) AddWebauthnSessionDataAllowedCredentialIDs(ids ...uuid.UUID) *WebauthnSessionDataCreate {
 	wsdc.mutation.AddWebauthnSessionDataAllowedCredentialIDs(ids...)
 	return wsdc
 }
 
 // AddWebauthnSessionDataAllowedCredentials adds the "webauthn_session_data_allowed_credentials" edges to the WebauthnSessionDataAllowedCredential entity.
-func (wsdc *WebauthnSessionDatumCreate) AddWebauthnSessionDataAllowedCredentials(w ...*WebauthnSessionDataAllowedCredential) *WebauthnSessionDatumCreate {
+func (wsdc *WebauthnSessionDataCreate) AddWebauthnSessionDataAllowedCredentials(w ...*WebauthnSessionDataAllowedCredential) *WebauthnSessionDataCreate {
 	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
@@ -79,18 +79,18 @@ func (wsdc *WebauthnSessionDatumCreate) AddWebauthnSessionDataAllowedCredentials
 	return wsdc.AddWebauthnSessionDataAllowedCredentialIDs(ids...)
 }
 
-// Mutation returns the WebauthnSessionDatumMutation object of the builder.
-func (wsdc *WebauthnSessionDatumCreate) Mutation() *WebauthnSessionDatumMutation {
+// Mutation returns the WebauthnSessionDataMutation object of the builder.
+func (wsdc *WebauthnSessionDataCreate) Mutation() *WebauthnSessionDataMutation {
 	return wsdc.mutation
 }
 
-// Save creates the WebauthnSessionDatum in the database.
-func (wsdc *WebauthnSessionDatumCreate) Save(ctx context.Context) (*WebauthnSessionDatum, error) {
-	return withHooks[*WebauthnSessionDatum, WebauthnSessionDatumMutation](ctx, wsdc.sqlSave, wsdc.mutation, wsdc.hooks)
+// Save creates the WebauthnSessionData in the database.
+func (wsdc *WebauthnSessionDataCreate) Save(ctx context.Context) (*WebauthnSessionData, error) {
+	return withHooks[*WebauthnSessionData, WebauthnSessionDataMutation](ctx, wsdc.sqlSave, wsdc.mutation, wsdc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (wsdc *WebauthnSessionDatumCreate) SaveX(ctx context.Context) *WebauthnSessionDatum {
+func (wsdc *WebauthnSessionDataCreate) SaveX(ctx context.Context) *WebauthnSessionData {
 	v, err := wsdc.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -99,42 +99,42 @@ func (wsdc *WebauthnSessionDatumCreate) SaveX(ctx context.Context) *WebauthnSess
 }
 
 // Exec executes the query.
-func (wsdc *WebauthnSessionDatumCreate) Exec(ctx context.Context) error {
+func (wsdc *WebauthnSessionDataCreate) Exec(ctx context.Context) error {
 	_, err := wsdc.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (wsdc *WebauthnSessionDatumCreate) ExecX(ctx context.Context) {
+func (wsdc *WebauthnSessionDataCreate) ExecX(ctx context.Context) {
 	if err := wsdc.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (wsdc *WebauthnSessionDatumCreate) check() error {
+func (wsdc *WebauthnSessionDataCreate) check() error {
 	if _, ok := wsdc.mutation.Challenge(); !ok {
-		return &ValidationError{Name: "challenge", err: errors.New(`ent: missing required field "WebauthnSessionDatum.challenge"`)}
+		return &ValidationError{Name: "challenge", err: errors.New(`ent: missing required field "WebauthnSessionData.challenge"`)}
 	}
 	if _, ok := wsdc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "WebauthnSessionDatum.user_id"`)}
+		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "WebauthnSessionData.user_id"`)}
 	}
 	if _, ok := wsdc.mutation.UserVerification(); !ok {
-		return &ValidationError{Name: "user_verification", err: errors.New(`ent: missing required field "WebauthnSessionDatum.user_verification"`)}
+		return &ValidationError{Name: "user_verification", err: errors.New(`ent: missing required field "WebauthnSessionData.user_verification"`)}
 	}
 	if _, ok := wsdc.mutation.Operation(); !ok {
-		return &ValidationError{Name: "operation", err: errors.New(`ent: missing required field "WebauthnSessionDatum.operation"`)}
+		return &ValidationError{Name: "operation", err: errors.New(`ent: missing required field "WebauthnSessionData.operation"`)}
 	}
 	if _, ok := wsdc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "WebauthnSessionDatum.created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "WebauthnSessionData.created_at"`)}
 	}
 	if _, ok := wsdc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "WebauthnSessionDatum.updated_at"`)}
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "WebauthnSessionData.updated_at"`)}
 	}
 	return nil
 }
 
-func (wsdc *WebauthnSessionDatumCreate) sqlSave(ctx context.Context) (*WebauthnSessionDatum, error) {
+func (wsdc *WebauthnSessionDataCreate) sqlSave(ctx context.Context) (*WebauthnSessionData, error) {
 	if err := wsdc.check(); err != nil {
 		return nil, err
 	}
@@ -157,45 +157,45 @@ func (wsdc *WebauthnSessionDatumCreate) sqlSave(ctx context.Context) (*WebauthnS
 	return _node, nil
 }
 
-func (wsdc *WebauthnSessionDatumCreate) createSpec() (*WebauthnSessionDatum, *sqlgraph.CreateSpec) {
+func (wsdc *WebauthnSessionDataCreate) createSpec() (*WebauthnSessionData, *sqlgraph.CreateSpec) {
 	var (
-		_node = &WebauthnSessionDatum{config: wsdc.config}
-		_spec = sqlgraph.NewCreateSpec(webauthnsessiondatum.Table, sqlgraph.NewFieldSpec(webauthnsessiondatum.FieldID, field.TypeUUID))
+		_node = &WebauthnSessionData{config: wsdc.config}
+		_spec = sqlgraph.NewCreateSpec(webauthnsessiondata.Table, sqlgraph.NewFieldSpec(webauthnsessiondata.FieldID, field.TypeUUID))
 	)
 	if id, ok := wsdc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
 	if value, ok := wsdc.mutation.Challenge(); ok {
-		_spec.SetField(webauthnsessiondatum.FieldChallenge, field.TypeString, value)
+		_spec.SetField(webauthnsessiondata.FieldChallenge, field.TypeString, value)
 		_node.Challenge = value
 	}
 	if value, ok := wsdc.mutation.UserID(); ok {
-		_spec.SetField(webauthnsessiondatum.FieldUserID, field.TypeUUID, value)
+		_spec.SetField(webauthnsessiondata.FieldUserID, field.TypeUUID, value)
 		_node.UserID = value
 	}
 	if value, ok := wsdc.mutation.UserVerification(); ok {
-		_spec.SetField(webauthnsessiondatum.FieldUserVerification, field.TypeString, value)
+		_spec.SetField(webauthnsessiondata.FieldUserVerification, field.TypeString, value)
 		_node.UserVerification = value
 	}
 	if value, ok := wsdc.mutation.Operation(); ok {
-		_spec.SetField(webauthnsessiondatum.FieldOperation, field.TypeString, value)
+		_spec.SetField(webauthnsessiondata.FieldOperation, field.TypeString, value)
 		_node.Operation = value
 	}
 	if value, ok := wsdc.mutation.CreatedAt(); ok {
-		_spec.SetField(webauthnsessiondatum.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(webauthnsessiondata.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := wsdc.mutation.UpdatedAt(); ok {
-		_spec.SetField(webauthnsessiondatum.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(webauthnsessiondata.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if nodes := wsdc.mutation.WebauthnSessionDataAllowedCredentialsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   webauthnsessiondatum.WebauthnSessionDataAllowedCredentialsTable,
-			Columns: []string{webauthnsessiondatum.WebauthnSessionDataAllowedCredentialsColumn},
+			Table:   webauthnsessiondata.WebauthnSessionDataAllowedCredentialsTable,
+			Columns: []string{webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -212,22 +212,22 @@ func (wsdc *WebauthnSessionDatumCreate) createSpec() (*WebauthnSessionDatum, *sq
 	return _node, _spec
 }
 
-// WebauthnSessionDatumCreateBulk is the builder for creating many WebauthnSessionDatum entities in bulk.
-type WebauthnSessionDatumCreateBulk struct {
+// WebauthnSessionDataCreateBulk is the builder for creating many WebauthnSessionData entities in bulk.
+type WebauthnSessionDataCreateBulk struct {
 	config
-	builders []*WebauthnSessionDatumCreate
+	builders []*WebauthnSessionDataCreate
 }
 
-// Save creates the WebauthnSessionDatum entities in the database.
-func (wsdcb *WebauthnSessionDatumCreateBulk) Save(ctx context.Context) ([]*WebauthnSessionDatum, error) {
+// Save creates the WebauthnSessionData entities in the database.
+func (wsdcb *WebauthnSessionDataCreateBulk) Save(ctx context.Context) ([]*WebauthnSessionData, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(wsdcb.builders))
-	nodes := make([]*WebauthnSessionDatum, len(wsdcb.builders))
+	nodes := make([]*WebauthnSessionData, len(wsdcb.builders))
 	mutators := make([]Mutator, len(wsdcb.builders))
 	for i := range wsdcb.builders {
 		func(i int, root context.Context) {
 			builder := wsdcb.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*WebauthnSessionDatumMutation)
+				mutation, ok := m.(*WebauthnSessionDataMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -270,7 +270,7 @@ func (wsdcb *WebauthnSessionDatumCreateBulk) Save(ctx context.Context) ([]*Webau
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (wsdcb *WebauthnSessionDatumCreateBulk) SaveX(ctx context.Context) []*WebauthnSessionDatum {
+func (wsdcb *WebauthnSessionDataCreateBulk) SaveX(ctx context.Context) []*WebauthnSessionData {
 	v, err := wsdcb.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -279,13 +279,13 @@ func (wsdcb *WebauthnSessionDatumCreateBulk) SaveX(ctx context.Context) []*Webau
 }
 
 // Exec executes the query.
-func (wsdcb *WebauthnSessionDatumCreateBulk) Exec(ctx context.Context) error {
+func (wsdcb *WebauthnSessionDataCreateBulk) Exec(ctx context.Context) error {
 	_, err := wsdcb.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (wsdcb *WebauthnSessionDatumCreateBulk) ExecX(ctx context.Context) {
+func (wsdcb *WebauthnSessionDataCreateBulk) ExecX(ctx context.Context) {
 	if err := wsdcb.Exec(ctx); err != nil {
 		panic(err)
 	}

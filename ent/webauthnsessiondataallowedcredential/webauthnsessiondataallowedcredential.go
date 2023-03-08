@@ -15,17 +15,17 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
-	// EdgeWebauthnSessionDatum holds the string denoting the webauthn_session_datum edge name in mutations.
-	EdgeWebauthnSessionDatum = "webauthn_session_datum"
+	// EdgeWebauthnSessionData holds the string denoting the webauthn_session_data edge name in mutations.
+	EdgeWebauthnSessionData = "webauthn_session_data"
 	// Table holds the table name of the webauthnsessiondataallowedcredential in the database.
 	Table = "webauthn_session_data_allowed_credentials"
-	// WebauthnSessionDatumTable is the table that holds the webauthn_session_datum relation/edge.
-	WebauthnSessionDatumTable = "webauthn_session_data_allowed_credentials"
-	// WebauthnSessionDatumInverseTable is the table name for the WebauthnSessionDatum entity.
-	// It exists in this package in order to avoid circular dependency with the "webauthnsessiondatum" package.
-	WebauthnSessionDatumInverseTable = "webauthn_session_data"
-	// WebauthnSessionDatumColumn is the table column denoting the webauthn_session_datum relation/edge.
-	WebauthnSessionDatumColumn = "webauthn_session_data_id"
+	// WebauthnSessionDataTable is the table that holds the webauthn_session_data relation/edge.
+	WebauthnSessionDataTable = "webauthn_session_data_allowed_credentials"
+	// WebauthnSessionDataInverseTable is the table name for the WebauthnSessionData entity.
+	// It exists in this package in order to avoid circular dependency with the "webauthnsessiondata" package.
+	WebauthnSessionDataInverseTable = "webauthn_session_data"
+	// WebauthnSessionDataColumn is the table column denoting the webauthn_session_data relation/edge.
+	WebauthnSessionDataColumn = "webauthn_session_data_id"
 )
 
 // Columns holds all SQL columns for webauthnsessiondataallowedcredential fields.

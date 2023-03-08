@@ -10,16 +10,16 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-type WebauthnSessionDatum struct {
+type WebauthnSessionData struct {
 	ent.Schema
 }
 
-func (WebauthnSessionDatum) Fields() []ent.Field {
+func (WebauthnSessionData) Fields() []ent.Field {
 	return []ent.Field{field.UUID("id", uuid.UUID{}), field.String("challenge").Unique(), field.UUID("user_id", uuid.UUID{}), field.String("user_verification"), field.String("operation"), field.Time("created_at"), field.Time("updated_at")}
 }
-func (WebauthnSessionDatum) Edges() []ent.Edge {
+func (WebauthnSessionData) Edges() []ent.Edge {
 	return []ent.Edge{edge.To("webauthn_session_data_allowed_credentials", WebauthnSessionDataAllowedCredential.Type)}
 }
-func (WebauthnSessionDatum) Annotations() []schema.Annotation {
+func (WebauthnSessionData) Annotations() []schema.Annotation {
 	return nil
 }

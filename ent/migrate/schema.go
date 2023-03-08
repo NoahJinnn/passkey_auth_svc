@@ -209,6 +209,22 @@ var (
 			},
 		},
 	}
+	// WebauthnSessionDataColumns holds the columns for the "webauthn_session_data" table.
+	WebauthnSessionDataColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "challenge", Type: field.TypeString, Unique: true},
+		{Name: "user_id", Type: field.TypeUUID},
+		{Name: "user_verification", Type: field.TypeString},
+		{Name: "operation", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// WebauthnSessionDataTable holds the schema information for the "webauthn_session_data" table.
+	WebauthnSessionDataTable = &schema.Table{
+		Name:       "webauthn_session_data",
+		Columns:    WebauthnSessionDataColumns,
+		PrimaryKey: []*schema.Column{WebauthnSessionDataColumns[0]},
+	}
 	// WebauthnSessionDataAllowedCredentialsColumns holds the columns for the "webauthn_session_data_allowed_credentials" table.
 	WebauthnSessionDataAllowedCredentialsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -231,22 +247,6 @@ var (
 			},
 		},
 	}
-	// WebauthnSessionDataColumns holds the columns for the "webauthn_session_data" table.
-	WebauthnSessionDataColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "challenge", Type: field.TypeString, Unique: true},
-		{Name: "user_id", Type: field.TypeUUID},
-		{Name: "user_verification", Type: field.TypeString},
-		{Name: "operation", Type: field.TypeString},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-	}
-	// WebauthnSessionDataTable holds the schema information for the "webauthn_session_data" table.
-	WebauthnSessionDataTable = &schema.Table{
-		Name:       "webauthn_session_data",
-		Columns:    WebauthnSessionDataColumns,
-		PrimaryKey: []*schema.Column{WebauthnSessionDataColumns[0]},
-	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		EmailsTable,
@@ -258,8 +258,8 @@ var (
 		UsersTable,
 		WebauthnCredentialsTable,
 		WebauthnCredentialTransportsTable,
-		WebauthnSessionDataAllowedCredentialsTable,
 		WebauthnSessionDataTable,
+		WebauthnSessionDataAllowedCredentialsTable,
 	}
 )
 

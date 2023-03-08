@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/predicate"
+	"github.com/hellohq/hqservice/ent/webauthnsessiondata"
 	"github.com/hellohq/hqservice/ent/webauthnsessiondataallowedcredential"
-	"github.com/hellohq/hqservice/ent/webauthnsessiondatum"
 )
 
 // WebauthnSessionDataAllowedCredentialUpdate is the builder for updating WebauthnSessionDataAllowedCredential entities.
@@ -68,23 +68,9 @@ func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) SetUpdatedAt(t time.Ti
 	return wsdacu
 }
 
-// SetWebauthnSessionDatumID sets the "webauthn_session_datum" edge to the WebauthnSessionDatum entity by ID.
-func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) SetWebauthnSessionDatumID(id uuid.UUID) *WebauthnSessionDataAllowedCredentialUpdate {
-	wsdacu.mutation.SetWebauthnSessionDatumID(id)
-	return wsdacu
-}
-
-// SetNillableWebauthnSessionDatumID sets the "webauthn_session_datum" edge to the WebauthnSessionDatum entity by ID if the given value is not nil.
-func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) SetNillableWebauthnSessionDatumID(id *uuid.UUID) *WebauthnSessionDataAllowedCredentialUpdate {
-	if id != nil {
-		wsdacu = wsdacu.SetWebauthnSessionDatumID(*id)
-	}
-	return wsdacu
-}
-
-// SetWebauthnSessionDatum sets the "webauthn_session_datum" edge to the WebauthnSessionDatum entity.
-func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) SetWebauthnSessionDatum(w *WebauthnSessionDatum) *WebauthnSessionDataAllowedCredentialUpdate {
-	return wsdacu.SetWebauthnSessionDatumID(w.ID)
+// SetWebauthnSessionData sets the "webauthn_session_data" edge to the WebauthnSessionData entity.
+func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) SetWebauthnSessionData(w *WebauthnSessionData) *WebauthnSessionDataAllowedCredentialUpdate {
+	return wsdacu.SetWebauthnSessionDataID(w.ID)
 }
 
 // Mutation returns the WebauthnSessionDataAllowedCredentialMutation object of the builder.
@@ -92,9 +78,9 @@ func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) Mutation() *WebauthnSe
 	return wsdacu.mutation
 }
 
-// ClearWebauthnSessionDatum clears the "webauthn_session_datum" edge to the WebauthnSessionDatum entity.
-func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) ClearWebauthnSessionDatum() *WebauthnSessionDataAllowedCredentialUpdate {
-	wsdacu.mutation.ClearWebauthnSessionDatum()
+// ClearWebauthnSessionData clears the "webauthn_session_data" edge to the WebauthnSessionData entity.
+func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) ClearWebauthnSessionData() *WebauthnSessionDataAllowedCredentialUpdate {
+	wsdacu.mutation.ClearWebauthnSessionData()
 	return wsdacu
 }
 
@@ -143,33 +129,33 @@ func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) sqlSave(ctx context.Co
 	if value, ok := wsdacu.mutation.UpdatedAt(); ok {
 		_spec.SetField(webauthnsessiondataallowedcredential.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if wsdacu.mutation.WebauthnSessionDatumCleared() {
+	if wsdacu.mutation.WebauthnSessionDataCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   webauthnsessiondataallowedcredential.WebauthnSessionDatumTable,
-			Columns: []string{webauthnsessiondataallowedcredential.WebauthnSessionDatumColumn},
+			Table:   webauthnsessiondataallowedcredential.WebauthnSessionDataTable,
+			Columns: []string{webauthnsessiondataallowedcredential.WebauthnSessionDataColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: webauthnsessiondatum.FieldID,
+					Column: webauthnsessiondata.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wsdacu.mutation.WebauthnSessionDatumIDs(); len(nodes) > 0 {
+	if nodes := wsdacu.mutation.WebauthnSessionDataIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   webauthnsessiondataallowedcredential.WebauthnSessionDatumTable,
-			Columns: []string{webauthnsessiondataallowedcredential.WebauthnSessionDatumColumn},
+			Table:   webauthnsessiondataallowedcredential.WebauthnSessionDataTable,
+			Columns: []string{webauthnsessiondataallowedcredential.WebauthnSessionDataColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: webauthnsessiondatum.FieldID,
+					Column: webauthnsessiondata.FieldID,
 				},
 			},
 		}
@@ -236,23 +222,9 @@ func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) SetUpdatedAt(t tim
 	return wsdacuo
 }
 
-// SetWebauthnSessionDatumID sets the "webauthn_session_datum" edge to the WebauthnSessionDatum entity by ID.
-func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) SetWebauthnSessionDatumID(id uuid.UUID) *WebauthnSessionDataAllowedCredentialUpdateOne {
-	wsdacuo.mutation.SetWebauthnSessionDatumID(id)
-	return wsdacuo
-}
-
-// SetNillableWebauthnSessionDatumID sets the "webauthn_session_datum" edge to the WebauthnSessionDatum entity by ID if the given value is not nil.
-func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) SetNillableWebauthnSessionDatumID(id *uuid.UUID) *WebauthnSessionDataAllowedCredentialUpdateOne {
-	if id != nil {
-		wsdacuo = wsdacuo.SetWebauthnSessionDatumID(*id)
-	}
-	return wsdacuo
-}
-
-// SetWebauthnSessionDatum sets the "webauthn_session_datum" edge to the WebauthnSessionDatum entity.
-func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) SetWebauthnSessionDatum(w *WebauthnSessionDatum) *WebauthnSessionDataAllowedCredentialUpdateOne {
-	return wsdacuo.SetWebauthnSessionDatumID(w.ID)
+// SetWebauthnSessionData sets the "webauthn_session_data" edge to the WebauthnSessionData entity.
+func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) SetWebauthnSessionData(w *WebauthnSessionData) *WebauthnSessionDataAllowedCredentialUpdateOne {
+	return wsdacuo.SetWebauthnSessionDataID(w.ID)
 }
 
 // Mutation returns the WebauthnSessionDataAllowedCredentialMutation object of the builder.
@@ -260,9 +232,9 @@ func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) Mutation() *Webaut
 	return wsdacuo.mutation
 }
 
-// ClearWebauthnSessionDatum clears the "webauthn_session_datum" edge to the WebauthnSessionDatum entity.
-func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) ClearWebauthnSessionDatum() *WebauthnSessionDataAllowedCredentialUpdateOne {
-	wsdacuo.mutation.ClearWebauthnSessionDatum()
+// ClearWebauthnSessionData clears the "webauthn_session_data" edge to the WebauthnSessionData entity.
+func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) ClearWebauthnSessionData() *WebauthnSessionDataAllowedCredentialUpdateOne {
+	wsdacuo.mutation.ClearWebauthnSessionData()
 	return wsdacuo
 }
 
@@ -341,33 +313,33 @@ func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) sqlSave(ctx contex
 	if value, ok := wsdacuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(webauthnsessiondataallowedcredential.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if wsdacuo.mutation.WebauthnSessionDatumCleared() {
+	if wsdacuo.mutation.WebauthnSessionDataCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   webauthnsessiondataallowedcredential.WebauthnSessionDatumTable,
-			Columns: []string{webauthnsessiondataallowedcredential.WebauthnSessionDatumColumn},
+			Table:   webauthnsessiondataallowedcredential.WebauthnSessionDataTable,
+			Columns: []string{webauthnsessiondataallowedcredential.WebauthnSessionDataColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: webauthnsessiondatum.FieldID,
+					Column: webauthnsessiondata.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wsdacuo.mutation.WebauthnSessionDatumIDs(); len(nodes) > 0 {
+	if nodes := wsdacuo.mutation.WebauthnSessionDataIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   webauthnsessiondataallowedcredential.WebauthnSessionDatumTable,
-			Columns: []string{webauthnsessiondataallowedcredential.WebauthnSessionDatumColumn},
+			Table:   webauthnsessiondataallowedcredential.WebauthnSessionDataTable,
+			Columns: []string{webauthnsessiondataallowedcredential.WebauthnSessionDataColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: webauthnsessiondatum.FieldID,
+					Column: webauthnsessiondata.FieldID,
 				},
 			},
 		}

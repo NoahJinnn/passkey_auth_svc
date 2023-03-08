@@ -17,7 +17,9 @@ func (WebauthnCredentialTransport) Fields() []ent.Field {
 	return []ent.Field{field.String("id"), field.String("name"), field.String("webauthn_credential_id").Optional()}
 }
 func (WebauthnCredentialTransport) Edges() []ent.Edge {
-	return []ent.Edge{edge.From("webauthn_credential", WebauthnCredential.Type).Ref("webauthn_credential_transports").Unique().Field("webauthn_credential_id")}
+	return []ent.Edge{
+		edge.From("webauthn_credential", WebauthnCredential.Type).Ref("webauthn_credential_transports").Unique().Field("webauthn_credential_id"),
+	}
 }
 func (WebauthnCredentialTransport) Annotations() []schema.Annotation {
 	return nil

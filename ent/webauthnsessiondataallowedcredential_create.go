@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ent/webauthnsessiondata"
 	"github.com/hellohq/hqservice/ent/webauthnsessiondataallowedcredential"
-	"github.com/hellohq/hqservice/ent/webauthnsessiondatum"
 )
 
 // WebauthnSessionDataAllowedCredentialCreate is the builder for creating a WebauthnSessionDataAllowedCredential entity.
@@ -60,23 +60,9 @@ func (wsdacc *WebauthnSessionDataAllowedCredentialCreate) SetID(u uuid.UUID) *We
 	return wsdacc
 }
 
-// SetWebauthnSessionDatumID sets the "webauthn_session_datum" edge to the WebauthnSessionDatum entity by ID.
-func (wsdacc *WebauthnSessionDataAllowedCredentialCreate) SetWebauthnSessionDatumID(id uuid.UUID) *WebauthnSessionDataAllowedCredentialCreate {
-	wsdacc.mutation.SetWebauthnSessionDatumID(id)
-	return wsdacc
-}
-
-// SetNillableWebauthnSessionDatumID sets the "webauthn_session_datum" edge to the WebauthnSessionDatum entity by ID if the given value is not nil.
-func (wsdacc *WebauthnSessionDataAllowedCredentialCreate) SetNillableWebauthnSessionDatumID(id *uuid.UUID) *WebauthnSessionDataAllowedCredentialCreate {
-	if id != nil {
-		wsdacc = wsdacc.SetWebauthnSessionDatumID(*id)
-	}
-	return wsdacc
-}
-
-// SetWebauthnSessionDatum sets the "webauthn_session_datum" edge to the WebauthnSessionDatum entity.
-func (wsdacc *WebauthnSessionDataAllowedCredentialCreate) SetWebauthnSessionDatum(w *WebauthnSessionDatum) *WebauthnSessionDataAllowedCredentialCreate {
-	return wsdacc.SetWebauthnSessionDatumID(w.ID)
+// SetWebauthnSessionData sets the "webauthn_session_data" edge to the WebauthnSessionData entity.
+func (wsdacc *WebauthnSessionDataAllowedCredentialCreate) SetWebauthnSessionData(w *WebauthnSessionData) *WebauthnSessionDataAllowedCredentialCreate {
+	return wsdacc.SetWebauthnSessionDataID(w.ID)
 }
 
 // Mutation returns the WebauthnSessionDataAllowedCredentialMutation object of the builder.
@@ -169,17 +155,17 @@ func (wsdacc *WebauthnSessionDataAllowedCredentialCreate) createSpec() (*Webauth
 		_spec.SetField(webauthnsessiondataallowedcredential.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if nodes := wsdacc.mutation.WebauthnSessionDatumIDs(); len(nodes) > 0 {
+	if nodes := wsdacc.mutation.WebauthnSessionDataIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   webauthnsessiondataallowedcredential.WebauthnSessionDatumTable,
-			Columns: []string{webauthnsessiondataallowedcredential.WebauthnSessionDatumColumn},
+			Table:   webauthnsessiondataallowedcredential.WebauthnSessionDataTable,
+			Columns: []string{webauthnsessiondataallowedcredential.WebauthnSessionDataColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: webauthnsessiondatum.FieldID,
+					Column: webauthnsessiondata.FieldID,
 				},
 			},
 		}

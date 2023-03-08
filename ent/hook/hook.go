@@ -117,6 +117,18 @@ func (f WebauthnCredentialTransportFunc) Mutate(ctx context.Context, m ent.Mutat
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WebauthnCredentialTransportMutation", m)
 }
 
+// The WebauthnSessionDataFunc type is an adapter to allow the use of ordinary
+// function as WebauthnSessionData mutator.
+type WebauthnSessionDataFunc func(context.Context, *ent.WebauthnSessionDataMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f WebauthnSessionDataFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.WebauthnSessionDataMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WebauthnSessionDataMutation", m)
+}
+
 // The WebauthnSessionDataAllowedCredentialFunc type is an adapter to allow the use of ordinary
 // function as WebauthnSessionDataAllowedCredential mutator.
 type WebauthnSessionDataAllowedCredentialFunc func(context.Context, *ent.WebauthnSessionDataAllowedCredentialMutation) (ent.Value, error)
@@ -127,18 +139,6 @@ func (f WebauthnSessionDataAllowedCredentialFunc) Mutate(ctx context.Context, m 
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WebauthnSessionDataAllowedCredentialMutation", m)
-}
-
-// The WebauthnSessionDatumFunc type is an adapter to allow the use of ordinary
-// function as WebauthnSessionDatum mutator.
-type WebauthnSessionDatumFunc func(context.Context, *ent.WebauthnSessionDatumMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f WebauthnSessionDatumFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.WebauthnSessionDatumMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WebauthnSessionDatumMutation", m)
 }
 
 // Condition is a hook condition function.

@@ -12,18 +12,18 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/predicate"
+	"github.com/hellohq/hqservice/ent/webauthnsessiondata"
 	"github.com/hellohq/hqservice/ent/webauthnsessiondataallowedcredential"
-	"github.com/hellohq/hqservice/ent/webauthnsessiondatum"
 )
 
 // WebauthnSessionDataAllowedCredentialQuery is the builder for querying WebauthnSessionDataAllowedCredential entities.
 type WebauthnSessionDataAllowedCredentialQuery struct {
 	config
-	ctx                      *QueryContext
-	order                    []OrderFunc
-	inters                   []Interceptor
-	predicates               []predicate.WebauthnSessionDataAllowedCredential
-	withWebauthnSessionDatum *WebauthnSessionDatumQuery
+	ctx                     *QueryContext
+	order                   []OrderFunc
+	inters                  []Interceptor
+	predicates              []predicate.WebauthnSessionDataAllowedCredential
+	withWebauthnSessionData *WebauthnSessionDataQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -60,9 +60,9 @@ func (wsdacq *WebauthnSessionDataAllowedCredentialQuery) Order(o ...OrderFunc) *
 	return wsdacq
 }
 
-// QueryWebauthnSessionDatum chains the current query on the "webauthn_session_datum" edge.
-func (wsdacq *WebauthnSessionDataAllowedCredentialQuery) QueryWebauthnSessionDatum() *WebauthnSessionDatumQuery {
-	query := (&WebauthnSessionDatumClient{config: wsdacq.config}).Query()
+// QueryWebauthnSessionData chains the current query on the "webauthn_session_data" edge.
+func (wsdacq *WebauthnSessionDataAllowedCredentialQuery) QueryWebauthnSessionData() *WebauthnSessionDataQuery {
+	query := (&WebauthnSessionDataClient{config: wsdacq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := wsdacq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -73,8 +73,8 @@ func (wsdacq *WebauthnSessionDataAllowedCredentialQuery) QueryWebauthnSessionDat
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(webauthnsessiondataallowedcredential.Table, webauthnsessiondataallowedcredential.FieldID, selector),
-			sqlgraph.To(webauthnsessiondatum.Table, webauthnsessiondatum.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, webauthnsessiondataallowedcredential.WebauthnSessionDatumTable, webauthnsessiondataallowedcredential.WebauthnSessionDatumColumn),
+			sqlgraph.To(webauthnsessiondata.Table, webauthnsessiondata.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, webauthnsessiondataallowedcredential.WebauthnSessionDataTable, webauthnsessiondataallowedcredential.WebauthnSessionDataColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(wsdacq.driver.Dialect(), step)
 		return fromU, nil
@@ -269,26 +269,26 @@ func (wsdacq *WebauthnSessionDataAllowedCredentialQuery) Clone() *WebauthnSessio
 		return nil
 	}
 	return &WebauthnSessionDataAllowedCredentialQuery{
-		config:                   wsdacq.config,
-		ctx:                      wsdacq.ctx.Clone(),
-		order:                    append([]OrderFunc{}, wsdacq.order...),
-		inters:                   append([]Interceptor{}, wsdacq.inters...),
-		predicates:               append([]predicate.WebauthnSessionDataAllowedCredential{}, wsdacq.predicates...),
-		withWebauthnSessionDatum: wsdacq.withWebauthnSessionDatum.Clone(),
+		config:                  wsdacq.config,
+		ctx:                     wsdacq.ctx.Clone(),
+		order:                   append([]OrderFunc{}, wsdacq.order...),
+		inters:                  append([]Interceptor{}, wsdacq.inters...),
+		predicates:              append([]predicate.WebauthnSessionDataAllowedCredential{}, wsdacq.predicates...),
+		withWebauthnSessionData: wsdacq.withWebauthnSessionData.Clone(),
 		// clone intermediate query.
 		sql:  wsdacq.sql.Clone(),
 		path: wsdacq.path,
 	}
 }
 
-// WithWebauthnSessionDatum tells the query-builder to eager-load the nodes that are connected to
-// the "webauthn_session_datum" edge. The optional arguments are used to configure the query builder of the edge.
-func (wsdacq *WebauthnSessionDataAllowedCredentialQuery) WithWebauthnSessionDatum(opts ...func(*WebauthnSessionDatumQuery)) *WebauthnSessionDataAllowedCredentialQuery {
-	query := (&WebauthnSessionDatumClient{config: wsdacq.config}).Query()
+// WithWebauthnSessionData tells the query-builder to eager-load the nodes that are connected to
+// the "webauthn_session_data" edge. The optional arguments are used to configure the query builder of the edge.
+func (wsdacq *WebauthnSessionDataAllowedCredentialQuery) WithWebauthnSessionData(opts ...func(*WebauthnSessionDataQuery)) *WebauthnSessionDataAllowedCredentialQuery {
+	query := (&WebauthnSessionDataClient{config: wsdacq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	wsdacq.withWebauthnSessionDatum = query
+	wsdacq.withWebauthnSessionData = query
 	return wsdacq
 }
 
@@ -371,7 +371,7 @@ func (wsdacq *WebauthnSessionDataAllowedCredentialQuery) sqlAll(ctx context.Cont
 		nodes       = []*WebauthnSessionDataAllowedCredential{}
 		_spec       = wsdacq.querySpec()
 		loadedTypes = [1]bool{
-			wsdacq.withWebauthnSessionDatum != nil,
+			wsdacq.withWebauthnSessionData != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -392,18 +392,16 @@ func (wsdacq *WebauthnSessionDataAllowedCredentialQuery) sqlAll(ctx context.Cont
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := wsdacq.withWebauthnSessionDatum; query != nil {
-		if err := wsdacq.loadWebauthnSessionDatum(ctx, query, nodes, nil,
-			func(n *WebauthnSessionDataAllowedCredential, e *WebauthnSessionDatum) {
-				n.Edges.WebauthnSessionDatum = e
-			}); err != nil {
+	if query := wsdacq.withWebauthnSessionData; query != nil {
+		if err := wsdacq.loadWebauthnSessionData(ctx, query, nodes, nil,
+			func(n *WebauthnSessionDataAllowedCredential, e *WebauthnSessionData) { n.Edges.WebauthnSessionData = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (wsdacq *WebauthnSessionDataAllowedCredentialQuery) loadWebauthnSessionDatum(ctx context.Context, query *WebauthnSessionDatumQuery, nodes []*WebauthnSessionDataAllowedCredential, init func(*WebauthnSessionDataAllowedCredential), assign func(*WebauthnSessionDataAllowedCredential, *WebauthnSessionDatum)) error {
+func (wsdacq *WebauthnSessionDataAllowedCredentialQuery) loadWebauthnSessionData(ctx context.Context, query *WebauthnSessionDataQuery, nodes []*WebauthnSessionDataAllowedCredential, init func(*WebauthnSessionDataAllowedCredential), assign func(*WebauthnSessionDataAllowedCredential, *WebauthnSessionData)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*WebauthnSessionDataAllowedCredential)
 	for i := range nodes {
@@ -416,7 +414,7 @@ func (wsdacq *WebauthnSessionDataAllowedCredentialQuery) loadWebauthnSessionDatu
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(webauthnsessiondatum.IDIn(ids...))
+	query.Where(webauthnsessiondata.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

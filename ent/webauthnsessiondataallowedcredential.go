@@ -9,8 +9,8 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ent/webauthnsessiondata"
 	"github.com/hellohq/hqservice/ent/webauthnsessiondataallowedcredential"
-	"github.com/hellohq/hqservice/ent/webauthnsessiondatum"
 )
 
 // WebauthnSessionDataAllowedCredential is the model entity for the WebauthnSessionDataAllowedCredential schema.
@@ -33,24 +33,24 @@ type WebauthnSessionDataAllowedCredential struct {
 
 // WebauthnSessionDataAllowedCredentialEdges holds the relations/edges for other nodes in the graph.
 type WebauthnSessionDataAllowedCredentialEdges struct {
-	// WebauthnSessionDatum holds the value of the webauthn_session_datum edge.
-	WebauthnSessionDatum *WebauthnSessionDatum `json:"webauthn_session_datum,omitempty"`
+	// WebauthnSessionData holds the value of the webauthn_session_data edge.
+	WebauthnSessionData *WebauthnSessionData `json:"webauthn_session_data,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// WebauthnSessionDatumOrErr returns the WebauthnSessionDatum value or an error if the edge
+// WebauthnSessionDataOrErr returns the WebauthnSessionData value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e WebauthnSessionDataAllowedCredentialEdges) WebauthnSessionDatumOrErr() (*WebauthnSessionDatum, error) {
+func (e WebauthnSessionDataAllowedCredentialEdges) WebauthnSessionDataOrErr() (*WebauthnSessionData, error) {
 	if e.loadedTypes[0] {
-		if e.WebauthnSessionDatum == nil {
+		if e.WebauthnSessionData == nil {
 			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: webauthnsessiondatum.Label}
+			return nil, &NotFoundError{label: webauthnsessiondata.Label}
 		}
-		return e.WebauthnSessionDatum, nil
+		return e.WebauthnSessionData, nil
 	}
-	return nil, &NotLoadedError{edge: "webauthn_session_datum"}
+	return nil, &NotLoadedError{edge: "webauthn_session_data"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -114,9 +114,9 @@ func (wsdac *WebauthnSessionDataAllowedCredential) assignValues(columns []string
 	return nil
 }
 
-// QueryWebauthnSessionDatum queries the "webauthn_session_datum" edge of the WebauthnSessionDataAllowedCredential entity.
-func (wsdac *WebauthnSessionDataAllowedCredential) QueryWebauthnSessionDatum() *WebauthnSessionDatumQuery {
-	return NewWebauthnSessionDataAllowedCredentialClient(wsdac.config).QueryWebauthnSessionDatum(wsdac)
+// QueryWebauthnSessionData queries the "webauthn_session_data" edge of the WebauthnSessionDataAllowedCredential entity.
+func (wsdac *WebauthnSessionDataAllowedCredential) QueryWebauthnSessionData() *WebauthnSessionDataQuery {
+	return NewWebauthnSessionDataAllowedCredentialClient(wsdac.config).QueryWebauthnSessionData(wsdac)
 }
 
 // Update returns a builder for updating this WebauthnSessionDataAllowedCredential.

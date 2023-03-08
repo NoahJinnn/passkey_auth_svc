@@ -13,67 +13,67 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/predicate"
+	"github.com/hellohq/hqservice/ent/webauthnsessiondata"
 	"github.com/hellohq/hqservice/ent/webauthnsessiondataallowedcredential"
-	"github.com/hellohq/hqservice/ent/webauthnsessiondatum"
 )
 
-// WebauthnSessionDatumUpdate is the builder for updating WebauthnSessionDatum entities.
-type WebauthnSessionDatumUpdate struct {
+// WebauthnSessionDataUpdate is the builder for updating WebauthnSessionData entities.
+type WebauthnSessionDataUpdate struct {
 	config
 	hooks    []Hook
-	mutation *WebauthnSessionDatumMutation
+	mutation *WebauthnSessionDataMutation
 }
 
-// Where appends a list predicates to the WebauthnSessionDatumUpdate builder.
-func (wsdu *WebauthnSessionDatumUpdate) Where(ps ...predicate.WebauthnSessionDatum) *WebauthnSessionDatumUpdate {
+// Where appends a list predicates to the WebauthnSessionDataUpdate builder.
+func (wsdu *WebauthnSessionDataUpdate) Where(ps ...predicate.WebauthnSessionData) *WebauthnSessionDataUpdate {
 	wsdu.mutation.Where(ps...)
 	return wsdu
 }
 
 // SetChallenge sets the "challenge" field.
-func (wsdu *WebauthnSessionDatumUpdate) SetChallenge(s string) *WebauthnSessionDatumUpdate {
+func (wsdu *WebauthnSessionDataUpdate) SetChallenge(s string) *WebauthnSessionDataUpdate {
 	wsdu.mutation.SetChallenge(s)
 	return wsdu
 }
 
 // SetUserID sets the "user_id" field.
-func (wsdu *WebauthnSessionDatumUpdate) SetUserID(u uuid.UUID) *WebauthnSessionDatumUpdate {
+func (wsdu *WebauthnSessionDataUpdate) SetUserID(u uuid.UUID) *WebauthnSessionDataUpdate {
 	wsdu.mutation.SetUserID(u)
 	return wsdu
 }
 
 // SetUserVerification sets the "user_verification" field.
-func (wsdu *WebauthnSessionDatumUpdate) SetUserVerification(s string) *WebauthnSessionDatumUpdate {
+func (wsdu *WebauthnSessionDataUpdate) SetUserVerification(s string) *WebauthnSessionDataUpdate {
 	wsdu.mutation.SetUserVerification(s)
 	return wsdu
 }
 
 // SetOperation sets the "operation" field.
-func (wsdu *WebauthnSessionDatumUpdate) SetOperation(s string) *WebauthnSessionDatumUpdate {
+func (wsdu *WebauthnSessionDataUpdate) SetOperation(s string) *WebauthnSessionDataUpdate {
 	wsdu.mutation.SetOperation(s)
 	return wsdu
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (wsdu *WebauthnSessionDatumUpdate) SetCreatedAt(t time.Time) *WebauthnSessionDatumUpdate {
+func (wsdu *WebauthnSessionDataUpdate) SetCreatedAt(t time.Time) *WebauthnSessionDataUpdate {
 	wsdu.mutation.SetCreatedAt(t)
 	return wsdu
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (wsdu *WebauthnSessionDatumUpdate) SetUpdatedAt(t time.Time) *WebauthnSessionDatumUpdate {
+func (wsdu *WebauthnSessionDataUpdate) SetUpdatedAt(t time.Time) *WebauthnSessionDataUpdate {
 	wsdu.mutation.SetUpdatedAt(t)
 	return wsdu
 }
 
 // AddWebauthnSessionDataAllowedCredentialIDs adds the "webauthn_session_data_allowed_credentials" edge to the WebauthnSessionDataAllowedCredential entity by IDs.
-func (wsdu *WebauthnSessionDatumUpdate) AddWebauthnSessionDataAllowedCredentialIDs(ids ...uuid.UUID) *WebauthnSessionDatumUpdate {
+func (wsdu *WebauthnSessionDataUpdate) AddWebauthnSessionDataAllowedCredentialIDs(ids ...uuid.UUID) *WebauthnSessionDataUpdate {
 	wsdu.mutation.AddWebauthnSessionDataAllowedCredentialIDs(ids...)
 	return wsdu
 }
 
 // AddWebauthnSessionDataAllowedCredentials adds the "webauthn_session_data_allowed_credentials" edges to the WebauthnSessionDataAllowedCredential entity.
-func (wsdu *WebauthnSessionDatumUpdate) AddWebauthnSessionDataAllowedCredentials(w ...*WebauthnSessionDataAllowedCredential) *WebauthnSessionDatumUpdate {
+func (wsdu *WebauthnSessionDataUpdate) AddWebauthnSessionDataAllowedCredentials(w ...*WebauthnSessionDataAllowedCredential) *WebauthnSessionDataUpdate {
 	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
@@ -81,25 +81,25 @@ func (wsdu *WebauthnSessionDatumUpdate) AddWebauthnSessionDataAllowedCredentials
 	return wsdu.AddWebauthnSessionDataAllowedCredentialIDs(ids...)
 }
 
-// Mutation returns the WebauthnSessionDatumMutation object of the builder.
-func (wsdu *WebauthnSessionDatumUpdate) Mutation() *WebauthnSessionDatumMutation {
+// Mutation returns the WebauthnSessionDataMutation object of the builder.
+func (wsdu *WebauthnSessionDataUpdate) Mutation() *WebauthnSessionDataMutation {
 	return wsdu.mutation
 }
 
 // ClearWebauthnSessionDataAllowedCredentials clears all "webauthn_session_data_allowed_credentials" edges to the WebauthnSessionDataAllowedCredential entity.
-func (wsdu *WebauthnSessionDatumUpdate) ClearWebauthnSessionDataAllowedCredentials() *WebauthnSessionDatumUpdate {
+func (wsdu *WebauthnSessionDataUpdate) ClearWebauthnSessionDataAllowedCredentials() *WebauthnSessionDataUpdate {
 	wsdu.mutation.ClearWebauthnSessionDataAllowedCredentials()
 	return wsdu
 }
 
 // RemoveWebauthnSessionDataAllowedCredentialIDs removes the "webauthn_session_data_allowed_credentials" edge to WebauthnSessionDataAllowedCredential entities by IDs.
-func (wsdu *WebauthnSessionDatumUpdate) RemoveWebauthnSessionDataAllowedCredentialIDs(ids ...uuid.UUID) *WebauthnSessionDatumUpdate {
+func (wsdu *WebauthnSessionDataUpdate) RemoveWebauthnSessionDataAllowedCredentialIDs(ids ...uuid.UUID) *WebauthnSessionDataUpdate {
 	wsdu.mutation.RemoveWebauthnSessionDataAllowedCredentialIDs(ids...)
 	return wsdu
 }
 
 // RemoveWebauthnSessionDataAllowedCredentials removes "webauthn_session_data_allowed_credentials" edges to WebauthnSessionDataAllowedCredential entities.
-func (wsdu *WebauthnSessionDatumUpdate) RemoveWebauthnSessionDataAllowedCredentials(w ...*WebauthnSessionDataAllowedCredential) *WebauthnSessionDatumUpdate {
+func (wsdu *WebauthnSessionDataUpdate) RemoveWebauthnSessionDataAllowedCredentials(w ...*WebauthnSessionDataAllowedCredential) *WebauthnSessionDataUpdate {
 	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
@@ -108,12 +108,12 @@ func (wsdu *WebauthnSessionDatumUpdate) RemoveWebauthnSessionDataAllowedCredenti
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (wsdu *WebauthnSessionDatumUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, WebauthnSessionDatumMutation](ctx, wsdu.sqlSave, wsdu.mutation, wsdu.hooks)
+func (wsdu *WebauthnSessionDataUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks[int, WebauthnSessionDataMutation](ctx, wsdu.sqlSave, wsdu.mutation, wsdu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (wsdu *WebauthnSessionDatumUpdate) SaveX(ctx context.Context) int {
+func (wsdu *WebauthnSessionDataUpdate) SaveX(ctx context.Context) int {
 	affected, err := wsdu.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -122,20 +122,20 @@ func (wsdu *WebauthnSessionDatumUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (wsdu *WebauthnSessionDatumUpdate) Exec(ctx context.Context) error {
+func (wsdu *WebauthnSessionDataUpdate) Exec(ctx context.Context) error {
 	_, err := wsdu.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (wsdu *WebauthnSessionDatumUpdate) ExecX(ctx context.Context) {
+func (wsdu *WebauthnSessionDataUpdate) ExecX(ctx context.Context) {
 	if err := wsdu.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (wsdu *WebauthnSessionDatumUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(webauthnsessiondatum.Table, webauthnsessiondatum.Columns, sqlgraph.NewFieldSpec(webauthnsessiondatum.FieldID, field.TypeUUID))
+func (wsdu *WebauthnSessionDataUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	_spec := sqlgraph.NewUpdateSpec(webauthnsessiondata.Table, webauthnsessiondata.Columns, sqlgraph.NewFieldSpec(webauthnsessiondata.FieldID, field.TypeUUID))
 	if ps := wsdu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -144,29 +144,29 @@ func (wsdu *WebauthnSessionDatumUpdate) sqlSave(ctx context.Context) (n int, err
 		}
 	}
 	if value, ok := wsdu.mutation.Challenge(); ok {
-		_spec.SetField(webauthnsessiondatum.FieldChallenge, field.TypeString, value)
+		_spec.SetField(webauthnsessiondata.FieldChallenge, field.TypeString, value)
 	}
 	if value, ok := wsdu.mutation.UserID(); ok {
-		_spec.SetField(webauthnsessiondatum.FieldUserID, field.TypeUUID, value)
+		_spec.SetField(webauthnsessiondata.FieldUserID, field.TypeUUID, value)
 	}
 	if value, ok := wsdu.mutation.UserVerification(); ok {
-		_spec.SetField(webauthnsessiondatum.FieldUserVerification, field.TypeString, value)
+		_spec.SetField(webauthnsessiondata.FieldUserVerification, field.TypeString, value)
 	}
 	if value, ok := wsdu.mutation.Operation(); ok {
-		_spec.SetField(webauthnsessiondatum.FieldOperation, field.TypeString, value)
+		_spec.SetField(webauthnsessiondata.FieldOperation, field.TypeString, value)
 	}
 	if value, ok := wsdu.mutation.CreatedAt(); ok {
-		_spec.SetField(webauthnsessiondatum.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(webauthnsessiondata.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := wsdu.mutation.UpdatedAt(); ok {
-		_spec.SetField(webauthnsessiondatum.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(webauthnsessiondata.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if wsdu.mutation.WebauthnSessionDataAllowedCredentialsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   webauthnsessiondatum.WebauthnSessionDataAllowedCredentialsTable,
-			Columns: []string{webauthnsessiondatum.WebauthnSessionDataAllowedCredentialsColumn},
+			Table:   webauthnsessiondata.WebauthnSessionDataAllowedCredentialsTable,
+			Columns: []string{webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -181,8 +181,8 @@ func (wsdu *WebauthnSessionDatumUpdate) sqlSave(ctx context.Context) (n int, err
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   webauthnsessiondatum.WebauthnSessionDataAllowedCredentialsTable,
-			Columns: []string{webauthnsessiondatum.WebauthnSessionDataAllowedCredentialsColumn},
+			Table:   webauthnsessiondata.WebauthnSessionDataAllowedCredentialsTable,
+			Columns: []string{webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -200,8 +200,8 @@ func (wsdu *WebauthnSessionDatumUpdate) sqlSave(ctx context.Context) (n int, err
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   webauthnsessiondatum.WebauthnSessionDataAllowedCredentialsTable,
-			Columns: []string{webauthnsessiondatum.WebauthnSessionDataAllowedCredentialsColumn},
+			Table:   webauthnsessiondata.WebauthnSessionDataAllowedCredentialsTable,
+			Columns: []string{webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -217,7 +217,7 @@ func (wsdu *WebauthnSessionDatumUpdate) sqlSave(ctx context.Context) (n int, err
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, wsdu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{webauthnsessiondatum.Label}
+			err = &NotFoundError{webauthnsessiondata.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -227,58 +227,58 @@ func (wsdu *WebauthnSessionDatumUpdate) sqlSave(ctx context.Context) (n int, err
 	return n, nil
 }
 
-// WebauthnSessionDatumUpdateOne is the builder for updating a single WebauthnSessionDatum entity.
-type WebauthnSessionDatumUpdateOne struct {
+// WebauthnSessionDataUpdateOne is the builder for updating a single WebauthnSessionData entity.
+type WebauthnSessionDataUpdateOne struct {
 	config
 	fields   []string
 	hooks    []Hook
-	mutation *WebauthnSessionDatumMutation
+	mutation *WebauthnSessionDataMutation
 }
 
 // SetChallenge sets the "challenge" field.
-func (wsduo *WebauthnSessionDatumUpdateOne) SetChallenge(s string) *WebauthnSessionDatumUpdateOne {
+func (wsduo *WebauthnSessionDataUpdateOne) SetChallenge(s string) *WebauthnSessionDataUpdateOne {
 	wsduo.mutation.SetChallenge(s)
 	return wsduo
 }
 
 // SetUserID sets the "user_id" field.
-func (wsduo *WebauthnSessionDatumUpdateOne) SetUserID(u uuid.UUID) *WebauthnSessionDatumUpdateOne {
+func (wsduo *WebauthnSessionDataUpdateOne) SetUserID(u uuid.UUID) *WebauthnSessionDataUpdateOne {
 	wsduo.mutation.SetUserID(u)
 	return wsduo
 }
 
 // SetUserVerification sets the "user_verification" field.
-func (wsduo *WebauthnSessionDatumUpdateOne) SetUserVerification(s string) *WebauthnSessionDatumUpdateOne {
+func (wsduo *WebauthnSessionDataUpdateOne) SetUserVerification(s string) *WebauthnSessionDataUpdateOne {
 	wsduo.mutation.SetUserVerification(s)
 	return wsduo
 }
 
 // SetOperation sets the "operation" field.
-func (wsduo *WebauthnSessionDatumUpdateOne) SetOperation(s string) *WebauthnSessionDatumUpdateOne {
+func (wsduo *WebauthnSessionDataUpdateOne) SetOperation(s string) *WebauthnSessionDataUpdateOne {
 	wsduo.mutation.SetOperation(s)
 	return wsduo
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (wsduo *WebauthnSessionDatumUpdateOne) SetCreatedAt(t time.Time) *WebauthnSessionDatumUpdateOne {
+func (wsduo *WebauthnSessionDataUpdateOne) SetCreatedAt(t time.Time) *WebauthnSessionDataUpdateOne {
 	wsduo.mutation.SetCreatedAt(t)
 	return wsduo
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (wsduo *WebauthnSessionDatumUpdateOne) SetUpdatedAt(t time.Time) *WebauthnSessionDatumUpdateOne {
+func (wsduo *WebauthnSessionDataUpdateOne) SetUpdatedAt(t time.Time) *WebauthnSessionDataUpdateOne {
 	wsduo.mutation.SetUpdatedAt(t)
 	return wsduo
 }
 
 // AddWebauthnSessionDataAllowedCredentialIDs adds the "webauthn_session_data_allowed_credentials" edge to the WebauthnSessionDataAllowedCredential entity by IDs.
-func (wsduo *WebauthnSessionDatumUpdateOne) AddWebauthnSessionDataAllowedCredentialIDs(ids ...uuid.UUID) *WebauthnSessionDatumUpdateOne {
+func (wsduo *WebauthnSessionDataUpdateOne) AddWebauthnSessionDataAllowedCredentialIDs(ids ...uuid.UUID) *WebauthnSessionDataUpdateOne {
 	wsduo.mutation.AddWebauthnSessionDataAllowedCredentialIDs(ids...)
 	return wsduo
 }
 
 // AddWebauthnSessionDataAllowedCredentials adds the "webauthn_session_data_allowed_credentials" edges to the WebauthnSessionDataAllowedCredential entity.
-func (wsduo *WebauthnSessionDatumUpdateOne) AddWebauthnSessionDataAllowedCredentials(w ...*WebauthnSessionDataAllowedCredential) *WebauthnSessionDatumUpdateOne {
+func (wsduo *WebauthnSessionDataUpdateOne) AddWebauthnSessionDataAllowedCredentials(w ...*WebauthnSessionDataAllowedCredential) *WebauthnSessionDataUpdateOne {
 	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
@@ -286,25 +286,25 @@ func (wsduo *WebauthnSessionDatumUpdateOne) AddWebauthnSessionDataAllowedCredent
 	return wsduo.AddWebauthnSessionDataAllowedCredentialIDs(ids...)
 }
 
-// Mutation returns the WebauthnSessionDatumMutation object of the builder.
-func (wsduo *WebauthnSessionDatumUpdateOne) Mutation() *WebauthnSessionDatumMutation {
+// Mutation returns the WebauthnSessionDataMutation object of the builder.
+func (wsduo *WebauthnSessionDataUpdateOne) Mutation() *WebauthnSessionDataMutation {
 	return wsduo.mutation
 }
 
 // ClearWebauthnSessionDataAllowedCredentials clears all "webauthn_session_data_allowed_credentials" edges to the WebauthnSessionDataAllowedCredential entity.
-func (wsduo *WebauthnSessionDatumUpdateOne) ClearWebauthnSessionDataAllowedCredentials() *WebauthnSessionDatumUpdateOne {
+func (wsduo *WebauthnSessionDataUpdateOne) ClearWebauthnSessionDataAllowedCredentials() *WebauthnSessionDataUpdateOne {
 	wsduo.mutation.ClearWebauthnSessionDataAllowedCredentials()
 	return wsduo
 }
 
 // RemoveWebauthnSessionDataAllowedCredentialIDs removes the "webauthn_session_data_allowed_credentials" edge to WebauthnSessionDataAllowedCredential entities by IDs.
-func (wsduo *WebauthnSessionDatumUpdateOne) RemoveWebauthnSessionDataAllowedCredentialIDs(ids ...uuid.UUID) *WebauthnSessionDatumUpdateOne {
+func (wsduo *WebauthnSessionDataUpdateOne) RemoveWebauthnSessionDataAllowedCredentialIDs(ids ...uuid.UUID) *WebauthnSessionDataUpdateOne {
 	wsduo.mutation.RemoveWebauthnSessionDataAllowedCredentialIDs(ids...)
 	return wsduo
 }
 
 // RemoveWebauthnSessionDataAllowedCredentials removes "webauthn_session_data_allowed_credentials" edges to WebauthnSessionDataAllowedCredential entities.
-func (wsduo *WebauthnSessionDatumUpdateOne) RemoveWebauthnSessionDataAllowedCredentials(w ...*WebauthnSessionDataAllowedCredential) *WebauthnSessionDatumUpdateOne {
+func (wsduo *WebauthnSessionDataUpdateOne) RemoveWebauthnSessionDataAllowedCredentials(w ...*WebauthnSessionDataAllowedCredential) *WebauthnSessionDataUpdateOne {
 	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
@@ -312,26 +312,26 @@ func (wsduo *WebauthnSessionDatumUpdateOne) RemoveWebauthnSessionDataAllowedCred
 	return wsduo.RemoveWebauthnSessionDataAllowedCredentialIDs(ids...)
 }
 
-// Where appends a list predicates to the WebauthnSessionDatumUpdate builder.
-func (wsduo *WebauthnSessionDatumUpdateOne) Where(ps ...predicate.WebauthnSessionDatum) *WebauthnSessionDatumUpdateOne {
+// Where appends a list predicates to the WebauthnSessionDataUpdate builder.
+func (wsduo *WebauthnSessionDataUpdateOne) Where(ps ...predicate.WebauthnSessionData) *WebauthnSessionDataUpdateOne {
 	wsduo.mutation.Where(ps...)
 	return wsduo
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (wsduo *WebauthnSessionDatumUpdateOne) Select(field string, fields ...string) *WebauthnSessionDatumUpdateOne {
+func (wsduo *WebauthnSessionDataUpdateOne) Select(field string, fields ...string) *WebauthnSessionDataUpdateOne {
 	wsduo.fields = append([]string{field}, fields...)
 	return wsduo
 }
 
-// Save executes the query and returns the updated WebauthnSessionDatum entity.
-func (wsduo *WebauthnSessionDatumUpdateOne) Save(ctx context.Context) (*WebauthnSessionDatum, error) {
-	return withHooks[*WebauthnSessionDatum, WebauthnSessionDatumMutation](ctx, wsduo.sqlSave, wsduo.mutation, wsduo.hooks)
+// Save executes the query and returns the updated WebauthnSessionData entity.
+func (wsduo *WebauthnSessionDataUpdateOne) Save(ctx context.Context) (*WebauthnSessionData, error) {
+	return withHooks[*WebauthnSessionData, WebauthnSessionDataMutation](ctx, wsduo.sqlSave, wsduo.mutation, wsduo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (wsduo *WebauthnSessionDatumUpdateOne) SaveX(ctx context.Context) *WebauthnSessionDatum {
+func (wsduo *WebauthnSessionDataUpdateOne) SaveX(ctx context.Context) *WebauthnSessionData {
 	node, err := wsduo.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -340,33 +340,33 @@ func (wsduo *WebauthnSessionDatumUpdateOne) SaveX(ctx context.Context) *Webauthn
 }
 
 // Exec executes the query on the entity.
-func (wsduo *WebauthnSessionDatumUpdateOne) Exec(ctx context.Context) error {
+func (wsduo *WebauthnSessionDataUpdateOne) Exec(ctx context.Context) error {
 	_, err := wsduo.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (wsduo *WebauthnSessionDatumUpdateOne) ExecX(ctx context.Context) {
+func (wsduo *WebauthnSessionDataUpdateOne) ExecX(ctx context.Context) {
 	if err := wsduo.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (wsduo *WebauthnSessionDatumUpdateOne) sqlSave(ctx context.Context) (_node *WebauthnSessionDatum, err error) {
-	_spec := sqlgraph.NewUpdateSpec(webauthnsessiondatum.Table, webauthnsessiondatum.Columns, sqlgraph.NewFieldSpec(webauthnsessiondatum.FieldID, field.TypeUUID))
+func (wsduo *WebauthnSessionDataUpdateOne) sqlSave(ctx context.Context) (_node *WebauthnSessionData, err error) {
+	_spec := sqlgraph.NewUpdateSpec(webauthnsessiondata.Table, webauthnsessiondata.Columns, sqlgraph.NewFieldSpec(webauthnsessiondata.FieldID, field.TypeUUID))
 	id, ok := wsduo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "WebauthnSessionDatum.id" for update`)}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "WebauthnSessionData.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := wsduo.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, webauthnsessiondatum.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, webauthnsessiondata.FieldID)
 		for _, f := range fields {
-			if !webauthnsessiondatum.ValidColumn(f) {
+			if !webauthnsessiondata.ValidColumn(f) {
 				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 			}
-			if f != webauthnsessiondatum.FieldID {
+			if f != webauthnsessiondata.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, f)
 			}
 		}
@@ -379,29 +379,29 @@ func (wsduo *WebauthnSessionDatumUpdateOne) sqlSave(ctx context.Context) (_node 
 		}
 	}
 	if value, ok := wsduo.mutation.Challenge(); ok {
-		_spec.SetField(webauthnsessiondatum.FieldChallenge, field.TypeString, value)
+		_spec.SetField(webauthnsessiondata.FieldChallenge, field.TypeString, value)
 	}
 	if value, ok := wsduo.mutation.UserID(); ok {
-		_spec.SetField(webauthnsessiondatum.FieldUserID, field.TypeUUID, value)
+		_spec.SetField(webauthnsessiondata.FieldUserID, field.TypeUUID, value)
 	}
 	if value, ok := wsduo.mutation.UserVerification(); ok {
-		_spec.SetField(webauthnsessiondatum.FieldUserVerification, field.TypeString, value)
+		_spec.SetField(webauthnsessiondata.FieldUserVerification, field.TypeString, value)
 	}
 	if value, ok := wsduo.mutation.Operation(); ok {
-		_spec.SetField(webauthnsessiondatum.FieldOperation, field.TypeString, value)
+		_spec.SetField(webauthnsessiondata.FieldOperation, field.TypeString, value)
 	}
 	if value, ok := wsduo.mutation.CreatedAt(); ok {
-		_spec.SetField(webauthnsessiondatum.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(webauthnsessiondata.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := wsduo.mutation.UpdatedAt(); ok {
-		_spec.SetField(webauthnsessiondatum.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(webauthnsessiondata.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if wsduo.mutation.WebauthnSessionDataAllowedCredentialsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   webauthnsessiondatum.WebauthnSessionDataAllowedCredentialsTable,
-			Columns: []string{webauthnsessiondatum.WebauthnSessionDataAllowedCredentialsColumn},
+			Table:   webauthnsessiondata.WebauthnSessionDataAllowedCredentialsTable,
+			Columns: []string{webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -416,8 +416,8 @@ func (wsduo *WebauthnSessionDatumUpdateOne) sqlSave(ctx context.Context) (_node 
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   webauthnsessiondatum.WebauthnSessionDataAllowedCredentialsTable,
-			Columns: []string{webauthnsessiondatum.WebauthnSessionDataAllowedCredentialsColumn},
+			Table:   webauthnsessiondata.WebauthnSessionDataAllowedCredentialsTable,
+			Columns: []string{webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -435,8 +435,8 @@ func (wsduo *WebauthnSessionDatumUpdateOne) sqlSave(ctx context.Context) (_node 
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   webauthnsessiondatum.WebauthnSessionDataAllowedCredentialsTable,
-			Columns: []string{webauthnsessiondatum.WebauthnSessionDataAllowedCredentialsColumn},
+			Table:   webauthnsessiondata.WebauthnSessionDataAllowedCredentialsTable,
+			Columns: []string{webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -450,12 +450,12 @@ func (wsduo *WebauthnSessionDatumUpdateOne) sqlSave(ctx context.Context) (_node 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &WebauthnSessionDatum{config: wsduo.config}
+	_node = &WebauthnSessionData{config: wsduo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, wsduo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{webauthnsessiondatum.Label}
+			err = &NotFoundError{webauthnsessiondata.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}

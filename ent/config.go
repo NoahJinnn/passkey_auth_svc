@@ -36,8 +36,8 @@ type (
 		User                                 []ent.Hook
 		WebauthnCredential                   []ent.Hook
 		WebauthnCredentialTransport          []ent.Hook
+		WebauthnSessionData                  []ent.Hook
 		WebauthnSessionDataAllowedCredential []ent.Hook
-		WebauthnSessionDatum                 []ent.Hook
 	}
 	inters struct {
 		Email                                []ent.Interceptor
@@ -49,8 +49,8 @@ type (
 		User                                 []ent.Interceptor
 		WebauthnCredential                   []ent.Interceptor
 		WebauthnCredentialTransport          []ent.Interceptor
+		WebauthnSessionData                  []ent.Interceptor
 		WebauthnSessionDataAllowedCredential []ent.Interceptor
-		WebauthnSessionDatum                 []ent.Interceptor
 	}
 )
 

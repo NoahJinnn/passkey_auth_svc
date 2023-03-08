@@ -251,24 +251,24 @@ func UpdatedAtLTE(v time.Time) predicate.WebauthnSessionDataAllowedCredential {
 	return predicate.WebauthnSessionDataAllowedCredential(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
-// HasWebauthnSessionDatum applies the HasEdge predicate on the "webauthn_session_datum" edge.
-func HasWebauthnSessionDatum() predicate.WebauthnSessionDataAllowedCredential {
+// HasWebauthnSessionData applies the HasEdge predicate on the "webauthn_session_data" edge.
+func HasWebauthnSessionData() predicate.WebauthnSessionDataAllowedCredential {
 	return predicate.WebauthnSessionDataAllowedCredential(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, WebauthnSessionDatumTable, WebauthnSessionDatumColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, WebauthnSessionDataTable, WebauthnSessionDataColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasWebauthnSessionDatumWith applies the HasEdge predicate on the "webauthn_session_datum" edge with a given conditions (other predicates).
-func HasWebauthnSessionDatumWith(preds ...predicate.WebauthnSessionDatum) predicate.WebauthnSessionDataAllowedCredential {
+// HasWebauthnSessionDataWith applies the HasEdge predicate on the "webauthn_session_data" edge with a given conditions (other predicates).
+func HasWebauthnSessionDataWith(preds ...predicate.WebauthnSessionData) predicate.WebauthnSessionDataAllowedCredential {
 	return predicate.WebauthnSessionDataAllowedCredential(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(WebauthnSessionDatumInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, WebauthnSessionDatumTable, WebauthnSessionDatumColumn),
+			sqlgraph.To(WebauthnSessionDataInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, WebauthnSessionDataTable, WebauthnSessionDataColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

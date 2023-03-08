@@ -13,56 +13,56 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/predicate"
+	"github.com/hellohq/hqservice/ent/webauthnsessiondata"
 	"github.com/hellohq/hqservice/ent/webauthnsessiondataallowedcredential"
-	"github.com/hellohq/hqservice/ent/webauthnsessiondatum"
 )
 
-// WebauthnSessionDatumQuery is the builder for querying WebauthnSessionDatum entities.
-type WebauthnSessionDatumQuery struct {
+// WebauthnSessionDataQuery is the builder for querying WebauthnSessionData entities.
+type WebauthnSessionDataQuery struct {
 	config
 	ctx                                       *QueryContext
 	order                                     []OrderFunc
 	inters                                    []Interceptor
-	predicates                                []predicate.WebauthnSessionDatum
+	predicates                                []predicate.WebauthnSessionData
 	withWebauthnSessionDataAllowedCredentials *WebauthnSessionDataAllowedCredentialQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the WebauthnSessionDatumQuery builder.
-func (wsdq *WebauthnSessionDatumQuery) Where(ps ...predicate.WebauthnSessionDatum) *WebauthnSessionDatumQuery {
+// Where adds a new predicate for the WebauthnSessionDataQuery builder.
+func (wsdq *WebauthnSessionDataQuery) Where(ps ...predicate.WebauthnSessionData) *WebauthnSessionDataQuery {
 	wsdq.predicates = append(wsdq.predicates, ps...)
 	return wsdq
 }
 
 // Limit the number of records to be returned by this query.
-func (wsdq *WebauthnSessionDatumQuery) Limit(limit int) *WebauthnSessionDatumQuery {
+func (wsdq *WebauthnSessionDataQuery) Limit(limit int) *WebauthnSessionDataQuery {
 	wsdq.ctx.Limit = &limit
 	return wsdq
 }
 
 // Offset to start from.
-func (wsdq *WebauthnSessionDatumQuery) Offset(offset int) *WebauthnSessionDatumQuery {
+func (wsdq *WebauthnSessionDataQuery) Offset(offset int) *WebauthnSessionDataQuery {
 	wsdq.ctx.Offset = &offset
 	return wsdq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (wsdq *WebauthnSessionDatumQuery) Unique(unique bool) *WebauthnSessionDatumQuery {
+func (wsdq *WebauthnSessionDataQuery) Unique(unique bool) *WebauthnSessionDataQuery {
 	wsdq.ctx.Unique = &unique
 	return wsdq
 }
 
 // Order specifies how the records should be ordered.
-func (wsdq *WebauthnSessionDatumQuery) Order(o ...OrderFunc) *WebauthnSessionDatumQuery {
+func (wsdq *WebauthnSessionDataQuery) Order(o ...OrderFunc) *WebauthnSessionDataQuery {
 	wsdq.order = append(wsdq.order, o...)
 	return wsdq
 }
 
 // QueryWebauthnSessionDataAllowedCredentials chains the current query on the "webauthn_session_data_allowed_credentials" edge.
-func (wsdq *WebauthnSessionDatumQuery) QueryWebauthnSessionDataAllowedCredentials() *WebauthnSessionDataAllowedCredentialQuery {
+func (wsdq *WebauthnSessionDataQuery) QueryWebauthnSessionDataAllowedCredentials() *WebauthnSessionDataAllowedCredentialQuery {
 	query := (&WebauthnSessionDataAllowedCredentialClient{config: wsdq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := wsdq.prepareQuery(ctx); err != nil {
@@ -73,9 +73,9 @@ func (wsdq *WebauthnSessionDatumQuery) QueryWebauthnSessionDataAllowedCredential
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(webauthnsessiondatum.Table, webauthnsessiondatum.FieldID, selector),
+			sqlgraph.From(webauthnsessiondata.Table, webauthnsessiondata.FieldID, selector),
 			sqlgraph.To(webauthnsessiondataallowedcredential.Table, webauthnsessiondataallowedcredential.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, webauthnsessiondatum.WebauthnSessionDataAllowedCredentialsTable, webauthnsessiondatum.WebauthnSessionDataAllowedCredentialsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, webauthnsessiondata.WebauthnSessionDataAllowedCredentialsTable, webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(wsdq.driver.Dialect(), step)
 		return fromU, nil
@@ -83,21 +83,21 @@ func (wsdq *WebauthnSessionDatumQuery) QueryWebauthnSessionDataAllowedCredential
 	return query
 }
 
-// First returns the first WebauthnSessionDatum entity from the query.
-// Returns a *NotFoundError when no WebauthnSessionDatum was found.
-func (wsdq *WebauthnSessionDatumQuery) First(ctx context.Context) (*WebauthnSessionDatum, error) {
+// First returns the first WebauthnSessionData entity from the query.
+// Returns a *NotFoundError when no WebauthnSessionData was found.
+func (wsdq *WebauthnSessionDataQuery) First(ctx context.Context) (*WebauthnSessionData, error) {
 	nodes, err := wsdq.Limit(1).All(setContextOp(ctx, wsdq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{webauthnsessiondatum.Label}
+		return nil, &NotFoundError{webauthnsessiondata.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (wsdq *WebauthnSessionDatumQuery) FirstX(ctx context.Context) *WebauthnSessionDatum {
+func (wsdq *WebauthnSessionDataQuery) FirstX(ctx context.Context) *WebauthnSessionData {
 	node, err := wsdq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -105,22 +105,22 @@ func (wsdq *WebauthnSessionDatumQuery) FirstX(ctx context.Context) *WebauthnSess
 	return node
 }
 
-// FirstID returns the first WebauthnSessionDatum ID from the query.
-// Returns a *NotFoundError when no WebauthnSessionDatum ID was found.
-func (wsdq *WebauthnSessionDatumQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+// FirstID returns the first WebauthnSessionData ID from the query.
+// Returns a *NotFoundError when no WebauthnSessionData ID was found.
+func (wsdq *WebauthnSessionDataQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
 	if ids, err = wsdq.Limit(1).IDs(setContextOp(ctx, wsdq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{webauthnsessiondatum.Label}
+		err = &NotFoundError{webauthnsessiondata.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (wsdq *WebauthnSessionDatumQuery) FirstIDX(ctx context.Context) uuid.UUID {
+func (wsdq *WebauthnSessionDataQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := wsdq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -128,10 +128,10 @@ func (wsdq *WebauthnSessionDatumQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	return id
 }
 
-// Only returns a single WebauthnSessionDatum entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one WebauthnSessionDatum entity is found.
-// Returns a *NotFoundError when no WebauthnSessionDatum entities are found.
-func (wsdq *WebauthnSessionDatumQuery) Only(ctx context.Context) (*WebauthnSessionDatum, error) {
+// Only returns a single WebauthnSessionData entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one WebauthnSessionData entity is found.
+// Returns a *NotFoundError when no WebauthnSessionData entities are found.
+func (wsdq *WebauthnSessionDataQuery) Only(ctx context.Context) (*WebauthnSessionData, error) {
 	nodes, err := wsdq.Limit(2).All(setContextOp(ctx, wsdq.ctx, "Only"))
 	if err != nil {
 		return nil, err
@@ -140,14 +140,14 @@ func (wsdq *WebauthnSessionDatumQuery) Only(ctx context.Context) (*WebauthnSessi
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{webauthnsessiondatum.Label}
+		return nil, &NotFoundError{webauthnsessiondata.Label}
 	default:
-		return nil, &NotSingularError{webauthnsessiondatum.Label}
+		return nil, &NotSingularError{webauthnsessiondata.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (wsdq *WebauthnSessionDatumQuery) OnlyX(ctx context.Context) *WebauthnSessionDatum {
+func (wsdq *WebauthnSessionDataQuery) OnlyX(ctx context.Context) *WebauthnSessionData {
 	node, err := wsdq.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -155,10 +155,10 @@ func (wsdq *WebauthnSessionDatumQuery) OnlyX(ctx context.Context) *WebauthnSessi
 	return node
 }
 
-// OnlyID is like Only, but returns the only WebauthnSessionDatum ID in the query.
-// Returns a *NotSingularError when more than one WebauthnSessionDatum ID is found.
+// OnlyID is like Only, but returns the only WebauthnSessionData ID in the query.
+// Returns a *NotSingularError when more than one WebauthnSessionData ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (wsdq *WebauthnSessionDatumQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (wsdq *WebauthnSessionDataQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
 	if ids, err = wsdq.Limit(2).IDs(setContextOp(ctx, wsdq.ctx, "OnlyID")); err != nil {
 		return
@@ -167,15 +167,15 @@ func (wsdq *WebauthnSessionDatumQuery) OnlyID(ctx context.Context) (id uuid.UUID
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{webauthnsessiondatum.Label}
+		err = &NotFoundError{webauthnsessiondata.Label}
 	default:
-		err = &NotSingularError{webauthnsessiondatum.Label}
+		err = &NotSingularError{webauthnsessiondata.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (wsdq *WebauthnSessionDatumQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+func (wsdq *WebauthnSessionDataQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := wsdq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -183,18 +183,18 @@ func (wsdq *WebauthnSessionDatumQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	return id
 }
 
-// All executes the query and returns a list of WebauthnSessionData.
-func (wsdq *WebauthnSessionDatumQuery) All(ctx context.Context) ([]*WebauthnSessionDatum, error) {
+// All executes the query and returns a list of WebauthnSessionDataSlice.
+func (wsdq *WebauthnSessionDataQuery) All(ctx context.Context) ([]*WebauthnSessionData, error) {
 	ctx = setContextOp(ctx, wsdq.ctx, "All")
 	if err := wsdq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*WebauthnSessionDatum, *WebauthnSessionDatumQuery]()
-	return withInterceptors[[]*WebauthnSessionDatum](ctx, wsdq, qr, wsdq.inters)
+	qr := querierAll[[]*WebauthnSessionData, *WebauthnSessionDataQuery]()
+	return withInterceptors[[]*WebauthnSessionData](ctx, wsdq, qr, wsdq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (wsdq *WebauthnSessionDatumQuery) AllX(ctx context.Context) []*WebauthnSessionDatum {
+func (wsdq *WebauthnSessionDataQuery) AllX(ctx context.Context) []*WebauthnSessionData {
 	nodes, err := wsdq.All(ctx)
 	if err != nil {
 		panic(err)
@@ -202,20 +202,20 @@ func (wsdq *WebauthnSessionDatumQuery) AllX(ctx context.Context) []*WebauthnSess
 	return nodes
 }
 
-// IDs executes the query and returns a list of WebauthnSessionDatum IDs.
-func (wsdq *WebauthnSessionDatumQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+// IDs executes the query and returns a list of WebauthnSessionData IDs.
+func (wsdq *WebauthnSessionDataQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if wsdq.ctx.Unique == nil && wsdq.path != nil {
 		wsdq.Unique(true)
 	}
 	ctx = setContextOp(ctx, wsdq.ctx, "IDs")
-	if err = wsdq.Select(webauthnsessiondatum.FieldID).Scan(ctx, &ids); err != nil {
+	if err = wsdq.Select(webauthnsessiondata.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (wsdq *WebauthnSessionDatumQuery) IDsX(ctx context.Context) []uuid.UUID {
+func (wsdq *WebauthnSessionDataQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := wsdq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -224,16 +224,16 @@ func (wsdq *WebauthnSessionDatumQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (wsdq *WebauthnSessionDatumQuery) Count(ctx context.Context) (int, error) {
+func (wsdq *WebauthnSessionDataQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, wsdq.ctx, "Count")
 	if err := wsdq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, wsdq, querierCount[*WebauthnSessionDatumQuery](), wsdq.inters)
+	return withInterceptors[int](ctx, wsdq, querierCount[*WebauthnSessionDataQuery](), wsdq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (wsdq *WebauthnSessionDatumQuery) CountX(ctx context.Context) int {
+func (wsdq *WebauthnSessionDataQuery) CountX(ctx context.Context) int {
 	count, err := wsdq.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -242,7 +242,7 @@ func (wsdq *WebauthnSessionDatumQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (wsdq *WebauthnSessionDatumQuery) Exist(ctx context.Context) (bool, error) {
+func (wsdq *WebauthnSessionDataQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, wsdq.ctx, "Exist")
 	switch _, err := wsdq.FirstID(ctx); {
 	case IsNotFound(err):
@@ -255,7 +255,7 @@ func (wsdq *WebauthnSessionDatumQuery) Exist(ctx context.Context) (bool, error) 
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (wsdq *WebauthnSessionDatumQuery) ExistX(ctx context.Context) bool {
+func (wsdq *WebauthnSessionDataQuery) ExistX(ctx context.Context) bool {
 	exist, err := wsdq.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -263,18 +263,18 @@ func (wsdq *WebauthnSessionDatumQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the WebauthnSessionDatumQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the WebauthnSessionDataQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (wsdq *WebauthnSessionDatumQuery) Clone() *WebauthnSessionDatumQuery {
+func (wsdq *WebauthnSessionDataQuery) Clone() *WebauthnSessionDataQuery {
 	if wsdq == nil {
 		return nil
 	}
-	return &WebauthnSessionDatumQuery{
+	return &WebauthnSessionDataQuery{
 		config:     wsdq.config,
 		ctx:        wsdq.ctx.Clone(),
 		order:      append([]OrderFunc{}, wsdq.order...),
 		inters:     append([]Interceptor{}, wsdq.inters...),
-		predicates: append([]predicate.WebauthnSessionDatum{}, wsdq.predicates...),
+		predicates: append([]predicate.WebauthnSessionData{}, wsdq.predicates...),
 		withWebauthnSessionDataAllowedCredentials: wsdq.withWebauthnSessionDataAllowedCredentials.Clone(),
 		// clone intermediate query.
 		sql:  wsdq.sql.Clone(),
@@ -284,7 +284,7 @@ func (wsdq *WebauthnSessionDatumQuery) Clone() *WebauthnSessionDatumQuery {
 
 // WithWebauthnSessionDataAllowedCredentials tells the query-builder to eager-load the nodes that are connected to
 // the "webauthn_session_data_allowed_credentials" edge. The optional arguments are used to configure the query builder of the edge.
-func (wsdq *WebauthnSessionDatumQuery) WithWebauthnSessionDataAllowedCredentials(opts ...func(*WebauthnSessionDataAllowedCredentialQuery)) *WebauthnSessionDatumQuery {
+func (wsdq *WebauthnSessionDataQuery) WithWebauthnSessionDataAllowedCredentials(opts ...func(*WebauthnSessionDataAllowedCredentialQuery)) *WebauthnSessionDataQuery {
 	query := (&WebauthnSessionDataAllowedCredentialClient{config: wsdq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
@@ -303,15 +303,15 @@ func (wsdq *WebauthnSessionDatumQuery) WithWebauthnSessionDataAllowedCredentials
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.WebauthnSessionDatum.Query().
-//		GroupBy(webauthnsessiondatum.FieldChallenge).
+//	client.WebauthnSessionData.Query().
+//		GroupBy(webauthnsessiondata.FieldChallenge).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (wsdq *WebauthnSessionDatumQuery) GroupBy(field string, fields ...string) *WebauthnSessionDatumGroupBy {
+func (wsdq *WebauthnSessionDataQuery) GroupBy(field string, fields ...string) *WebauthnSessionDataGroupBy {
 	wsdq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &WebauthnSessionDatumGroupBy{build: wsdq}
+	grbuild := &WebauthnSessionDataGroupBy{build: wsdq}
 	grbuild.flds = &wsdq.ctx.Fields
-	grbuild.label = webauthnsessiondatum.Label
+	grbuild.label = webauthnsessiondata.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -325,23 +325,23 @@ func (wsdq *WebauthnSessionDatumQuery) GroupBy(field string, fields ...string) *
 //		Challenge string `json:"challenge,omitempty"`
 //	}
 //
-//	client.WebauthnSessionDatum.Query().
-//		Select(webauthnsessiondatum.FieldChallenge).
+//	client.WebauthnSessionData.Query().
+//		Select(webauthnsessiondata.FieldChallenge).
 //		Scan(ctx, &v)
-func (wsdq *WebauthnSessionDatumQuery) Select(fields ...string) *WebauthnSessionDatumSelect {
+func (wsdq *WebauthnSessionDataQuery) Select(fields ...string) *WebauthnSessionDataSelect {
 	wsdq.ctx.Fields = append(wsdq.ctx.Fields, fields...)
-	sbuild := &WebauthnSessionDatumSelect{WebauthnSessionDatumQuery: wsdq}
-	sbuild.label = webauthnsessiondatum.Label
+	sbuild := &WebauthnSessionDataSelect{WebauthnSessionDataQuery: wsdq}
+	sbuild.label = webauthnsessiondata.Label
 	sbuild.flds, sbuild.scan = &wsdq.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a WebauthnSessionDatumSelect configured with the given aggregations.
-func (wsdq *WebauthnSessionDatumQuery) Aggregate(fns ...AggregateFunc) *WebauthnSessionDatumSelect {
+// Aggregate returns a WebauthnSessionDataSelect configured with the given aggregations.
+func (wsdq *WebauthnSessionDataQuery) Aggregate(fns ...AggregateFunc) *WebauthnSessionDataSelect {
 	return wsdq.Select().Aggregate(fns...)
 }
 
-func (wsdq *WebauthnSessionDatumQuery) prepareQuery(ctx context.Context) error {
+func (wsdq *WebauthnSessionDataQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range wsdq.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
@@ -353,7 +353,7 @@ func (wsdq *WebauthnSessionDatumQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range wsdq.ctx.Fields {
-		if !webauthnsessiondatum.ValidColumn(f) {
+		if !webauthnsessiondata.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
@@ -367,19 +367,19 @@ func (wsdq *WebauthnSessionDatumQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (wsdq *WebauthnSessionDatumQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*WebauthnSessionDatum, error) {
+func (wsdq *WebauthnSessionDataQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*WebauthnSessionData, error) {
 	var (
-		nodes       = []*WebauthnSessionDatum{}
+		nodes       = []*WebauthnSessionData{}
 		_spec       = wsdq.querySpec()
 		loadedTypes = [1]bool{
 			wsdq.withWebauthnSessionDataAllowedCredentials != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*WebauthnSessionDatum).scanValues(nil, columns)
+		return (*WebauthnSessionData).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &WebauthnSessionDatum{config: wsdq.config}
+		node := &WebauthnSessionData{config: wsdq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -395,10 +395,10 @@ func (wsdq *WebauthnSessionDatumQuery) sqlAll(ctx context.Context, hooks ...quer
 	}
 	if query := wsdq.withWebauthnSessionDataAllowedCredentials; query != nil {
 		if err := wsdq.loadWebauthnSessionDataAllowedCredentials(ctx, query, nodes,
-			func(n *WebauthnSessionDatum) {
+			func(n *WebauthnSessionData) {
 				n.Edges.WebauthnSessionDataAllowedCredentials = []*WebauthnSessionDataAllowedCredential{}
 			},
-			func(n *WebauthnSessionDatum, e *WebauthnSessionDataAllowedCredential) {
+			func(n *WebauthnSessionData, e *WebauthnSessionDataAllowedCredential) {
 				n.Edges.WebauthnSessionDataAllowedCredentials = append(n.Edges.WebauthnSessionDataAllowedCredentials, e)
 			}); err != nil {
 			return nil, err
@@ -407,9 +407,9 @@ func (wsdq *WebauthnSessionDatumQuery) sqlAll(ctx context.Context, hooks ...quer
 	return nodes, nil
 }
 
-func (wsdq *WebauthnSessionDatumQuery) loadWebauthnSessionDataAllowedCredentials(ctx context.Context, query *WebauthnSessionDataAllowedCredentialQuery, nodes []*WebauthnSessionDatum, init func(*WebauthnSessionDatum), assign func(*WebauthnSessionDatum, *WebauthnSessionDataAllowedCredential)) error {
+func (wsdq *WebauthnSessionDataQuery) loadWebauthnSessionDataAllowedCredentials(ctx context.Context, query *WebauthnSessionDataAllowedCredentialQuery, nodes []*WebauthnSessionData, init func(*WebauthnSessionData), assign func(*WebauthnSessionData, *WebauthnSessionDataAllowedCredential)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*WebauthnSessionDatum)
+	nodeids := make(map[uuid.UUID]*WebauthnSessionData)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -418,7 +418,7 @@ func (wsdq *WebauthnSessionDatumQuery) loadWebauthnSessionDataAllowedCredentials
 		}
 	}
 	query.Where(predicate.WebauthnSessionDataAllowedCredential(func(s *sql.Selector) {
-		s.Where(sql.InValues(webauthnsessiondatum.WebauthnSessionDataAllowedCredentialsColumn, fks...))
+		s.Where(sql.InValues(webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn, fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -435,7 +435,7 @@ func (wsdq *WebauthnSessionDatumQuery) loadWebauthnSessionDataAllowedCredentials
 	return nil
 }
 
-func (wsdq *WebauthnSessionDatumQuery) sqlCount(ctx context.Context) (int, error) {
+func (wsdq *WebauthnSessionDataQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := wsdq.querySpec()
 	_spec.Node.Columns = wsdq.ctx.Fields
 	if len(wsdq.ctx.Fields) > 0 {
@@ -444,8 +444,8 @@ func (wsdq *WebauthnSessionDatumQuery) sqlCount(ctx context.Context) (int, error
 	return sqlgraph.CountNodes(ctx, wsdq.driver, _spec)
 }
 
-func (wsdq *WebauthnSessionDatumQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(webauthnsessiondatum.Table, webauthnsessiondatum.Columns, sqlgraph.NewFieldSpec(webauthnsessiondatum.FieldID, field.TypeUUID))
+func (wsdq *WebauthnSessionDataQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(webauthnsessiondata.Table, webauthnsessiondata.Columns, sqlgraph.NewFieldSpec(webauthnsessiondata.FieldID, field.TypeUUID))
 	_spec.From = wsdq.sql
 	if unique := wsdq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -454,9 +454,9 @@ func (wsdq *WebauthnSessionDatumQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := wsdq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, webauthnsessiondatum.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, webauthnsessiondata.FieldID)
 		for i := range fields {
-			if fields[i] != webauthnsessiondatum.FieldID {
+			if fields[i] != webauthnsessiondata.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
@@ -484,12 +484,12 @@ func (wsdq *WebauthnSessionDatumQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (wsdq *WebauthnSessionDatumQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (wsdq *WebauthnSessionDataQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(wsdq.driver.Dialect())
-	t1 := builder.Table(webauthnsessiondatum.Table)
+	t1 := builder.Table(webauthnsessiondata.Table)
 	columns := wsdq.ctx.Fields
 	if len(columns) == 0 {
-		columns = webauthnsessiondatum.Columns
+		columns = webauthnsessiondata.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if wsdq.sql != nil {
@@ -516,28 +516,28 @@ func (wsdq *WebauthnSessionDatumQuery) sqlQuery(ctx context.Context) *sql.Select
 	return selector
 }
 
-// WebauthnSessionDatumGroupBy is the group-by builder for WebauthnSessionDatum entities.
-type WebauthnSessionDatumGroupBy struct {
+// WebauthnSessionDataGroupBy is the group-by builder for WebauthnSessionData entities.
+type WebauthnSessionDataGroupBy struct {
 	selector
-	build *WebauthnSessionDatumQuery
+	build *WebauthnSessionDataQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (wsdgb *WebauthnSessionDatumGroupBy) Aggregate(fns ...AggregateFunc) *WebauthnSessionDatumGroupBy {
+func (wsdgb *WebauthnSessionDataGroupBy) Aggregate(fns ...AggregateFunc) *WebauthnSessionDataGroupBy {
 	wsdgb.fns = append(wsdgb.fns, fns...)
 	return wsdgb
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (wsdgb *WebauthnSessionDatumGroupBy) Scan(ctx context.Context, v any) error {
+func (wsdgb *WebauthnSessionDataGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, wsdgb.build.ctx, "GroupBy")
 	if err := wsdgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*WebauthnSessionDatumQuery, *WebauthnSessionDatumGroupBy](ctx, wsdgb.build, wsdgb, wsdgb.build.inters, v)
+	return scanWithInterceptors[*WebauthnSessionDataQuery, *WebauthnSessionDataGroupBy](ctx, wsdgb.build, wsdgb, wsdgb.build.inters, v)
 }
 
-func (wsdgb *WebauthnSessionDatumGroupBy) sqlScan(ctx context.Context, root *WebauthnSessionDatumQuery, v any) error {
+func (wsdgb *WebauthnSessionDataGroupBy) sqlScan(ctx context.Context, root *WebauthnSessionDataQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(wsdgb.fns))
 	for _, fn := range wsdgb.fns {
@@ -564,28 +564,28 @@ func (wsdgb *WebauthnSessionDatumGroupBy) sqlScan(ctx context.Context, root *Web
 	return sql.ScanSlice(rows, v)
 }
 
-// WebauthnSessionDatumSelect is the builder for selecting fields of WebauthnSessionDatum entities.
-type WebauthnSessionDatumSelect struct {
-	*WebauthnSessionDatumQuery
+// WebauthnSessionDataSelect is the builder for selecting fields of WebauthnSessionData entities.
+type WebauthnSessionDataSelect struct {
+	*WebauthnSessionDataQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (wsds *WebauthnSessionDatumSelect) Aggregate(fns ...AggregateFunc) *WebauthnSessionDatumSelect {
+func (wsds *WebauthnSessionDataSelect) Aggregate(fns ...AggregateFunc) *WebauthnSessionDataSelect {
 	wsds.fns = append(wsds.fns, fns...)
 	return wsds
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (wsds *WebauthnSessionDatumSelect) Scan(ctx context.Context, v any) error {
+func (wsds *WebauthnSessionDataSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, wsds.ctx, "Select")
 	if err := wsds.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*WebauthnSessionDatumQuery, *WebauthnSessionDatumSelect](ctx, wsds.WebauthnSessionDatumQuery, wsds, wsds.inters, v)
+	return scanWithInterceptors[*WebauthnSessionDataQuery, *WebauthnSessionDataSelect](ctx, wsds.WebauthnSessionDataQuery, wsds, wsds.inters, v)
 }
 
-func (wsds *WebauthnSessionDatumSelect) sqlScan(ctx context.Context, root *WebauthnSessionDatumQuery, v any) error {
+func (wsds *WebauthnSessionDataSelect) sqlScan(ctx context.Context, root *WebauthnSessionDataQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(wsds.fns))
 	for _, fn := range wsds.fns {

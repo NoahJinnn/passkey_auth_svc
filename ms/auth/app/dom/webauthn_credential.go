@@ -10,19 +10,19 @@ import (
 	"github.com/hellohq/hqservice/ent"
 )
 
-func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID, backupEligible bool, backupState bool) *models.WebauthnCredential {
+func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID, backupEligible bool, backupState bool) *ent.WebauthnCredential {
 	now := time.Now().UTC()
 	aaguid, _ := uuid.FromBytes(credential.Authenticator.AAGUID)
 	credentialID := base64.RawURLEncoding.EncodeToString(credential.ID)
 
 	c := &ent.WebauthnCredential{
 		ID:              credentialID,
-		UserId:          userId,
+		UserID:          userId,
 		PublicKey:       base64.RawURLEncoding.EncodeToString(credential.PublicKey),
 		AttestationType: credential.AttestationType,
-		AAGUID:          aaguid,
-		SignCount:       int(credential.Authenticator.SignCount),
-		LastUsedAt:      &now,
+		Aaguid:          aaguid,
+		SignCount:       int32(credential.Authenticator.SignCount),
+		LastUsedAt:      now,
 		CreatedAt:       now,
 		UpdatedAt:       now,
 		BackupEligible:  backupEligible,
@@ -33,11 +33,12 @@ func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID
 		if string(name) != "" {
 			id, _ := uuid.NewV4()
 			t := ent.WebauthnCredentialTransport{
-				ID:                   id,
+				ID:                   id.String(),
 				Name:                 string(name),
 				WebauthnCredentialID: credentialID,
 			}
-			c.Transports = append(c.Transports, t)
+			// c.Transports = append(c.Transports, t)
+			c.Edges.WebauthnCredentialTransports = append(c.Edges.WebauthnCredentialTransports, &t)
 		}
 	}
 
@@ -47,9 +48,10 @@ func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID
 func WebauthnCredentialFromModel(credential *ent.WebauthnCredential) *webauthn.Credential {
 	credId, _ := base64.RawURLEncoding.DecodeString(credential.ID)
 	pKey, _ := base64.RawURLEncoding.DecodeString(credential.PublicKey)
-	transport := make([]protocol.AuthenticatorTransport, len(credential.Transports))
+	transports := credential.Edges.WebauthnCredentialTransports
+	transport := make([]protocol.AuthenticatorTransport, len(transports))
 
-	for i, t := range credential.Transports {
+	for i, t := range transports {
 		transport[i] = protocol.AuthenticatorTransport(t.Name)
 	}
 
@@ -58,7 +60,7 @@ func WebauthnCredentialFromModel(credential *ent.WebauthnCredential) *webauthn.C
 		PublicKey:       pKey,
 		AttestationType: credential.AttestationType,
 		Authenticator: webauthn.Authenticator{
-			AAGUID:    credential.AAGUID.Bytes(),
+			AAGUID:    credential.Aaguid.Bytes(),
 			SignCount: uint32(credential.SignCount),
 		},
 		Transport: transport,

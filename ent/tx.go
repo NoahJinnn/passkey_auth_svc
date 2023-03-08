@@ -30,10 +30,10 @@ type Tx struct {
 	WebauthnCredential *WebauthnCredentialClient
 	// WebauthnCredentialTransport is the client for interacting with the WebauthnCredentialTransport builders.
 	WebauthnCredentialTransport *WebauthnCredentialTransportClient
+	// WebauthnSessionData is the client for interacting with the WebauthnSessionData builders.
+	WebauthnSessionData *WebauthnSessionDataClient
 	// WebauthnSessionDataAllowedCredential is the client for interacting with the WebauthnSessionDataAllowedCredential builders.
 	WebauthnSessionDataAllowedCredential *WebauthnSessionDataAllowedCredentialClient
-	// WebauthnSessionDatum is the client for interacting with the WebauthnSessionDatum builders.
-	WebauthnSessionDatum *WebauthnSessionDatumClient
 
 	// lazily loaded.
 	client     *Client
@@ -174,8 +174,8 @@ func (tx *Tx) init() {
 	tx.User = NewUserClient(tx.config)
 	tx.WebauthnCredential = NewWebauthnCredentialClient(tx.config)
 	tx.WebauthnCredentialTransport = NewWebauthnCredentialTransportClient(tx.config)
+	tx.WebauthnSessionData = NewWebauthnSessionDataClient(tx.config)
 	tx.WebauthnSessionDataAllowedCredential = NewWebauthnSessionDataAllowedCredentialClient(tx.config)
-	tx.WebauthnSessionDatum = NewWebauthnSessionDatumClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

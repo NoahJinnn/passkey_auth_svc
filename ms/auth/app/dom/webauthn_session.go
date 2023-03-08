@@ -12,16 +12,16 @@ import (
 
 func WebauthnSessionDataFromModel(data *ent.WebauthnSessionData) *webauthn.SessionData {
 	var allowedCredentials [][]byte
-	for _, credential := range data.AllowedCredentials {
-		credentialId, err := base64.RawURLEncoding.DecodeString(credential.CredentialId)
+	for _, credential := range data.Edges.WebauthnSessionDataAllowedCredentials {
+		credentialId, err := base64.RawURLEncoding.DecodeString(credential.CredentialID)
 		if err != nil {
 			continue
 		}
 		allowedCredentials = append(allowedCredentials, credentialId)
 	}
 	var userId []byte = nil
-	if !data.UserId.IsNil() {
-		userId = data.UserId.Bytes()
+	if !data.UserID.IsNil() {
+		userId = data.UserID.Bytes()
 	}
 	return &webauthn.SessionData{
 		Challenge:            data.Challenge,
@@ -31,33 +31,34 @@ func WebauthnSessionDataFromModel(data *ent.WebauthnSessionData) *webauthn.Sessi
 	}
 }
 
-func WebauthnSessionDataToModel(data *webauthn.SessionData, operation ent.Operation) *ent.WebauthnSessionData {
+func WebauthnSessionDataToModel(data *webauthn.SessionData, operation string) *ent.WebauthnSessionData {
 	id, _ := uuid.NewV4()
 	userId, _ := uuid.FromBytes(data.UserID)
 	now := time.Now()
 
-	var allowedCredentials []ent.WebauthnSessionDataAllowedCredential
+	var allowedCredentials []*ent.WebauthnSessionDataAllowedCredential
 	for _, credentialID := range data.AllowedCredentialIDs {
 		aId, _ := uuid.NewV4()
 		allowedCredential := ent.WebauthnSessionDataAllowedCredential{
 			ID:                    aId,
-			CredentialId:          base64.RawURLEncoding.EncodeToString(credentialID),
+			CredentialID:          base64.RawURLEncoding.EncodeToString(credentialID),
 			WebauthnSessionDataID: id,
 			CreatedAt:             now,
 			UpdatedAt:             now,
 		}
 
-		allowedCredentials = append(allowedCredentials, allowedCredential)
+		allowedCredentials = append(allowedCredentials, &allowedCredential)
 	}
 
-	return &ent.WebauthnSessionData{
-		ID:                 id,
-		Challenge:          data.Challenge,
-		UserId:             userId,
-		UserVerification:   string(data.UserVerification),
-		CreatedAt:          now,
-		UpdatedAt:          now,
-		Operation:          operation,
-		AllowedCredentials: allowedCredentials,
+	sessionData := &ent.WebauthnSessionData{
+		ID:               id,
+		Challenge:        data.Challenge,
+		UserID:           userId,
+		UserVerification: string(data.UserVerification),
+		CreatedAt:        now,
+		UpdatedAt:        now,
+		Operation:        operation,
 	}
+	sessionData.Edges.WebauthnSessionDataAllowedCredentials = allowedCredentials
+	return sessionData
 }

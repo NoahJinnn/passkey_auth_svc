@@ -18,7 +18,10 @@ func (PrimaryEmail) Fields() []ent.Field {
 	return []ent.Field{field.UUID("id", uuid.UUID{}), field.UUID("email_id", uuid.UUID{}).Optional().Unique(), field.UUID("user_id", uuid.UUID{}).Optional().Unique(), field.Time("created_at"), field.Time("updated_at")}
 }
 func (PrimaryEmail) Edges() []ent.Edge {
-	return []ent.Edge{edge.From("email", Email.Type).Ref("primary_email").Unique().Field("email_id"), edge.From("user", User.Type).Ref("primary_email").Unique().Field("user_id")}
+	return []ent.Edge{
+		edge.From("email", Email.Type).Ref("primary_email").Unique().Field("email_id"), 
+		edge.From("user", User.Type).Ref("primary_email").Unique().Field("user_id"),
+	}
 }
 func (PrimaryEmail) Annotations() []schema.Annotation {
 	return nil

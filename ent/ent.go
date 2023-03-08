@@ -20,8 +20,8 @@ import (
 	"github.com/hellohq/hqservice/ent/user"
 	"github.com/hellohq/hqservice/ent/webauthncredential"
 	"github.com/hellohq/hqservice/ent/webauthncredentialtransport"
+	"github.com/hellohq/hqservice/ent/webauthnsessiondata"
 	"github.com/hellohq/hqservice/ent/webauthnsessiondataallowedcredential"
-	"github.com/hellohq/hqservice/ent/webauthnsessiondatum"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -58,8 +58,8 @@ func columnChecker(table string) func(string) error {
 		user.Table:                        user.ValidColumn,
 		webauthncredential.Table:          webauthncredential.ValidColumn,
 		webauthncredentialtransport.Table: webauthncredentialtransport.ValidColumn,
+		webauthnsessiondata.Table:         webauthnsessiondata.ValidColumn,
 		webauthnsessiondataallowedcredential.Table: webauthnsessiondataallowedcredential.ValidColumn,
-		webauthnsessiondatum.Table:                 webauthnsessiondatum.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

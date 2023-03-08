@@ -33,8 +33,8 @@ type WebauthnCredential func(*sql.Selector)
 // WebauthnCredentialTransport is the predicate function for webauthncredentialtransport builders.
 type WebauthnCredentialTransport func(*sql.Selector)
 
+// WebauthnSessionData is the predicate function for webauthnsessiondata builders.
+type WebauthnSessionData func(*sql.Selector)
+
 // WebauthnSessionDataAllowedCredential is the predicate function for webauthnsessiondataallowedcredential builders.
 type WebauthnSessionDataAllowedCredential func(*sql.Selector)
-
-// WebauthnSessionDatum is the predicate function for webauthnsessiondatum builders.
-type WebauthnSessionDatum func(*sql.Selector)

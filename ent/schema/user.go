@@ -17,11 +17,15 @@ type User struct {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{field.UUID("id", uuid.UUID{}), field.Time("created_at"), field.Time("updated_at")}
-
-	// Edges of the User.
-
 }
 
+// Edges of the User.
 func (User) Edges() []ent.Edge {
-	return []ent.Edge{edge.To("emails", Email.Type), edge.To("passcodes", Passcode.Type), edge.To("password_credential", PasswordCredential.Type).Unique(), edge.To("primary_email", PrimaryEmail.Type).Unique(), edge.To("webauthn_credentials", WebauthnCredential.Type)}
+	return []ent.Edge{
+		edge.To("emails", Email.Type), 
+		edge.To("passcodes", Passcode.Type), 
+		edge.To("password_credential", PasswordCredential.Type).Unique(), 
+		edge.To("primary_email", PrimaryEmail.Type).Unique(), 
+		edge.To("webauthn_credentials", WebauthnCredential.Type),
+	}
 }
