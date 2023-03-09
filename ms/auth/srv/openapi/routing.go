@@ -6,6 +6,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/hellohq/hqservice/api/openapi/restapi"
 	"github.com/hellohq/hqservice/api/openapi/restapi/op"
+	"github.com/hellohq/hqservice/ms/auth/srv/openapi/middlewares"
 	"github.com/sebest/xff"
 )
 
@@ -37,14 +38,14 @@ func bindMiddlewares(api *op.HqServiceAPI, server *restapi.Server, basePath stri
 	api.UseSwaggerUI()
 	globalMiddlewares := func(handler http.Handler) http.Handler {
 		xffmw, _ := xff.Default()
-		logger := makeLogger(basePath)
-		accesslog := makeAccessLog(basePath)
-		return noCache(
+		logger := middlewares.MakeLogger(basePath)
+		accesslog := middlewares.MakeAccessLog(basePath)
+		return middlewares.NoCache(
 			xffmw.Handler(
 				logger(
-					recovery(
+					middlewares.Recovery(
 						accesslog( //FIXME: middleware log error
-							middleware.Spec(basePath, restapi.FlatSwaggerJSON, cors(handler)),
+							middleware.Spec(basePath, restapi.FlatSwaggerJSON, middlewares.Cors(handler)),
 						),
 					),
 				),

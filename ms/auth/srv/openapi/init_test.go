@@ -12,6 +12,7 @@ import (
 	"github.com/hellohq/hqservice/api/openapi/client"
 	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/srv/openapi"
+	"github.com/hellohq/hqservice/ms/auth/srv/openapi/middlewares"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/check"
@@ -25,7 +26,7 @@ func TestMain(m *testing.M) {
 	reg := prometheus.NewPedanticRegistry()
 	def.Init()
 	app.InitMetrics(reg)
-	openapi.InitMetrics(reg, "test")
+	middlewares.InitMetrics(reg, "test")
 	check.TestMain(m)
 }
 
