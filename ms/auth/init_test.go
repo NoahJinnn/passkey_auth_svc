@@ -5,7 +5,7 @@ import (
 
 	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/dal"
-	"github.com/hellohq/hqservice/ms/auth/srv/openapi"
+	"github.com/hellohq/hqservice/ms/auth/srv/openapi/middlewares"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/powerman/check"
 	_ "github.com/smartystreets/goconvey/convey"
@@ -15,7 +15,7 @@ func TestMain(m *testing.M) {
 	def.Init()
 	dal.InitMetrics(reg, "test")
 	app.InitMetrics(reg)
-	openapi.InitMetrics(reg, "test")
+	middlewares.InitMetrics(reg, "test")
 	initMetrics(reg, "test")
 	check.TestMain(m)
 }

@@ -7,22 +7,14 @@ import (
 	"github.com/hellohq/hqservice/api/openapi/restapi"
 	"github.com/hellohq/hqservice/api/openapi/restapi/op"
 	"github.com/hellohq/hqservice/ms/auth/srv/openapi/middlewares"
+	"github.com/labstack/echo/v4"
 	"github.com/sebest/xff"
 )
 
-func bindOAIHandlers(api *op.HqServiceAPI, srv *httpServer) {
-	api.HealthCheckHandler = op.HealthCheckHandlerFunc(srv.HealthCheck)
+func bindOAIHandlers(e *echo.Echo, srv *httpServer) {
 	// Plaid API
-	api.LinkTokenCreateHandler = op.LinkTokenCreateHandlerFunc(srv.LinkTokenCreate)
-	api.GetAuthAccountHandler = op.GetAuthAccountHandlerFunc(srv.GetAuthAccount)
-	api.GetAccessTokenHandler = op.GetAccessTokenHandlerFunc(srv.GetAccessToken)
-	api.GetTransactionsHandler = op.GetTransactionsHandlerFunc(srv.GetTransactions)
-	api.GetIdentityHandler = op.GetIdentityHandlerFunc(srv.GetIdentity)
-	api.GetBalanceHandler = op.GetBalanceHandlerFunc(srv.GetBalance)
-	api.GetAccountsHandler = op.GetAccountsHandlerFunc(srv.GetAccounts)
+
 	// TODO: Only for testing, remove this route on production
-	api.GetInfoHandler = op.GetInfoHandlerFunc(srv.GetInfo)
-	api.GetSandboxAccessTokenHandler = op.GetSandboxAccessTokenHandlerFunc(srv.GetSandboxAccessToken)
 
 	// User API
 	// api.GetUsersHandler = op.GetUsersHandlerFunc(srv.GetUsers)

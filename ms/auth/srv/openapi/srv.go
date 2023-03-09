@@ -2,18 +2,14 @@
 package openapi
 
 import (
-	"fmt"
 	"net"
 	"net/http"
 
-	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime"
-	"github.com/hellohq/hqservice/api/openapi/restapi"
-	"github.com/hellohq/hqservice/api/openapi/restapi/op"
 	"github.com/hellohq/hqservice/ms/auth/app"
-	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/hellohq/hqservice/pkg/netx"
+	"github.com/labstack/echo/v4"
 	"github.com/powerman/structlog"
 )
 
@@ -33,30 +29,25 @@ type (
 
 // NewServer returns OpenAPI server configured to listen on the TCP network
 // address cfg.Host:cfg.Port and handle requests on incoming connections.
-func NewServer(appl app.Appl, cfg Config) (*restapi.Server, error) {
+func NewServer(appl app.Appl, cfg Config) (*echo.Echo, error) {
 	srv := &httpServer{
 		app: appl,
 		cfg: cfg,
 	}
+	e := echo.New()
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello, World!")
+	})
 
-	swaggerSpec, err := loads.Embedded(restapi.SwaggerJSON, restapi.FlatSwaggerJSON)
-	if err != nil {
-		return nil, fmt.Errorf("load embedded swagger spec: %w", err)
-	}
+	// log := structlog.New(structlog.KeyUnit, "swagger").SetDefaultKeyvals(structlog.KeyApp, config.ServiceName)
+	// log.Info("OpenAPI protocol", "version", swaggerSpec.Spec().Info.Version)
+	// log.Info("Base path", "base", swaggerSpec.BasePath())
 
-	log := structlog.New(structlog.KeyUnit, "swagger").SetDefaultKeyvals(structlog.KeyApp, config.ServiceName)
-	log.Info("OpenAPI protocol", "version", swaggerSpec.Spec().Info.Version)
-	log.Info("Base path", "base", swaggerSpec.BasePath())
-	api := op.NewHqServiceAPI(swaggerSpec)
-	api.Logger = log.Printf
+	bindOAIHandlers(e, srv)
+	// bindMiddlewares(api, server, swaggerSpec.BasePath())
 
-	bindOAIHandlers(api, srv)
-	server := restapi.NewServer(api)
-	server.Host = cfg.Addr.Host()
-	server.Port = cfg.Addr.Port()
-	bindMiddlewares(api, server, swaggerSpec.BasePath())
-
-	return server, nil
+	e.Logger.Fatal(e.Start(cfg.Addr.String()))
+	return e, nil
 }
 
 func fromRequest(r *http.Request) (Ctx, Log) {
