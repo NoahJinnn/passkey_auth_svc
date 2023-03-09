@@ -6,6 +6,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/hellohq/hqservice/api/openapi/restapi/op"
+	"github.com/hellohq/hqservice/ms/auth/srv/openapi/error"
 )
 
 func (srv *httpServer) HealthCheck(params op.HealthCheckParams) middleware.Responder {
@@ -13,7 +14,7 @@ func (srv *httpServer) HealthCheck(params op.HealthCheckParams) middleware.Respo
 	status, err := srv.app.HealthCheck(ctx)
 	switch {
 	default:
-		return errHealthCheck(log, err, codeInternal)
+		return error.ErrHealthCheck(log, err, error.CodeInternal)
 	case err == nil:
 		return op.NewHealthCheckOK().WithPayload(status)
 	}
@@ -35,7 +36,7 @@ func (srv *httpServer) GetSandboxAccessToken(params op.GetSandboxAccessTokenPara
 
 	switch {
 	default:
-		return errGetSandboxAccessToken(log, err, codeInternal)
+		return error.ErrGetSandboxAccessToken(log, err, error.CodeInternal)
 	case err == nil:
 		return op.NewGetSandboxAccessTokenOK().WithPayload(t.ToOAIResp())
 	}
@@ -55,7 +56,7 @@ func (srv *httpServer) LinkTokenCreate(params op.LinkTokenCreateParams) middlewa
 
 	switch {
 	default:
-		return errLinkTokenCreate(log, err, codeInternal)
+		return error.ErrLinkTokenCreate(log, err, error.CodeInternal)
 	case err == nil:
 		return op.NewLinkTokenCreateOK().WithPayload(l.ToOAIResp())
 	}
@@ -67,7 +68,7 @@ func (srv *httpServer) GetAccessToken(params op.GetAccessTokenParams) middleware
 
 	switch {
 	default:
-		return errGetAccessToken(log, err, codeInternal)
+		return error.ErrGetAccessToken(log, err, error.CodeInternal)
 	case err == nil:
 		return op.NewGetAccessTokenOK().WithPayload(t.ToOAIResp())
 	}

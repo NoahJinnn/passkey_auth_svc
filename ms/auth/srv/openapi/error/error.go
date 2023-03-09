@@ -2,7 +2,7 @@
 //go:generate genny -in=$GOFILE -out=gen.$GOFILE gen "HealthCheck=LinkTokenCreate,GetAccessToken,GetAccounts,GetAuthAccount,GetBalance,GetIdentity,GetSandboxAccessToken,GetTransactions,GetUsers,GetUserByID,CreateUser,UpdateUser"
 //go:generate sed -i -e "\\,^//go:generate,d" gen.$GOFILE
 
-package openapi
+package error
 
 import (
 	"net/http"
@@ -11,10 +11,12 @@ import (
 	"github.com/go-openapi/swag"
 	"github.com/hellohq/hqservice/api/openapi/model"
 	"github.com/hellohq/hqservice/api/openapi/restapi/op"
+	"github.com/powerman/structlog"
+
 	"github.com/hellohq/hqservice/pkg/def"
 )
 
-func errHealthCheck(log Log, err error, code errCode) middleware.Responder {
+func ErrHealthCheck(log *structlog.Logger, err error, code errCode) middleware.Responder {
 	if code.status < http.StatusInternalServerError {
 		log.Info("client error", def.LogHTTPStatus, code.status, "code", code.extra, "err", err)
 	} else {

@@ -6,6 +6,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/hellohq/hqservice/api/openapi/restapi/op"
+	"github.com/hellohq/hqservice/ms/auth/srv/openapi/error"
 )
 
 func (srv *httpServer) GetAuthAccount(params op.GetAuthAccountParams) middleware.Responder {
@@ -14,7 +15,7 @@ func (srv *httpServer) GetAuthAccount(params op.GetAuthAccountParams) middleware
 
 	switch {
 	default:
-		return errGetAuthAccount(log, err, codeInternal)
+		return error.ErrGetAuthAccount(log, err, error.CodeInternal)
 	case err == nil:
 		return CustomResponder(func(w http.ResponseWriter, producer runtime.Producer) {
 			if err := producer.Produce(w, aa); err != nil {
@@ -30,7 +31,7 @@ func (srv *httpServer) GetTransactions(params op.GetTransactionsParams) middlewa
 
 	switch {
 	default:
-		return errGetTransactions(log, err, codeInternal)
+		return error.ErrGetTransactions(log, err, error.CodeInternal)
 	case err == nil:
 		return CustomResponder(func(w http.ResponseWriter, producer runtime.Producer) {
 			if err := producer.Produce(w, txs); err != nil {
@@ -46,7 +47,7 @@ func (srv *httpServer) GetIdentity(params op.GetIdentityParams) middleware.Respo
 
 	switch {
 	default:
-		return errGetIdentity(log, err, codeInternal)
+		return error.ErrGetIdentity(log, err, error.CodeInternal)
 	case err == nil:
 		return CustomResponder(func(w http.ResponseWriter, producer runtime.Producer) {
 			if err := producer.Produce(w, id); err != nil {
@@ -62,7 +63,7 @@ func (srv *httpServer) GetBalance(params op.GetBalanceParams) middleware.Respond
 
 	switch {
 	default:
-		return errGetBalance(log, err, codeInternal)
+		return error.ErrGetBalance(log, err, error.CodeInternal)
 	case err == nil:
 		return CustomResponder(func(w http.ResponseWriter, producer runtime.Producer) {
 			if err := producer.Produce(w, bl); err != nil {
@@ -78,7 +79,7 @@ func (srv *httpServer) GetAccounts(params op.GetAccountsParams) middleware.Respo
 
 	switch {
 	default:
-		return errGetAccounts(log, err, codeInternal)
+		return error.ErrGetAccounts(log, err, error.CodeInternal)
 	case err == nil:
 		return CustomResponder(func(w http.ResponseWriter, producer runtime.Producer) {
 			if err := producer.Produce(w, accs); err != nil {

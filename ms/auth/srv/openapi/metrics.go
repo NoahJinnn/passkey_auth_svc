@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-openapi/loads"
 	"github.com/hellohq/hqservice/api/openapi/restapi"
+	"github.com/hellohq/hqservice/ms/auth/srv/openapi/error"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -20,13 +21,6 @@ const (
 	methodLabel   = "method"
 	codeLabel     = "code"
 	failedLabel   = "failed"
-)
-
-//nolint:gochecknoglobals // By design.
-var (
-	// Initialized with codes returned by go-swagger and middlewares
-	// after metrics middleware (accessLog).
-	codeLabels = []int{400, 401, 403, 422}
 )
 
 // InitMetrics must be called once before using this package.
@@ -70,7 +64,7 @@ func InitMetrics(reg *prometheus.Registry, namespace string) {
 	}
 	for method, resources := range ss.Analyzer.Operations() {
 		for resource, op := range resources {
-			codes := append([]int{}, codeLabels...)
+			codes := append([]int{}, error.CodeLabels...)
 			for code := range op.Responses.StatusCodeResponses {
 				codes = append(codes, code)
 			}
