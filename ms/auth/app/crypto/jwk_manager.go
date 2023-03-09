@@ -1,15 +1,19 @@
-package jwk
+package crypto
 
 import (
+	"context"
 	"encoding/json"
 	"time"
 
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/pkg/crypto/aes_gcm"
+	hqJwk "github.com/hellohq/hqservice/pkg/crypto/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 )
 
-type Manager interface {
+type JwkManager interface {
 	// GenerateKey is used to generate a jwk Key
 	GenerateKey() (jwk.Key, error)
 	// GetPublicKeys returns all Public keys that are persisted
@@ -20,24 +24,26 @@ type Manager interface {
 
 type DefaultManager struct {
 	encrypter *aes_gcm.AESGCM
-	persister persistence.JwkPersister
+	repo      app.IJwkRepo
 }
 
 // Returns a DefaultManager that reads and persists the jwks to database and generates jwks if a new secret gets added to the config.
-func NewDefaultManager(keys []string, persister persistence.JwkPersister) (*DefaultManager, error) {
+func NewDefaultManager(keys []string, repo app.IJwkRepo) (*DefaultManager, error) {
 	encrypter, err := aes_gcm.NewAESGCM(keys)
 	if err != nil {
 		return nil, err
 	}
 	manager := &DefaultManager{
 		encrypter: encrypter,
-		persister: persister,
+		repo:      repo,
 	}
 	// for every key we should check if a jwk with index exists and create one if not.
+	ctx := context.Background()
 	for i := range keys {
-		j, err := persister.Get(i + 1)
+
+		j, err := repo.GetJwk(ctx, uint(i+1))
 		if j == nil && err == nil {
-			_, err := manager.GenerateKey()
+			_, err := manager.GenerateKey(ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -49,8 +55,8 @@ func NewDefaultManager(keys []string, persister persistence.JwkPersister) (*Defa
 	return manager, nil
 }
 
-func (m *DefaultManager) GenerateKey() (jwk.Key, error) {
-	rsa := &RSAKeyGenerator{}
+func (m *DefaultManager) GenerateKey(ctx context.Context) (jwk.Key, error) {
+	rsa := &hqJwk.RSAKeyGenerator{}
 	id, _ := uuid.NewV4()
 	key, err := rsa.Generate(id.String())
 	if err != nil {
@@ -64,19 +70,19 @@ func (m *DefaultManager) GenerateKey() (jwk.Key, error) {
 	if err != nil {
 		return nil, err
 	}
-	model := models.Jwk{
+	model := ent.Jwk{
 		KeyData:   encryptedKey,
 		CreatedAt: time.Now(),
 	}
-	err = m.persister.Create(model)
+	err = m.repo.Create(ctx, model)
 	if err != nil {
 		return nil, err
 	}
 	return key, nil
 }
 
-func (m *DefaultManager) GetSigningKey() (jwk.Key, error) {
-	sigModel, err := m.persister.GetLast()
+func (m *DefaultManager) GetSigningKey(ctx context.Context) (jwk.Key, error) {
+	sigModel, err := m.repo.GetLastJwk(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -92,8 +98,8 @@ func (m *DefaultManager) GetSigningKey() (jwk.Key, error) {
 	return key, nil
 }
 
-func (m *DefaultManager) GetPublicKeys() (jwk.Set, error) {
-	modelList, err := m.persister.GetAll()
+func (m *DefaultManager) GetPublicKeys(ctx context.Context) (jwk.Set, error) {
+	modelList, err := m.repo.GetAllJwk(ctx)
 	if err != nil {
 		return nil, err
 	}

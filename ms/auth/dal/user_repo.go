@@ -8,8 +8,8 @@ import (
 	"github.com/hellohq/hqservice/ent/user"
 )
 
-func (repo *Repo) GetAllUsers(ctx Ctx) ([]*ent.User, error) {
-	us, err := repo.Db.User.
+func (r *Repo) GetAllUsers(ctx Ctx) ([]*ent.User, error) {
+	us, err := r.Db.User.
 		Query().
 		All(ctx)
 
@@ -20,8 +20,8 @@ func (repo *Repo) GetAllUsers(ctx Ctx) ([]*ent.User, error) {
 	return us, nil
 }
 
-func (repo *Repo) GetUserById(ctx Ctx, id uuid.UUID) (*ent.User, error) {
-	u, err := repo.Db.User.
+func (r *Repo) GetUserById(ctx Ctx, id uuid.UUID) (*ent.User, error) {
+	u, err := r.Db.User.
 		Query().
 		Where(user.ID(id)).
 		Only(ctx)
@@ -33,13 +33,13 @@ func (repo *Repo) GetUserById(ctx Ctx, id uuid.UUID) (*ent.User, error) {
 	return u, nil
 }
 
-func (repo *Repo) CreateUser(ctx Ctx, u *ent.User) (*ent.User, error) {
-	u, err := repo.Db.User.
+func (r *Repo) CreateUser(ctx Ctx, u *ent.User) (*ent.User, error) {
+	u, err := r.Db.User.
 		Create().
 		Save(ctx)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed querying user by id: %w", err)
+		return nil, fmt.Errorf("failed creating user by id: %w", err)
 	}
 
 	return u, nil

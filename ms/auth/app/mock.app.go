@@ -422,6 +422,20 @@ func (m *MockRepo) EXPECT() *MockRepoMockRecorder {
 	return m.recorder
 }
 
+// Create mocks base method.
+func (m *MockRepo) Create(ctx Ctx, jwk ent.Jwk) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", ctx, jwk)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockRepoMockRecorder) Create(ctx, jwk interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockRepo)(nil).Create), ctx, jwk)
+}
+
 // CreateUser mocks base method.
 func (m *MockRepo) CreateUser(ctx Ctx, u *ent.User) (*ent.User, error) {
 	m.ctrl.T.Helper()
@@ -435,6 +449,21 @@ func (m *MockRepo) CreateUser(ctx Ctx, u *ent.User) (*ent.User, error) {
 func (mr *MockRepoMockRecorder) CreateUser(ctx, u interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockRepo)(nil).CreateUser), ctx, u)
+}
+
+// GetAllJwk mocks base method.
+func (m *MockRepo) GetAllJwk(ctx Ctx) ([]*ent.Jwk, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllJwk", ctx)
+	ret0, _ := ret[0].([]*ent.Jwk)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllJwk indicates an expected call of GetAllJwk.
+func (mr *MockRepoMockRecorder) GetAllJwk(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllJwk", reflect.TypeOf((*MockRepo)(nil).GetAllJwk), ctx)
 }
 
 // GetAllUsers mocks base method.
@@ -452,6 +481,36 @@ func (mr *MockRepoMockRecorder) GetAllUsers(ctx interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllUsers", reflect.TypeOf((*MockRepo)(nil).GetAllUsers), ctx)
 }
 
+// GetJwk mocks base method.
+func (m *MockRepo) GetJwk(ctx Ctx, id uint) (*ent.Jwk, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetJwk", ctx, id)
+	ret0, _ := ret[0].(*ent.Jwk)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetJwk indicates an expected call of GetJwk.
+func (mr *MockRepoMockRecorder) GetJwk(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetJwk", reflect.TypeOf((*MockRepo)(nil).GetJwk), ctx, id)
+}
+
+// GetLastJwk mocks base method.
+func (m *MockRepo) GetLastJwk(ctx Ctx) (*ent.Jwk, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLastJwk", ctx)
+	ret0, _ := ret[0].(*ent.Jwk)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLastJwk indicates an expected call of GetLastJwk.
+func (mr *MockRepoMockRecorder) GetLastJwk(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastJwk", reflect.TypeOf((*MockRepo)(nil).GetLastJwk), ctx)
+}
+
 // GetUserById mocks base method.
 func (m *MockRepo) GetUserById(ctx Ctx, id uuid.UUID) (*ent.User, error) {
 	m.ctrl.T.Helper()
@@ -465,4 +524,86 @@ func (m *MockRepo) GetUserById(ctx Ctx, id uuid.UUID) (*ent.User, error) {
 func (mr *MockRepoMockRecorder) GetUserById(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserById", reflect.TypeOf((*MockRepo)(nil).GetUserById), ctx, id)
+}
+
+// MockIJwkRepo is a mock of IJwkRepo interface.
+type MockIJwkRepo struct {
+	ctrl     *gomock.Controller
+	recorder *MockIJwkRepoMockRecorder
+}
+
+// MockIJwkRepoMockRecorder is the mock recorder for MockIJwkRepo.
+type MockIJwkRepoMockRecorder struct {
+	mock *MockIJwkRepo
+}
+
+// NewMockIJwkRepo creates a new mock instance.
+func NewMockIJwkRepo(ctrl *gomock.Controller) *MockIJwkRepo {
+	mock := &MockIJwkRepo{ctrl: ctrl}
+	mock.recorder = &MockIJwkRepoMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockIJwkRepo) EXPECT() *MockIJwkRepoMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockIJwkRepo) Create(ctx Ctx, jwk ent.Jwk) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", ctx, jwk)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockIJwkRepoMockRecorder) Create(ctx, jwk interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockIJwkRepo)(nil).Create), ctx, jwk)
+}
+
+// GetAllJwk mocks base method.
+func (m *MockIJwkRepo) GetAllJwk(ctx Ctx) ([]*ent.Jwk, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllJwk", ctx)
+	ret0, _ := ret[0].([]*ent.Jwk)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllJwk indicates an expected call of GetAllJwk.
+func (mr *MockIJwkRepoMockRecorder) GetAllJwk(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllJwk", reflect.TypeOf((*MockIJwkRepo)(nil).GetAllJwk), ctx)
+}
+
+// GetJwk mocks base method.
+func (m *MockIJwkRepo) GetJwk(ctx Ctx, id uint) (*ent.Jwk, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetJwk", ctx, id)
+	ret0, _ := ret[0].(*ent.Jwk)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetJwk indicates an expected call of GetJwk.
+func (mr *MockIJwkRepoMockRecorder) GetJwk(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetJwk", reflect.TypeOf((*MockIJwkRepo)(nil).GetJwk), ctx, id)
+}
+
+// GetLastJwk mocks base method.
+func (m *MockIJwkRepo) GetLastJwk(ctx Ctx) (*ent.Jwk, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLastJwk", ctx)
+	ret0, _ := ret[0].(*ent.Jwk)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLastJwk indicates an expected call of GetLastJwk.
+func (mr *MockIJwkRepoMockRecorder) GetLastJwk(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastJwk", reflect.TypeOf((*MockIJwkRepo)(nil).GetLastJwk), ctx)
 }

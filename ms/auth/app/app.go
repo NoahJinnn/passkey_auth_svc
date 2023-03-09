@@ -63,6 +63,14 @@ type Repo interface {
 	GetAllUsers(ctx Ctx) ([]*ent.User, error)
 	GetUserById(ctx Ctx, id uuid.UUID) (*ent.User, error)
 	CreateUser(ctx Ctx, u *ent.User) (*ent.User, error)
+	IJwkRepo
+}
+
+type IJwkRepo interface {
+	GetJwk(ctx Ctx, id uint) (*ent.Jwk, error)
+	GetAllJwk(ctx Ctx) ([]*ent.Jwk, error)
+	GetLastJwk(ctx Ctx) (*ent.Jwk, error)
+	Create(ctx Ctx, jwk ent.Jwk) error
 }
 
 // Ref: https://github.com/plaid/quickstart/blob/master/.env.example

@@ -1,6 +1,7 @@
-package jwk
+package crypto
 
 import (
+	"context"
 	"testing"
 
 	"github.com/hellohq/hqservice/ent"
@@ -44,21 +45,21 @@ func (m *mockJwkPersister) Create(jwk ent.Jwk) error {
 
 func TestDefaultManager(t *testing.T) {
 	keys := []string{"asfnoadnfoaegnq3094intoaegjnoadjgnoadng", "apdisfoaiegnoaiegnbouaebgn982"}
+	ctx := context.Background()
+	repo := test.NewJwkRepo(nil)
 
-	persister := test.NewJwkPersister(nil)
-
-	dm, err := NewDefaultManager(keys, persister)
+	dm, err := NewDefaultManager(keys, repo)
 	require.NoError(t, err)
-	all, err := persister.GetAll()
+	all, err := repo.GetAllJwk(ctx)
 
 	require.NoError(t, err)
 	assert.Equal(t, 2, len(all))
 
-	js, err := dm.GetPublicKeys()
+	js, err := dm.GetPublicKeys(ctx)
 	require.NoError(t, err)
 	assert.Equal(t, 2, js.Len())
 
-	sk, err := dm.GetSigningKey()
+	sk, err := dm.GetSigningKey(ctx)
 	require.NoError(t, err)
 
 	token := jwt.New()
