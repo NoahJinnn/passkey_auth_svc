@@ -55,7 +55,7 @@ type IPlaidSvc interface {
 }
 
 type IWebauthnSvc interface {
-	WebauthnBeginRegistration(ctx Ctx) (*protocol.CredentialCreation, *webauthn.SessionData, error)
+	WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, *webauthn.SessionData, error)
 }
 
 // Repo provides data storage.

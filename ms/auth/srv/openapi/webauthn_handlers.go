@@ -1,6 +1,7 @@
 package openapi
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-openapi/runtime"
@@ -10,7 +11,8 @@ import (
 )
 
 func (srv *httpServer) WebauthnBeginRegistration(params op.WebauthnRegInitParams) middleware.Responder {
-	ctx, log := fromRequest(params.HTTPRequest)
+	ctx, _ := fromRequest(params.HTTPRequest)
+	fmt.Printf("noah %+v\n", ctx)
 	// TODO: Impl Session middleware
 	// sessionToken, ok := c.Get("session").(jwt.Token)
 	// if !ok {
@@ -23,19 +25,16 @@ func (srv *httpServer) WebauthnBeginRegistration(params op.WebauthnRegInitParams
 
 	// TODO: Impl DAL
 	// webauthnUser, user, err := h.getWebauthnUser(h.persister.GetConnection(), uId)
-	_, _, err := srv.app.WebauthnBeginRegistration(ctx)
+	// _, _, err := srv.app.WebauthnBeginRegistration(ctx)
 	// if err != nil {
 	// 	return fmt.Errorf("failed to get user: %w", err)
 	// }
 	// if webauthnUser == nil {
-	// 	err = h.auditLogger.Create(c, models.AuditLogWebAuthnRegistrationInitFailed, nil, fmt.Errorf("unknown user"))
-	// 	if err != nil {
-	// 		return fmt.Errorf("failed to create audit log: %w", err)
-	// 	}
 	// 	return dto.NewHTTPError(http.StatusBadRequest, "user not found").SetInternal(errors.New(fmt.Sprintf("user %s not found ", uId)))
 	// }
 
 	// TODO: Impl Appl
+	options := model.CredentialCreationOptions{}
 	// t := true
 	// options, sessionData, err := h.webauthn.BeginRegistration(
 	// 	webauthnUser,
@@ -44,7 +43,6 @@ func (srv *httpServer) WebauthnBeginRegistration(params op.WebauthnRegInitParams
 	// 		ResidentKey:        protocol.ResidentKeyRequirementRequired,
 	// 		UserVerification:   protocol.VerificationRequired,
 	// 	}),
-	options := model.CredentialCreationOptions{}
 	// 	webauthn.WithConveyancePreference(protocol.PreferNoAttestation),
 	// 	// don't set the excludeCredentials list, so an already registered device can be re-registered
 	// )
@@ -62,14 +60,20 @@ func (srv *httpServer) WebauthnBeginRegistration(params op.WebauthnRegInitParams
 	// 	return fmt.Errorf("failed to create audit log: %w", err)
 	// }
 
-	switch {
-	default:
-		return errGetUsers(log, err, codeInternal)
-	case err == nil:
-		return CustomResponder(func(w http.ResponseWriter, producer runtime.Producer) {
-			if err := producer.Produce(w, options); err != nil {
-				panic(err) // let the recovery middleware deal with this
-			}
-		})
-	}
+	// switch {
+	// default:
+	// 	return errGetUsers(log, err, codeInternal)
+	// case err == nil:
+	// 	return CustomResponder(func(w http.ResponseWriter, producer runtime.Producer) {
+	// 		if err := producer.Produce(w, options); err != nil {
+	// 			panic(err) // let the recovery middleware deal with this
+	// 		}
+	// 	})
+	// }
+
+	return CustomResponder(func(w http.ResponseWriter, producer runtime.Producer) {
+		if err := producer.Produce(w, options); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	})
 }

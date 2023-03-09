@@ -188,9 +188,9 @@ func (mr *MockApplMockRecorder) LinkTokenCreate(ctx, paymentInitiation interface
 }
 
 // WebauthnBeginRegistration mocks base method.
-func (m *MockAppl) WebauthnBeginRegistration(ctx Ctx) (*protocol.CredentialCreation, *webauthn.SessionData, error) {
+func (m *MockAppl) WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, *webauthn.SessionData, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WebauthnBeginRegistration", ctx)
+	ret := m.ctrl.Call(m, "WebauthnBeginRegistration", ctx, userId)
 	ret0, _ := ret[0].(*protocol.CredentialCreation)
 	ret1, _ := ret[1].(*webauthn.SessionData)
 	ret2, _ := ret[2].(error)
@@ -198,9 +198,9 @@ func (m *MockAppl) WebauthnBeginRegistration(ctx Ctx) (*protocol.CredentialCreat
 }
 
 // WebauthnBeginRegistration indicates an expected call of WebauthnBeginRegistration.
-func (mr *MockApplMockRecorder) WebauthnBeginRegistration(ctx interface{}) *gomock.Call {
+func (mr *MockApplMockRecorder) WebauthnBeginRegistration(ctx, userId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WebauthnBeginRegistration", reflect.TypeOf((*MockAppl)(nil).WebauthnBeginRegistration), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WebauthnBeginRegistration", reflect.TypeOf((*MockAppl)(nil).WebauthnBeginRegistration), ctx, userId)
 }
 
 // MockIPlaidSvc is a mock of IPlaidSvc interface.
@@ -384,9 +384,9 @@ func (m *MockIWebauthnSvc) EXPECT() *MockIWebauthnSvcMockRecorder {
 }
 
 // WebauthnBeginRegistration mocks base method.
-func (m *MockIWebauthnSvc) WebauthnBeginRegistration(ctx Ctx) (*protocol.CredentialCreation, *webauthn.SessionData, error) {
+func (m *MockIWebauthnSvc) WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, *webauthn.SessionData, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WebauthnBeginRegistration", ctx)
+	ret := m.ctrl.Call(m, "WebauthnBeginRegistration", ctx, userId)
 	ret0, _ := ret[0].(*protocol.CredentialCreation)
 	ret1, _ := ret[1].(*webauthn.SessionData)
 	ret2, _ := ret[2].(error)
@@ -394,9 +394,9 @@ func (m *MockIWebauthnSvc) WebauthnBeginRegistration(ctx Ctx) (*protocol.Credent
 }
 
 // WebauthnBeginRegistration indicates an expected call of WebauthnBeginRegistration.
-func (mr *MockIWebauthnSvcMockRecorder) WebauthnBeginRegistration(ctx interface{}) *gomock.Call {
+func (mr *MockIWebauthnSvcMockRecorder) WebauthnBeginRegistration(ctx, userId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WebauthnBeginRegistration", reflect.TypeOf((*MockIWebauthnSvc)(nil).WebauthnBeginRegistration), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WebauthnBeginRegistration", reflect.TypeOf((*MockIWebauthnSvc)(nil).WebauthnBeginRegistration), ctx, userId)
 }
 
 // MockRepo is a mock of Repo interface.
