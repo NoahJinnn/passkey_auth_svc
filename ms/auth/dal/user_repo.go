@@ -8,8 +8,22 @@ import (
 	"github.com/hellohq/hqservice/ent/user"
 )
 
-func (r *Repo) GetAllUsers(ctx Ctx) ([]*ent.User, error) {
-	us, err := r.Db.User.
+type IUserRepo interface {
+	GetAllUsers(ctx Ctx) ([]*ent.User, error)
+	GetUserById(ctx Ctx, id uuid.UUID) (*ent.User, error)
+	CreateUser(ctx Ctx, u *ent.User) (*ent.User, error)
+}
+
+type userRepo struct {
+	db *ent.Client
+}
+
+func NewUserRepo(db *ent.Client) IUserRepo {
+	return &userRepo{db: db}
+}
+
+func (r *userRepo) GetAllUsers(ctx Ctx) ([]*ent.User, error) {
+	us, err := r.db.User.
 		Query().
 		All(ctx)
 
@@ -20,8 +34,8 @@ func (r *Repo) GetAllUsers(ctx Ctx) ([]*ent.User, error) {
 	return us, nil
 }
 
-func (r *Repo) GetUserById(ctx Ctx, id uuid.UUID) (*ent.User, error) {
-	u, err := r.Db.User.
+func (r *userRepo) GetUserById(ctx Ctx, id uuid.UUID) (*ent.User, error) {
+	u, err := r.db.User.
 		Query().
 		Where(user.ID(id)).
 		Only(ctx)
@@ -33,8 +47,8 @@ func (r *Repo) GetUserById(ctx Ctx, id uuid.UUID) (*ent.User, error) {
 	return u, nil
 }
 
-func (r *Repo) CreateUser(ctx Ctx, u *ent.User) (*ent.User, error) {
-	u, err := r.Db.User.
+func (r *userRepo) CreateUser(ctx Ctx, u *ent.User) (*ent.User, error) {
+	newu, err := r.db.User.
 		Create().
 		Save(ctx)
 
@@ -42,5 +56,5 @@ func (r *Repo) CreateUser(ctx Ctx, u *ent.User) (*ent.User, error) {
 		return nil, fmt.Errorf("failed creating user by id: %w", err)
 	}
 
-	return u, nil
+	return newu, nil
 }

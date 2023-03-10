@@ -1,6 +1,7 @@
-package app
+package svcs
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/go-webauthn/webauthn/protocol"
@@ -8,9 +9,21 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ms/auth/app/dom"
+	"github.com/hellohq/hqservice/ms/auth/dal"
 )
 
-func NewWebAuthn(cfg config) *webauthn.WebAuthn {
+type Ctx = context.Context
+
+type IWebauthnSvc interface {
+	WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, *webauthn.SessionData, error)
+}
+
+type webauthnSvc struct {
+	repo dal.IUserRepo
+	w    *webauthn.WebAuthn
+}
+
+func NewWebAuthn(repo dal.IUserRepo) *webauthnSvc {
 	var w *webauthn.WebAuthn
 	var err error
 	wconfig := &webauthn.Config{
@@ -22,11 +35,14 @@ func NewWebAuthn(cfg config) *webauthn.WebAuthn {
 	if w, err = webauthn.New(wconfig); err != nil {
 		fmt.Println(err)
 	}
-	return w
+	return &webauthnSvc{
+		repo: repo,
+		w:    w,
+	}
 }
 
-func (app *App) WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, *webauthn.SessionData, error) {
-	user, err := app.repo.GetUserById(ctx, userId)
+func (svc *webauthnSvc) WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, *webauthn.SessionData, error) {
+	user, err := svc.repo.GetUserById(ctx, userId)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get user: %w", err)
 	}
@@ -48,7 +64,7 @@ func (app *App) WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.
 	}
 
 	t := true
-	options, sessionData, err := app.wAuthn.BeginRegistration(
+	options, sessionData, err := svc.w.BeginRegistration(
 		webauthnUser,
 		webauthn.WithAuthenticatorSelection(protocol.AuthenticatorSelection{
 			RequireResidentKey: &t,

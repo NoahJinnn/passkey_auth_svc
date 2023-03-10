@@ -2,10 +2,10 @@ package test
 
 import (
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/ms/auth/app"
+	"github.com/hellohq/hqservice/ms/auth/dal"
 )
 
-func NewJwkRepo(init []*ent.Jwk) app.IJwkRepo {
+func NewJwkRepo(init []*ent.Jwk) dal.IJwkRepo {
 	if init == nil {
 		return &jwkPersister{[]*ent.Jwk{}}
 	}

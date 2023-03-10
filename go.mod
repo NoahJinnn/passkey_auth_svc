@@ -35,8 +35,11 @@ require (
 	entgo.io/ent v0.11.9
 	github.com/bufbuild/buf v1.15.1
 	github.com/cosmtrek/air v1.41.0
+	github.com/go-playground/validator/v10 v10.11.2
 	github.com/go-webauthn/webauthn v0.8.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.0
+	github.com/labstack/echo-jwt/v4 v4.1.0
+	github.com/labstack/echo/v4 v4.10.2
 	github.com/lestrrat-go/jwx/v2 v2.0.8
 	github.com/mattn/goveralls v0.0.11
 	github.com/powerman/dockerize v0.18.1
@@ -64,7 +67,6 @@ require (
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.11.2 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/go-webauthn/revoke v0.1.9 // indirect
 	github.com/gofrs/uuid/v5 v5.0.0 // indirect
@@ -81,8 +83,6 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/labstack/echo-jwt/v4 v4.1.0 // indirect
-	github.com/labstack/echo/v4 v4.10.2 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.1 // indirect

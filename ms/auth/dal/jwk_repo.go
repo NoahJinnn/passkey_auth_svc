@@ -7,8 +7,23 @@ import (
 	"github.com/hellohq/hqservice/ent/jwk"
 )
 
-func (r *Repo) GetJwk(ctx Ctx, id uint) (*ent.Jwk, error) {
-	jwk, err := r.Db.Jwk.
+type IJwkRepo interface {
+	GetJwk(ctx Ctx, id uint) (*ent.Jwk, error)
+	GetAllJwk(ctx Ctx) ([]*ent.Jwk, error)
+	GetLastJwk(ctx Ctx) (*ent.Jwk, error)
+	Create(ctx Ctx, jwk ent.Jwk) error
+}
+
+type jwkRepo struct {
+	db *ent.Client
+}
+
+func NewJwkRepo(db *ent.Client) IJwkRepo {
+	return &jwkRepo{db: db}
+}
+
+func (r *jwkRepo) GetJwk(ctx Ctx, id uint) (*ent.Jwk, error) {
+	jwk, err := r.db.Jwk.
 		Query().
 		Where(jwk.ID(id)).
 		Only(ctx)
@@ -21,8 +36,8 @@ func (r *Repo) GetJwk(ctx Ctx, id uint) (*ent.Jwk, error) {
 
 }
 
-func (r *Repo) GetAllJwk(ctx Ctx) ([]*ent.Jwk, error) {
-	jwks, err := r.Db.Jwk.
+func (r *jwkRepo) GetAllJwk(ctx Ctx) ([]*ent.Jwk, error) {
+	jwks, err := r.db.Jwk.
 		Query().
 		All(ctx)
 
@@ -33,8 +48,8 @@ func (r *Repo) GetAllJwk(ctx Ctx) ([]*ent.Jwk, error) {
 	return jwks, nil
 }
 
-func (r *Repo) GetLastJwk(ctx Ctx) (*ent.Jwk, error) {
-	jwk, err := r.Db.Jwk.
+func (r *jwkRepo) GetLastJwk(ctx Ctx) (*ent.Jwk, error) {
+	jwk, err := r.db.Jwk.
 		Query().
 		Order(ent.Desc(jwk.FieldCreatedAt, jwk.FieldID)).
 		Limit(1).
@@ -47,8 +62,8 @@ func (r *Repo) GetLastJwk(ctx Ctx) (*ent.Jwk, error) {
 	return jwk, nil
 }
 
-func (r *Repo) Create(ctx Ctx, jwk ent.Jwk) error {
-	_, err := r.Db.Jwk.
+func (r *jwkRepo) Create(ctx Ctx, jwk ent.Jwk) error {
+	_, err := r.db.Jwk.
 		Create().
 		Save(ctx)
 

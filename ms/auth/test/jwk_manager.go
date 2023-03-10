@@ -1,7 +1,9 @@
 package test
 
 import (
+	"context"
 	"errors"
+
 	"github.com/lestrrat-go/jwx/v2/jwk"
 )
 
@@ -21,11 +23,11 @@ var privateKey = `{
 
 type JwkManager struct{}
 
-func (m JwkManager) GenerateKey() (jwk.Key, error) {
+func (m JwkManager) GenerateKey(ctx context.Context) (jwk.Key, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (m JwkManager) GetPublicKeys() (jwk.Set, error) {
+func (m JwkManager) GetPublicKeys(ctx context.Context) (jwk.Set, error) {
 	key, err := getJwk()
 	if err != nil {
 		return nil, err
@@ -42,7 +44,7 @@ func (m JwkManager) GetPublicKeys() (jwk.Set, error) {
 	return set, nil
 }
 
-func (m JwkManager) GetSigningKey() (jwk.Key, error) {
+func (m JwkManager) GetSigningKey(ctx context.Context) (jwk.Key, error) {
 	return getJwk()
 }
 

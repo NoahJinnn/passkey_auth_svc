@@ -20,6 +20,13 @@ const (
 	dbMaxIdleConns              = 5        // A bit more than default (2).
 )
 
+// Repo provides data storage.
+type IRepo interface {
+	IJwkRepo
+	GetIJwkRepo() IJwkRepo
+	GetIUserRepo() IUserRepo
+}
+
 type Repo struct {
 	Db  *ent.Client
 	log *structlog.Logger
@@ -51,4 +58,12 @@ func New(ctx Ctx, cfg *config.PostgresConfig) (_ *Repo, err error) {
 
 func (r *Repo) Close() {
 	r.Db.Close()
+}
+
+func (r *Repo) GetIJwkRepo() IJwkRepo {
+	return NewJwkRepo(r.Db)
+}
+
+func (r *Repo) GetIUserRepo() IUserRepo {
+	return NewUserRepo(r.Db)
 }

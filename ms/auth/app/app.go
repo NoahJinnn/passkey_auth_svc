@@ -9,11 +9,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
-	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/sharedconfig"
+	"github.com/hellohq/hqservice/ms/auth/app/svcs"
+	"github.com/hellohq/hqservice/ms/auth/dal"
 	plaid "github.com/plaid/plaid-go/v3/plaid"
 	"github.com/powerman/appcfg"
 )
@@ -37,7 +36,7 @@ type Appl interface {
 	// Errors: none.
 	HealthCheck(Ctx) (interface{}, error)
 	IPlaidSvc
-	IWebauthnSvc
+	svcs.IWebauthnSvc
 }
 
 type IPlaidSvc interface {
@@ -52,25 +51,6 @@ type IPlaidSvc interface {
 	GetIdentity(ctx Ctx) (*GetIdentityResp, error)
 	GetBalance(ctx Ctx) (*GetAccountsResp, error)
 	GetAccounts(ctx Ctx) (*GetAccountsResp, error)
-}
-
-type IWebauthnSvc interface {
-	WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, *webauthn.SessionData, error)
-}
-
-// Repo provides data storage.
-type Repo interface {
-	GetAllUsers(ctx Ctx) ([]*ent.User, error)
-	GetUserById(ctx Ctx, id uuid.UUID) (*ent.User, error)
-	CreateUser(ctx Ctx, u *ent.User) (*ent.User, error)
-	IJwkRepo
-}
-
-type IJwkRepo interface {
-	GetJwk(ctx Ctx, id uint) (*ent.Jwk, error)
-	GetAllJwk(ctx Ctx) ([]*ent.Jwk, error)
-	GetLastJwk(ctx Ctx) (*ent.Jwk, error)
-	Create(ctx Ctx, jwk ent.Jwk) error
 }
 
 // Ref: https://github.com/plaid/quickstart/blob/master/.env.example
@@ -94,11 +74,12 @@ type App struct {
 	cfg         *config
 	wAuthn      *webauthn.WebAuthn
 	plaidClient *plaid.APIClient
-	repo        Repo
+	jwkRepo     dal.IJwkRepo
+	userRepo    dal.IUserRepo
 }
 
 // New creates and returns new App.
-func New(repo Repo) (*App, error) {
+func New(repo dal.IRepo) (*App, error) {
 	var cfg = &config{}
 	fromEnv := appcfg.NewFromEnv(sharedconfig.EnvPrefix)
 	err := appcfg.ProvideStruct(cfg, fromEnv)
@@ -112,7 +93,8 @@ func New(repo Repo) (*App, error) {
 	a := &App{
 		cfg:         cfg,
 		plaidClient: plaidClient,
-		repo:        repo,
+		jwkRepo:     repo.GetIJwkRepo(),
+		userRepo:    repo.GetIUserRepo(),
 	}
 	return a, nil
 }
