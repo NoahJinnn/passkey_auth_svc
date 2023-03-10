@@ -46,6 +46,9 @@ type Config struct {
 	BindAddrInt     netx.Addr
 	BindMetricsAddr netx.Addr
 	Postgres        *PostgresConfig
+	Webauthn        WebauthnSettings
+	Session         Session
+	Secrets         Secrets
 }
 
 // Init updates config defaults (from env) and setup subcommands flags.
@@ -85,6 +88,23 @@ func GetServe() (c *Config, err error) {
 			User:   own.PostgresUser.Value(&err),
 			Pass:   own.PostgresPass.Value(&err),
 		}),
+		Webauthn: WebauthnSettings{
+			RelyingParty: RelyingParty{
+				Id:          "localhost",
+				DisplayName: "Hanko Authentication Service",
+				Origins:     []string{"http://localhost"},
+			},
+			Timeout: 60000,
+		},
+
+		Session: Session{
+			Lifespan: "1h",
+			Cookie: Cookie{
+				HttpOnly: true,
+				SameSite: "strict",
+				Secure:   true,
+			},
+		},
 	}
 
 	if err != nil {

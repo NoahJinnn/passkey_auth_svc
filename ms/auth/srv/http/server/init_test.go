@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hellohq/hqservice/ms/auth/app"
+	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/server/middlewares"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/hellohq/hqservice/pkg/netx"
@@ -24,8 +25,8 @@ func TestMain(m *testing.M) {
 	check.TestMain(m)
 }
 
-func testNewServer(t *check.C, cfg Config) {
-	cfg.Addr = netx.NewAddr("localhost", 0)
+func testNewServer(t *check.C, cfg config.Config) {
+	cfg.BindAddr = netx.NewAddr("localhost", 0)
 
 	t.Helper()
 	// ctrl := gomock.NewController(t)

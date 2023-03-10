@@ -7,7 +7,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/ms/auth/app"
+	"github.com/hellohq/hqservice/ms/auth/dal"
 	"github.com/hellohq/hqservice/pkg/crypto/aes_gcm"
 	hqJwk "github.com/hellohq/hqservice/pkg/crypto/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwk"
@@ -15,20 +15,20 @@ import (
 
 type JwkManager interface {
 	// GenerateKey is used to generate a jwk Key
-	GenerateKey() (jwk.Key, error)
+	GenerateKey(ctx context.Context) (jwk.Key, error)
 	// GetPublicKeys returns all Public keys that are persisted
-	GetPublicKeys() (jwk.Set, error)
+	GetPublicKeys(ctx context.Context) (jwk.Set, error)
 	// GetSigningKey returns the last added private key that is used for signing
-	GetSigningKey() (jwk.Key, error)
+	GetSigningKey(ctx context.Context) (jwk.Key, error)
 }
 
 type DefaultManager struct {
 	encrypter *aes_gcm.AESGCM
-	repo      app.IJwkRepo
+	repo      dal.IJwkRepo
 }
 
 // Returns a DefaultManager that reads and persists the jwks to database and generates jwks if a new secret gets added to the config.
-func NewDefaultManager(keys []string, repo app.IJwkRepo) (*DefaultManager, error) {
+func NewDefaultManager(keys []string, repo dal.IJwkRepo) (*DefaultManager, error) {
 	encrypter, err := aes_gcm.NewAESGCM(keys)
 	if err != nil {
 		return nil, err

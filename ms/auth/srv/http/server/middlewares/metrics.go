@@ -1,10 +1,6 @@
 package middlewares
 
 import (
-	"strconv"
-
-	"github.com/go-openapi/loads"
-	"github.com/hellohq/hqservice/api/openapi/restapi"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -63,32 +59,4 @@ func InitMetrics(reg *prometheus.Registry, namespace string) {
 	)
 	reg.MustRegister(metric.reqDuration)
 
-	ss, err := loads.Analyzed(restapi.FlatSwaggerJSON, "")
-	if err != nil {
-		panic(err)
-	}
-	for method, resources := range ss.Analyzer.Operations() {
-		for resource, op := range resources {
-			codes := append([]int{}, CodeLabels...)
-			for code := range op.Responses.StatusCodeResponses {
-				codes = append(codes, code)
-			}
-			for _, code := range codes {
-				l := prometheus.Labels{
-					resourceLabel: resource,
-					methodLabel:   method,
-					codeLabel:     strconv.Itoa(code),
-				}
-				metric.reqTotal.With(l)
-			}
-			for _, failed := range []string{"true", "false"} {
-				l := prometheus.Labels{
-					resourceLabel: resource,
-					methodLabel:   method,
-					failedLabel:   failed,
-				}
-				metric.reqDuration.With(l)
-			}
-		}
-	}
 }

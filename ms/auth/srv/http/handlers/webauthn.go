@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 
+	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/api/openapi/model"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/server"
 	"github.com/labstack/echo/v4"
@@ -20,13 +21,13 @@ func NewWebauthnHandler(srv *server.HttpServer) *WebauthnHandler {
 }
 
 func BeginRegistration(c echo.Context) error {
-	// fmt.Printf("noah %+v\n", ctx)
 	// TODO: Impl Session middleware
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("failed to cast session object")
 	}
-	// uId, err := uuid.FromString(sessionToken.Subject())
+
+	uId, err := uuid.FromString(sessionToken.Subject())
 	// if err != nil {
 	// 	return fmt.Errorf("failed to parse userId from JWT subject:%w", err)
 	// }
