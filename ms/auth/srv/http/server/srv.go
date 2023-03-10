@@ -1,4 +1,3 @@
-// Package openapi implements OpenAPI server.
 package server
 
 import (

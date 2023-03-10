@@ -1,25 +1,31 @@
 package handlers
 
 import (
-	"net/http"
+	"errors"
 
-	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/runtime/middleware"
 	"github.com/hellohq/hqservice/api/openapi/model"
-	"github.com/hellohq/hqservice/api/openapi/restapi/op"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/server"
+	"github.com/labstack/echo/v4"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
 type WebauthnHandler struct {
-	srv *httpServer
+	srv *server.HttpServer
 }
 
-func WebauthnBeginRegistration(params op.WebauthnRegInitParams) middleware.Responder {
+func NewWebauthnHandler(srv *server.HttpServer) *WebauthnHandler {
+	return &WebauthnHandler{
+		srv: srv,
+	}
+}
+
+func BeginRegistration(c echo.Context) error {
 	// fmt.Printf("noah %+v\n", ctx)
 	// TODO: Impl Session middleware
-	// sessionToken, ok := c.Get("session").(jwt.Token)
-	// if !ok {
-	// 	return errors.New("failed to cast session object")
-	// }
+	sessionToken, ok := c.Get("session").(jwt.Token)
+	if !ok {
+		return errors.New("failed to cast session object")
+	}
 	// uId, err := uuid.FromString(sessionToken.Subject())
 	// if err != nil {
 	// 	return fmt.Errorf("failed to parse userId from JWT subject:%w", err)
@@ -73,9 +79,5 @@ func WebauthnBeginRegistration(params op.WebauthnRegInitParams) middleware.Respo
 	// 	})
 	// }
 
-	return CustomResponder(func(w http.ResponseWriter, producer runtime.Producer) {
-		if err := producer.Produce(w, options); err != nil {
-			panic(err) // let the recovery middleware deal with this
-		}
-	})
+	return nil
 }

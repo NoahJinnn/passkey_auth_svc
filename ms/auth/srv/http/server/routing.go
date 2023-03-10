@@ -6,7 +6,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/hellohq/hqservice/api/openapi/restapi"
 	"github.com/hellohq/hqservice/api/openapi/restapi/op"
-	"github.com/hellohq/hqservice/ms/auth/srv/http/middlewares"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/server/middlewares"
 	"github.com/labstack/echo/v4"
 	"github.com/sebest/xff"
 )

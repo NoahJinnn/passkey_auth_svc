@@ -5,7 +5,7 @@ import (
 
 	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/dal"
-	"github.com/hellohq/hqservice/ms/auth/srv/echo/middlewares"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/server/middlewares"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/powerman/check"
 	_ "github.com/smartystreets/goconvey/convey"

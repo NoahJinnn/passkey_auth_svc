@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/hellohq/hqservice/ms/auth/app"
-	"github.com/hellohq/hqservice/ms/auth/srv/http/middlewares"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/server/middlewares"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/check"
