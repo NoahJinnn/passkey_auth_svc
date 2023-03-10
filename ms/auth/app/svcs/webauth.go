@@ -19,11 +19,11 @@ type IWebauthnSvc interface {
 }
 
 type webauthnSvc struct {
-	repo dal.IUserRepo
+	repo dal.Repo
 	w    *webauthn.WebAuthn
 }
 
-func NewWebAuthn(repo dal.IUserRepo) *webauthnSvc {
+func NewWebAuthn(repo dal.Repo) *webauthnSvc {
 	var w *webauthn.WebAuthn
 	var err error
 	wconfig := &webauthn.Config{
@@ -41,14 +41,14 @@ func NewWebAuthn(repo dal.IUserRepo) *webauthnSvc {
 	}
 }
 
-func (svc *webauthnSvc) WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, *webauthn.SessionData, error) {
-	user, err := svc.repo.GetUserById(ctx, userId)
+func (svc *webauthnSvc) WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, error) {
+	user, err := svc.repo.GetIUserRepo().GetUserById(ctx, userId)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get user: %w", err)
+		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 
 	if user == nil {
-		return nil, nil, nil
+		return nil, nil
 	}
 
 	// TODO: Impl DAL for WebauthnCredential
@@ -60,7 +60,11 @@ func (svc *webauthnSvc) WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*p
 
 	webauthnUser, err := dom.NewWebauthnUser(*user, credentials)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
+	}
+
+	if webauthnUser == nil {
+		return nil, fmt.Errorf("failed to get webauthnuser: %w", err)
 	}
 
 	t := true
@@ -75,10 +79,16 @@ func (svc *webauthnSvc) WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*p
 		// don't set the excludeCredentials list, so an already registered device can be re-registered
 	)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create webauthn creation options: %w", err)
+		return nil, fmt.Errorf("failed to create webauthn creation options: %w", err)
 	}
 
-	return options, sessionData, nil
+	// TODO: Impl DAL
+	// err = h.persister.GetWebauthnSessionDataPersister().Create(*intern.WebauthnSessionDataToModel(sessionData, models.WebauthnOperationRegistration))
+	// if err != nil {
+	// 	return fmt.Errorf("failed to store creation options session data: %w", err)
+	// }
+
+	return options, nil
 }
 
 // func (app *App) WebauthnFinishRegistration(postBody []byte) *webauthn.Credential {

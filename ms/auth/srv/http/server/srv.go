@@ -10,6 +10,8 @@ import (
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/handlers"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/server/middlewares"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/session"
 	"github.com/labstack/echo/v4"
 	"github.com/powerman/structlog"
@@ -19,21 +21,31 @@ type (
 	// Log is a synonym for convenience.
 	Log = *structlog.Logger
 
-	HttpServer struct {
-		app app.Appl
-		cfg config.Config
-	}
 	CustomResponder func(http.ResponseWriter, runtime.Producer)
 )
 
 // NewServer returns OpenAPI server configured to listen on the TCP network
 // address cfg.Host:cfg.Port and handle requests on incoming connections.
 func NewServer(appl app.Appl, repo dal.Repo, cfg config.Config) (*echo.Echo, error) {
-	srv := &HttpServer{
-		app: appl,
-		cfg: cfg,
+	srv := &handlers.HttpDeps{
+		App: appl,
+		Cfg: cfg,
 	}
 	e := echo.New()
+	e.HideBanner = true
+
+	// TODO: Setup CORS by config
+	// if cfg.Server.Public.Cors.Enabled {
+	// 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+	// 		AllowOrigins:     cfg.Server.Public.Cors.AllowOrigins,
+	// 		AllowMethods:     cfg.Server.Public.Cors.AllowMethods,
+	// 		AllowHeaders:     cfg.Server.Public.Cors.AllowHeaders,
+	// 		ExposeHeaders:    cfg.Server.Public.Cors.ExposeHeaders,
+	// 		AllowCredentials: cfg.Server.Public.Cors.AllowCredentials,
+	// 		MaxAge:           cfg.Server.Public.Cors.MaxAge,
+	// 	}))
+	// }
+
 	e.Validator = dto.NewCustomValidator()
 	jwkManager, err := crypto.NewDefaultManager(cfg.Secrets.Keys, repo.GetIJwkRepo())
 	if err != nil {
@@ -44,9 +56,19 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg config.Config) (*echo.Echo, err
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
 
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
+	// TODO: Impl user handlers
+	// user := e.Group("/users")
+	// user.POST("", userHandler.Create)
+	// user.GET("/:id", userHandler.Get, hankoMiddleware.Session(sessionManager))
+
+	// e.POST("/user", userHandler.GetUserIdByEmail)
+	// e.POST("/logout", userHandler.Logout, hankoMiddleware.Session(sessionManager))
+
+	webauthnHandler := handlers.NewWebauthnHandler(srv)
+	webauthn := e.Group("/webauthn")
+	webauthnRegistration := webauthn.Group("/registration", middlewares.Session(sessionManager))
+	webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
+	// webauthnRegistration.POST("/finalize", webauthnHandler.FinishRegistration)
 
 	// log := structlog.New(structlog.KeyUnit, "swagger").SetDefaultKeyvals(structlog.KeyApp, config.ServiceName)
 	// log.Info("OpenAPI protocol", "version", swaggerSpec.Spec().Info.Version)
