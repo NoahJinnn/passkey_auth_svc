@@ -1,7 +1,6 @@
-package echo
+package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/go-openapi/runtime"
@@ -10,9 +9,12 @@ import (
 	"github.com/hellohq/hqservice/api/openapi/restapi/op"
 )
 
-func (srv *httpServer) WebauthnBeginRegistration(params op.WebauthnRegInitParams) middleware.Responder {
-	ctx, _ := fromRequest(params.HTTPRequest)
-	fmt.Printf("noah %+v\n", ctx)
+type WebauthnHandler struct {
+	srv *httpServer
+}
+
+func WebauthnBeginRegistration(params op.WebauthnRegInitParams) middleware.Responder {
+	// fmt.Printf("noah %+v\n", ctx)
 	// TODO: Impl Session middleware
 	// sessionToken, ok := c.Get("session").(jwt.Token)
 	// if !ok {

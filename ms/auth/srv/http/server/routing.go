@@ -1,4 +1,4 @@
-package echo
+package server
 
 import (
 	"net/http"
@@ -6,12 +6,12 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/hellohq/hqservice/api/openapi/restapi"
 	"github.com/hellohq/hqservice/api/openapi/restapi/op"
-	"github.com/hellohq/hqservice/ms/auth/srv/echo/middlewares"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/middlewares"
 	"github.com/labstack/echo/v4"
 	"github.com/sebest/xff"
 )
 
-func bindOAIHandlers(e *echo.Echo, srv *httpServer) {
+func bindOAIHandlers(e *echo.Echo, srv *HttpServer) {
 	// Plaid API
 
 	// TODO: Only for testing, remove this route on production
@@ -36,7 +36,7 @@ func bindMiddlewares(api *op.HqServiceAPI, server *restapi.Server, basePath stri
 			xffmw.Handler(
 				logger(
 					middlewares.Recovery(
-						accesslog( //FIXME: middleware log error
+						accesslog(
 							middleware.Spec(basePath, restapi.FlatSwaggerJSON, middlewares.Cors(handler)),
 						),
 					),

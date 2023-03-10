@@ -10,8 +10,8 @@ import (
 	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
-	"github.com/hellohq/hqservice/ms/auth/srv/openapi"
-	"github.com/hellohq/hqservice/ms/auth/srv/openapi/middlewares"
+	server "github.com/hellohq/hqservice/ms/auth/srv/echo"
+	"github.com/hellohq/hqservice/ms/auth/srv/echo/middlewares"
 	"github.com/hellohq/hqservice/pkg/concurrent"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/hellohq/hqservice/pkg/serve"
@@ -73,7 +73,7 @@ func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func()) (er
 		}
 	}
 
-	s.srv, err = openapi.NewServer(s.appl, openapi.Config{
+	s.srv, err = server.NewServer(s.appl, server.Config{
 		Addr: s.cfg.BindAddr,
 	})
 

@@ -1,4 +1,4 @@
-package echo_test
+package server
 
 import (
 	"testing"

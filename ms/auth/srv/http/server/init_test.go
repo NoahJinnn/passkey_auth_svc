@@ -1,4 +1,4 @@
-package echo_test
+package server
 
 import (
 	"io"
@@ -6,8 +6,7 @@ import (
 	"testing"
 
 	"github.com/hellohq/hqservice/ms/auth/app"
-	"github.com/hellohq/hqservice/ms/auth/srv/echo"
-	"github.com/hellohq/hqservice/ms/auth/srv/echo/middlewares"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/middlewares"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/check"
@@ -25,7 +24,7 @@ func TestMain(m *testing.M) {
 	check.TestMain(m)
 }
 
-func testNewServer(t *check.C, cfg echo.Config) {
+func testNewServer(t *check.C, cfg Config) {
 	cfg.Addr = netx.NewAddr("localhost", 0)
 
 	t.Helper()

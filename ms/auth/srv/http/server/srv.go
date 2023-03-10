@@ -1,13 +1,11 @@
 // Package openapi implements OpenAPI server.
-package echo
+package server
 
 import (
-	"net"
 	"net/http"
 
 	"github.com/go-openapi/runtime"
 	"github.com/hellohq/hqservice/ms/auth/app"
-	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/labstack/echo/v4"
 	"github.com/powerman/structlog"
@@ -20,7 +18,7 @@ type (
 	Config struct {
 		Addr netx.Addr
 	}
-	httpServer struct {
+	HttpServer struct {
 		app app.Appl
 		cfg Config
 	}
@@ -30,7 +28,7 @@ type (
 // NewServer returns OpenAPI server configured to listen on the TCP network
 // address cfg.Host:cfg.Port and handle requests on incoming connections.
 func NewServer(appl app.Appl, cfg Config) (*echo.Echo, error) {
-	srv := &httpServer{
+	srv := &HttpServer{
 		app: appl,
 		cfg: cfg,
 	}
@@ -48,14 +46,4 @@ func NewServer(appl app.Appl, cfg Config) (*echo.Echo, error) {
 
 	e.Logger.Fatal(e.Start(cfg.Addr.String()))
 	return e, nil
-}
-
-func fromRequest(r *http.Request) (Ctx, Log) {
-	ctx := r.Context()
-	remoteIP, _, _ := net.SplitHostPort(r.RemoteAddr)
-	ctx = NewContextWithRemoteIP(ctx, remoteIP)
-	log := structlog.FromContext(ctx, nil)
-	log.SetDefaultKeyvals(def.LogUserID, "userID")
-
-	return ctx, log
 }
