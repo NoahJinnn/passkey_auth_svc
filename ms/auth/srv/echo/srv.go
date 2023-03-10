@@ -1,5 +1,5 @@
 // Package openapi implements OpenAPI server.
-package openapi
+package echo
 
 import (
 	"net"

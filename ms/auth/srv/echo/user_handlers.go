@@ -1,4 +1,4 @@
-package openapi
+package echo
 
 // func (srv *httpServer) GetUsers(params op.GetUsersParams) middleware.Responder {
 // 	ctx, log := fromRequest(params.HTTPRequest)

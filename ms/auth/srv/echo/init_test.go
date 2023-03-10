@@ -1,4 +1,4 @@
-package openapi_test
+package echo_test
 
 import (
 	"io"
@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/hellohq/hqservice/ms/auth/app"
-	"github.com/hellohq/hqservice/ms/auth/srv/openapi"
-	"github.com/hellohq/hqservice/ms/auth/srv/openapi/middlewares"
+	"github.com/hellohq/hqservice/ms/auth/srv/echo"
+	"github.com/hellohq/hqservice/ms/auth/srv/echo/middlewares"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/check"
@@ -25,13 +25,7 @@ func TestMain(m *testing.M) {
 	check.TestMain(m)
 }
 
-// Const shared by tests. Recommended naming scheme: <dataType><Variant>.
-var (
-	// nolint:unused
-	apiError500 = openapi.APIError(500, "internal error")
-)
-
-func testNewServer(t *check.C, cfg openapi.Config) {
+func testNewServer(t *check.C, cfg echo.Config) {
 	cfg.Addr = netx.NewAddr("localhost", 0)
 
 	t.Helper()

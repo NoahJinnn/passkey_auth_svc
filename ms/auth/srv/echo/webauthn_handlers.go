@@ -1,4 +1,4 @@
-package openapi
+package echo
 
 import (
 	"fmt"

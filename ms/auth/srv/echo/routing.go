@@ -1,4 +1,4 @@
-package openapi
+package echo
 
 import (
 	"net/http"
@@ -6,7 +6,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/hellohq/hqservice/api/openapi/restapi"
 	"github.com/hellohq/hqservice/api/openapi/restapi/op"
-	"github.com/hellohq/hqservice/ms/auth/srv/openapi/middlewares"
+	"github.com/hellohq/hqservice/ms/auth/srv/echo/middlewares"
 	"github.com/labstack/echo/v4"
 	"github.com/sebest/xff"
 )

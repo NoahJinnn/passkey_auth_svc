@@ -1,4 +1,4 @@
-package openapi_test
+package echo_test
 
 import (
 	"testing"
