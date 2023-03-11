@@ -61,8 +61,8 @@ require (
 	github.com/go-openapi/jsonpointer v0.19.6 // indirect
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
-	github.com/gofrs/uuid/v5 v5.0.0 // indirect
 	github.com/go-webauthn/revoke v0.1.9 // indirect
+	github.com/gofrs/uuid/v5 v5.0.0 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang/glog v1.0.0 // indirect
 	github.com/golangci/golangci-lint v1.50.1 // indirect
