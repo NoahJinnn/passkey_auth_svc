@@ -26,7 +26,7 @@ type (
 
 // NewServer returns OpenAPI server configured to listen on the TCP network
 // address cfg.Host:cfg.Port and handle requests on incoming connections.
-func NewServer(appl app.Appl, repo dal.Repo, cfg config.Config) (*echo.Echo, error) {
+func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, error) {
 	srv := &handlers.HttpDeps{
 		App: appl,
 		Cfg: cfg,
@@ -47,7 +47,7 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg config.Config) (*echo.Echo, err
 	// }
 
 	e.Validator = dto.NewCustomValidator()
-	jwkManager, err := crypto.NewDefaultManager(cfg.Secrets.Keys, repo.GetIJwkRepo())
+	jwkManager, err := crypto.NewDefaultManager(cfg.Secrets.Keys, repo.GetJwkRepo())
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
 	}

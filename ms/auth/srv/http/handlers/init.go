@@ -7,5 +7,5 @@ import (
 
 type HttpDeps struct {
 	App app.Appl
-	Cfg config.Config
+	Cfg *config.Config
 }

@@ -22,9 +22,8 @@ const (
 
 // Repo provides data storage.
 type IRepo interface {
-	IJwkRepo
-	GetIJwkRepo() IJwkRepo
-	GetIUserRepo() IUserRepo
+	GetJwkRepo() IJwkRepo
+	GetUserRepo() IUserRepo
 }
 
 type Repo struct {
@@ -56,14 +55,14 @@ func New(ctx Ctx, cfg *config.PostgresConfig) (_ *Repo, err error) {
 	return r, nil
 }
 
-func (r *Repo) Close() {
+func (r Repo) Close() {
 	r.Db.Close()
 }
 
-func (r *Repo) GetIJwkRepo() IJwkRepo {
+func (r Repo) GetJwkRepo() IJwkRepo {
 	return NewJwkRepo(r.Db)
 }
 
-func (r *Repo) GetIUserRepo() IUserRepo {
+func (r Repo) GetUserRepo() IUserRepo {
 	return NewUserRepo(r.Db)
 }

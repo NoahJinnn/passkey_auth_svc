@@ -31,12 +31,8 @@ var (
 
 // Appl provides application features (use cases) service.
 type Appl interface {
-	// HealthCheck returns error if service is unhealthy or current
-	// status otherwise.
-	// Errors: none.
-	HealthCheck(Ctx) (interface{}, error)
-	IPlaidSvc
-	svcs.IWebauthnSvc
+	// IPlaidSvc
+	GetWebauthnSvc() svcs.IWebauthnSvc
 }
 
 type IPlaidSvc interface {
@@ -74,31 +70,28 @@ type App struct {
 	cfg         *config
 	wAuthn      *webauthn.WebAuthn
 	plaidClient *plaid.APIClient
-	jwkRepo     dal.IJwkRepo
-	userRepo    dal.IUserRepo
+	repo        dal.Repo
 }
 
 // New creates and returns new App.
-func New(repo dal.IRepo) (*App, error) {
+func New(repo dal.Repo) App {
 	var cfg = &config{}
 	fromEnv := appcfg.NewFromEnv(sharedconfig.EnvPrefix)
 	err := appcfg.ProvideStruct(cfg, fromEnv)
 
 	if err != nil {
-		return nil, fmt.Errorf("load app config failed: %w", err)
+		panic(fmt.Errorf("load app config failed: %w", err))
 	}
 
 	plaidClient := NewPlaidClient(*cfg)
 
-	a := &App{
+	return App{
 		cfg:         cfg,
 		plaidClient: plaidClient,
-		jwkRepo:     repo.GetIJwkRepo(),
-		userRepo:    repo.GetIUserRepo(),
+		repo:        repo,
 	}
-	return a, nil
 }
 
-func (a *App) HealthCheck(_ Ctx) (interface{}, error) {
-	return "OK", nil
+func (a App) GetWebauthnSvc() svcs.IWebauthnSvc {
+	return svcs.NewWebAuthn(a.repo)
 }

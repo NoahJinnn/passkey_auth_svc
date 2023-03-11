@@ -32,7 +32,7 @@ func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
 		return fmt.Errorf("failed to parse userId from JWT subject:%w", err)
 	}
 
-	options, err := h.srv.App.WebauthnBeginRegistration(c.Request().Context(), uId)
+	options, err := h.srv.App.GetWebauthnSvc().WebauthnBeginRegistration(c.Request().Context(), uId)
 
 	if err != nil {
 		return fmt.Errorf("failed to create webauthn creation options: %w", err)

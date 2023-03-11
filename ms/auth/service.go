@@ -30,8 +30,8 @@ var reg = prometheus.NewPedanticRegistry()
 type Service struct {
 	cfg  *config.Config
 	srv  *echo.Echo
-	appl *app.App
-	repo *dal.Repo
+	appl app.App
+	repo dal.Repo
 }
 
 // Name implements main.embeddedService interface.
@@ -59,23 +59,16 @@ func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func()) (er
 		return log.Err("failed to get config", "err", err)
 	}
 
-	// err = concurrent.Setup(ctxStartup, map[interface{}]concurrent.SetupFunc{
-	// 	&s.repo: s.connectRepo,
-	// })
-	// if err != nil {
-	// 	return log.Err("failed to connect", "err", err)
-	// }
-
-	if s.appl == nil {
-		s.appl, err = app.New(s.repo)
-		if err != nil {
-			return log.Err("failed to create Appl", "err", err)
-		}
+	err = concurrent.Setup(ctxStartup, map[interface{}]concurrent.SetupFunc{
+		&s.repo: s.connectRepo,
+	})
+	if err != nil {
+		return log.Err("failed to connect", "err", err)
 	}
 
-	s.srv, err = server.NewServer(s.appl, server.Config{
-		Addr: s.cfg.BindAddr,
-	})
+	s.appl = app.New(s.repo)
+
+	s.srv, err = server.NewServer(s.appl, s.repo, s.cfg)
 
 	if err != nil {
 		return log.Err("failed to openapi.NewServer", "err", err)

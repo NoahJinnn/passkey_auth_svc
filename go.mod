@@ -13,6 +13,7 @@ require (
 	github.com/go-openapi/swag v0.22.3
 	github.com/go-openapi/validate v0.22.1
 	github.com/go-swagger/go-swagger v0.30.4
+	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/jessevdk/go-flags v1.5.0 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
@@ -36,7 +37,6 @@ require (
 	github.com/cosmtrek/air v1.41.0
 	github.com/go-playground/validator/v10 v10.11.2
 	github.com/go-webauthn/webauthn v0.8.2
-	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.0
 	github.com/labstack/echo-jwt/v4 v4.1.0
 	github.com/labstack/echo/v4 v4.10.2

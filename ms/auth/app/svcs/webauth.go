@@ -15,7 +15,7 @@ import (
 type Ctx = context.Context
 
 type IWebauthnSvc interface {
-	WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, *webauthn.SessionData, error)
+	WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, error)
 }
 
 type webauthnSvc struct {
@@ -23,7 +23,7 @@ type webauthnSvc struct {
 	w    *webauthn.WebAuthn
 }
 
-func NewWebAuthn(repo dal.Repo) *webauthnSvc {
+func NewWebAuthn(repo dal.Repo) IWebauthnSvc {
 	var w *webauthn.WebAuthn
 	var err error
 	wconfig := &webauthn.Config{
@@ -42,7 +42,7 @@ func NewWebAuthn(repo dal.Repo) *webauthnSvc {
 }
 
 func (svc *webauthnSvc) WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, error) {
-	user, err := svc.repo.GetIUserRepo().GetUserById(ctx, userId)
+	user, err := svc.repo.GetUserRepo().GetUserById(ctx, userId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
