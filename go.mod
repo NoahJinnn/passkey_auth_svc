@@ -6,15 +6,15 @@ require (
 	github.com/cheekybits/genny v1.0.1-0.20200709201058-3e22f1a88ff2
 	github.com/felixge/httpsnoop v1.0.3
 	github.com/go-openapi/errors v0.20.3
-	github.com/go-openapi/loads v0.21.2
+	github.com/go-openapi/loads v0.21.2 // indirect
 	github.com/go-openapi/runtime v0.25.0
-	github.com/go-openapi/spec v0.20.8
+	github.com/go-openapi/spec v0.20.8 // indirect
 	github.com/go-openapi/strfmt v0.21.3
 	github.com/go-openapi/swag v0.22.3
 	github.com/go-openapi/validate v0.22.1
 	github.com/go-swagger/go-swagger v0.30.4
 	github.com/golang/mock v1.6.0
-	github.com/jessevdk/go-flags v1.5.0
+	github.com/jessevdk/go-flags v1.5.0 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/powerman/appcfg v0.9.0
 	github.com/powerman/check v1.6.0
@@ -24,7 +24,6 @@ require (
 	github.com/powerman/sensitive v0.0.7
 	github.com/powerman/structlog v0.7.3
 	github.com/prometheus/client_golang v1.14.0
-	github.com/sebest/xff v0.0.0-20210106013422-671bd2870b3a
 	github.com/smartystreets/goconvey v1.7.2
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/pflag v1.0.5
@@ -37,6 +36,7 @@ require (
 	github.com/cosmtrek/air v1.41.0
 	github.com/go-playground/validator/v10 v10.11.2
 	github.com/go-webauthn/webauthn v0.8.2
+	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.0
 	github.com/labstack/echo-jwt/v4 v4.1.0
 	github.com/labstack/echo/v4 v4.10.2
@@ -69,8 +69,8 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/go-webauthn/revoke v0.1.9 // indirect
-	github.com/gofrs/uuid/v5 v5.0.0 // indirect
 	github.com/goccy/go-json v0.9.11 // indirect
+	github.com/gofrs/uuid/v5 v5.0.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang/glog v1.0.0 // indirect
@@ -226,7 +226,7 @@ require (
 	github.com/ldez/gomoddirectives v0.2.3 // indirect
 	github.com/ldez/tagliatelle v0.4.0 // indirect
 	github.com/leonklingele/grouper v1.1.1 // indirect
-	github.com/lib/pq v1.10.7
+	github.com/lib/pq v1.10.7 // indirect
 	github.com/lufeee/execinquery v1.2.1 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/maratori/testableexamples v1.0.0 // indirect
@@ -294,7 +294,7 @@ require (
 	github.com/ssgreg/nlreturn/v2 v2.2.1 // indirect
 	github.com/stbenjam/no-sprintf-host-port v0.1.1 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
-	github.com/stretchr/testify v1.8.2 // indirect
+	github.com/stretchr/testify v1.8.2
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/tdakkota/asciicheck v0.1.1 // indirect
 	github.com/tetafro/godot v1.4.11 // indirect
@@ -315,7 +315,7 @@ require (
 	golang.org/x/exp v0.0.0-20230307190834-24139beb5833 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20230206171751-46f607a40771 // indirect
 	golang.org/x/mod v0.9.0 // indirect
-	golang.org/x/net v0.8.0
+	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/oauth2 v0.5.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
