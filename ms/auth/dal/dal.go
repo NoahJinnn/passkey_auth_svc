@@ -24,6 +24,8 @@ const (
 type IRepo interface {
 	GetJwkRepo() IJwkRepo
 	GetUserRepo() IUserRepo
+	GetWebauthnCredentialRepo() IWebauthnCredentialRepo
+	GetWebauthnSessionRepo() IWebauthnSessionRepo
 }
 
 type Repo struct {
@@ -65,4 +67,12 @@ func (r Repo) GetJwkRepo() IJwkRepo {
 
 func (r Repo) GetUserRepo() IUserRepo {
 	return NewUserRepo(r.Db)
+}
+
+func (r Repo) GetWebauthnCredentialRepo() IWebauthnCredentialRepo {
+	return NewWebauthnCredentialRepo(r.Db)
+}
+
+func (r Repo) GetWebauthnSessionRepo() IWebauthnSessionRepo {
+	return NewWebauthnSessionRepo(r.Db)
 }

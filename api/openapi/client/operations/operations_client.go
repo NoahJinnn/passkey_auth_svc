@@ -30,7 +30,7 @@ type ClientOption func(*runtime.ClientOperation)
 
 // ClientService is the interface for Client methods
 type ClientService interface {
-	CreateUser(params *CreateUserParams, opts ...ClientOption) (*CreateUserOK, error)
+	Create(params *CreateUserParams, opts ...ClientOption) (*CreateUserOK, error)
 
 	GetAccessToken(params *GetAccessTokenParams, opts ...ClientOption) (*GetAccessTokenOK, error)
 
@@ -68,15 +68,15 @@ type ClientService interface {
 }
 
 /*
-CreateUser create user API
+Create create user API
 */
-func (a *Client) CreateUser(params *CreateUserParams, opts ...ClientOption) (*CreateUserOK, error) {
+func (a *Client) Create(params *CreateUserParams, opts ...ClientOption) (*CreateUserOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewCreateUserParams()
 	}
 	op := &runtime.ClientOperation{
-		ID:                 "CreateUser",
+		ID:                 "Create",
 		Method:             "POST",
 		PathPattern:        "/user",
 		ProducesMediaTypes: []string{"application/json"},

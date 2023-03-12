@@ -15,7 +15,7 @@ import (
 	"github.com/hellohq/hqservice/api/openapi/model"
 )
 
-// CreateUserReader is a Reader for the CreateUser structure.
+// CreateUserReader is a Reader for the Create structure.
 type CreateUserReader struct {
 	formats strfmt.Registry
 }
@@ -158,11 +158,11 @@ func (o *CreateUserDefault) Code() int {
 }
 
 func (o *CreateUserDefault) Error() string {
-	return fmt.Sprintf("[POST /user][%d] CreateUser default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[POST /user][%d] Create default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *CreateUserDefault) String() string {
-	return fmt.Sprintf("[POST /user][%d] CreateUser default  %+v", o._statusCode, o.Payload)
+	return fmt.Sprintf("[POST /user][%d] Create default  %+v", o._statusCode, o.Payload)
 }
 
 func (o *CreateUserDefault) GetPayload() *model.Error {

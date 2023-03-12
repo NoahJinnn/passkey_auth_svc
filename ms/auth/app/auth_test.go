@@ -11,7 +11,7 @@ func TestRegister(tt *testing.T) {
 	t.Parallel()
 	// _, mockRepo := testNew(t)
 	// var uAnon = &app.User{}
-	// mockRepo.EXPECT().CreateUser(gomock.Any(), &dom.User{})
+	// mockRepo.EXPECT().Create(gomock.Any(), &dom.User{})
 
 	// tests := []struct {
 	// 	user    *model.User
@@ -27,7 +27,7 @@ func TestRegister(tt *testing.T) {
 	// 	tc := tc
 	// 	t.Run("", func(tt *testing.T) {
 	// 		t := check.T(tt)
-	// 		u, err := a.CreateUser(ctx, tc.user)
+	// 		u, err := a.Create(ctx, tc.user)
 	// 		t.Err(err, tc.wantErr)
 	// 		if err == nil {
 	// 			t.DeepEqual(u, tc.want)

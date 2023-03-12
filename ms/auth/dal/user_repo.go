@@ -9,9 +9,9 @@ import (
 )
 
 type IUserRepo interface {
-	GetAllUsers(ctx Ctx) ([]*ent.User, error)
-	GetUserById(ctx Ctx, id uuid.UUID) (*ent.User, error)
-	CreateUser(ctx Ctx, u *ent.User) (*ent.User, error)
+	GetAll(ctx Ctx) ([]*ent.User, error)
+	GetById(ctx Ctx, id uuid.UUID) (*ent.User, error)
+	Create(ctx Ctx, u *ent.User) (*ent.User, error)
 }
 
 type userRepo struct {
@@ -22,7 +22,7 @@ func NewUserRepo(db *ent.Client) IUserRepo {
 	return &userRepo{db: db}
 }
 
-func (r *userRepo) GetAllUsers(ctx Ctx) ([]*ent.User, error) {
+func (r *userRepo) GetAll(ctx Ctx) ([]*ent.User, error) {
 	us, err := r.db.User.
 		Query().
 		All(ctx)
@@ -34,7 +34,7 @@ func (r *userRepo) GetAllUsers(ctx Ctx) ([]*ent.User, error) {
 	return us, nil
 }
 
-func (r *userRepo) GetUserById(ctx Ctx, id uuid.UUID) (*ent.User, error) {
+func (r *userRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.User, error) {
 	u, err := r.db.User.
 		Query().
 		Where(user.ID(id)).
@@ -47,7 +47,7 @@ func (r *userRepo) GetUserById(ctx Ctx, id uuid.UUID) (*ent.User, error) {
 	return u, nil
 }
 
-func (r *userRepo) CreateUser(ctx Ctx, u *ent.User) (*ent.User, error) {
+func (r *userRepo) Create(ctx Ctx, u *ent.User) (*ent.User, error) {
 	newu, err := r.db.User.
 		Create().
 		Save(ctx)

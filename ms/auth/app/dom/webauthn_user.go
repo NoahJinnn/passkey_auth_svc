@@ -8,7 +8,7 @@ import (
 	"github.com/hellohq/hqservice/ent"
 )
 
-func NewWebauthnUser(user ent.User, credentials []ent.WebauthnCredential) (*WebauthnUser, error) {
+func NewWebauthnUser(user ent.User, credentials []*ent.WebauthnCredential) (*WebauthnUser, error) {
 	email := user.Edges.PrimaryEmail
 	if email == nil {
 		return nil, errors.New("primary email unavailable")
@@ -24,7 +24,7 @@ func NewWebauthnUser(user ent.User, credentials []ent.WebauthnCredential) (*Weba
 type WebauthnUser struct {
 	UserId              uuid.UUID
 	Email               string
-	WebauthnCredentials []ent.WebauthnCredential
+	WebauthnCredentials []*ent.WebauthnCredential
 }
 
 func (u *WebauthnUser) WebAuthnID() []byte {
@@ -47,7 +47,7 @@ func (u *WebauthnUser) WebAuthnCredentials() []webauthn.Credential {
 	var credentials []webauthn.Credential
 	for _, credential := range u.WebauthnCredentials {
 		cred := credential
-		c := WebauthnCredentialFromModel(&cred)
+		c := WebauthnCredentialFromModel(cred)
 		credentials = append(credentials, *c)
 	}
 

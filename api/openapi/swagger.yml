@@ -1010,7 +1010,7 @@ paths:
           type: integer
   /user:
     post:
-      operationId: CreateUser
+      operationId: Create
       responses:
         "200":
           description: Create a user successfully.
