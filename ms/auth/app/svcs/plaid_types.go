@@ -1,4 +1,4 @@
-package app
+package svcs
 
 import (
 	"github.com/hellohq/hqservice/api/openapi/model"

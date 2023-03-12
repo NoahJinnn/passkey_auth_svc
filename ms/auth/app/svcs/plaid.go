@@ -1,4 +1,4 @@
-package app
+package svcs
 
 import (
 	// 	"context"
@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hellohq/hqservice/ms/auth/config"
 	plaid "github.com/plaid/plaid-go/v3/plaid"
 )
 
@@ -35,20 +36,42 @@ var (
 	}
 )
 
-func NewPlaidClient(cfg config) *plaid.APIClient {
-	// create Plaid client
-	configuration := plaid.NewConfiguration()
-	configuration.AddDefaultHeader("PLAID-CLIENT-ID", cfg.ClientId.String())
-	configuration.AddDefaultHeader("PLAID-SECRET", cfg.Secret.String())
-	configuration.UseEnvironment(environments[cfg.Env.String()])
-	return plaid.NewAPIClient(configuration)
+type IPlaidSvc interface {
+	Info() *GetInfoResp
+	GetSandboxAccessToken(ctx Ctx, institutionID string) (*GetAccessTokenResp, error)
+	LinkTokenCreate(
+		ctx Ctx, paymentInitiation *plaid.LinkTokenCreateRequestPaymentInitiation,
+	) (*LinkTokenCreateResp, error)
+	GetAccessToken(ctx Ctx, publicToken string) (*GetAccessTokenResp, error)
+	GetAuthAccount(ctx Ctx) (*GetAuthAccountResp, error)
+	GetTransactions(ctx Ctx) (*GetTransactionsResp, error)
+	GetIdentity(ctx Ctx) (*GetIdentityResp, error)
+	GetBalance(ctx Ctx) (*GetAccountsResp, error)
+	GetAccounts(ctx Ctx) (*GetAccountsResp, error)
 }
 
-func (app *App) Info() *GetInfoResp {
+type plaidSvc struct {
+	plaidClient *plaid.APIClient
+	cfg         *config.Config
+}
+
+func NewPlaidClient(cfg *config.Config) *plaidSvc {
+	// create Plaid client
+	configuration := plaid.NewConfiguration()
+	configuration.AddDefaultHeader("PLAID-CLIENT-ID", cfg.Plaid.ClientId.String())
+	configuration.AddDefaultHeader("PLAID-SECRET", cfg.Plaid.Secret.String())
+	configuration.UseEnvironment(environments[cfg.Plaid.Env.String()])
+	return &plaidSvc{
+		plaidClient: plaid.NewAPIClient(configuration),
+		cfg:         cfg,
+	}
+}
+
+func (svc *plaidSvc) Info() *GetInfoResp {
 	return &GetInfoResp{
 		AccessToken: accessToken,
 		ItemId:      itemID,
-		Products:    app.cfg.Products.String(),
+		Products:    svc.cfg.Plaid.Products.String(),
 	}
 }
 
@@ -73,8 +96,8 @@ func convertProducts(productStrs []string) []plaid.Products {
 }
 
 // For sandbox testing
-func (app *App) GetSandboxAccessToken(ctx Ctx, institutionID string) (*GetAccessTokenResp, error) {
-	products := convertProducts(strings.Split(app.cfg.Products.String(), ","))
+func (svc *plaidSvc) GetSandboxAccessToken(ctx Ctx, institutionID string) (*GetAccessTokenResp, error) {
+	products := convertProducts(strings.Split(svc.cfg.Plaid.Products.String(), ","))
 	// Create a one-time use public_token for the Item.
 	// This public_token can be used to initialize Link in update mode for a user
 	options := plaid.NewSandboxPublicTokenCreateRequestOptions()
@@ -86,7 +109,7 @@ func (app *App) GetSandboxAccessToken(ctx Ctx, institutionID string) (*GetAccess
 	)
 	sbReq.SetOptions(*options)
 
-	sandboxPublicTokenResp, _, err := app.plaidClient.PlaidApi.SandboxPublicTokenCreate(ctx).SandboxPublicTokenCreateRequest(
+	sandboxPublicTokenResp, _, err := svc.plaidClient.PlaidApi.SandboxPublicTokenCreate(ctx).SandboxPublicTokenCreateRequest(
 		sbReq,
 	).Execute()
 
@@ -95,7 +118,7 @@ func (app *App) GetSandboxAccessToken(ctx Ctx, institutionID string) (*GetAccess
 	}
 
 	// exchange the public_token for an access_token
-	exchangePublicTokenResp, _, err := app.plaidClient.PlaidApi.ItemPublicTokenExchange(ctx).ItemPublicTokenExchangeRequest(
+	exchangePublicTokenResp, _, err := svc.plaidClient.PlaidApi.ItemPublicTokenExchange(ctx).ItemPublicTokenExchangeRequest(
 		*plaid.NewItemPublicTokenExchangeRequest(sandboxPublicTokenResp.GetPublicToken()),
 	).Execute()
 
@@ -112,10 +135,10 @@ func (app *App) GetSandboxAccessToken(ctx Ctx, institutionID string) (*GetAccess
 	}, nil
 }
 
-func (app *App) GetAccessToken(ctx Ctx, publicToken string) (*GetAccessTokenResp, error) {
+func (svc *plaidSvc) GetAccessToken(ctx Ctx, publicToken string) (*GetAccessTokenResp, error) {
 
 	// exchange the public_token for an access_token
-	exchangePublicTokenResp, _, err := app.plaidClient.PlaidApi.ItemPublicTokenExchange(ctx).ItemPublicTokenExchangeRequest(
+	exchangePublicTokenResp, _, err := svc.plaidClient.PlaidApi.ItemPublicTokenExchange(ctx).ItemPublicTokenExchangeRequest(
 		*plaid.NewItemPublicTokenExchangeRequest(publicToken),
 	).Execute()
 
@@ -125,8 +148,8 @@ func (app *App) GetAccessToken(ctx Ctx, publicToken string) (*GetAccessTokenResp
 
 	accessToken = exchangePublicTokenResp.GetAccessToken()
 	itemID = exchangePublicTokenResp.GetItemId()
-	if itemExists(strings.Split(app.cfg.Products.String(), ","), "transfer") {
-		transferID, err = authorizeAndCreateTransfer(ctx, app.plaidClient, accessToken)
+	if itemExists(strings.Split(svc.cfg.Plaid.Products.String(), ","), "transfer") {
+		transferID, err = authorizeAndCreateTransfer(ctx, svc.plaidClient, accessToken)
 		if err != nil {
 			return nil, err
 		}
@@ -144,12 +167,12 @@ func (app *App) GetAccessToken(ctx Ctx, publicToken string) (*GetAccessTokenResp
 }
 
 // linkTokenCreate creates a link token using the specified parameters
-func (app *App) LinkTokenCreate(
+func (svc *plaidSvc) LinkTokenCreate(
 	ctx Ctx, paymentInitiation *plaid.LinkTokenCreateRequestPaymentInitiation,
 ) (*LinkTokenCreateResp, error) {
-	countryCodes := convertCountryCodes(strings.Split(app.cfg.CountryCodes.String(), ","))
-	products := convertProducts(strings.Split(app.cfg.Products.String(), ","))
-	redirectURI := app.cfg.RedirectUri.String()
+	countryCodes := convertCountryCodes(strings.Split(svc.cfg.Plaid.CountryCodes.String(), ","))
+	products := convertProducts(strings.Split(svc.cfg.Plaid.Products.String(), ","))
+	redirectURI := svc.cfg.Plaid.RedirectUri.String()
 
 	user := plaid.LinkTokenCreateRequestUser{
 		ClientUserId: time.Now().String(),
@@ -172,7 +195,7 @@ func (app *App) LinkTokenCreate(
 		request.SetPaymentInitiation(*paymentInitiation)
 	}
 
-	linkTokenCreateResp, _, err := app.plaidClient.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*request).Execute()
+	linkTokenCreateResp, _, err := svc.plaidClient.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*request).Execute()
 
 	if err != nil {
 		return nil, err
@@ -183,8 +206,8 @@ func (app *App) LinkTokenCreate(
 	}, nil
 }
 
-func (app *App) GetAuthAccount(ctx Ctx) (*GetAuthAccountResp, error) {
-	authGetResp, _, err := app.plaidClient.PlaidApi.AuthGet(ctx).AuthGetRequest(
+func (svc *plaidSvc) GetAuthAccount(ctx Ctx) (*GetAuthAccountResp, error) {
+	authGetResp, _, err := svc.plaidClient.PlaidApi.AuthGet(ctx).AuthGetRequest(
 		*plaid.NewAuthGetRequest(accessToken),
 	).Execute()
 
@@ -198,7 +221,7 @@ func (app *App) GetAuthAccount(ctx Ctx) (*GetAuthAccountResp, error) {
 	}, nil
 }
 
-func (app *App) GetTransactions(Ctx) (*GetTransactionsResp, error) {
+func (svc *plaidSvc) GetTransactions(Ctx) (*GetTransactionsResp, error) {
 	ctx := context.Background()
 
 	// Set cursor to empty to receive all historical updates
@@ -215,7 +238,7 @@ func (app *App) GetTransactions(Ctx) (*GetTransactionsResp, error) {
 		if cursor != nil {
 			request.SetCursor(*cursor)
 		}
-		resp, _, err := app.plaidClient.PlaidApi.TransactionsSync(
+		resp, _, err := svc.plaidClient.PlaidApi.TransactionsSync(
 			ctx,
 		).TransactionsSyncRequest(*request).Execute()
 		if err != nil {
@@ -245,10 +268,10 @@ func (app *App) GetTransactions(Ctx) (*GetTransactionsResp, error) {
 	}, nil
 }
 
-func (app *App) GetIdentity(Ctx) (*GetIdentityResp, error) {
+func (svc *plaidSvc) GetIdentity(Ctx) (*GetIdentityResp, error) {
 	ctx := context.Background()
 
-	identityGetResp, _, err := app.plaidClient.PlaidApi.IdentityGet(ctx).IdentityGetRequest(
+	identityGetResp, _, err := svc.plaidClient.PlaidApi.IdentityGet(ctx).IdentityGetRequest(
 		*plaid.NewIdentityGetRequest(accessToken),
 	).Execute()
 	if err != nil {
@@ -260,10 +283,10 @@ func (app *App) GetIdentity(Ctx) (*GetIdentityResp, error) {
 	}, nil
 }
 
-func (app *App) GetBalance(Ctx) (*GetAccountsResp, error) {
+func (svc *plaidSvc) GetBalance(Ctx) (*GetAccountsResp, error) {
 	ctx := context.Background()
 
-	balancesGetResp, _, err := app.plaidClient.PlaidApi.AccountsBalanceGet(ctx).AccountsBalanceGetRequest(
+	balancesGetResp, _, err := svc.plaidClient.PlaidApi.AccountsBalanceGet(ctx).AccountsBalanceGetRequest(
 		*plaid.NewAccountsBalanceGetRequest(accessToken),
 	).Execute()
 
@@ -276,10 +299,10 @@ func (app *App) GetBalance(Ctx) (*GetAccountsResp, error) {
 	}, nil
 }
 
-func (app *App) GetAccounts(Ctx) (*GetAccountsResp, error) {
+func (svc *plaidSvc) GetAccounts(Ctx) (*GetAccountsResp, error) {
 	ctx := context.Background()
 
-	accountsGetResp, _, err := app.plaidClient.PlaidApi.AccountsGet(ctx).AccountsGetRequest(
+	accountsGetResp, _, err := svc.plaidClient.PlaidApi.AccountsGet(ctx).AccountsGetRequest(
 		*plaid.NewAccountsGetRequest(accessToken),
 	).Execute()
 

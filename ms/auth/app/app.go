@@ -7,14 +7,12 @@ package app
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/go-webauthn/webauthn/webauthn"
-	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/ms/auth/app/svcs"
+	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
 	plaid "github.com/plaid/plaid-go/v3/plaid"
-	"github.com/powerman/appcfg"
 )
 
 // Ctx is a synonym for convenience.
@@ -31,67 +29,42 @@ var (
 
 // Appl provides application features (use cases) service.
 type Appl interface {
-	// IPlaidSvc
 	GetWebauthnSvc() svcs.IWebauthnSvc
 }
 
-type IPlaidSvc interface {
-	Info() *GetInfoResp
-	GetSandboxAccessToken(ctx Ctx, institutionID string) (*GetAccessTokenResp, error)
-	LinkTokenCreate(
-		ctx Ctx, paymentInitiation *plaid.LinkTokenCreateRequestPaymentInitiation,
-	) (*LinkTokenCreateResp, error)
-	GetAccessToken(ctx Ctx, publicToken string) (*GetAccessTokenResp, error)
-	GetAuthAccount(ctx Ctx) (*GetAuthAccountResp, error)
-	GetTransactions(ctx Ctx) (*GetTransactionsResp, error)
-	GetIdentity(ctx Ctx) (*GetIdentityResp, error)
-	GetBalance(ctx Ctx) (*GetAccountsResp, error)
-	GetAccounts(ctx Ctx) (*GetAccountsResp, error)
-}
-
-// Ref: https://github.com/plaid/quickstart/blob/master/.env.example
-// Config contains configuration for business-logic.
-type config struct {
-	// See https://dashboard.plaid.com/account/keys
-	ClientId appcfg.String `env:"PLAID_CLIENT_ID"`
-	Secret   appcfg.String `env:"PLAID_SECRET"`
-	// See sandbox, development, product
-	Env appcfg.String `env:"PLAID_ENV"`
-	// See https://plaid.com/docs/api/tokens/#link-token-create-request-products
-	Products appcfg.String `env:"PLAID_PRODUCTS"`
-	// See https://plaid.com/docs/api/tokens/#link-token-create-request-country-codes
-	CountryCodes appcfg.String `env:"PLAID_COUNTRY_CODES"`
-	// See https://dashboard.plaid.com/team/api
-	RedirectUri appcfg.String `env:"PLAID_REDIRECT_URI"`
-}
+// // Ref: https://github.com/plaid/quickstart/blob/master/.env.example
+// // Config contains configuration for business-logic.
+// type config struct {
+// 	// See https://dashboard.plaid.com/account/keys
+// 	ClientId appcfg.String `env:"PLAID_CLIENT_ID"`
+// 	Secret   appcfg.String `env:"PLAID_SECRET"`
+// 	// See sandbox, development, product
+// 	Env appcfg.String `env:"PLAID_ENV"`
+// 	// See https://plaid.com/docs/api/tokens/#link-token-create-request-products
+// 	Products appcfg.String `env:"PLAID_PRODUCTS"`
+// 	// See https://plaid.com/docs/api/tokens/#link-token-create-request-country-codes
+// 	CountryCodes appcfg.String `env:"PLAID_COUNTRY_CODES"`
+// 	// See https://dashboard.plaid.com/team/api
+// 	RedirectUri appcfg.String `env:"PLAID_REDIRECT_URI"`
+// }
 
 // App implements interface Appl.
 type App struct {
-	cfg         *config
+	cfg         *config.Config
 	wAuthn      *webauthn.WebAuthn
 	plaidClient *plaid.APIClient
 	repo        dal.Repo
 }
 
 // New creates and returns new App.
-func New(repo dal.Repo) App {
-	var cfg = &config{}
-	fromEnv := appcfg.NewFromEnv(sharedconfig.EnvPrefix)
-	err := appcfg.ProvideStruct(cfg, fromEnv)
-
-	if err != nil {
-		panic(fmt.Errorf("load app config failed: %w", err))
-	}
-
-	plaidClient := NewPlaidClient(*cfg)
+func New(cfg *config.Config, repo dal.Repo) App {
 
 	return App{
-		cfg:         cfg,
-		plaidClient: plaidClient,
-		repo:        repo,
+		cfg:  cfg,
+		repo: repo,
 	}
 }
 
 func (a App) GetWebauthnSvc() svcs.IWebauthnSvc {
-	return svcs.NewWebAuthn(a.repo)
+	return svcs.NewWebAuthn(a.cfg, a.repo)
 }
