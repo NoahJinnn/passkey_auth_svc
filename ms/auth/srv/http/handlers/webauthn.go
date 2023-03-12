@@ -21,7 +21,6 @@ func NewWebauthnHandler(srv *HttpDeps) *WebauthnHandler {
 }
 
 func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
-	// TODO: Impl Session middleware
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("failed to cast session object")

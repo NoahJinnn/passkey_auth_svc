@@ -90,7 +90,6 @@ func (svc *webauthnSvc) WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*p
 		return nil, fmt.Errorf("failed to create webauthn creation options: %w", err)
 	}
 
-	// TODO: Impl DAL
 	err = svc.repo.GetWebauthnSessionRepo().Create(ctx, *dom.WebauthnSessionDataToModel(sessionData, WebauthnOperationRegistration))
 	if err != nil {
 		return nil, fmt.Errorf("failed to store creation options session data: %w", err)
