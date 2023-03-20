@@ -20,9 +20,11 @@ func Test(t *testing.T) {
 			User:   "auth",
 			Pass:   "authpass",
 		}),
-		BindAddr:        netx.NewAddr(def.Hostname, sharedconfig.AuthPort),
-		BindAddrInt:     netx.NewAddr(def.Hostname, sharedconfig.AuthPortInt),
-		BindMetricsAddr: netx.NewAddr(def.Hostname, sharedconfig.MetricsPort),
+		Server: Server{
+			BindAddr:        netx.NewAddr(def.Hostname, sharedconfig.AuthPort),
+			BindAddrInt:     netx.NewAddr(def.Hostname, sharedconfig.AuthPortInt),
+			BindMetricsAddr: netx.NewAddr(def.Hostname, sharedconfig.MetricsPort),
+		},
 	}
 
 	t.Run("required", func(tt *testing.T) {

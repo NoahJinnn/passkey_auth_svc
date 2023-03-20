@@ -32,39 +32,28 @@ var (
 	fs          FlagSets
 	shared      *sharedconfig.Shared
 	own         = &struct {
-		MetricsAddrPort appcfg.Port           `env:"AUTH_METRICS_ADDR_PORT"`
-		PostgresUser    appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_LOGIN"`
-		PostgresPass    appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_PASS"`
+		// Below envs is loaded by Doppler
+		MetricsAddrPort  appcfg.Port           `env:"AUTH_METRICS_ADDR_PORT"`
+		PostgresUser     appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_LOGIN"`
+		PostgresPass     appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_PASS"`
+		PostgresAddrHost appcfg.NotEmptyString `env:"AUTH_POSTGRES_ADDR_HOST"`
+		PostgresAddrPort appcfg.Port           `env:"AUTH_POSTGRES_ADDR_PORT"`
+		PostgresDBName   appcfg.NotEmptyString `env:"AUTH_POSTGRES_DB_NAME"`
 	}{
-		MetricsAddrPort: appcfg.MustPort(strconv.Itoa(sharedconfig.MetricsPort)),
-		PostgresUser:    appcfg.MustNotEmptyString(ServiceName),
+		MetricsAddrPort:  appcfg.MustPort(strconv.Itoa(sharedconfig.MetricsPort)),
+		PostgresUser:     appcfg.MustNotEmptyString(ServiceName),
+		PostgresAddrPort: appcfg.MustPort("5432"),
+		PostgresDBName:   appcfg.MustNotEmptyString("postgres"),
 	}
 )
 
 type Config struct {
-	BindAddr        netx.Addr
-	BindAddrInt     netx.Addr
-	BindMetricsAddr netx.Addr
-	Webauthn        WebauthnSettings
-	Session         Session
-	Secrets         Secrets
-	Postgres        *PostgresConfig
-	Plaid           *PlaidConfig
-}
-
-// // Ref: https://github.com/plaid/quickstart/blob/master/.env.example
-type PlaidConfig struct {
-	// 	// See https://dashboard.plaid.com/account/keys
-	ClientId appcfg.String `env:"PLAID_CLIENT_ID"`
-	Secret   appcfg.String `env:"PLAID_SECRET"`
-	// See sandbox, development, product
-	Env appcfg.String `env:"PLAID_ENV"`
-	// See https://plaid.com/docs/api/tokens/#link-token-create-request-products
-	Products appcfg.String `env:"PLAID_PRODUCTS"`
-	// See https://plaid.com/docs/api/tokens/#link-token-create-request-country-codes
-	CountryCodes appcfg.String `env:"PLAID_COUNTRY_CODES"`
-	// See https://dashboard.plaid.com/team/api
-	RedirectUri appcfg.String `env:"PLAID_REDIRECT_URI"`
+	Server   Server
+	Webauthn WebauthnSettings
+	Session  Session
+	Secrets  Secrets
+	Postgres *PostgresConfig
+	Plaid    *PlaidConfig
 }
 
 // Init updates config defaults (from env) and setup subcommands flags.
@@ -81,9 +70,9 @@ func Init(sharedCfg *sharedconfig.Shared, flagsets FlagSets) error {
 	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrHost, "host", "host to serve")
 	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrPort, "host-int", "internal host to serve")
 	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrPortInt, "port", "port to serve monolith introspection")
-	appcfg.AddPFlag(fs.Serve, &shared.XPostgresAddrHost, "postgres.host", "host to connect to PostgreSQL")
-	appcfg.AddPFlag(fs.Serve, &shared.XPostgresAddrPort, "postgres.port", "port to connect to PostgreSQL")
-	appcfg.AddPFlag(fs.Serve, &shared.XPostgresDBName, "postgres.dbname", "PostgreSQL database name")
+	appcfg.AddPFlag(fs.Serve, &own.PostgresAddrHost, "postgres.host", "host to connect to PostgreSQL")
+	appcfg.AddPFlag(fs.Serve, &own.PostgresAddrPort, "postgres.port", "port to connect to PostgreSQL")
+	appcfg.AddPFlag(fs.Serve, &own.PostgresDBName, "postgres.dbname", "PostgreSQL database name")
 	appcfg.AddPFlag(fs.Serve, &own.PostgresUser, "postgres.user", "PostgreSQL username")
 	appcfg.AddPFlag(fs.Serve, &own.PostgresPass, "postgres.pass", "PostgreSQL password")
 
@@ -95,15 +84,18 @@ func GetServe() (c *Config, err error) {
 	defer cleanup()
 
 	c = &Config{
-		BindAddr:        netx.NewAddr(shared.AuthAddrHost.Value(&err), shared.AuthAddrPort.Value(&err)),
-		BindMetricsAddr: netx.NewAddr(shared.AuthAddrHostInt.Value(&err), own.MetricsAddrPort.Value(&err)),
+		Server: Server{
+			BindAddr:        netx.NewAddr(shared.AuthAddrHost.Value(&err), shared.AuthAddrPort.Value(&err)),
+			BindMetricsAddr: netx.NewAddr(shared.AuthAddrHostInt.Value(&err), own.MetricsAddrPort.Value(&err)),
+		},
 		Postgres: NewPostgresConfig(pqx.Config{
-			Host:   shared.XPostgresAddrHost.Value(&err),
-			Port:   shared.XPostgresAddrPort.Value(&err),
-			DBName: shared.XPostgresDBName.Value(&err),
+			Host:   own.PostgresAddrHost.Value(&err),
+			Port:   own.PostgresAddrPort.Value(&err),
+			DBName: own.PostgresDBName.Value(&err),
 			User:   own.PostgresUser.Value(&err),
 			Pass:   own.PostgresPass.Value(&err),
 		}),
+		// TODO: Add env vars for below config fields
 		Webauthn: WebauthnSettings{
 			RelyingParty: RelyingParty{
 				Id:          "localhost",
@@ -112,7 +104,6 @@ func GetServe() (c *Config, err error) {
 			},
 			Timeout: 60000,
 		},
-
 		Session: Session{
 			Lifespan: "1h",
 			Cookie: Cookie{

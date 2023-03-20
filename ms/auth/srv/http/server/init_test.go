@@ -26,7 +26,7 @@ func TestMain(m *testing.M) {
 }
 
 func testNewServer(t *check.C, cfg config.Config) {
-	cfg.BindAddr = netx.NewAddr("localhost", 0)
+	cfg.Server.BindAddr = netx.NewAddr("localhost", 0)
 
 	t.Helper()
 	// ctrl := gomock.NewController(t)

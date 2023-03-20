@@ -20,7 +20,7 @@ func TestSmoke(tt *testing.T) {
 	cfg := &config.Config{}
 	s.cfg = cfg
 	const host = "localhost"
-	s.cfg.BindAddr = netx.NewAddr(host, netx.UnusedTCPPort(host))
+	s.cfg.Server.BindAddr = netx.NewAddr(host, netx.UnusedTCPPort(host))
 
 	ctxStartup, cancel := context.WithTimeout(ctx, def.TestTimeout)
 	defer cancel()
@@ -31,5 +31,5 @@ func TestSmoke(tt *testing.T) {
 		shutdown()
 		t.Nil(<-errc, "RunServe")
 	}()
-	t.Must(t.Nil(netx.WaitTCPPort(ctxStartup, s.cfg.BindAddr), "connect to HTTP service"))
+	t.Must(t.Nil(netx.WaitTCPPort(ctxStartup, s.cfg.Server.BindAddr), "connect to HTTP service"))
 }

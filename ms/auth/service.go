@@ -94,7 +94,7 @@ func (s *Service) serveEcho(ctx Ctx) error {
 }
 
 func (s *Service) serveMetrics(ctx Ctx) error {
-	return serve.Metrics(ctx, s.cfg.BindMetricsAddr, reg)
+	return serve.Metrics(ctx, s.cfg.Server.BindMetricsAddr, reg)
 }
 
 func (s *Service) connectRepo(ctx Ctx) (interface{}, error) {
