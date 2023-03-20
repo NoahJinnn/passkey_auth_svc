@@ -17,7 +17,7 @@ services:
       - "${mono_postgres_tls_key}:/dev.key"
     environment:
       POSTGRES_USER: "${MONO_AUTH_POSTGRES_AUTH_LOGIN}"
-      POSTGRES_PASSWORD: "${MONO_AUTH_POSTGRES_AUTH_PASS}"
+      POSTGRES_PASSWORD: "${HQ_AUTH_POSTGRES_AUTH_PASS}"
     entrypoint:
       - bash
       - -c
@@ -38,7 +38,7 @@ services:
   #     - "./scripts/postgres-setup:/usr/local/bin/postgres-setup"
   #   environment:
   #     MONO_AUTH_POSTGRES_AUTH_LOGIN: "${MONO_AUTH_POSTGRES_AUTH_LOGIN}"
-  #     MONO_AUTH_POSTGRES_AUTH_PASS: "${MONO_AUTH_POSTGRES_AUTH_PASS}"
+  #     HQ_AUTH_POSTGRES_AUTH_PASS: "${HQ_AUTH_POSTGRES_AUTH_PASS}"
   #     PGHOST: "postgres"
   #     PGUSER: "postgres"
   #     PGPASSWORD: "postgres"
@@ -74,7 +74,7 @@ services:
   #     MONO_TLS_CA_CERT: "/ca.crt"
   #     MONO_X_POSTGRES_ADDR_HOST: "postgres"
   #     MONO_AUTH_POSTGRES_AUTH_LOGIN: "${MONO_AUTH_POSTGRES_AUTH_LOGIN}"
-  #     MONO_AUTH_POSTGRES_AUTH_PASS: "${MONO_AUTH_POSTGRES_AUTH_PASS}"
+  #     HQ_AUTH_POSTGRES_AUTH_PASS: "${HQ_AUTH_POSTGRES_AUTH_PASS}"
   #     MONO_AUTH_TLS_CERT: "/auth.crt"
   #     MONO_AUTH_TLS_CERT_INT: "/auth-int.crt"
   #     MONO_AUTH_TLS_KEY: "/auth.key"

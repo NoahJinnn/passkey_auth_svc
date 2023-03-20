@@ -35,7 +35,6 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 	e := echo.New()
 	e.HideBanner = true
 
-	// TODO: Setup CORS by config
 	if cfg.Server.Cors.Enabled {
 		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 			AllowOrigins:     cfg.Server.Cors.AllowOrigins,
