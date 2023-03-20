@@ -13,7 +13,7 @@ import (
 func Session(generator session.Manager) echo.MiddlewareFunc {
 	c := echojwt.Config{
 		ContextKey:     "session",
-		TokenLookup:    "header:Authorization:Bearer,cookie:hanko",
+		TokenLookup:    "header:Authorization:Bearer,cookie:hqservice",
 		ParseTokenFunc: parseToken(generator),
 		ErrorHandler: func(c echo.Context, err error) error {
 			return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(err)

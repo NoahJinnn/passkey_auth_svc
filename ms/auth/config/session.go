@@ -32,7 +32,7 @@ func (r *WebauthnSettings) Validate() error {
 	return nil
 }
 
-// RelyingParty webauthn settings for your application using hanko.
+// RelyingParty webauthn settings for your application.
 type RelyingParty struct {
 	Id          string `yaml:"id" json:"id" koanf:"id"`
 	DisplayName string `yaml:"display_name" json:"display_name" koanf:"display_name" split_words:"true"`

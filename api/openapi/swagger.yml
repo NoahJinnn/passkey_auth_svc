@@ -48,7 +48,7 @@ definitions:
             properties:
               name:
                 type: string
-                example: Hanko Authentication Service
+                example: Authentication Service
               id:
                 type: string
                 example: localhost

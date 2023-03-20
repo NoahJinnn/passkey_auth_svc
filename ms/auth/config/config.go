@@ -53,7 +53,6 @@ type Config struct {
 }
 
 // // Ref: https://github.com/plaid/quickstart/blob/master/.env.example
-
 type PlaidConfig struct {
 	// 	// See https://dashboard.plaid.com/account/keys
 	ClientId appcfg.String `env:"PLAID_CLIENT_ID"`
@@ -108,7 +107,7 @@ func GetServe() (c *Config, err error) {
 		Webauthn: WebauthnSettings{
 			RelyingParty: RelyingParty{
 				Id:          "localhost",
-				DisplayName: "Hanko Authentication Service",
+				DisplayName: "Authentication Service",
 				Origins:     []string{"http://localhost"},
 			},
 			Timeout: 60000,

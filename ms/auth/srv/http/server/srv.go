@@ -59,20 +59,16 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 	// TODO: Impl user handlers
 	// user := e.Group("/users")
 	// user.POST("", userHandler.Create)
-	// user.GET("/:id", userHandler.Get, hankoMiddleware.Session(sessionManager))
+	// user.GET("/:id", userHandler.Get, middleware.Session(sessionManager))
 
 	// e.POST("/user", userHandler.GetUserIdByEmail)
-	// e.POST("/logout", userHandler.Logout, hankoMiddleware.Session(sessionManager))
+	// e.POST("/logout", userHandler.Logout, middleware.Session(sessionManager))
 
 	webauthnHandler := handlers.NewWebauthnHandler(srv)
 	webauthn := e.Group("/webauthn")
 	webauthnRegistration := webauthn.Group("/registration", middlewares.Session(sessionManager))
 	webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
 	// webauthnRegistration.POST("/finalize", webauthnHandler.FinishRegistration)
-
-	// log := structlog.New(structlog.KeyUnit, "swagger").SetDefaultKeyvals(structlog.KeyApp, config.ServiceName)
-	// log.Info("OpenAPI protocol", "version", swaggerSpec.Spec().Info.Version)
-	// log.Info("Base path", "base", swaggerSpec.BasePath())
 
 	e.Logger.Fatal(e.Start(cfg.BindAddr.String()))
 	return e, nil

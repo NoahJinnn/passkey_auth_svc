@@ -90,7 +90,6 @@ func (s *Service) serveEcho(ctx Ctx) error {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
-	// e.Logger.Fatal(e.Start(":1323"))
 	return e.Start(":1323")
 }
 
