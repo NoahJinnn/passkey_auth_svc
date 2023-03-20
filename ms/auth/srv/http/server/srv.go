@@ -11,9 +11,10 @@ import (
 	"github.com/hellohq/hqservice/ms/auth/dal"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/handlers"
-	"github.com/hellohq/hqservice/ms/auth/srv/http/server/middlewares"
+	hqMiddlewares "github.com/hellohq/hqservice/ms/auth/srv/http/server/middlewares"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/session"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/powerman/structlog"
 )
 
@@ -35,16 +36,16 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 	e.HideBanner = true
 
 	// TODO: Setup CORS by config
-	// if cfg.Server.Public.Cors.Enabled {
-	// 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-	// 		AllowOrigins:     cfg.Server.Public.Cors.AllowOrigins,
-	// 		AllowMethods:     cfg.Server.Public.Cors.AllowMethods,
-	// 		AllowHeaders:     cfg.Server.Public.Cors.AllowHeaders,
-	// 		ExposeHeaders:    cfg.Server.Public.Cors.ExposeHeaders,
-	// 		AllowCredentials: cfg.Server.Public.Cors.AllowCredentials,
-	// 		MaxAge:           cfg.Server.Public.Cors.MaxAge,
-	// 	}))
-	// }
+	if cfg.Server.Cors.Enabled {
+		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+			AllowOrigins:     cfg.Server.Cors.AllowOrigins,
+			AllowMethods:     cfg.Server.Cors.AllowMethods,
+			AllowHeaders:     cfg.Server.Cors.AllowHeaders,
+			ExposeHeaders:    cfg.Server.Cors.ExposeHeaders,
+			AllowCredentials: cfg.Server.Cors.AllowCredentials,
+			MaxAge:           cfg.Server.Cors.MaxAge,
+		}))
+	}
 
 	e.Validator = dto.NewCustomValidator()
 	jwkManager, err := crypto.NewDefaultManager(cfg.Secrets.Keys, repo.GetJwkRepo())
@@ -59,14 +60,14 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 	// TODO: Impl user handlers
 	// user := e.Group("/users")
 	// user.POST("", userHandler.Create)
-	// user.GET("/:id", userHandler.Get, middleware.Session(sessionManager))
+	// user.GET("/:id", userHandler.Get, hqMiddlewares.Session(sessionManager))
 
 	// e.POST("/user", userHandler.GetUserIdByEmail)
-	// e.POST("/logout", userHandler.Logout, middleware.Session(sessionManager))
+	// e.POST("/logout", userHandler.Logout, hqMiddlewares.Session(sessionManager))
 
 	webauthnHandler := handlers.NewWebauthnHandler(srv)
 	webauthn := e.Group("/webauthn")
-	webauthnRegistration := webauthn.Group("/registration", middlewares.Session(sessionManager))
+	webauthnRegistration := webauthn.Group("/registration", hqMiddlewares.Session(sessionManager))
 	webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
 	// webauthnRegistration.POST("/finalize", webauthnHandler.FinishRegistration)
 

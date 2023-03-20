@@ -45,6 +45,7 @@ require (
 	github.com/powerman/dockerize v0.18.1
 	github.com/powerman/go-monolith-example v0.5.2
 	github.com/powerman/pqx v0.7.0
+	github.com/sethvargo/go-limiter v0.7.2
 	golang.org/x/tools v0.7.0
 	google.golang.org/grpc v1.52.0
 	google.golang.org/protobuf v1.29.0

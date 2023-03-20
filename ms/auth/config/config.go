@@ -18,6 +18,7 @@ import (
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/appcfg"
 	"github.com/powerman/pqx"
+	"github.com/sethvargo/go-limiter/httplimit"
 	"github.com/spf13/pflag"
 )
 
@@ -87,6 +88,14 @@ func GetServe() (c *Config, err error) {
 		Server: Server{
 			BindAddr:        netx.NewAddr(shared.AuthAddrHost.Value(&err), shared.AuthAddrPort.Value(&err)),
 			BindMetricsAddr: netx.NewAddr(shared.AuthAddrHostInt.Value(&err), own.MetricsAddrPort.Value(&err)),
+			Cors: Cors{
+				ExposeHeaders: []string{
+					httplimit.HeaderRateLimitLimit,
+					httplimit.HeaderRateLimitRemaining,
+					httplimit.HeaderRateLimitReset,
+					httplimit.HeaderRetryAfter,
+				},
+			},
 		},
 		Postgres: NewPostgresConfig(pqx.Config{
 			Host:   own.PostgresAddrHost.Value(&err),
