@@ -6,6 +6,6 @@ import (
 )
 
 type HttpDeps struct {
-	App app.Appl
+	app.Appl
 	Cfg *config.Config
 }
