@@ -3,6 +3,7 @@ package dal
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/hellohq/hqservice/ent"
@@ -22,6 +23,7 @@ const (
 
 // Repo provides data storage.
 type IRepo interface {
+	WithTx(ctx context.Context, fn func(tx *ent.Tx) error) error
 	GetJwkRepo() IJwkRepo
 	GetUserRepo() IUserRepo
 	GetWebauthnCredentialRepo() IWebauthnCredentialRepo
@@ -59,6 +61,29 @@ func New(ctx Ctx, cfg *config.PostgresConfig) (_ *Repo, err error) {
 
 func (r Repo) Close() {
 	r.Db.Close()
+}
+
+func (r Repo) WithTx(ctx context.Context, fn func(tx *ent.Tx) error) error {
+	tx, err := r.Db.Tx(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if v := recover(); v != nil {
+			tx.Rollback()
+			panic(v)
+		}
+	}()
+	if err := fn(tx); err != nil {
+		if rerr := tx.Rollback(); rerr != nil {
+			err = fmt.Errorf("%w: rolling back transaction: %v", err, rerr)
+		}
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("committing transaction: %w", err)
+	}
+	return nil
 }
 
 func (r Repo) GetJwkRepo() IJwkRepo {

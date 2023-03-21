@@ -29,13 +29,12 @@ type (
 // address cfg.Host:cfg.Port and handle requests on incoming connections.
 func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, error) {
 	srv := &handlers.HttpDeps{
-		App: appl,
-		Cfg: cfg,
+		Appl: appl,
+		Cfg:  cfg,
 	}
 	e := echo.New()
 	e.HideBanner = true
 
-	// TODO: Setup CORS by config
 	if cfg.Server.Cors.Enabled {
 		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 			AllowOrigins:     cfg.Server.Cors.AllowOrigins,
@@ -58,8 +57,9 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 	}
 
 	// TODO: Impl user handlers
-	// user := e.Group("/users")
-	// user.POST("", userHandler.Create)
+	user := e.Group("/users")
+	userHandler := handlers.NewUserHandler(srv, sessionManager)
+	user.POST("", userHandler.Create)
 	// user.GET("/:id", userHandler.Get, hqMiddlewares.Session(sessionManager))
 
 	// e.POST("/user", userHandler.GetUserIdByEmail)
