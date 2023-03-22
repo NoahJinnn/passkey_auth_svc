@@ -40,11 +40,14 @@ var (
 		PostgresAddrHost appcfg.NotEmptyString `env:"AUTH_POSTGRES_ADDR_HOST"`
 		PostgresAddrPort appcfg.Port           `env:"AUTH_POSTGRES_ADDR_PORT"`
 		PostgresDBName   appcfg.NotEmptyString `env:"AUTH_POSTGRES_DB_NAME"`
+		Secrets          appcfg.NotEmptyString `env:"AUTH_SECRETS"`
 	}{
 		MetricsAddrPort:  appcfg.MustPort(strconv.Itoa(sharedconfig.MetricsPort)),
 		PostgresUser:     appcfg.MustNotEmptyString(ServiceName),
 		PostgresAddrPort: appcfg.MustPort("5432"),
+		PostgresAddrHost: appcfg.MustNotEmptyString("localhost"),
 		PostgresDBName:   appcfg.MustNotEmptyString("postgres"),
+		Secrets:          appcfg.MustNotEmptyString("needstobeatleast16"),
 	}
 )
 
@@ -120,6 +123,9 @@ func GetServe() (c *Config, err error) {
 				SameSite: "strict",
 				Secure:   true,
 			},
+		},
+		Secrets: Secrets{
+			Keys: []string{own.Secrets.Value(&err)},
 		},
 	}
 

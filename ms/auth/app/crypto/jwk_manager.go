@@ -41,7 +41,7 @@ func NewDefaultManager(keys []string, repo dal.IJwkRepo) (*DefaultManager, error
 	ctx := context.Background()
 	for i := range keys {
 
-		j, err := repo.GetJwk(ctx, uint(i+1))
+		j, err := repo.GetJwk(ctx, uint(i))
 		if j == nil && err == nil {
 			_, err := manager.GenerateKey(ctx)
 			if err != nil {

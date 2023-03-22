@@ -4,7 +4,6 @@ package dal
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ms/auth/config"
@@ -40,23 +39,20 @@ func New(ctx Ctx, cfg *config.PostgresConfig) (_ *Repo, err error) {
 	log := structlog.FromContext(ctx, nil)
 	cfg.SSLMode = pqx.SSLRequire
 	dateSourceName := cfg.FormatDSN()
-
 	client, err := ent.Open("postgres", dateSourceName)
-
 	if err != nil {
 		log.Fatalf("failed opening connection to postgres: %v", err)
 	}
 
 	// Run the auto migration tool.
-	if err := client.Schema.WriteTo(ctx, os.Stdout); err != nil {
-		log.Fatalf("failed printing schema changes: %v", err)
+	if err := client.Schema.Create(ctx); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
 	}
 
-	r := &Repo{
+	return &Repo{
 		Db:  client,
 		log: log,
-	}
-	return r, nil
+	}, nil
 }
 
 func (r Repo) Close() {

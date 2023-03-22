@@ -29,7 +29,10 @@ func (r *jwkRepo) GetJwk(ctx Ctx, id uint) (*ent.Jwk, error) {
 		Only(ctx)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed querying user by id: %w", err)
+		if ent.IsNotFound(err) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed querying jwk by id: %w", err)
 	}
 
 	return jwk, nil
@@ -42,7 +45,7 @@ func (r *jwkRepo) GetAllJwk(ctx Ctx) ([]*ent.Jwk, error) {
 		All(ctx)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed querying all users: %w", err)
+		return nil, fmt.Errorf("failed querying all jwks: %w", err)
 	}
 
 	return jwks, nil
@@ -56,7 +59,7 @@ func (r *jwkRepo) GetLastJwk(ctx Ctx) (*ent.Jwk, error) {
 		Only(ctx)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed querying user by id: %w", err)
+		return nil, fmt.Errorf("failed querying jwk by id: %w", err)
 	}
 
 	return jwk, nil
@@ -65,6 +68,8 @@ func (r *jwkRepo) GetLastJwk(ctx Ctx) (*ent.Jwk, error) {
 func (r *jwkRepo) Create(ctx Ctx, jwk ent.Jwk) error {
 	_, err := r.db.Jwk.
 		Create().
+		SetID(jwk.ID).
+		SetKeyData(jwk.KeyData).
 		Save(ctx)
 
 	if err != nil {

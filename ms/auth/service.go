@@ -31,7 +31,7 @@ type Service struct {
 	cfg  *config.Config
 	srv  *echo.Echo
 	appl app.App
-	repo dal.Repo
+	repo *dal.Repo
 }
 
 // Name implements main.embeddedService interface.
@@ -66,10 +66,7 @@ func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func()) (er
 		return log.Err("failed to connect", "err", err)
 	}
 
-	s.appl = app.New(s.cfg, s.repo)
-
-	s.srv, err = server.NewServer(s.appl, s.repo, s.cfg)
-
+	s.srv, err = server.NewServer(s.appl, *s.repo, s.cfg)
 	if err != nil {
 		return log.Err("failed to openapi.NewServer", "err", err)
 	}

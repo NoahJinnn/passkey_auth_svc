@@ -16,7 +16,7 @@ type IWebauthnSvc interface {
 }
 
 type webauthnSvc struct {
-	repo dal.Repo
+	repo *dal.Repo
 	wa   *webauthn.WebAuthn
 }
 
@@ -25,7 +25,7 @@ var (
 	WebauthnOperationAuthentication string = "authentication"
 )
 
-func NewWebAuthn(cfg *config.Config, repo dal.Repo) IWebauthnSvc {
+func NewWebAuthn(cfg *config.Config, repo *dal.Repo) IWebauthnSvc {
 	f := false
 	wa, err := webauthn.New(&webauthn.Config{
 		RPDisplayName:         cfg.Webauthn.RelyingParty.DisplayName,

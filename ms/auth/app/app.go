@@ -34,11 +34,11 @@ type Appl interface {
 // App implements interface Appl.
 type App struct {
 	cfg  *config.Config
-	repo dal.Repo
+	repo *dal.Repo
 }
 
 // New creates and returns new App.
-func New(cfg *config.Config, repo dal.Repo) App {
+func New(cfg *config.Config, repo *dal.Repo) App {
 
 	return App{
 		cfg:  cfg,

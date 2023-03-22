@@ -17,10 +17,10 @@ type IUserSvc interface {
 }
 
 type userSvc struct {
-	repo dal.Repo
+	repo *dal.Repo
 }
 
-func NewUserSvc(repo dal.Repo) IUserSvc {
+func NewUserSvc(repo *dal.Repo) IUserSvc {
 	return &userSvc{
 		repo: repo,
 	}
