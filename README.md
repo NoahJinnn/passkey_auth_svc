@@ -102,13 +102,6 @@ Naming convention:
 <PROJECT>__<MS>_<VAR>   - private vars for embedded microservice
 ```
 
-#### docker-compose
-
-It's recommended to add shell alias `alias dc="if test -f env.sh; then
-source env.sh; fi && docker-compose"` and then run `dc` instead of
-`docker-compose` - this way you won't have to run `source env.sh` after
-changing it.
-
 #### HTTPS
 
 1. This project requires https:// and will send HSTS and CSP HTTP headers,
@@ -120,7 +113,6 @@ changing it.
    was created this way:
 
 ```
-$ . ./env.sh   # Sets $EASYRSA_PKI=configs/dev-pki.
 $ /path/to/easyrsa init-pki
 $ echo Dev CA $(go list -m) | /path/to/easyrsa build-ca nopass
 $ /path/to/easyrsa --days=3650 "--subject-alt-name=DNS:postgres" build-server-full postgres nopass
