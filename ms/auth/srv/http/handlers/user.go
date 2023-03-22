@@ -40,7 +40,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 
 	newUser, emailId, err := h.srv.GetUserSvc().Create(c.Request().Context(), body.Email)
 	if err != nil {
-		return err
+		return dto.ToHttpError(err)
 	}
 
 	token, err := h.sessionManager.GenerateJWT(newUser.ID)
