@@ -2,8 +2,138 @@
 
 package ent
 
+import (
+	"time"
+
+	"github.com/hellohq/hqservice/ent/email"
+	"github.com/hellohq/hqservice/ent/identity"
+	"github.com/hellohq/hqservice/ent/jwk"
+	"github.com/hellohq/hqservice/ent/passcode"
+	"github.com/hellohq/hqservice/ent/passwordcredential"
+	"github.com/hellohq/hqservice/ent/primaryemail"
+	"github.com/hellohq/hqservice/ent/schema"
+	"github.com/hellohq/hqservice/ent/user"
+	"github.com/hellohq/hqservice/ent/webauthncredential"
+	"github.com/hellohq/hqservice/ent/webauthnsessiondata"
+	"github.com/hellohq/hqservice/ent/webauthnsessiondataallowedcredential"
+)
+
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	emailFields := schema.Email{}.Fields()
+	_ = emailFields
+	// emailDescCreatedAt is the schema descriptor for created_at field.
+	emailDescCreatedAt := emailFields[4].Descriptor()
+	// email.DefaultCreatedAt holds the default value on creation for the created_at field.
+	email.DefaultCreatedAt = emailDescCreatedAt.Default.(func() time.Time)
+	// emailDescUpdatedAt is the schema descriptor for updated_at field.
+	emailDescUpdatedAt := emailFields[5].Descriptor()
+	// email.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	email.DefaultUpdatedAt = emailDescUpdatedAt.Default.(func() time.Time)
+	// email.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	email.UpdateDefaultUpdatedAt = emailDescUpdatedAt.UpdateDefault.(func() time.Time)
+	identityFields := schema.Identity{}.Fields()
+	_ = identityFields
+	// identityDescCreatedAt is the schema descriptor for created_at field.
+	identityDescCreatedAt := identityFields[5].Descriptor()
+	// identity.DefaultCreatedAt holds the default value on creation for the created_at field.
+	identity.DefaultCreatedAt = identityDescCreatedAt.Default.(func() time.Time)
+	// identityDescUpdatedAt is the schema descriptor for updated_at field.
+	identityDescUpdatedAt := identityFields[6].Descriptor()
+	// identity.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	identity.DefaultUpdatedAt = identityDescUpdatedAt.Default.(func() time.Time)
+	// identity.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	identity.UpdateDefaultUpdatedAt = identityDescUpdatedAt.UpdateDefault.(func() time.Time)
+	jwkFields := schema.Jwk{}.Fields()
+	_ = jwkFields
+	// jwkDescCreatedAt is the schema descriptor for created_at field.
+	jwkDescCreatedAt := jwkFields[2].Descriptor()
+	// jwk.DefaultCreatedAt holds the default value on creation for the created_at field.
+	jwk.DefaultCreatedAt = jwkDescCreatedAt.Default.(func() time.Time)
+	passcodeFields := schema.Passcode{}.Fields()
+	_ = passcodeFields
+	// passcodeDescCreatedAt is the schema descriptor for created_at field.
+	passcodeDescCreatedAt := passcodeFields[5].Descriptor()
+	// passcode.DefaultCreatedAt holds the default value on creation for the created_at field.
+	passcode.DefaultCreatedAt = passcodeDescCreatedAt.Default.(func() time.Time)
+	// passcodeDescUpdatedAt is the schema descriptor for updated_at field.
+	passcodeDescUpdatedAt := passcodeFields[6].Descriptor()
+	// passcode.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	passcode.DefaultUpdatedAt = passcodeDescUpdatedAt.Default.(func() time.Time)
+	// passcode.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	passcode.UpdateDefaultUpdatedAt = passcodeDescUpdatedAt.UpdateDefault.(func() time.Time)
+	passwordcredentialFields := schema.PasswordCredential{}.Fields()
+	_ = passwordcredentialFields
+	// passwordcredentialDescCreatedAt is the schema descriptor for created_at field.
+	passwordcredentialDescCreatedAt := passwordcredentialFields[3].Descriptor()
+	// passwordcredential.DefaultCreatedAt holds the default value on creation for the created_at field.
+	passwordcredential.DefaultCreatedAt = passwordcredentialDescCreatedAt.Default.(func() time.Time)
+	// passwordcredentialDescUpdatedAt is the schema descriptor for updated_at field.
+	passwordcredentialDescUpdatedAt := passwordcredentialFields[4].Descriptor()
+	// passwordcredential.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	passwordcredential.DefaultUpdatedAt = passwordcredentialDescUpdatedAt.Default.(func() time.Time)
+	// passwordcredential.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	passwordcredential.UpdateDefaultUpdatedAt = passwordcredentialDescUpdatedAt.UpdateDefault.(func() time.Time)
+	primaryemailFields := schema.PrimaryEmail{}.Fields()
+	_ = primaryemailFields
+	// primaryemailDescCreatedAt is the schema descriptor for created_at field.
+	primaryemailDescCreatedAt := primaryemailFields[3].Descriptor()
+	// primaryemail.DefaultCreatedAt holds the default value on creation for the created_at field.
+	primaryemail.DefaultCreatedAt = primaryemailDescCreatedAt.Default.(func() time.Time)
+	// primaryemailDescUpdatedAt is the schema descriptor for updated_at field.
+	primaryemailDescUpdatedAt := primaryemailFields[4].Descriptor()
+	// primaryemail.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	primaryemail.DefaultUpdatedAt = primaryemailDescUpdatedAt.Default.(func() time.Time)
+	// primaryemail.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	primaryemail.UpdateDefaultUpdatedAt = primaryemailDescUpdatedAt.UpdateDefault.(func() time.Time)
+	userFields := schema.User{}.Fields()
+	_ = userFields
+	// userDescCreatedAt is the schema descriptor for created_at field.
+	userDescCreatedAt := userFields[1].Descriptor()
+	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
+	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
+	// userDescUpdatedAt is the schema descriptor for updated_at field.
+	userDescUpdatedAt := userFields[2].Descriptor()
+	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
+	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
+	webauthncredentialFields := schema.WebauthnCredential{}.Fields()
+	_ = webauthncredentialFields
+	// webauthncredentialDescCreatedAt is the schema descriptor for created_at field.
+	webauthncredentialDescCreatedAt := webauthncredentialFields[6].Descriptor()
+	// webauthncredential.DefaultCreatedAt holds the default value on creation for the created_at field.
+	webauthncredential.DefaultCreatedAt = webauthncredentialDescCreatedAt.Default.(func() time.Time)
+	// webauthncredentialDescUpdatedAt is the schema descriptor for updated_at field.
+	webauthncredentialDescUpdatedAt := webauthncredentialFields[7].Descriptor()
+	// webauthncredential.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	webauthncredential.DefaultUpdatedAt = webauthncredentialDescUpdatedAt.Default.(func() time.Time)
+	// webauthncredential.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	webauthncredential.UpdateDefaultUpdatedAt = webauthncredentialDescUpdatedAt.UpdateDefault.(func() time.Time)
+	webauthnsessiondataFields := schema.WebauthnSessionData{}.Fields()
+	_ = webauthnsessiondataFields
+	// webauthnsessiondataDescCreatedAt is the schema descriptor for created_at field.
+	webauthnsessiondataDescCreatedAt := webauthnsessiondataFields[5].Descriptor()
+	// webauthnsessiondata.DefaultCreatedAt holds the default value on creation for the created_at field.
+	webauthnsessiondata.DefaultCreatedAt = webauthnsessiondataDescCreatedAt.Default.(func() time.Time)
+	// webauthnsessiondataDescUpdatedAt is the schema descriptor for updated_at field.
+	webauthnsessiondataDescUpdatedAt := webauthnsessiondataFields[6].Descriptor()
+	// webauthnsessiondata.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	webauthnsessiondata.DefaultUpdatedAt = webauthnsessiondataDescUpdatedAt.Default.(func() time.Time)
+	// webauthnsessiondata.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	webauthnsessiondata.UpdateDefaultUpdatedAt = webauthnsessiondataDescUpdatedAt.UpdateDefault.(func() time.Time)
+	webauthnsessiondataallowedcredentialFields := schema.WebauthnSessionDataAllowedCredential{}.Fields()
+	_ = webauthnsessiondataallowedcredentialFields
+	// webauthnsessiondataallowedcredentialDescCreatedAt is the schema descriptor for created_at field.
+	webauthnsessiondataallowedcredentialDescCreatedAt := webauthnsessiondataallowedcredentialFields[3].Descriptor()
+	// webauthnsessiondataallowedcredential.DefaultCreatedAt holds the default value on creation for the created_at field.
+	webauthnsessiondataallowedcredential.DefaultCreatedAt = webauthnsessiondataallowedcredentialDescCreatedAt.Default.(func() time.Time)
+	// webauthnsessiondataallowedcredentialDescUpdatedAt is the schema descriptor for updated_at field.
+	webauthnsessiondataallowedcredentialDescUpdatedAt := webauthnsessiondataallowedcredentialFields[4].Descriptor()
+	// webauthnsessiondataallowedcredential.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	webauthnsessiondataallowedcredential.DefaultUpdatedAt = webauthnsessiondataallowedcredentialDescUpdatedAt.Default.(func() time.Time)
+	// webauthnsessiondataallowedcredential.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	webauthnsessiondataallowedcredential.UpdateDefaultUpdatedAt = webauthnsessiondataallowedcredentialDescUpdatedAt.UpdateDefault.(func() time.Time)
 }

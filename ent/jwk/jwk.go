@@ -2,6 +2,10 @@
 
 package jwk
 
+import (
+	"time"
+)
+
 const (
 	// Label holds the string label denoting the jwk type in the database.
 	Label = "jwk"
@@ -31,3 +35,8 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+)

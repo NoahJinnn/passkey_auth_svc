@@ -48,9 +48,25 @@ func (wsdacc *WebauthnSessionDataAllowedCredentialCreate) SetCreatedAt(t time.Ti
 	return wsdacc
 }
 
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (wsdacc *WebauthnSessionDataAllowedCredentialCreate) SetNillableCreatedAt(t *time.Time) *WebauthnSessionDataAllowedCredentialCreate {
+	if t != nil {
+		wsdacc.SetCreatedAt(*t)
+	}
+	return wsdacc
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (wsdacc *WebauthnSessionDataAllowedCredentialCreate) SetUpdatedAt(t time.Time) *WebauthnSessionDataAllowedCredentialCreate {
 	wsdacc.mutation.SetUpdatedAt(t)
+	return wsdacc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (wsdacc *WebauthnSessionDataAllowedCredentialCreate) SetNillableUpdatedAt(t *time.Time) *WebauthnSessionDataAllowedCredentialCreate {
+	if t != nil {
+		wsdacc.SetUpdatedAt(*t)
+	}
 	return wsdacc
 }
 
@@ -72,6 +88,7 @@ func (wsdacc *WebauthnSessionDataAllowedCredentialCreate) Mutation() *WebauthnSe
 
 // Save creates the WebauthnSessionDataAllowedCredential in the database.
 func (wsdacc *WebauthnSessionDataAllowedCredentialCreate) Save(ctx context.Context) (*WebauthnSessionDataAllowedCredential, error) {
+	wsdacc.defaults()
 	return withHooks[*WebauthnSessionDataAllowedCredential, WebauthnSessionDataAllowedCredentialMutation](ctx, wsdacc.sqlSave, wsdacc.mutation, wsdacc.hooks)
 }
 
@@ -94,6 +111,18 @@ func (wsdacc *WebauthnSessionDataAllowedCredentialCreate) Exec(ctx context.Conte
 func (wsdacc *WebauthnSessionDataAllowedCredentialCreate) ExecX(ctx context.Context) {
 	if err := wsdacc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (wsdacc *WebauthnSessionDataAllowedCredentialCreate) defaults() {
+	if _, ok := wsdacc.mutation.CreatedAt(); !ok {
+		v := webauthnsessiondataallowedcredential.DefaultCreatedAt()
+		wsdacc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := wsdacc.mutation.UpdatedAt(); !ok {
+		v := webauthnsessiondataallowedcredential.DefaultUpdatedAt()
+		wsdacc.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -192,6 +221,7 @@ func (wsdaccb *WebauthnSessionDataAllowedCredentialCreateBulk) Save(ctx context.
 	for i := range wsdaccb.builders {
 		func(i int, root context.Context) {
 			builder := wsdaccb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*WebauthnSessionDataAllowedCredentialMutation)
 				if !ok {

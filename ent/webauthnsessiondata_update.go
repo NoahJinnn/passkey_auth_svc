@@ -54,12 +54,6 @@ func (wsdu *WebauthnSessionDataUpdate) SetOperation(s string) *WebauthnSessionDa
 	return wsdu
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (wsdu *WebauthnSessionDataUpdate) SetCreatedAt(t time.Time) *WebauthnSessionDataUpdate {
-	wsdu.mutation.SetCreatedAt(t)
-	return wsdu
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (wsdu *WebauthnSessionDataUpdate) SetUpdatedAt(t time.Time) *WebauthnSessionDataUpdate {
 	wsdu.mutation.SetUpdatedAt(t)
@@ -109,6 +103,7 @@ func (wsdu *WebauthnSessionDataUpdate) RemoveWebauthnSessionDataAllowedCredentia
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (wsdu *WebauthnSessionDataUpdate) Save(ctx context.Context) (int, error) {
+	wsdu.defaults()
 	return withHooks[int, WebauthnSessionDataMutation](ctx, wsdu.sqlSave, wsdu.mutation, wsdu.hooks)
 }
 
@@ -134,6 +129,14 @@ func (wsdu *WebauthnSessionDataUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (wsdu *WebauthnSessionDataUpdate) defaults() {
+	if _, ok := wsdu.mutation.UpdatedAt(); !ok {
+		v := webauthnsessiondata.UpdateDefaultUpdatedAt()
+		wsdu.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (wsdu *WebauthnSessionDataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(webauthnsessiondata.Table, webauthnsessiondata.Columns, sqlgraph.NewFieldSpec(webauthnsessiondata.FieldID, field.TypeUUID))
 	if ps := wsdu.mutation.predicates; len(ps) > 0 {
@@ -154,9 +157,6 @@ func (wsdu *WebauthnSessionDataUpdate) sqlSave(ctx context.Context) (n int, err 
 	}
 	if value, ok := wsdu.mutation.Operation(); ok {
 		_spec.SetField(webauthnsessiondata.FieldOperation, field.TypeString, value)
-	}
-	if value, ok := wsdu.mutation.CreatedAt(); ok {
-		_spec.SetField(webauthnsessiondata.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := wsdu.mutation.UpdatedAt(); ok {
 		_spec.SetField(webauthnsessiondata.FieldUpdatedAt, field.TypeTime, value)
@@ -259,12 +259,6 @@ func (wsduo *WebauthnSessionDataUpdateOne) SetOperation(s string) *WebauthnSessi
 	return wsduo
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (wsduo *WebauthnSessionDataUpdateOne) SetCreatedAt(t time.Time) *WebauthnSessionDataUpdateOne {
-	wsduo.mutation.SetCreatedAt(t)
-	return wsduo
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (wsduo *WebauthnSessionDataUpdateOne) SetUpdatedAt(t time.Time) *WebauthnSessionDataUpdateOne {
 	wsduo.mutation.SetUpdatedAt(t)
@@ -327,6 +321,7 @@ func (wsduo *WebauthnSessionDataUpdateOne) Select(field string, fields ...string
 
 // Save executes the query and returns the updated WebauthnSessionData entity.
 func (wsduo *WebauthnSessionDataUpdateOne) Save(ctx context.Context) (*WebauthnSessionData, error) {
+	wsduo.defaults()
 	return withHooks[*WebauthnSessionData, WebauthnSessionDataMutation](ctx, wsduo.sqlSave, wsduo.mutation, wsduo.hooks)
 }
 
@@ -349,6 +344,14 @@ func (wsduo *WebauthnSessionDataUpdateOne) Exec(ctx context.Context) error {
 func (wsduo *WebauthnSessionDataUpdateOne) ExecX(ctx context.Context) {
 	if err := wsduo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (wsduo *WebauthnSessionDataUpdateOne) defaults() {
+	if _, ok := wsduo.mutation.UpdatedAt(); !ok {
+		v := webauthnsessiondata.UpdateDefaultUpdatedAt()
+		wsduo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -389,9 +392,6 @@ func (wsduo *WebauthnSessionDataUpdateOne) sqlSave(ctx context.Context) (_node *
 	}
 	if value, ok := wsduo.mutation.Operation(); ok {
 		_spec.SetField(webauthnsessiondata.FieldOperation, field.TypeString, value)
-	}
-	if value, ok := wsduo.mutation.CreatedAt(); ok {
-		_spec.SetField(webauthnsessiondata.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := wsduo.mutation.UpdatedAt(); ok {
 		_spec.SetField(webauthnsessiondata.FieldUpdatedAt, field.TypeTime, value)

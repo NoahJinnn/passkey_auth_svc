@@ -82,12 +82,6 @@ func (iu *IdentityUpdate) ClearEmailID() *IdentityUpdate {
 	return iu
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (iu *IdentityUpdate) SetCreatedAt(t time.Time) *IdentityUpdate {
-	iu.mutation.SetCreatedAt(t)
-	return iu
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (iu *IdentityUpdate) SetUpdatedAt(t time.Time) *IdentityUpdate {
 	iu.mutation.SetUpdatedAt(t)
@@ -112,6 +106,7 @@ func (iu *IdentityUpdate) ClearEmail() *IdentityUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (iu *IdentityUpdate) Save(ctx context.Context) (int, error) {
+	iu.defaults()
 	return withHooks[int, IdentityMutation](ctx, iu.sqlSave, iu.mutation, iu.hooks)
 }
 
@@ -137,6 +132,14 @@ func (iu *IdentityUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (iu *IdentityUpdate) defaults() {
+	if _, ok := iu.mutation.UpdatedAt(); !ok {
+		v := identity.UpdateDefaultUpdatedAt()
+		iu.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (iu *IdentityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(identity.Table, identity.Columns, sqlgraph.NewFieldSpec(identity.FieldID, field.TypeUUID))
 	if ps := iu.mutation.predicates; len(ps) > 0 {
@@ -157,9 +160,6 @@ func (iu *IdentityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if iu.mutation.DataCleared() {
 		_spec.ClearField(identity.FieldData, field.TypeString)
-	}
-	if value, ok := iu.mutation.CreatedAt(); ok {
-		_spec.SetField(identity.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := iu.mutation.UpdatedAt(); ok {
 		_spec.SetField(identity.FieldUpdatedAt, field.TypeTime, value)
@@ -271,12 +271,6 @@ func (iuo *IdentityUpdateOne) ClearEmailID() *IdentityUpdateOne {
 	return iuo
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (iuo *IdentityUpdateOne) SetCreatedAt(t time.Time) *IdentityUpdateOne {
-	iuo.mutation.SetCreatedAt(t)
-	return iuo
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (iuo *IdentityUpdateOne) SetUpdatedAt(t time.Time) *IdentityUpdateOne {
 	iuo.mutation.SetUpdatedAt(t)
@@ -314,6 +308,7 @@ func (iuo *IdentityUpdateOne) Select(field string, fields ...string) *IdentityUp
 
 // Save executes the query and returns the updated Identity entity.
 func (iuo *IdentityUpdateOne) Save(ctx context.Context) (*Identity, error) {
+	iuo.defaults()
 	return withHooks[*Identity, IdentityMutation](ctx, iuo.sqlSave, iuo.mutation, iuo.hooks)
 }
 
@@ -336,6 +331,14 @@ func (iuo *IdentityUpdateOne) Exec(ctx context.Context) error {
 func (iuo *IdentityUpdateOne) ExecX(ctx context.Context) {
 	if err := iuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (iuo *IdentityUpdateOne) defaults() {
+	if _, ok := iuo.mutation.UpdatedAt(); !ok {
+		v := identity.UpdateDefaultUpdatedAt()
+		iuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -376,9 +379,6 @@ func (iuo *IdentityUpdateOne) sqlSave(ctx context.Context) (_node *Identity, err
 	}
 	if iuo.mutation.DataCleared() {
 		_spec.ClearField(identity.FieldData, field.TypeString)
-	}
-	if value, ok := iuo.mutation.CreatedAt(); ok {
-		_spec.SetField(identity.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := iuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(identity.FieldUpdatedAt, field.TypeTime, value)

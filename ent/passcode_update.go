@@ -83,12 +83,6 @@ func (pu *PasscodeUpdate) AddTryCount(i int32) *PasscodeUpdate {
 	return pu
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (pu *PasscodeUpdate) SetCreatedAt(t time.Time) *PasscodeUpdate {
-	pu.mutation.SetCreatedAt(t)
-	return pu
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (pu *PasscodeUpdate) SetUpdatedAt(t time.Time) *PasscodeUpdate {
 	pu.mutation.SetUpdatedAt(t)
@@ -144,6 +138,7 @@ func (pu *PasscodeUpdate) ClearUser() *PasscodeUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (pu *PasscodeUpdate) Save(ctx context.Context) (int, error) {
+	pu.defaults()
 	return withHooks[int, PasscodeMutation](ctx, pu.sqlSave, pu.mutation, pu.hooks)
 }
 
@@ -166,6 +161,14 @@ func (pu *PasscodeUpdate) Exec(ctx context.Context) error {
 func (pu *PasscodeUpdate) ExecX(ctx context.Context) {
 	if err := pu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (pu *PasscodeUpdate) defaults() {
+	if _, ok := pu.mutation.UpdatedAt(); !ok {
+		v := passcode.UpdateDefaultUpdatedAt()
+		pu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -192,9 +195,6 @@ func (pu *PasscodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := pu.mutation.AddedTryCount(); ok {
 		_spec.AddField(passcode.FieldTryCount, field.TypeInt32, value)
-	}
-	if value, ok := pu.mutation.CreatedAt(); ok {
-		_spec.SetField(passcode.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := pu.mutation.UpdatedAt(); ok {
 		_spec.SetField(passcode.FieldUpdatedAt, field.TypeTime, value)
@@ -341,12 +341,6 @@ func (puo *PasscodeUpdateOne) AddTryCount(i int32) *PasscodeUpdateOne {
 	return puo
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (puo *PasscodeUpdateOne) SetCreatedAt(t time.Time) *PasscodeUpdateOne {
-	puo.mutation.SetCreatedAt(t)
-	return puo
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (puo *PasscodeUpdateOne) SetUpdatedAt(t time.Time) *PasscodeUpdateOne {
 	puo.mutation.SetUpdatedAt(t)
@@ -415,6 +409,7 @@ func (puo *PasscodeUpdateOne) Select(field string, fields ...string) *PasscodeUp
 
 // Save executes the query and returns the updated Passcode entity.
 func (puo *PasscodeUpdateOne) Save(ctx context.Context) (*Passcode, error) {
+	puo.defaults()
 	return withHooks[*Passcode, PasscodeMutation](ctx, puo.sqlSave, puo.mutation, puo.hooks)
 }
 
@@ -437,6 +432,14 @@ func (puo *PasscodeUpdateOne) Exec(ctx context.Context) error {
 func (puo *PasscodeUpdateOne) ExecX(ctx context.Context) {
 	if err := puo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (puo *PasscodeUpdateOne) defaults() {
+	if _, ok := puo.mutation.UpdatedAt(); !ok {
+		v := passcode.UpdateDefaultUpdatedAt()
+		puo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -480,9 +483,6 @@ func (puo *PasscodeUpdateOne) sqlSave(ctx context.Context) (_node *Passcode, err
 	}
 	if value, ok := puo.mutation.AddedTryCount(); ok {
 		_spec.AddField(passcode.FieldTryCount, field.TypeInt32, value)
-	}
-	if value, ok := puo.mutation.CreatedAt(); ok {
-		_spec.SetField(passcode.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := puo.mutation.UpdatedAt(); ok {
 		_spec.SetField(passcode.FieldUpdatedAt, field.TypeTime, value)

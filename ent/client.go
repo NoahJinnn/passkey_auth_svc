@@ -11,6 +11,10 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/migrate"
 
+	"entgo.io/ent"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/identity"
 	"github.com/hellohq/hqservice/ent/jwk"
@@ -22,10 +26,6 @@ import (
 	"github.com/hellohq/hqservice/ent/webauthncredentialtransport"
 	"github.com/hellohq/hqservice/ent/webauthnsessiondata"
 	"github.com/hellohq/hqservice/ent/webauthnsessiondataallowedcredential"
-
-	"entgo.io/ent/dialect"
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -79,6 +79,55 @@ func (c *Client) init() {
 	c.WebauthnCredentialTransport = NewWebauthnCredentialTransportClient(c.config)
 	c.WebauthnSessionData = NewWebauthnSessionDataClient(c.config)
 	c.WebauthnSessionDataAllowedCredential = NewWebauthnSessionDataAllowedCredentialClient(c.config)
+}
+
+type (
+	// config is the configuration for the client and its builder.
+	config struct {
+		// driver used for executing database requests.
+		driver dialect.Driver
+		// debug enable a debug logging.
+		debug bool
+		// log used for logging on debug mode.
+		log func(...any)
+		// hooks to execute on mutations.
+		hooks *hooks
+		// interceptors to execute on queries.
+		inters *inters
+	}
+	// Option function to configure the client.
+	Option func(*config)
+)
+
+// options applies the options on the config object.
+func (c *config) options(opts ...Option) {
+	for _, opt := range opts {
+		opt(c)
+	}
+	if c.debug {
+		c.driver = dialect.Debug(c.driver, c.log)
+	}
+}
+
+// Debug enables debug logging on the ent.Driver.
+func Debug() Option {
+	return func(c *config) {
+		c.debug = true
+	}
+}
+
+// Log sets the logging function for debug mode.
+func Log(fn func(...any)) Option {
+	return func(c *config) {
+		c.log = fn
+	}
+}
+
+// Driver configures the client driver.
+func Driver(driver dialect.Driver) Option {
+	return func(c *config) {
+		c.driver = driver
+	}
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -181,33 +230,25 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Email.Use(hooks...)
-	c.Identity.Use(hooks...)
-	c.Jwk.Use(hooks...)
-	c.Passcode.Use(hooks...)
-	c.PasswordCredential.Use(hooks...)
-	c.PrimaryEmail.Use(hooks...)
-	c.User.Use(hooks...)
-	c.WebauthnCredential.Use(hooks...)
-	c.WebauthnCredentialTransport.Use(hooks...)
-	c.WebauthnSessionData.Use(hooks...)
-	c.WebauthnSessionDataAllowedCredential.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.Email, c.Identity, c.Jwk, c.Passcode, c.PasswordCredential, c.PrimaryEmail,
+		c.User, c.WebauthnCredential, c.WebauthnCredentialTransport,
+		c.WebauthnSessionData, c.WebauthnSessionDataAllowedCredential,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.Email.Intercept(interceptors...)
-	c.Identity.Intercept(interceptors...)
-	c.Jwk.Intercept(interceptors...)
-	c.Passcode.Intercept(interceptors...)
-	c.PasswordCredential.Intercept(interceptors...)
-	c.PrimaryEmail.Intercept(interceptors...)
-	c.User.Intercept(interceptors...)
-	c.WebauthnCredential.Intercept(interceptors...)
-	c.WebauthnCredentialTransport.Intercept(interceptors...)
-	c.WebauthnSessionData.Intercept(interceptors...)
-	c.WebauthnSessionDataAllowedCredential.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.Email, c.Identity, c.Jwk, c.Passcode, c.PasswordCredential, c.PrimaryEmail,
+		c.User, c.WebauthnCredential, c.WebauthnCredentialTransport,
+		c.WebauthnSessionData, c.WebauthnSessionDataAllowedCredential,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -1857,3 +1898,17 @@ func (c *WebauthnSessionDataAllowedCredentialClient) mutate(ctx context.Context,
 		return nil, fmt.Errorf("ent: unknown WebauthnSessionDataAllowedCredential mutation op: %q", m.Op())
 	}
 }
+
+// hooks and interceptors per client, for fast access.
+type (
+	hooks struct {
+		Email, Identity, Jwk, Passcode, PasswordCredential, PrimaryEmail, User,
+		WebauthnCredential, WebauthnCredentialTransport, WebauthnSessionData,
+		WebauthnSessionDataAllowedCredential []ent.Hook
+	}
+	inters struct {
+		Email, Identity, Jwk, Passcode, PasswordCredential, PrimaryEmail, User,
+		WebauthnCredential, WebauthnCredentialTransport, WebauthnSessionData,
+		WebauthnSessionDataAllowedCredential []ent.Interceptor
+	}
+)

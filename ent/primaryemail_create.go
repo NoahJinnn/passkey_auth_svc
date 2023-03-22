@@ -57,9 +57,25 @@ func (pec *PrimaryEmailCreate) SetCreatedAt(t time.Time) *PrimaryEmailCreate {
 	return pec
 }
 
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (pec *PrimaryEmailCreate) SetNillableCreatedAt(t *time.Time) *PrimaryEmailCreate {
+	if t != nil {
+		pec.SetCreatedAt(*t)
+	}
+	return pec
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (pec *PrimaryEmailCreate) SetUpdatedAt(t time.Time) *PrimaryEmailCreate {
 	pec.mutation.SetUpdatedAt(t)
+	return pec
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (pec *PrimaryEmailCreate) SetNillableUpdatedAt(t *time.Time) *PrimaryEmailCreate {
+	if t != nil {
+		pec.SetUpdatedAt(*t)
+	}
 	return pec
 }
 
@@ -86,6 +102,7 @@ func (pec *PrimaryEmailCreate) Mutation() *PrimaryEmailMutation {
 
 // Save creates the PrimaryEmail in the database.
 func (pec *PrimaryEmailCreate) Save(ctx context.Context) (*PrimaryEmail, error) {
+	pec.defaults()
 	return withHooks[*PrimaryEmail, PrimaryEmailMutation](ctx, pec.sqlSave, pec.mutation, pec.hooks)
 }
 
@@ -108,6 +125,18 @@ func (pec *PrimaryEmailCreate) Exec(ctx context.Context) error {
 func (pec *PrimaryEmailCreate) ExecX(ctx context.Context) {
 	if err := pec.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (pec *PrimaryEmailCreate) defaults() {
+	if _, ok := pec.mutation.CreatedAt(); !ok {
+		v := primaryemail.DefaultCreatedAt()
+		pec.mutation.SetCreatedAt(v)
+	}
+	if _, ok := pec.mutation.UpdatedAt(); !ok {
+		v := primaryemail.DefaultUpdatedAt()
+		pec.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -219,6 +248,7 @@ func (pecb *PrimaryEmailCreateBulk) Save(ctx context.Context) ([]*PrimaryEmail, 
 	for i := range pecb.builders {
 		func(i int, root context.Context) {
 			builder := pecb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PrimaryEmailMutation)
 				if !ok {

@@ -56,12 +56,6 @@ func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) ClearWebauthnSessionDa
 	return wsdacu
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) SetCreatedAt(t time.Time) *WebauthnSessionDataAllowedCredentialUpdate {
-	wsdacu.mutation.SetCreatedAt(t)
-	return wsdacu
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) SetUpdatedAt(t time.Time) *WebauthnSessionDataAllowedCredentialUpdate {
 	wsdacu.mutation.SetUpdatedAt(t)
@@ -86,6 +80,7 @@ func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) ClearWebauthnSessionDa
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) Save(ctx context.Context) (int, error) {
+	wsdacu.defaults()
 	return withHooks[int, WebauthnSessionDataAllowedCredentialMutation](ctx, wsdacu.sqlSave, wsdacu.mutation, wsdacu.hooks)
 }
 
@@ -111,6 +106,14 @@ func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) ExecX(ctx context.Cont
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) defaults() {
+	if _, ok := wsdacu.mutation.UpdatedAt(); !ok {
+		v := webauthnsessiondataallowedcredential.UpdateDefaultUpdatedAt()
+		wsdacu.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(webauthnsessiondataallowedcredential.Table, webauthnsessiondataallowedcredential.Columns, sqlgraph.NewFieldSpec(webauthnsessiondataallowedcredential.FieldID, field.TypeUUID))
 	if ps := wsdacu.mutation.predicates; len(ps) > 0 {
@@ -122,9 +125,6 @@ func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) sqlSave(ctx context.Co
 	}
 	if value, ok := wsdacu.mutation.CredentialID(); ok {
 		_spec.SetField(webauthnsessiondataallowedcredential.FieldCredentialID, field.TypeString, value)
-	}
-	if value, ok := wsdacu.mutation.CreatedAt(); ok {
-		_spec.SetField(webauthnsessiondataallowedcredential.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := wsdacu.mutation.UpdatedAt(); ok {
 		_spec.SetField(webauthnsessiondataallowedcredential.FieldUpdatedAt, field.TypeTime, value)
@@ -210,12 +210,6 @@ func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) ClearWebauthnSessi
 	return wsdacuo
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) SetCreatedAt(t time.Time) *WebauthnSessionDataAllowedCredentialUpdateOne {
-	wsdacuo.mutation.SetCreatedAt(t)
-	return wsdacuo
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) SetUpdatedAt(t time.Time) *WebauthnSessionDataAllowedCredentialUpdateOne {
 	wsdacuo.mutation.SetUpdatedAt(t)
@@ -253,6 +247,7 @@ func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) Select(field strin
 
 // Save executes the query and returns the updated WebauthnSessionDataAllowedCredential entity.
 func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) Save(ctx context.Context) (*WebauthnSessionDataAllowedCredential, error) {
+	wsdacuo.defaults()
 	return withHooks[*WebauthnSessionDataAllowedCredential, WebauthnSessionDataAllowedCredentialMutation](ctx, wsdacuo.sqlSave, wsdacuo.mutation, wsdacuo.hooks)
 }
 
@@ -275,6 +270,14 @@ func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) Exec(ctx context.C
 func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) ExecX(ctx context.Context) {
 	if err := wsdacuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) defaults() {
+	if _, ok := wsdacuo.mutation.UpdatedAt(); !ok {
+		v := webauthnsessiondataallowedcredential.UpdateDefaultUpdatedAt()
+		wsdacuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -306,9 +309,6 @@ func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) sqlSave(ctx contex
 	}
 	if value, ok := wsdacuo.mutation.CredentialID(); ok {
 		_spec.SetField(webauthnsessiondataallowedcredential.FieldCredentialID, field.TypeString, value)
-	}
-	if value, ok := wsdacuo.mutation.CreatedAt(); ok {
-		_spec.SetField(webauthnsessiondataallowedcredential.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := wsdacuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(webauthnsessiondataallowedcredential.FieldUpdatedAt, field.TypeTime, value)

@@ -61,9 +61,25 @@ func (pc *PasscodeCreate) SetCreatedAt(t time.Time) *PasscodeCreate {
 	return pc
 }
 
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (pc *PasscodeCreate) SetNillableCreatedAt(t *time.Time) *PasscodeCreate {
+	if t != nil {
+		pc.SetCreatedAt(*t)
+	}
+	return pc
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (pc *PasscodeCreate) SetUpdatedAt(t time.Time) *PasscodeCreate {
 	pc.mutation.SetUpdatedAt(t)
+	return pc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (pc *PasscodeCreate) SetNillableUpdatedAt(t *time.Time) *PasscodeCreate {
+	if t != nil {
+		pc.SetUpdatedAt(*t)
+	}
 	return pc
 }
 
@@ -104,6 +120,7 @@ func (pc *PasscodeCreate) Mutation() *PasscodeMutation {
 
 // Save creates the Passcode in the database.
 func (pc *PasscodeCreate) Save(ctx context.Context) (*Passcode, error) {
+	pc.defaults()
 	return withHooks[*Passcode, PasscodeMutation](ctx, pc.sqlSave, pc.mutation, pc.hooks)
 }
 
@@ -126,6 +143,18 @@ func (pc *PasscodeCreate) Exec(ctx context.Context) error {
 func (pc *PasscodeCreate) ExecX(ctx context.Context) {
 	if err := pc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (pc *PasscodeCreate) defaults() {
+	if _, ok := pc.mutation.CreatedAt(); !ok {
+		v := passcode.DefaultCreatedAt()
+		pc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := pc.mutation.UpdatedAt(); !ok {
+		v := passcode.DefaultUpdatedAt()
+		pc.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -258,6 +287,7 @@ func (pcb *PasscodeCreateBulk) Save(ctx context.Context) ([]*Passcode, error) {
 	for i := range pcb.builders {
 		func(i int, root context.Context) {
 			builder := pcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PasscodeMutation)
 				if !ok {

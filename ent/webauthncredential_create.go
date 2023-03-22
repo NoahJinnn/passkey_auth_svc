@@ -67,9 +67,25 @@ func (wcc *WebauthnCredentialCreate) SetCreatedAt(t time.Time) *WebauthnCredenti
 	return wcc
 }
 
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (wcc *WebauthnCredentialCreate) SetNillableCreatedAt(t *time.Time) *WebauthnCredentialCreate {
+	if t != nil {
+		wcc.SetCreatedAt(*t)
+	}
+	return wcc
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (wcc *WebauthnCredentialCreate) SetUpdatedAt(t time.Time) *WebauthnCredentialCreate {
 	wcc.mutation.SetUpdatedAt(t)
+	return wcc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (wcc *WebauthnCredentialCreate) SetNillableUpdatedAt(t *time.Time) *WebauthnCredentialCreate {
+	if t != nil {
+		wcc.SetUpdatedAt(*t)
+	}
 	return wcc
 }
 
@@ -146,6 +162,7 @@ func (wcc *WebauthnCredentialCreate) Mutation() *WebauthnCredentialMutation {
 
 // Save creates the WebauthnCredential in the database.
 func (wcc *WebauthnCredentialCreate) Save(ctx context.Context) (*WebauthnCredential, error) {
+	wcc.defaults()
 	return withHooks[*WebauthnCredential, WebauthnCredentialMutation](ctx, wcc.sqlSave, wcc.mutation, wcc.hooks)
 }
 
@@ -168,6 +185,18 @@ func (wcc *WebauthnCredentialCreate) Exec(ctx context.Context) error {
 func (wcc *WebauthnCredentialCreate) ExecX(ctx context.Context) {
 	if err := wcc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (wcc *WebauthnCredentialCreate) defaults() {
+	if _, ok := wcc.mutation.CreatedAt(); !ok {
+		v := webauthncredential.DefaultCreatedAt()
+		wcc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := wcc.mutation.UpdatedAt(); !ok {
+		v := webauthncredential.DefaultUpdatedAt()
+		wcc.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -328,6 +357,7 @@ func (wccb *WebauthnCredentialCreateBulk) Save(ctx context.Context) ([]*Webauthn
 	for i := range wccb.builders {
 		func(i int, root context.Context) {
 			builder := wccb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*WebauthnCredentialMutation)
 				if !ok {

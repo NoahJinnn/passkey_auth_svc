@@ -68,9 +68,25 @@ func (ic *IdentityCreate) SetCreatedAt(t time.Time) *IdentityCreate {
 	return ic
 }
 
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (ic *IdentityCreate) SetNillableCreatedAt(t *time.Time) *IdentityCreate {
+	if t != nil {
+		ic.SetCreatedAt(*t)
+	}
+	return ic
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (ic *IdentityCreate) SetUpdatedAt(t time.Time) *IdentityCreate {
 	ic.mutation.SetUpdatedAt(t)
+	return ic
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (ic *IdentityCreate) SetNillableUpdatedAt(t *time.Time) *IdentityCreate {
+	if t != nil {
+		ic.SetUpdatedAt(*t)
+	}
 	return ic
 }
 
@@ -92,6 +108,7 @@ func (ic *IdentityCreate) Mutation() *IdentityMutation {
 
 // Save creates the Identity in the database.
 func (ic *IdentityCreate) Save(ctx context.Context) (*Identity, error) {
+	ic.defaults()
 	return withHooks[*Identity, IdentityMutation](ctx, ic.sqlSave, ic.mutation, ic.hooks)
 }
 
@@ -114,6 +131,18 @@ func (ic *IdentityCreate) Exec(ctx context.Context) error {
 func (ic *IdentityCreate) ExecX(ctx context.Context) {
 	if err := ic.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (ic *IdentityCreate) defaults() {
+	if _, ok := ic.mutation.CreatedAt(); !ok {
+		v := identity.DefaultCreatedAt()
+		ic.mutation.SetCreatedAt(v)
+	}
+	if _, ok := ic.mutation.UpdatedAt(); !ok {
+		v := identity.DefaultUpdatedAt()
+		ic.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -223,6 +252,7 @@ func (icb *IdentityCreateBulk) Save(ctx context.Context) ([]*Identity, error) {
 	for i := range icb.builders {
 		func(i int, root context.Context) {
 			builder := icb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*IdentityMutation)
 				if !ok {

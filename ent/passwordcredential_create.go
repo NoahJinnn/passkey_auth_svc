@@ -48,9 +48,25 @@ func (pcc *PasswordCredentialCreate) SetCreatedAt(t time.Time) *PasswordCredenti
 	return pcc
 }
 
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (pcc *PasswordCredentialCreate) SetNillableCreatedAt(t *time.Time) *PasswordCredentialCreate {
+	if t != nil {
+		pcc.SetCreatedAt(*t)
+	}
+	return pcc
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (pcc *PasswordCredentialCreate) SetUpdatedAt(t time.Time) *PasswordCredentialCreate {
 	pcc.mutation.SetUpdatedAt(t)
+	return pcc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (pcc *PasswordCredentialCreate) SetNillableUpdatedAt(t *time.Time) *PasswordCredentialCreate {
+	if t != nil {
+		pcc.SetUpdatedAt(*t)
+	}
 	return pcc
 }
 
@@ -72,6 +88,7 @@ func (pcc *PasswordCredentialCreate) Mutation() *PasswordCredentialMutation {
 
 // Save creates the PasswordCredential in the database.
 func (pcc *PasswordCredentialCreate) Save(ctx context.Context) (*PasswordCredential, error) {
+	pcc.defaults()
 	return withHooks[*PasswordCredential, PasswordCredentialMutation](ctx, pcc.sqlSave, pcc.mutation, pcc.hooks)
 }
 
@@ -94,6 +111,18 @@ func (pcc *PasswordCredentialCreate) Exec(ctx context.Context) error {
 func (pcc *PasswordCredentialCreate) ExecX(ctx context.Context) {
 	if err := pcc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (pcc *PasswordCredentialCreate) defaults() {
+	if _, ok := pcc.mutation.CreatedAt(); !ok {
+		v := passwordcredential.DefaultCreatedAt()
+		pcc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := pcc.mutation.UpdatedAt(); !ok {
+		v := passwordcredential.DefaultUpdatedAt()
+		pcc.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -192,6 +221,7 @@ func (pccb *PasswordCredentialCreateBulk) Save(ctx context.Context) ([]*Password
 	for i := range pccb.builders {
 		func(i int, root context.Context) {
 			builder := pccb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PasswordCredentialMutation)
 				if !ok {

@@ -57,9 +57,25 @@ func (ec *EmailCreate) SetCreatedAt(t time.Time) *EmailCreate {
 	return ec
 }
 
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (ec *EmailCreate) SetNillableCreatedAt(t *time.Time) *EmailCreate {
+	if t != nil {
+		ec.SetCreatedAt(*t)
+	}
+	return ec
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (ec *EmailCreate) SetUpdatedAt(t time.Time) *EmailCreate {
 	ec.mutation.SetUpdatedAt(t)
+	return ec
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (ec *EmailCreate) SetNillableUpdatedAt(t *time.Time) *EmailCreate {
+	if t != nil {
+		ec.SetUpdatedAt(*t)
+	}
 	return ec
 }
 
@@ -130,6 +146,7 @@ func (ec *EmailCreate) Mutation() *EmailMutation {
 
 // Save creates the Email in the database.
 func (ec *EmailCreate) Save(ctx context.Context) (*Email, error) {
+	ec.defaults()
 	return withHooks[*Email, EmailMutation](ctx, ec.sqlSave, ec.mutation, ec.hooks)
 }
 
@@ -152,6 +169,18 @@ func (ec *EmailCreate) Exec(ctx context.Context) error {
 func (ec *EmailCreate) ExecX(ctx context.Context) {
 	if err := ec.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (ec *EmailCreate) defaults() {
+	if _, ok := ec.mutation.CreatedAt(); !ok {
+		v := email.DefaultCreatedAt()
+		ec.mutation.SetCreatedAt(v)
+	}
+	if _, ok := ec.mutation.UpdatedAt(); !ok {
+		v := email.DefaultUpdatedAt()
+		ec.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -314,6 +343,7 @@ func (ecb *EmailCreateBulk) Save(ctx context.Context) ([]*Email, error) {
 	for i := range ecb.builders {
 		func(i int, root context.Context) {
 			builder := ecb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*EmailMutation)
 				if !ok {

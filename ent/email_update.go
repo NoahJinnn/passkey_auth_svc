@@ -65,12 +65,6 @@ func (eu *EmailUpdate) SetVerified(b bool) *EmailUpdate {
 	return eu
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (eu *EmailUpdate) SetCreatedAt(t time.Time) *EmailUpdate {
-	eu.mutation.SetCreatedAt(t)
-	return eu
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (eu *EmailUpdate) SetUpdatedAt(t time.Time) *EmailUpdate {
 	eu.mutation.SetUpdatedAt(t)
@@ -192,6 +186,7 @@ func (eu *EmailUpdate) ClearPrimaryEmail() *EmailUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (eu *EmailUpdate) Save(ctx context.Context) (int, error) {
+	eu.defaults()
 	return withHooks[int, EmailMutation](ctx, eu.sqlSave, eu.mutation, eu.hooks)
 }
 
@@ -217,6 +212,14 @@ func (eu *EmailUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (eu *EmailUpdate) defaults() {
+	if _, ok := eu.mutation.UpdatedAt(); !ok {
+		v := email.UpdateDefaultUpdatedAt()
+		eu.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (eu *EmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(email.Table, email.Columns, sqlgraph.NewFieldSpec(email.FieldID, field.TypeUUID))
 	if ps := eu.mutation.predicates; len(ps) > 0 {
@@ -231,9 +234,6 @@ func (eu *EmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := eu.mutation.Verified(); ok {
 		_spec.SetField(email.FieldVerified, field.TypeBool, value)
-	}
-	if value, ok := eu.mutation.CreatedAt(); ok {
-		_spec.SetField(email.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := eu.mutation.UpdatedAt(); ok {
 		_spec.SetField(email.FieldUpdatedAt, field.TypeTime, value)
@@ -468,12 +468,6 @@ func (euo *EmailUpdateOne) SetVerified(b bool) *EmailUpdateOne {
 	return euo
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (euo *EmailUpdateOne) SetCreatedAt(t time.Time) *EmailUpdateOne {
-	euo.mutation.SetCreatedAt(t)
-	return euo
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (euo *EmailUpdateOne) SetUpdatedAt(t time.Time) *EmailUpdateOne {
 	euo.mutation.SetUpdatedAt(t)
@@ -608,6 +602,7 @@ func (euo *EmailUpdateOne) Select(field string, fields ...string) *EmailUpdateOn
 
 // Save executes the query and returns the updated Email entity.
 func (euo *EmailUpdateOne) Save(ctx context.Context) (*Email, error) {
+	euo.defaults()
 	return withHooks[*Email, EmailMutation](ctx, euo.sqlSave, euo.mutation, euo.hooks)
 }
 
@@ -630,6 +625,14 @@ func (euo *EmailUpdateOne) Exec(ctx context.Context) error {
 func (euo *EmailUpdateOne) ExecX(ctx context.Context) {
 	if err := euo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (euo *EmailUpdateOne) defaults() {
+	if _, ok := euo.mutation.UpdatedAt(); !ok {
+		v := email.UpdateDefaultUpdatedAt()
+		euo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -664,9 +667,6 @@ func (euo *EmailUpdateOne) sqlSave(ctx context.Context) (_node *Email, err error
 	}
 	if value, ok := euo.mutation.Verified(); ok {
 		_spec.SetField(email.FieldVerified, field.TypeBool, value)
-	}
-	if value, ok := euo.mutation.CreatedAt(); ok {
-		_spec.SetField(email.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := euo.mutation.UpdatedAt(); ok {
 		_spec.SetField(email.FieldUpdatedAt, field.TypeTime, value)

@@ -71,12 +71,6 @@ func (peu *PrimaryEmailUpdate) ClearUserID() *PrimaryEmailUpdate {
 	return peu
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (peu *PrimaryEmailUpdate) SetCreatedAt(t time.Time) *PrimaryEmailUpdate {
-	peu.mutation.SetCreatedAt(t)
-	return peu
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (peu *PrimaryEmailUpdate) SetUpdatedAt(t time.Time) *PrimaryEmailUpdate {
 	peu.mutation.SetUpdatedAt(t)
@@ -112,6 +106,7 @@ func (peu *PrimaryEmailUpdate) ClearUser() *PrimaryEmailUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (peu *PrimaryEmailUpdate) Save(ctx context.Context) (int, error) {
+	peu.defaults()
 	return withHooks[int, PrimaryEmailMutation](ctx, peu.sqlSave, peu.mutation, peu.hooks)
 }
 
@@ -137,6 +132,14 @@ func (peu *PrimaryEmailUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (peu *PrimaryEmailUpdate) defaults() {
+	if _, ok := peu.mutation.UpdatedAt(); !ok {
+		v := primaryemail.UpdateDefaultUpdatedAt()
+		peu.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (peu *PrimaryEmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(primaryemail.Table, primaryemail.Columns, sqlgraph.NewFieldSpec(primaryemail.FieldID, field.TypeUUID))
 	if ps := peu.mutation.predicates; len(ps) > 0 {
@@ -145,9 +148,6 @@ func (peu *PrimaryEmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := peu.mutation.CreatedAt(); ok {
-		_spec.SetField(primaryemail.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := peu.mutation.UpdatedAt(); ok {
 		_spec.SetField(primaryemail.FieldUpdatedAt, field.TypeTime, value)
@@ -282,12 +282,6 @@ func (peuo *PrimaryEmailUpdateOne) ClearUserID() *PrimaryEmailUpdateOne {
 	return peuo
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (peuo *PrimaryEmailUpdateOne) SetCreatedAt(t time.Time) *PrimaryEmailUpdateOne {
-	peuo.mutation.SetCreatedAt(t)
-	return peuo
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (peuo *PrimaryEmailUpdateOne) SetUpdatedAt(t time.Time) *PrimaryEmailUpdateOne {
 	peuo.mutation.SetUpdatedAt(t)
@@ -336,6 +330,7 @@ func (peuo *PrimaryEmailUpdateOne) Select(field string, fields ...string) *Prima
 
 // Save executes the query and returns the updated PrimaryEmail entity.
 func (peuo *PrimaryEmailUpdateOne) Save(ctx context.Context) (*PrimaryEmail, error) {
+	peuo.defaults()
 	return withHooks[*PrimaryEmail, PrimaryEmailMutation](ctx, peuo.sqlSave, peuo.mutation, peuo.hooks)
 }
 
@@ -358,6 +353,14 @@ func (peuo *PrimaryEmailUpdateOne) Exec(ctx context.Context) error {
 func (peuo *PrimaryEmailUpdateOne) ExecX(ctx context.Context) {
 	if err := peuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (peuo *PrimaryEmailUpdateOne) defaults() {
+	if _, ok := peuo.mutation.UpdatedAt(); !ok {
+		v := primaryemail.UpdateDefaultUpdatedAt()
+		peuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -386,9 +389,6 @@ func (peuo *PrimaryEmailUpdateOne) sqlSave(ctx context.Context) (_node *PrimaryE
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := peuo.mutation.CreatedAt(); ok {
-		_spec.SetField(primaryemail.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := peuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(primaryemail.FieldUpdatedAt, field.TypeTime, value)

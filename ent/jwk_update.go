@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -31,12 +30,6 @@ func (ju *JwkUpdate) Where(ps ...predicate.Jwk) *JwkUpdate {
 // SetKeyData sets the "key_data" field.
 func (ju *JwkUpdate) SetKeyData(s string) *JwkUpdate {
 	ju.mutation.SetKeyData(s)
-	return ju
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (ju *JwkUpdate) SetCreatedAt(t time.Time) *JwkUpdate {
-	ju.mutation.SetCreatedAt(t)
 	return ju
 }
 
@@ -84,9 +77,6 @@ func (ju *JwkUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := ju.mutation.KeyData(); ok {
 		_spec.SetField(jwk.FieldKeyData, field.TypeString, value)
 	}
-	if value, ok := ju.mutation.CreatedAt(); ok {
-		_spec.SetField(jwk.FieldCreatedAt, field.TypeTime, value)
-	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ju.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{jwk.Label}
@@ -110,12 +100,6 @@ type JwkUpdateOne struct {
 // SetKeyData sets the "key_data" field.
 func (juo *JwkUpdateOne) SetKeyData(s string) *JwkUpdateOne {
 	juo.mutation.SetKeyData(s)
-	return juo
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (juo *JwkUpdateOne) SetCreatedAt(t time.Time) *JwkUpdateOne {
-	juo.mutation.SetCreatedAt(t)
 	return juo
 }
 
@@ -192,9 +176,6 @@ func (juo *JwkUpdateOne) sqlSave(ctx context.Context) (_node *Jwk, err error) {
 	}
 	if value, ok := juo.mutation.KeyData(); ok {
 		_spec.SetField(jwk.FieldKeyData, field.TypeString, value)
-	}
-	if value, ok := juo.mutation.CreatedAt(); ok {
-		_spec.SetField(jwk.FieldCreatedAt, field.TypeTime, value)
 	}
 	_node = &Jwk{config: juo.config}
 	_spec.Assign = _node.assignValues

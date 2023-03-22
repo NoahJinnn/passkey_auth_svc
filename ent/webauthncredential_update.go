@@ -82,12 +82,6 @@ func (wcu *WebauthnCredentialUpdate) AddSignCount(i int32) *WebauthnCredentialUp
 	return wcu
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (wcu *WebauthnCredentialUpdate) SetCreatedAt(t time.Time) *WebauthnCredentialUpdate {
-	wcu.mutation.SetCreatedAt(t)
-	return wcu
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (wcu *WebauthnCredentialUpdate) SetUpdatedAt(t time.Time) *WebauthnCredentialUpdate {
 	wcu.mutation.SetUpdatedAt(t)
@@ -200,6 +194,7 @@ func (wcu *WebauthnCredentialUpdate) ClearUser() *WebauthnCredentialUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (wcu *WebauthnCredentialUpdate) Save(ctx context.Context) (int, error) {
+	wcu.defaults()
 	return withHooks[int, WebauthnCredentialMutation](ctx, wcu.sqlSave, wcu.mutation, wcu.hooks)
 }
 
@@ -222,6 +217,14 @@ func (wcu *WebauthnCredentialUpdate) Exec(ctx context.Context) error {
 func (wcu *WebauthnCredentialUpdate) ExecX(ctx context.Context) {
 	if err := wcu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (wcu *WebauthnCredentialUpdate) defaults() {
+	if _, ok := wcu.mutation.UpdatedAt(); !ok {
+		v := webauthncredential.UpdateDefaultUpdatedAt()
+		wcu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -248,9 +251,6 @@ func (wcu *WebauthnCredentialUpdate) sqlSave(ctx context.Context) (n int, err er
 	}
 	if value, ok := wcu.mutation.AddedSignCount(); ok {
 		_spec.AddField(webauthncredential.FieldSignCount, field.TypeInt32, value)
-	}
-	if value, ok := wcu.mutation.CreatedAt(); ok {
-		_spec.SetField(webauthncredential.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := wcu.mutation.UpdatedAt(); ok {
 		_spec.SetField(webauthncredential.FieldUpdatedAt, field.TypeTime, value)
@@ -433,12 +433,6 @@ func (wcuo *WebauthnCredentialUpdateOne) AddSignCount(i int32) *WebauthnCredenti
 	return wcuo
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (wcuo *WebauthnCredentialUpdateOne) SetCreatedAt(t time.Time) *WebauthnCredentialUpdateOne {
-	wcuo.mutation.SetCreatedAt(t)
-	return wcuo
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (wcuo *WebauthnCredentialUpdateOne) SetUpdatedAt(t time.Time) *WebauthnCredentialUpdateOne {
 	wcuo.mutation.SetUpdatedAt(t)
@@ -564,6 +558,7 @@ func (wcuo *WebauthnCredentialUpdateOne) Select(field string, fields ...string) 
 
 // Save executes the query and returns the updated WebauthnCredential entity.
 func (wcuo *WebauthnCredentialUpdateOne) Save(ctx context.Context) (*WebauthnCredential, error) {
+	wcuo.defaults()
 	return withHooks[*WebauthnCredential, WebauthnCredentialMutation](ctx, wcuo.sqlSave, wcuo.mutation, wcuo.hooks)
 }
 
@@ -586,6 +581,14 @@ func (wcuo *WebauthnCredentialUpdateOne) Exec(ctx context.Context) error {
 func (wcuo *WebauthnCredentialUpdateOne) ExecX(ctx context.Context) {
 	if err := wcuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (wcuo *WebauthnCredentialUpdateOne) defaults() {
+	if _, ok := wcuo.mutation.UpdatedAt(); !ok {
+		v := webauthncredential.UpdateDefaultUpdatedAt()
+		wcuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -629,9 +632,6 @@ func (wcuo *WebauthnCredentialUpdateOne) sqlSave(ctx context.Context) (_node *We
 	}
 	if value, ok := wcuo.mutation.AddedSignCount(); ok {
 		_spec.AddField(webauthncredential.FieldSignCount, field.TypeInt32, value)
-	}
-	if value, ok := wcuo.mutation.CreatedAt(); ok {
-		_spec.SetField(webauthncredential.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := wcuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(webauthncredential.FieldUpdatedAt, field.TypeTime, value)

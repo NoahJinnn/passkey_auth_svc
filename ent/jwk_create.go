@@ -32,6 +32,14 @@ func (jc *JwkCreate) SetCreatedAt(t time.Time) *JwkCreate {
 	return jc
 }
 
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (jc *JwkCreate) SetNillableCreatedAt(t *time.Time) *JwkCreate {
+	if t != nil {
+		jc.SetCreatedAt(*t)
+	}
+	return jc
+}
+
 // SetID sets the "id" field.
 func (jc *JwkCreate) SetID(u uint) *JwkCreate {
 	jc.mutation.SetID(u)
@@ -45,6 +53,7 @@ func (jc *JwkCreate) Mutation() *JwkMutation {
 
 // Save creates the Jwk in the database.
 func (jc *JwkCreate) Save(ctx context.Context) (*Jwk, error) {
+	jc.defaults()
 	return withHooks[*Jwk, JwkMutation](ctx, jc.sqlSave, jc.mutation, jc.hooks)
 }
 
@@ -67,6 +76,14 @@ func (jc *JwkCreate) Exec(ctx context.Context) error {
 func (jc *JwkCreate) ExecX(ctx context.Context) {
 	if err := jc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (jc *JwkCreate) defaults() {
+	if _, ok := jc.mutation.CreatedAt(); !ok {
+		v := jwk.DefaultCreatedAt()
+		jc.mutation.SetCreatedAt(v)
 	}
 }
 
@@ -135,6 +152,7 @@ func (jcb *JwkCreateBulk) Save(ctx context.Context) ([]*Jwk, error) {
 	for i := range jcb.builders {
 		func(i int, root context.Context) {
 			builder := jcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*JwkMutation)
 				if !ok {

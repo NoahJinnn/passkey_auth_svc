@@ -56,12 +56,6 @@ func (pcu *PasswordCredentialUpdate) SetPassword(s string) *PasswordCredentialUp
 	return pcu
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (pcu *PasswordCredentialUpdate) SetCreatedAt(t time.Time) *PasswordCredentialUpdate {
-	pcu.mutation.SetCreatedAt(t)
-	return pcu
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (pcu *PasswordCredentialUpdate) SetUpdatedAt(t time.Time) *PasswordCredentialUpdate {
 	pcu.mutation.SetUpdatedAt(t)
@@ -86,6 +80,7 @@ func (pcu *PasswordCredentialUpdate) ClearUser() *PasswordCredentialUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (pcu *PasswordCredentialUpdate) Save(ctx context.Context) (int, error) {
+	pcu.defaults()
 	return withHooks[int, PasswordCredentialMutation](ctx, pcu.sqlSave, pcu.mutation, pcu.hooks)
 }
 
@@ -111,6 +106,14 @@ func (pcu *PasswordCredentialUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (pcu *PasswordCredentialUpdate) defaults() {
+	if _, ok := pcu.mutation.UpdatedAt(); !ok {
+		v := passwordcredential.UpdateDefaultUpdatedAt()
+		pcu.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (pcu *PasswordCredentialUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(passwordcredential.Table, passwordcredential.Columns, sqlgraph.NewFieldSpec(passwordcredential.FieldID, field.TypeUUID))
 	if ps := pcu.mutation.predicates; len(ps) > 0 {
@@ -122,9 +125,6 @@ func (pcu *PasswordCredentialUpdate) sqlSave(ctx context.Context) (n int, err er
 	}
 	if value, ok := pcu.mutation.Password(); ok {
 		_spec.SetField(passwordcredential.FieldPassword, field.TypeString, value)
-	}
-	if value, ok := pcu.mutation.CreatedAt(); ok {
-		_spec.SetField(passwordcredential.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := pcu.mutation.UpdatedAt(); ok {
 		_spec.SetField(passwordcredential.FieldUpdatedAt, field.TypeTime, value)
@@ -210,12 +210,6 @@ func (pcuo *PasswordCredentialUpdateOne) SetPassword(s string) *PasswordCredenti
 	return pcuo
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (pcuo *PasswordCredentialUpdateOne) SetCreatedAt(t time.Time) *PasswordCredentialUpdateOne {
-	pcuo.mutation.SetCreatedAt(t)
-	return pcuo
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (pcuo *PasswordCredentialUpdateOne) SetUpdatedAt(t time.Time) *PasswordCredentialUpdateOne {
 	pcuo.mutation.SetUpdatedAt(t)
@@ -253,6 +247,7 @@ func (pcuo *PasswordCredentialUpdateOne) Select(field string, fields ...string) 
 
 // Save executes the query and returns the updated PasswordCredential entity.
 func (pcuo *PasswordCredentialUpdateOne) Save(ctx context.Context) (*PasswordCredential, error) {
+	pcuo.defaults()
 	return withHooks[*PasswordCredential, PasswordCredentialMutation](ctx, pcuo.sqlSave, pcuo.mutation, pcuo.hooks)
 }
 
@@ -275,6 +270,14 @@ func (pcuo *PasswordCredentialUpdateOne) Exec(ctx context.Context) error {
 func (pcuo *PasswordCredentialUpdateOne) ExecX(ctx context.Context) {
 	if err := pcuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (pcuo *PasswordCredentialUpdateOne) defaults() {
+	if _, ok := pcuo.mutation.UpdatedAt(); !ok {
+		v := passwordcredential.UpdateDefaultUpdatedAt()
+		pcuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -306,9 +309,6 @@ func (pcuo *PasswordCredentialUpdateOne) sqlSave(ctx context.Context) (_node *Pa
 	}
 	if value, ok := pcuo.mutation.Password(); ok {
 		_spec.SetField(passwordcredential.FieldPassword, field.TypeString, value)
-	}
-	if value, ok := pcuo.mutation.CreatedAt(); ok {
-		_spec.SetField(passwordcredential.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := pcuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(passwordcredential.FieldUpdatedAt, field.TypeTime, value)

@@ -52,9 +52,25 @@ func (wsdc *WebauthnSessionDataCreate) SetCreatedAt(t time.Time) *WebauthnSessio
 	return wsdc
 }
 
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (wsdc *WebauthnSessionDataCreate) SetNillableCreatedAt(t *time.Time) *WebauthnSessionDataCreate {
+	if t != nil {
+		wsdc.SetCreatedAt(*t)
+	}
+	return wsdc
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (wsdc *WebauthnSessionDataCreate) SetUpdatedAt(t time.Time) *WebauthnSessionDataCreate {
 	wsdc.mutation.SetUpdatedAt(t)
+	return wsdc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (wsdc *WebauthnSessionDataCreate) SetNillableUpdatedAt(t *time.Time) *WebauthnSessionDataCreate {
+	if t != nil {
+		wsdc.SetUpdatedAt(*t)
+	}
 	return wsdc
 }
 
@@ -86,6 +102,7 @@ func (wsdc *WebauthnSessionDataCreate) Mutation() *WebauthnSessionDataMutation {
 
 // Save creates the WebauthnSessionData in the database.
 func (wsdc *WebauthnSessionDataCreate) Save(ctx context.Context) (*WebauthnSessionData, error) {
+	wsdc.defaults()
 	return withHooks[*WebauthnSessionData, WebauthnSessionDataMutation](ctx, wsdc.sqlSave, wsdc.mutation, wsdc.hooks)
 }
 
@@ -108,6 +125,18 @@ func (wsdc *WebauthnSessionDataCreate) Exec(ctx context.Context) error {
 func (wsdc *WebauthnSessionDataCreate) ExecX(ctx context.Context) {
 	if err := wsdc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (wsdc *WebauthnSessionDataCreate) defaults() {
+	if _, ok := wsdc.mutation.CreatedAt(); !ok {
+		v := webauthnsessiondata.DefaultCreatedAt()
+		wsdc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := wsdc.mutation.UpdatedAt(); !ok {
+		v := webauthnsessiondata.DefaultUpdatedAt()
+		wsdc.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -226,6 +255,7 @@ func (wsdcb *WebauthnSessionDataCreateBulk) Save(ctx context.Context) ([]*Webaut
 	for i := range wsdcb.builders {
 		func(i int, root context.Context) {
 			builder := wsdcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*WebauthnSessionDataMutation)
 				if !ok {
