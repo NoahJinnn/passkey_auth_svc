@@ -16,7 +16,14 @@ type User struct {
 
 // Fields of the User.
 func (User) Fields() []ent.Field {
-	return []ent.Field{field.UUID("id", uuid.UUID{}), field.Time("created_at").Default(time.Now).Immutable(), field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now)}
+	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).Default(func() uuid.UUID {
+			id, _ := uuid.NewV4()
+			return id
+		}).Immutable(),
+		field.Time("created_at").Default(time.Now).Immutable(),
+		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+	}
 }
 
 // Edges of the User.

@@ -15,7 +15,16 @@ type PrimaryEmail struct {
 }
 
 func (PrimaryEmail) Fields() []ent.Field {
-	return []ent.Field{field.UUID("id", uuid.UUID{}), field.UUID("email_id", uuid.UUID{}).Optional().Unique(), field.UUID("user_id", uuid.UUID{}).Optional().Unique(), field.Time("created_at").Default(time.Now).Immutable(), field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now)}
+	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).Default(func() uuid.UUID {
+			id, _ := uuid.NewV4()
+			return id
+		}).Immutable(),
+		field.UUID("email_id", uuid.UUID{}).Optional().Unique(),
+		field.UUID("user_id", uuid.UUID{}).Optional().Unique(),
+		field.Time("created_at").Default(time.Now).Immutable(),
+		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+	}
 }
 func (PrimaryEmail) Edges() []ent.Edge {
 	return []ent.Edge{

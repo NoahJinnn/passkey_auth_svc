@@ -85,6 +85,14 @@ func (ec *EmailCreate) SetID(u uuid.UUID) *EmailCreate {
 	return ec
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (ec *EmailCreate) SetNillableID(u *uuid.UUID) *EmailCreate {
+	if u != nil {
+		ec.SetID(*u)
+	}
+	return ec
+}
+
 // SetUser sets the "user" edge to the User entity.
 func (ec *EmailCreate) SetUser(u *User) *EmailCreate {
 	return ec.SetUserID(u.ID)
@@ -181,6 +189,10 @@ func (ec *EmailCreate) defaults() {
 	if _, ok := ec.mutation.UpdatedAt(); !ok {
 		v := email.DefaultUpdatedAt()
 		ec.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := ec.mutation.ID(); !ok {
+		v := email.DefaultID()
+		ec.mutation.SetID(v)
 	}
 }
 

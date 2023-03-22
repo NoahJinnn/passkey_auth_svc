@@ -103,6 +103,14 @@ func (pc *PasscodeCreate) SetID(u uuid.UUID) *PasscodeCreate {
 	return pc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (pc *PasscodeCreate) SetNillableID(u *uuid.UUID) *PasscodeCreate {
+	if u != nil {
+		pc.SetID(*u)
+	}
+	return pc
+}
+
 // SetEmail sets the "email" edge to the Email entity.
 func (pc *PasscodeCreate) SetEmail(e *Email) *PasscodeCreate {
 	return pc.SetEmailID(e.ID)
@@ -155,6 +163,10 @@ func (pc *PasscodeCreate) defaults() {
 	if _, ok := pc.mutation.UpdatedAt(); !ok {
 		v := passcode.DefaultUpdatedAt()
 		pc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := pc.mutation.ID(); !ok {
+		v := passcode.DefaultID()
+		pc.mutation.SetID(v)
 	}
 }
 

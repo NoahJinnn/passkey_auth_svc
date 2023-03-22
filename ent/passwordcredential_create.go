@@ -76,6 +76,14 @@ func (pcc *PasswordCredentialCreate) SetID(u uuid.UUID) *PasswordCredentialCreat
 	return pcc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (pcc *PasswordCredentialCreate) SetNillableID(u *uuid.UUID) *PasswordCredentialCreate {
+	if u != nil {
+		pcc.SetID(*u)
+	}
+	return pcc
+}
+
 // SetUser sets the "user" edge to the User entity.
 func (pcc *PasswordCredentialCreate) SetUser(u *User) *PasswordCredentialCreate {
 	return pcc.SetUserID(u.ID)
@@ -123,6 +131,10 @@ func (pcc *PasswordCredentialCreate) defaults() {
 	if _, ok := pcc.mutation.UpdatedAt(); !ok {
 		v := passwordcredential.DefaultUpdatedAt()
 		pcc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := pcc.mutation.ID(); !ok {
+		v := passwordcredential.DefaultID()
+		pcc.mutation.SetID(v)
 	}
 }
 

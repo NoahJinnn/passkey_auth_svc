@@ -5,6 +5,7 @@ package ent
 import (
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/identity"
 	"github.com/hellohq/hqservice/ent/jwk"
@@ -34,6 +35,10 @@ func init() {
 	email.DefaultUpdatedAt = emailDescUpdatedAt.Default.(func() time.Time)
 	// email.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	email.UpdateDefaultUpdatedAt = emailDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// emailDescID is the schema descriptor for id field.
+	emailDescID := emailFields[0].Descriptor()
+	// email.DefaultID holds the default value on creation for the id field.
+	email.DefaultID = emailDescID.Default.(func() uuid.UUID)
 	identityFields := schema.Identity{}.Fields()
 	_ = identityFields
 	// identityDescCreatedAt is the schema descriptor for created_at field.
@@ -46,6 +51,10 @@ func init() {
 	identity.DefaultUpdatedAt = identityDescUpdatedAt.Default.(func() time.Time)
 	// identity.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	identity.UpdateDefaultUpdatedAt = identityDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// identityDescID is the schema descriptor for id field.
+	identityDescID := identityFields[0].Descriptor()
+	// identity.DefaultID holds the default value on creation for the id field.
+	identity.DefaultID = identityDescID.Default.(func() uuid.UUID)
 	jwkFields := schema.Jwk{}.Fields()
 	_ = jwkFields
 	// jwkDescCreatedAt is the schema descriptor for created_at field.
@@ -64,6 +73,10 @@ func init() {
 	passcode.DefaultUpdatedAt = passcodeDescUpdatedAt.Default.(func() time.Time)
 	// passcode.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	passcode.UpdateDefaultUpdatedAt = passcodeDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// passcodeDescID is the schema descriptor for id field.
+	passcodeDescID := passcodeFields[0].Descriptor()
+	// passcode.DefaultID holds the default value on creation for the id field.
+	passcode.DefaultID = passcodeDescID.Default.(func() uuid.UUID)
 	passwordcredentialFields := schema.PasswordCredential{}.Fields()
 	_ = passwordcredentialFields
 	// passwordcredentialDescCreatedAt is the schema descriptor for created_at field.
@@ -76,6 +89,10 @@ func init() {
 	passwordcredential.DefaultUpdatedAt = passwordcredentialDescUpdatedAt.Default.(func() time.Time)
 	// passwordcredential.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	passwordcredential.UpdateDefaultUpdatedAt = passwordcredentialDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// passwordcredentialDescID is the schema descriptor for id field.
+	passwordcredentialDescID := passwordcredentialFields[0].Descriptor()
+	// passwordcredential.DefaultID holds the default value on creation for the id field.
+	passwordcredential.DefaultID = passwordcredentialDescID.Default.(func() uuid.UUID)
 	primaryemailFields := schema.PrimaryEmail{}.Fields()
 	_ = primaryemailFields
 	// primaryemailDescCreatedAt is the schema descriptor for created_at field.
@@ -88,6 +105,10 @@ func init() {
 	primaryemail.DefaultUpdatedAt = primaryemailDescUpdatedAt.Default.(func() time.Time)
 	// primaryemail.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	primaryemail.UpdateDefaultUpdatedAt = primaryemailDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// primaryemailDescID is the schema descriptor for id field.
+	primaryemailDescID := primaryemailFields[0].Descriptor()
+	// primaryemail.DefaultID holds the default value on creation for the id field.
+	primaryemail.DefaultID = primaryemailDescID.Default.(func() uuid.UUID)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescCreatedAt is the schema descriptor for created_at field.
@@ -100,6 +121,10 @@ func init() {
 	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
 	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// userDescID is the schema descriptor for id field.
+	userDescID := userFields[0].Descriptor()
+	// user.DefaultID holds the default value on creation for the id field.
+	user.DefaultID = userDescID.Default.(func() uuid.UUID)
 	webauthncredentialFields := schema.WebauthnCredential{}.Fields()
 	_ = webauthncredentialFields
 	// webauthncredentialDescCreatedAt is the schema descriptor for created_at field.
@@ -124,6 +149,10 @@ func init() {
 	webauthnsessiondata.DefaultUpdatedAt = webauthnsessiondataDescUpdatedAt.Default.(func() time.Time)
 	// webauthnsessiondata.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	webauthnsessiondata.UpdateDefaultUpdatedAt = webauthnsessiondataDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// webauthnsessiondataDescID is the schema descriptor for id field.
+	webauthnsessiondataDescID := webauthnsessiondataFields[0].Descriptor()
+	// webauthnsessiondata.DefaultID holds the default value on creation for the id field.
+	webauthnsessiondata.DefaultID = webauthnsessiondataDescID.Default.(func() uuid.UUID)
 	webauthnsessiondataallowedcredentialFields := schema.WebauthnSessionDataAllowedCredential{}.Fields()
 	_ = webauthnsessiondataallowedcredentialFields
 	// webauthnsessiondataallowedcredentialDescCreatedAt is the schema descriptor for created_at field.
@@ -136,4 +165,8 @@ func init() {
 	webauthnsessiondataallowedcredential.DefaultUpdatedAt = webauthnsessiondataallowedcredentialDescUpdatedAt.Default.(func() time.Time)
 	// webauthnsessiondataallowedcredential.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	webauthnsessiondataallowedcredential.UpdateDefaultUpdatedAt = webauthnsessiondataallowedcredentialDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// webauthnsessiondataallowedcredentialDescID is the schema descriptor for id field.
+	webauthnsessiondataallowedcredentialDescID := webauthnsessiondataallowedcredentialFields[0].Descriptor()
+	// webauthnsessiondataallowedcredential.DefaultID holds the default value on creation for the id field.
+	webauthnsessiondataallowedcredential.DefaultID = webauthnsessiondataallowedcredentialDescID.Default.(func() uuid.UUID)
 }

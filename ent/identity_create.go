@@ -96,6 +96,14 @@ func (ic *IdentityCreate) SetID(u uuid.UUID) *IdentityCreate {
 	return ic
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (ic *IdentityCreate) SetNillableID(u *uuid.UUID) *IdentityCreate {
+	if u != nil {
+		ic.SetID(*u)
+	}
+	return ic
+}
+
 // SetEmail sets the "email" edge to the Email entity.
 func (ic *IdentityCreate) SetEmail(e *Email) *IdentityCreate {
 	return ic.SetEmailID(e.ID)
@@ -143,6 +151,10 @@ func (ic *IdentityCreate) defaults() {
 	if _, ok := ic.mutation.UpdatedAt(); !ok {
 		v := identity.DefaultUpdatedAt()
 		ic.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := ic.mutation.ID(); !ok {
+		v := identity.DefaultID()
+		ic.mutation.SetID(v)
 	}
 }
 

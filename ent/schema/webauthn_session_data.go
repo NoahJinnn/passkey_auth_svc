@@ -16,7 +16,10 @@ type WebauthnSessionData struct {
 
 func (WebauthnSessionData) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.UUID{}),
+		field.UUID("id", uuid.UUID{}).Default(func() uuid.UUID {
+			id, _ := uuid.NewV4()
+			return id
+		}).Immutable(),
 		field.String("challenge").Unique(),
 		field.UUID("user_id", uuid.UUID{}),
 		field.String("user_verification"),

@@ -15,7 +15,16 @@ type WebauthnSessionDataAllowedCredential struct {
 }
 
 func (WebauthnSessionDataAllowedCredential) Fields() []ent.Field {
-	return []ent.Field{field.UUID("id", uuid.UUID{}), field.String("credential_id"), field.UUID("webauthn_session_data_id", uuid.UUID{}).Optional(), field.Time("created_at").Default(time.Now).Immutable(), field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now)}
+	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).Default(func() uuid.UUID {
+			id, _ := uuid.NewV4()
+			return id
+		}).Immutable(),
+		field.String("credential_id"),
+		field.UUID("webauthn_session_data_id", uuid.UUID{}).Optional(),
+		field.Time("created_at").Default(time.Now).Immutable(),
+		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+	}
 }
 func (WebauthnSessionDataAllowedCredential) Edges() []ent.Edge {
 	return []ent.Edge{edge.From("webauthn_session_data", WebauthnSessionData.Type).Ref("webauthn_session_data_allowed_credentials").Unique().Field("webauthn_session_data_id")}

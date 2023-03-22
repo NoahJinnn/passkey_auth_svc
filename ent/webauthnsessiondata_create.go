@@ -80,6 +80,14 @@ func (wsdc *WebauthnSessionDataCreate) SetID(u uuid.UUID) *WebauthnSessionDataCr
 	return wsdc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (wsdc *WebauthnSessionDataCreate) SetNillableID(u *uuid.UUID) *WebauthnSessionDataCreate {
+	if u != nil {
+		wsdc.SetID(*u)
+	}
+	return wsdc
+}
+
 // AddWebauthnSessionDataAllowedCredentialIDs adds the "webauthn_session_data_allowed_credentials" edge to the WebauthnSessionDataAllowedCredential entity by IDs.
 func (wsdc *WebauthnSessionDataCreate) AddWebauthnSessionDataAllowedCredentialIDs(ids ...uuid.UUID) *WebauthnSessionDataCreate {
 	wsdc.mutation.AddWebauthnSessionDataAllowedCredentialIDs(ids...)
@@ -137,6 +145,10 @@ func (wsdc *WebauthnSessionDataCreate) defaults() {
 	if _, ok := wsdc.mutation.UpdatedAt(); !ok {
 		v := webauthnsessiondata.DefaultUpdatedAt()
 		wsdc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := wsdc.mutation.ID(); !ok {
+		v := webauthnsessiondata.DefaultID()
+		wsdc.mutation.SetID(v)
 	}
 }
 

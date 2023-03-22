@@ -85,6 +85,14 @@ func (pec *PrimaryEmailCreate) SetID(u uuid.UUID) *PrimaryEmailCreate {
 	return pec
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (pec *PrimaryEmailCreate) SetNillableID(u *uuid.UUID) *PrimaryEmailCreate {
+	if u != nil {
+		pec.SetID(*u)
+	}
+	return pec
+}
+
 // SetEmail sets the "email" edge to the Email entity.
 func (pec *PrimaryEmailCreate) SetEmail(e *Email) *PrimaryEmailCreate {
 	return pec.SetEmailID(e.ID)
@@ -137,6 +145,10 @@ func (pec *PrimaryEmailCreate) defaults() {
 	if _, ok := pec.mutation.UpdatedAt(); !ok {
 		v := primaryemail.DefaultUpdatedAt()
 		pec.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := pec.mutation.ID(); !ok {
+		v := primaryemail.DefaultID()
+		pec.mutation.SetID(v)
 	}
 }
 
