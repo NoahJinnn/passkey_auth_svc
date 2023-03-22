@@ -1,4 +1,4 @@
-// Package mono provides embedded microservice.
+// Package hq provides embedded microservice.
 package hq
 
 import (

@@ -10,13 +10,13 @@ services:
     restart: "always"
     shm_size: "256m"
     ports:
-      - "${mono_postgres_addr_port:-0}:5432"
+      - "${HQ_AUTH_POSTGRES_ADDR_PORT:-0}:5432"
     volumes:
       - "postgres:/var/lib/postgresql/data"
-      - "${mono_postgres_tls_cert}:/dev.crt"
-      - "${mono_postgres_tls_key}:/dev.key"
+      - "${POSTGRES_TLS_CERT_PATH}:/dev.crt"
+      - "${POSTGRES_TLS_KEY_PATH}:/dev.key"
     environment:
-      POSTGRES_USER: "${MONO_AUTH_POSTGRES_AUTH_LOGIN}"
+      POSTGRES_USER: "${HQ_AUTH_POSTGRES_AUTH_LOGIN}"
       POSTGRES_PASSWORD: "${HQ_AUTH_POSTGRES_AUTH_PASS}"
     entrypoint:
       - bash
@@ -37,7 +37,7 @@ services:
   #   volumes:
   #     - "./scripts/postgres-setup:/usr/local/bin/postgres-setup"
   #   environment:
-  #     MONO_AUTH_POSTGRES_AUTH_LOGIN: "${MONO_AUTH_POSTGRES_AUTH_LOGIN}"
+  #     HQ_AUTH_POSTGRES_AUTH_LOGIN: "${HQ_AUTH_POSTGRES_AUTH_LOGIN}"
   #     HQ_AUTH_POSTGRES_AUTH_PASS: "${HQ_AUTH_POSTGRES_AUTH_PASS}"
   #     PGHOST: "postgres"
   #     PGUSER: "postgres"
@@ -61,21 +61,11 @@ services:
   #   container_name: hqservice
   #   restart: always
   #   ports:
-  #     - "${MONO_AUTH_ADDR_PORT:-0}:17000"
-  #   volumes:
-  #     - "${MONO_TLS_CA_CERT}:/ca.crt"
-  #     - "${MONO_AUTH_TLS_CERT}:/auth.crt"
-  #     - "${MONO_AUTH_TLS_CERT_INT}:/auth-int.crt"
-  #     - "${MONO_AUTH_TLS_KEY}:/auth.key"
-  #     - "${MONO_AUTH_TLS_KEY_INT}:/auth-int.key"
+  #     - "${HQ_AUTH_ADDR_PORT:-0}:17000"
   #   environment:
-  #     MONO_ADDR_HOST: "${MONO_ADDR_HOST}"
-  #     MONO_ADDR_HOST_INT: "${MONO_ADDR_HOST_INT}"
-  #     MONO_TLS_CA_CERT: "/ca.crt"
-  #     MONO_X_POSTGRES_ADDR_HOST: "postgres"
-  #     MONO_AUTH_POSTGRES_AUTH_LOGIN: "${MONO_AUTH_POSTGRES_AUTH_LOGIN}"
+  #     HQ_ADDR_HOST: "${HQ_ADDR_HOST}"
+  #     HQ_ADDR_HOST_INT: "${HQ_ADDR_HOST_INT}"
+  #     HQ_X_POSTGRES_ADDR_HOST: "postgres"
+  #     HQ_AUTH_POSTGRES_AUTH_LOGIN: "${HQ_AUTH_POSTGRES_AUTH_LOGIN}"
   #     HQ_AUTH_POSTGRES_AUTH_PASS: "${HQ_AUTH_POSTGRES_AUTH_PASS}"
-  #     MONO_AUTH_TLS_CERT: "/auth.crt"
-  #     MONO_AUTH_TLS_CERT_INT: "/auth-int.crt"
-  #     MONO_AUTH_TLS_KEY: "/auth.key"
-  #     MONO_AUTH_TLS_KEY_INT: "/auth-int.key"
+

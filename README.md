@@ -33,41 +33,41 @@
 
 ### Features
 
-- [X] Project structure (mostly) follows
-  [Standard Go Project Layout](https://github.com/golang-standards/project-layout).
-- [X] Strict but convenient golangci-lint configuration.
-- [X] Embedded microservices:
-  - [X] Well isolated from each other.
-  - [X] Can be easily extracted from monolith into separate projects.
-  - [X] Share common configuration (both env vars and flags).
-  - [X] Each has own CLI subcommands, DB migrations, ports, metrics, …
-- [X] Easily testable code (thanks to The Clean Architecture).
-- [X] Avoids (and resists to) using global objects (to ensure embedded
-  microservices won't conflict on these global objects).
-- [X] CLI subcommands support using [cobra](https://github.com/spf13/cobra).
-- [X] Graceful shutdown support.
-- [X] Configuration defaults can be overwritten by env vars and flags.
-- [X] Example JSON-RPC 2.0 over HTTP API, with CORS support.
-- [X] Example gRPC API:
-  - [X] External and internal APIs on different host/port.
-  - [X] gRPC services with and without token-based authentication.
-  - [X] API design (mostly) follows
-    [Google API Design Guide](https://cloud.google.com/apis/design) and
-    [Google API Improvement Proposals](https://google.aip.dev/).
-- [X] Example OpenAPI 2.0 using grpc-gateway, with CORS suport:
-  - [X] Access to gRPC using HTTP/1 (except bi-directional streaming).
-  - [X] Generates `swagger.json` from gRPC `.proto` files.
-  - [X] Embedded [Swagger UI](https://swagger.io/tools/swagger-ui/).
-- [X] Example DAL (data access layer):
-  - [X] MySQL 5.7 (strictest SQL mode).
-  - [X] PostgreSQL 11 (secure schema usage pattern).
-- [X] Example tests, both unit and integration.
-- [X] Production logging using [structlog](https://github.com/powerman/structlog).
-- [X] Production metrics using Prometheus.
-- [X] Docker and docker-compose support.
-- [X] Smart test coverage report, with optional support for coveralls.io.
-- [X] Linters for Dockerfile and shell scripts.
-- [X] CI/CD setup for GitHub Actions and CircleCI.
+- [x] Project structure (mostly) follows
+      [Standard Go Project Layout](https://github.com/golang-standards/project-layout).
+- [x] Strict but convenient golangci-lint configuration.
+- [x] Embedded microservices:
+  - [x] Well isolated from each other.
+  - [x] Can be easily extracted from monolith into separate projects.
+  - [x] Share common configuration (both env vars and flags).
+  - [x] Each has own CLI subcommands, DB migrations, ports, metrics, …
+- [x] Easily testable code (thanks to The Clean Architecture).
+- [x] Avoids (and resists to) using global objects (to ensure embedded
+      microservices won't conflict on these global objects).
+- [x] CLI subcommands support using [cobra](https://github.com/spf13/cobra).
+- [x] Graceful shutdown support.
+- [x] Configuration defaults can be overwritten by env vars and flags.
+- [x] Example JSON-RPC 2.0 over HTTP API, with CORS support.
+- [x] Example gRPC API:
+  - [x] External and internal APIs on different host/port.
+  - [x] gRPC services with and without token-based authentication.
+  - [x] API design (mostly) follows
+        [Google API Design Guide](https://cloud.google.com/apis/design) and
+        [Google API Improvement Proposals](https://google.aip.dev/).
+- [x] Example OpenAPI 2.0 using grpc-gateway, with CORS suport:
+  - [x] Access to gRPC using HTTP/1 (except bi-directional streaming).
+  - [x] Generates `swagger.json` from gRPC `.proto` files.
+  - [x] Embedded [Swagger UI](https://swagger.io/tools/swagger-ui/).
+- [x] Example DAL (data access layer):
+  - [x] MySQL 5.7 (strictest SQL mode).
+  - [x] PostgreSQL 11 (secure schema usage pattern).
+- [x] Example tests, both unit and integration.
+- [x] Production logging using [structlog](https://github.com/powerman/structlog).
+- [x] Production metrics using Prometheus.
+- [x] Docker and docker-compose support.
+- [x] Smart test coverage report, with optional support for coveralls.io.
+- [x] Linters for Dockerfile and shell scripts.
+- [x] CI/CD setup for GitHub Actions and CircleCI.
 
 ## Development
 
@@ -79,16 +79,27 @@
 
 ### Setup
 
-#### Environment vars
+#### Environment management
 
-1. After cloning the repo copy `env.sh.dist` to `env.sh`.
-2. Review `env.sh` and update for your system as needed.
+Setup Doppler:
 
-#### Secrets
-
-Setup Doppler with:
 ```bash
-task scripts:install:doppler 
+task scripts:install:doppler
+```
+
+#### Naming convention
+
+Variables required to run and test project.
+Should be kept in sorted order.
+Avoid referencing one variable from another if their order may change,
+use lower-case variables defined above for such a shared values.
+Naming convention:
+
+```
+<PROJECT>_<VAR>         - global vars, not specific for some embedded microservice (e.g. domain)
+<PROJECT>_X_<SVC>_<VAR> - vars related to external services (e.g. databases)
+<PROJECT>_<MS>_<VAR>    - vars related to embedded microservice (e.g. addr)
+<PROJECT>__<MS>_<VAR>   - private vars for embedded microservice
 ```
 
 #### docker-compose
@@ -120,29 +131,23 @@ $ /path/to/easyrsa --days=3650 "--subject-alt-name=IP:127.0.0.1" build-server-fu
 ### Usage
 
 To develop this project you'll need only standard tools: `go generate`,
-`go test`, `go build`, `docker build`. Provided scripts are for
-convenience only.
+`go test`, `go build`, `docker build` with `doppler run`
 
-- Always load `env.sh` *in every terminal* used to run any project-related
-  commands (including `go test`): `source env.sh`.
-    - When `env.sh.dist` change (e.g. by `git pull`) next run of `source
-    env.sh` will fail and remind you to manually update `env.sh` to match
-    current `env.sh.dist`.
 - `go generate ./...` - do not forget to run after making changes related
   to auto-generated code
-- `go test ./...` - test project (excluding integration tests), fast
+- `doppler run -- go test ./...` - test project (excluding integration tests), fast
 - `./scripts/test` - thoroughly test project, slow
 - `./scripts/test-ci-circle` - run tests locally like CircleCI will do
 - `./scripts/cover` - analyse and show coverage
 - `./scripts/build` - build docker image and binaries in `bin/`
   - Then use mentioned above `dc` (or `docker-compose`) to run and control
     the project.
-    - Access project at host/port(s) defined in `env.sh`.
+  - Access project at host/port(s) defined in `doppler`.
 
 #### Cheatsheet
 
 ```sh
-dc up -d --remove-orphans               # (re)start all project's services
+doppler run -- dc up -d --remove-orphans               # (re)start all project's services
 dc logs -f -t                           # view logs of all services
 dc logs -f SERVICENAME                  # view logs of some service
 dc ps                                   # status of all services
@@ -161,15 +166,17 @@ available networks, then you'll have to restart docker service or reboot.
 
 ### Docker
 
-#### Run local PostgresSQL DB 
+#### Run local PostgresSQL DB
+
 ```bash
 doppler run -- docker-compose up -d --remove-orphans
 ```
 
 #### Remove container storage
+
 ```bash
 docker-compose stop && docker-compose rm -f
-docker volume rm hqservice_postgres 
+docker volume rm hqservice_postgres
 ```
 
 ### Source
@@ -177,26 +184,26 @@ docker volume rm hqservice_postgres
 #### Run directly, without building
 
 ```bash
-# cmd/mono/main.go is the entry point with the `main` function
+# cmd/hq/main.go is the entry point with the `main` function
 task scripts:run
 ```
 
 #### Build first, then run
 
-In this example below, we demonstrate using the `Taskfile` command to build our binary, then, run our built `mono` binary.
+In this example below, we demonstrate using the `Taskfile` command to build our binary, then, run our built `hq` binary.
 
 ```bash
 # build binary only
-# our binary gets installed into the ./bin/ folder, as `mono`.
+# our binary gets installed into the ./bin/ folder, as `hq`.
 $ task scripts:build:binary
 
-# so now, we can just run the built `mono` binary.
-$ ./bin/mono -h
+# so now, we can just run the built `hq` binary.
+$ ./bin/hq -h
 Example monolith with embedded microservices
 
 Usage:
-  mono [flags]
-  mono [command]
+  hq [flags]
+  hq [command]
 
 Available Commands:
   help        Help about any command
@@ -204,17 +211,17 @@ Available Commands:
   serve       Starts embedded microservices
 
 Flags:
-  -h, --help                    help for mono
+  -h, --help                    help for hq
       --log.level OneOfString   log level [debug|info|warn|err] (default debug)
-  -v, --version                 version for mono
+  -v, --version                 version for hq
 
-Use "mono [command] --help" for more information about a command.
+Use "hq [command] --help" for more information about a command.
 
-$ ./bin/mono serve -h
+$ ./bin/hq serve -h
 Starts embedded microservices
 
 Usage:
-  mono serve [flags]
+  hq serve [flags]
 
 Flags:
   -h, --help                        help for serve
@@ -226,11 +233,11 @@ Flags:
 Global Flags:
       --log.level OneOfString   log level [debug|info|warn|err] (default debug)
 
-$ ./bin/mono -v
-mono version v0.2.0 7562a1e 2020-10-22_03:19:37 go1.15.3
+$ ./bin/hq -v
+hq version v0.2.0 7562a1e 2020-10-22_03:19:37 go1.15.3
 
-$ ./bin/mono serve
-         mono: inf      main: `started` version f/design-task-command-to-run-hqservice 51adc59-dirty 2023-02-15_09:36:06
+$ ./bin/hq serve
+         hq: inf      main: `started` version f/design-task-command-to-run-hqservice 51adc59-dirty 2023-02-15_09:36:06
            hq: inf   openapi: `OpenAPI protocol` version 0.2.0
            hq: inf     serve: `serve` 127.0.0.1:17001 [Prometheus metrics]
            hq: inf     serve: `serve` 127.0.0.1:17000 [OpenAPI]
@@ -240,6 +247,7 @@ $ ./bin/mono serve
 ## TODO
 
 Functionality Group 1: add/connect assets and debts
+
 - [x] Plaid aggregator with dev env
 - [ ] Plaid aggregator with stg, prd env
 - [ ] Implement [webauthn](https://github.com/go-webauthn/webauthn) API
@@ -252,22 +260,17 @@ Functionality Group 1: add/connect assets and debts
 - [ ] Integration test for `auth` svc APIs
 
 Functionality Group 2: Recap feature (‘reflections’)
-- [ ] Create DB models:
-      1. Asset
-      2. Cashflow
-      3. Indices
-      4. IRR
-      5. Reflections
+
+- [ ] Create DB models: 1. Asset 2. Cashflow 3. Indices 4. IRR 5. Reflections
 - [ ] Create CRUD REST API for all types of model
 - [ ] Integration test APIs
 
 Functionality Group 3: Insurance
+
 - [ ] Create DB model for Insurance to store Insurance providers information, link to static assets
 - [ ] Create CRUD REST API for Insurance model
 - [ ] Integration test APIs
-Functionality Group 4: Safety Deposit Box
+      Functionality Group 4: Safety Deposit Box
 - Need to discuss
-Functionality Group 5: Beneficiary 
+  Functionality Group 5: Beneficiary
 - Need to discuss
-
-
