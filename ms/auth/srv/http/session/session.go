@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/ms/auth/app/crypto"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	hqJwt "github.com/hellohq/hqservice/pkg/crypto/jwt"
 	"github.com/lestrrat-go/jwx/v2/jwt"
@@ -35,7 +34,7 @@ type cookieConfig struct {
 }
 
 // NewManager returns a new Manager which will be used to create and verify sessions JWTs
-func NewManager(jwkManager crypto.JwkManager, config config.Session) (Manager, error) {
+func NewManager(jwkManager JwkManager, config config.Session) (Manager, error) {
 	ctx := context.Background()
 	signatureKey, err := jwkManager.GetSigningKey(ctx)
 	if err != nil {

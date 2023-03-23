@@ -1,47 +1,15 @@
-package crypto
+package session
 
 import (
 	"context"
 	"testing"
 
-	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ms/auth/test"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-type mockJwkPersister struct {
-	jwks []ent.Jwk
-}
-
-func (m *mockJwkPersister) Get(i int) (*ent.Jwk, error) {
-	for _, v := range m.jwks {
-		if v.ID == uint(i) {
-			return &v, nil
-		}
-	}
-	return nil, nil
-}
-
-func (m *mockJwkPersister) GetAll() ([]ent.Jwk, error) {
-	return m.jwks, nil
-}
-
-func (m *mockJwkPersister) GetLast() (*ent.Jwk, error) {
-	index := len(m.jwks)
-	return &m.jwks[index-1], nil
-}
-
-func (m *mockJwkPersister) Create(jwk ent.Jwk) error {
-	//increment id
-	index := len(m.jwks)
-	jwk.ID = uint(index)
-
-	m.jwks = append(m.jwks, jwk)
-	return nil
-}
 
 func TestDefaultManager(t *testing.T) {
 	keys := []string{"asfnoadnfoaegnq3094intoaegjnoadjgnoadng", "apdisfoaiegnoaiegnbouaebgn982"}
