@@ -66,11 +66,6 @@ func Address(v string) predicate.Email {
 	return predicate.Email(sql.FieldEQ(FieldAddress, v))
 }
 
-// Verified applies equality check predicate on the "verified" field. It's identical to VerifiedEQ.
-func Verified(v bool) predicate.Email {
-	return predicate.Email(sql.FieldEQ(FieldVerified, v))
-}
-
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Email {
 	return predicate.Email(sql.FieldEQ(FieldCreatedAt, v))
@@ -174,16 +169,6 @@ func AddressEqualFold(v string) predicate.Email {
 // AddressContainsFold applies the ContainsFold predicate on the "address" field.
 func AddressContainsFold(v string) predicate.Email {
 	return predicate.Email(sql.FieldContainsFold(FieldAddress, v))
-}
-
-// VerifiedEQ applies the EQ predicate on the "verified" field.
-func VerifiedEQ(v bool) predicate.Email {
-	return predicate.Email(sql.FieldEQ(FieldVerified, v))
-}
-
-// VerifiedNEQ applies the NEQ predicate on the "verified" field.
-func VerifiedNEQ(v bool) predicate.Email {
-	return predicate.Email(sql.FieldNEQ(FieldVerified, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

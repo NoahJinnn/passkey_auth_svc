@@ -55,7 +55,6 @@ type EmailMutation struct {
 	typ                  string
 	id                   *uuid.UUID
 	address              *string
-	verified             *bool
 	created_at           *time.Time
 	updated_at           *time.Time
 	clearedFields        map[string]struct{}
@@ -261,42 +260,6 @@ func (m *EmailMutation) OldAddress(ctx context.Context) (v string, err error) {
 // ResetAddress resets all changes to the "address" field.
 func (m *EmailMutation) ResetAddress() {
 	m.address = nil
-}
-
-// SetVerified sets the "verified" field.
-func (m *EmailMutation) SetVerified(b bool) {
-	m.verified = &b
-}
-
-// Verified returns the value of the "verified" field in the mutation.
-func (m *EmailMutation) Verified() (r bool, exists bool) {
-	v := m.verified
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldVerified returns the old "verified" field's value of the Email entity.
-// If the Email object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EmailMutation) OldVerified(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldVerified is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldVerified requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldVerified: %w", err)
-	}
-	return oldValue.Verified, nil
-}
-
-// ResetVerified resets all changes to the "verified" field.
-func (m *EmailMutation) ResetVerified() {
-	m.verified = nil
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -578,15 +541,12 @@ func (m *EmailMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EmailMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 4)
 	if m.user != nil {
 		fields = append(fields, email.FieldUserID)
 	}
 	if m.address != nil {
 		fields = append(fields, email.FieldAddress)
-	}
-	if m.verified != nil {
-		fields = append(fields, email.FieldVerified)
 	}
 	if m.created_at != nil {
 		fields = append(fields, email.FieldCreatedAt)
@@ -606,8 +566,6 @@ func (m *EmailMutation) Field(name string) (ent.Value, bool) {
 		return m.UserID()
 	case email.FieldAddress:
 		return m.Address()
-	case email.FieldVerified:
-		return m.Verified()
 	case email.FieldCreatedAt:
 		return m.CreatedAt()
 	case email.FieldUpdatedAt:
@@ -625,8 +583,6 @@ func (m *EmailMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldUserID(ctx)
 	case email.FieldAddress:
 		return m.OldAddress(ctx)
-	case email.FieldVerified:
-		return m.OldVerified(ctx)
 	case email.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case email.FieldUpdatedAt:
@@ -653,13 +609,6 @@ func (m *EmailMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAddress(v)
-		return nil
-	case email.FieldVerified:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetVerified(v)
 		return nil
 	case email.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -738,9 +687,6 @@ func (m *EmailMutation) ResetField(name string) error {
 		return nil
 	case email.FieldAddress:
 		m.ResetAddress()
-		return nil
-	case email.FieldVerified:
-		m.ResetVerified()
 		return nil
 	case email.FieldCreatedAt:
 		m.ResetCreatedAt()

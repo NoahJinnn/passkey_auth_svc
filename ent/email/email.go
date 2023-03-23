@@ -17,8 +17,6 @@ const (
 	FieldUserID = "user_id"
 	// FieldAddress holds the string denoting the address field in the database.
 	FieldAddress = "address"
-	// FieldVerified holds the string denoting the verified field in the database.
-	FieldVerified = "verified"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -68,7 +66,6 @@ var Columns = []string{
 	FieldID,
 	FieldUserID,
 	FieldAddress,
-	FieldVerified,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/ent/migrate"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/powerman/pqx"
 	"github.com/powerman/structlog"
@@ -45,7 +46,11 @@ func New(ctx Ctx, cfg *config.PostgresConfig) (_ *Repo, err error) {
 	}
 
 	// Run the auto migration tool.
-	if err := client.Schema.Create(ctx); err != nil {
+	if err := client.Schema.Create(ctx,
+		migrate.WithDropIndex(true),
+		migrate.WithDropColumn(true),
+		migrate.WithGlobalUniqueID(true),
+	); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 

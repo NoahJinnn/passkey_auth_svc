@@ -22,7 +22,6 @@ func (Email) Fields() []ent.Field {
 		}).Immutable(),
 		field.UUID("user_id", uuid.UUID{}).Optional(),
 		field.String("address").Unique(),
-		field.Bool("verified"),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}

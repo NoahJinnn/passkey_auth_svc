@@ -59,12 +59,6 @@ func (eu *EmailUpdate) SetAddress(s string) *EmailUpdate {
 	return eu
 }
 
-// SetVerified sets the "verified" field.
-func (eu *EmailUpdate) SetVerified(b bool) *EmailUpdate {
-	eu.mutation.SetVerified(b)
-	return eu
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (eu *EmailUpdate) SetUpdatedAt(t time.Time) *EmailUpdate {
 	eu.mutation.SetUpdatedAt(t)
@@ -231,9 +225,6 @@ func (eu *EmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := eu.mutation.Address(); ok {
 		_spec.SetField(email.FieldAddress, field.TypeString, value)
-	}
-	if value, ok := eu.mutation.Verified(); ok {
-		_spec.SetField(email.FieldVerified, field.TypeBool, value)
 	}
 	if value, ok := eu.mutation.UpdatedAt(); ok {
 		_spec.SetField(email.FieldUpdatedAt, field.TypeTime, value)
@@ -462,12 +453,6 @@ func (euo *EmailUpdateOne) SetAddress(s string) *EmailUpdateOne {
 	return euo
 }
 
-// SetVerified sets the "verified" field.
-func (euo *EmailUpdateOne) SetVerified(b bool) *EmailUpdateOne {
-	euo.mutation.SetVerified(b)
-	return euo
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (euo *EmailUpdateOne) SetUpdatedAt(t time.Time) *EmailUpdateOne {
 	euo.mutation.SetUpdatedAt(t)
@@ -664,9 +649,6 @@ func (euo *EmailUpdateOne) sqlSave(ctx context.Context) (_node *Email, err error
 	}
 	if value, ok := euo.mutation.Address(); ok {
 		_spec.SetField(email.FieldAddress, field.TypeString, value)
-	}
-	if value, ok := euo.mutation.Verified(); ok {
-		_spec.SetField(email.FieldVerified, field.TypeBool, value)
 	}
 	if value, ok := euo.mutation.UpdatedAt(); ok {
 		_spec.SetField(email.FieldUpdatedAt, field.TypeTime, value)

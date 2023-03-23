@@ -50,7 +50,10 @@ func (svc *userSvc) Create(ctx Ctx, address string) (newU *ent.User, emailID uui
 				}
 			} else {
 				// Create new email
-				email, err = client.Email.Create().SetAddress(address).SetUserID(newU.ID).Save(ctx)
+				email, err = client.Email.Create().
+					SetAddress(address).
+					SetUserID(newU.ID).
+					Save(ctx)
 				if err != nil {
 					return fmt.Errorf("failed creating email: %w", err)
 				}

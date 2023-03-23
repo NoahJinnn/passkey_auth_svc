@@ -45,12 +45,6 @@ func (ec *EmailCreate) SetAddress(s string) *EmailCreate {
 	return ec
 }
 
-// SetVerified sets the "verified" field.
-func (ec *EmailCreate) SetVerified(b bool) *EmailCreate {
-	ec.mutation.SetVerified(b)
-	return ec
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (ec *EmailCreate) SetCreatedAt(t time.Time) *EmailCreate {
 	ec.mutation.SetCreatedAt(t)
@@ -201,9 +195,6 @@ func (ec *EmailCreate) check() error {
 	if _, ok := ec.mutation.Address(); !ok {
 		return &ValidationError{Name: "address", err: errors.New(`ent: missing required field "Email.address"`)}
 	}
-	if _, ok := ec.mutation.Verified(); !ok {
-		return &ValidationError{Name: "verified", err: errors.New(`ent: missing required field "Email.verified"`)}
-	}
 	if _, ok := ec.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Email.created_at"`)}
 	}
@@ -248,10 +239,6 @@ func (ec *EmailCreate) createSpec() (*Email, *sqlgraph.CreateSpec) {
 	if value, ok := ec.mutation.Address(); ok {
 		_spec.SetField(email.FieldAddress, field.TypeString, value)
 		_node.Address = value
-	}
-	if value, ok := ec.mutation.Verified(); ok {
-		_spec.SetField(email.FieldVerified, field.TypeBool, value)
-		_node.Verified = value
 	}
 	if value, ok := ec.mutation.CreatedAt(); ok {
 		_spec.SetField(email.FieldCreatedAt, field.TypeTime, value)
