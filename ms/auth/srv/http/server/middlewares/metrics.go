@@ -18,12 +18,6 @@ const (
 	failedLabel   = "failed"
 )
 
-var (
-	// Initialized with codes returned by go-swagger and middlewares
-	// after metrics middleware (accessLog).
-	CodeLabels = []int{400, 401, 403, 422}
-)
-
 // InitMetrics must be called once before using this package.
 // It registers and initializes metrics used by this package.
 func InitMetrics(reg *prometheus.Registry, namespace string) {

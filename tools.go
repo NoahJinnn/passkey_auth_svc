@@ -8,7 +8,6 @@ import (
 	_ "entgo.io/ent/cmd/ent"
 	_ "github.com/bufbuild/buf/cmd/buf"
 	_ "github.com/cheekybits/genny"
-	_ "github.com/go-swagger/go-swagger/cmd/swagger"
 	_ "github.com/golang/mock/mockgen"
 
 	_ "github.com/cosmtrek/air"
