@@ -66,6 +66,8 @@ func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func()) (er
 		return log.Err("failed to connect", "err", err)
 	}
 
+	s.appl = app.New(s.cfg, s.repo)
+
 	s.srv, err = server.NewServer(s.appl, *s.repo, s.cfg)
 	if err != nil {
 		return log.Err("failed to openapi.NewServer", "err", err)

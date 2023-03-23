@@ -38,7 +38,9 @@ func (svc *userSvc) Create(ctx Ctx, address string) (newU *ent.User, emailID uui
 			// Query email by email address
 			email, err := client.Email.Query().Where(email.Address(address)).Only(ctx)
 			if err != nil {
-				return fmt.Errorf("failed querying email by address: %w", err)
+				if !ent.IsNotFound(err) {
+					return fmt.Errorf("failed querying email by address: %w", err)
+				}
 			}
 
 			if email != nil {

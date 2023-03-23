@@ -11,14 +11,14 @@ import (
 )
 
 type UserHandler struct {
-	srv            *HttpDeps
+	*HttpDeps
 	sessionManager session.Manager
 }
 
 func NewUserHandler(srv *HttpDeps, sessionManager session.Manager) *UserHandler {
 	return &UserHandler{
-		srv:            srv,
-		sessionManager: sessionManager,
+		srv,
+		sessionManager,
 	}
 }
 
@@ -38,7 +38,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 
 	body.Email = strings.ToLower(body.Email)
 
-	newUser, emailId, err := h.srv.GetUserSvc().Create(c.Request().Context(), body.Email)
+	newUser, emailId, err := h.GetUserSvc().Create(c.Request().Context(), body.Email)
 	if err != nil {
 		return dto.ToHttpError(err)
 	}
@@ -55,7 +55,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 
 	c.SetCookie(cookie)
 
-	if h.srv.Cfg.Session.EnableAuthTokenHeader {
+	if h.Cfg.Session.EnableAuthTokenHeader {
 		c.Response().Header().Set("X-Auth-Token", token)
 		c.Response().Header().Set("Access-Control-Expose-Headers", "X-Auth-Token")
 	}
