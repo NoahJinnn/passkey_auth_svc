@@ -16,6 +16,7 @@ import (
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/hellohq/hqservice/pkg/serve"
 	"github.com/labstack/echo/v4"
+	"github.com/powerman/pqx"
 	"github.com/powerman/structlog"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/cobra"
@@ -65,7 +66,6 @@ func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func()) (er
 	if err != nil {
 		return log.Err("failed to connect", "err", err)
 	}
-
 	s.appl = app.New(s.cfg, s.repo)
 
 	s.srv, err = server.NewServer(s.appl, *s.repo, s.cfg)
@@ -97,5 +97,7 @@ func (s *Service) serveMetrics(ctx Ctx) error {
 }
 
 func (s *Service) connectRepo(ctx Ctx) (interface{}, error) {
-	return dal.New(ctx, s.cfg.Postgres)
+	s.cfg.Postgres.SSLMode = pqx.SSLRequire
+	dateSourceName := s.cfg.Postgres.FormatDSN()
+	return dal.New(ctx, dateSourceName)
 }
