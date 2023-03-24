@@ -3,10 +3,7 @@ module github.com/hellohq/hqservice
 go 1.19
 
 require (
-	github.com/cheekybits/genny v1.0.1-0.20200709201058-3e22f1a88ff2
-	github.com/felixge/httpsnoop v1.0.3
 	github.com/gofrs/uuid v4.4.0+incompatible
-	github.com/golang/mock v1.6.0
 	github.com/powerman/appcfg v0.9.0
 	github.com/powerman/check v1.6.0
 	github.com/powerman/getenv v0.1.0
