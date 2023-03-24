@@ -47,27 +47,13 @@
 - [x] CLI subcommands support using [cobra](https://github.com/spf13/cobra).
 - [x] Graceful shutdown support.
 - [x] Configuration defaults can be overwritten by env vars and flags.
-- [x] Example JSON-RPC 2.0 over HTTP API, with CORS support.
-- [x] Example gRPC API:
-  - [x] External and internal APIs on different host/port.
-  - [x] gRPC services with and without token-based authentication.
-  - [x] API design (mostly) follows
-        [Google API Design Guide](https://cloud.google.com/apis/design) and
-        [Google API Improvement Proposals](https://google.aip.dev/).
-- [x] Example OpenAPI 2.0 using grpc-gateway, with CORS suport:
-  - [x] Access to gRPC using HTTP/1 (except bi-directional streaming).
-  - [x] Generates `swagger.json` from gRPC `.proto` files.
-  - [x] Embedded [Swagger UI](https://swagger.io/tools/swagger-ui/).
-- [x] Example DAL (data access layer):
-  - [x] MySQL 5.7 (strictest SQL mode).
-  - [x] PostgreSQL 11 (secure schema usage pattern).
 - [x] Example tests, both unit and integration.
 - [x] Production logging using [structlog](https://github.com/powerman/structlog).
 - [x] Production metrics using Prometheus.
 - [x] Docker and docker-compose support.
 - [x] Smart test coverage report, with optional support for coveralls.io.
 - [x] Linters for Dockerfile and shell scripts.
-- [x] CI/CD setup for GitHub Actions and CircleCI.
+- [x] CI/CD setup for GitHub Actions.
 
 ## Development
 
