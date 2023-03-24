@@ -2,11 +2,8 @@ package server
 
 import (
 	"fmt"
-	"net/http"
 
-	"github.com/go-openapi/runtime"
 	"github.com/hellohq/hqservice/ms/auth/app"
-	"github.com/hellohq/hqservice/ms/auth/app/crypto"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
@@ -21,8 +18,6 @@ import (
 type (
 	// Log is a synonym for convenience.
 	Log = *structlog.Logger
-
-	CustomResponder func(http.ResponseWriter, runtime.Producer)
 )
 
 // NewServer returns OpenAPI server configured to listen on the TCP network
@@ -47,7 +42,7 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 	}
 
 	e.Validator = dto.NewCustomValidator()
-	jwkManager, err := crypto.NewDefaultManager(cfg.Secrets.Keys, repo.GetJwkRepo())
+	jwkManager, err := session.NewDefaultManager(cfg.Secrets.Keys, repo.GetJwkRepo())
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
 	}

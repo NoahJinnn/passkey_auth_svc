@@ -7,8 +7,6 @@ import (
 
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ent/migrate"
-	"github.com/hellohq/hqservice/ms/auth/config"
-	"github.com/powerman/pqx"
 	"github.com/powerman/structlog"
 )
 
@@ -28,6 +26,7 @@ type IRepo interface {
 	GetUserRepo() IUserRepo
 	GetWebauthnCredentialRepo() IWebauthnCredentialRepo
 	GetWebauthnSessionRepo() IWebauthnSessionRepo
+	GetEmailRepo() IEmailRepo
 }
 
 type Repo struct {
@@ -36,10 +35,8 @@ type Repo struct {
 }
 type Ctx = context.Context
 
-func New(ctx Ctx, cfg *config.PostgresConfig) (_ *Repo, err error) {
+func New(ctx Ctx, dateSourceName string) (_ *Repo, err error) {
 	log := structlog.FromContext(ctx, nil)
-	cfg.SSLMode = pqx.SSLRequire
-	dateSourceName := cfg.FormatDSN()
 	client, err := ent.Open("postgres", dateSourceName)
 	if err != nil {
 		log.Fatalf("failed opening connection to postgres: %v", err)
@@ -101,4 +98,8 @@ func (r Repo) GetWebauthnCredentialRepo() IWebauthnCredentialRepo {
 
 func (r Repo) GetWebauthnSessionRepo() IWebauthnSessionRepo {
 	return NewWebauthnSessionRepo(r.Db)
+}
+
+func (r Repo) GetEmailRepo() IEmailRepo {
+	return NewEmailRepo(r.Db)
 }

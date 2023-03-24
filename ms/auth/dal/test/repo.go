@@ -56,3 +56,7 @@ func (r repo) GetWebauthnCredentialRepo() dal.IWebauthnCredentialRepo {
 func (r repo) GetWebauthnSessionRepo() dal.IWebauthnSessionRepo {
 	return NewWebauthnSessionRepo([]*ent.WebauthnSessionData{})
 }
+
+func (r repo) GetEmailRepo() dal.IEmailRepo {
+	return NewEmailRepo([]*ent.Email{})
+}

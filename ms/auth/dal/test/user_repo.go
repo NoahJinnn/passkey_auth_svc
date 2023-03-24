@@ -32,3 +32,12 @@ func (r *userRepo) Create(ctx Ctx, u *ent.User) (*ent.User, error) {
 
 	return u, nil
 }
+
+func (r *userRepo) Count(ctx Ctx, id uuid.UUID) (int, error) {
+	for _, u := range r.users {
+		if u.ID == id {
+			return 1, nil
+		}
+	}
+	return 0, nil
+}

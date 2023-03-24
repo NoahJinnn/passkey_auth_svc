@@ -6,13 +6,9 @@ package tools
 import (
 	_ "ariga.io/entimport/cmd/entimport"
 	_ "entgo.io/ent/cmd/ent"
-	_ "github.com/bufbuild/buf/cmd/buf"
-	_ "github.com/cheekybits/genny"
-	_ "github.com/go-swagger/go-swagger/cmd/swagger"
-	_ "github.com/golang/mock/mockgen"
 
 	_ "github.com/cosmtrek/air"
 	_ "github.com/mattn/goveralls"
-	_ "github.com/powerman/dockerize"
 	_ "golang.org/x/tools/cmd/stringer"
+	_ "gotest.tools/gotestsum"
 )
