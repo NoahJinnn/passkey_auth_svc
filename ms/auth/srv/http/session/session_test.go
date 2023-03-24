@@ -6,7 +6,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ms/auth/config"
-	"github.com/hellohq/hqservice/ms/auth/test"
+	"github.com/hellohq/hqservice/ms/auth/srv/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
