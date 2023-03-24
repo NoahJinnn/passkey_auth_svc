@@ -1,19 +1,7 @@
 #!/bin/bash
 set -e -o pipefail
 export PATH="$PWD/.gobincache:$PATH"
-
-# this gives us gnu find, xargs and locate
-# all commands will be installed with prefix g
-# i.e. gfind, gxargs, glocate
-brew install findutils
-# gsed
-brew install gsed
-# ggrep
-brew install grep
-
 go generate
-# SHELLCHECK_VER="0.7.2"
-# shellcheck --version | grep -wq $SHELLCHECK_VER || curl -sSfL https://github.com/koalaman/shellcheck/releases/download/v${SHELLCHECK_VER}/shellcheck-v${SHELLCHECK_VER}."$(uname)".x86_64.tar.xz | tar xJf - -C .gobincache --strip-components=1 shellcheck-v${SHELLCHECK_VER}/shellcheck
 set -x
 
 scriptsdir=$( dirname -- "$0"; )
@@ -21,21 +9,7 @@ cd $scriptsdir/../../
 
 hadolint Dockerfile
 
-# When https://github.com/quasilyte/go-ruleguard/issues/78 will be
-# implemented and available in golangci-lint then replace using
-# build/gorules/rules.go.
-mod="$(go list -m)"
-# (! ggrep --color=auto -r "\"$mod/internal" pkg)
-gfind ms -type d -name old | while read -r old; do
-	# shellcheck disable=SC2251 # Need inverted exit status to keep -e happy.
-	! ggrep -P -r "\"$mod/${old%/*}/(?!old|app)" "$old"
-done
-
+# TODO: Set up linting
 golangci-lint run
 
-dockerize \
-	-wait "tcp://${MONO_X_POSTGRES_ADDR_HOST}:${MONO_X_POSTGRES_ADDR_PORT:-5432}" \
-	-timeout 30s
-	
-test -z "$CI" || scripts/postgres-setup | psql
 gotestsum -- -race -tags=integration "$@" ./...

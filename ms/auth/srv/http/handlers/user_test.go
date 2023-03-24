@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/dal"
 	"github.com/hellohq/hqservice/ms/auth/dal/test"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
@@ -17,6 +18,7 @@ import (
 type userSuite struct {
 	suite.Suite
 	repo *dal.Repo
+	app  app.Appl
 	db   *test.TestDB
 	srv  *HttpDeps
 }
@@ -37,7 +39,11 @@ func (s *userSuite) SetupSuite() {
 
 	s.repo = repo
 	s.db = db
-	s.srv = &HttpDeps{}
+	s.app = app.New(&defaultConfig, repo)
+	s.srv = &HttpDeps{
+		s.app,
+		&defaultConfig,
+	}
 }
 
 func (s *userSuite) TearDownSuite() {
@@ -53,7 +59,7 @@ func (s *userSuite) TestUserHandler_Create() {
 	e := echo.New()
 	e.Validator = dto.NewCustomValidator()
 
-	body := UserCreateBody{Email: "jane.doe@example.com"}
+	body := UserCreateBody{Email: "noah.jin@example.com"}
 	bodyJson, err := json.Marshal(body)
 	s.NoError(err)
 	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewReader(bodyJson))
@@ -64,17 +70,17 @@ func (s *userSuite) TestUserHandler_Create() {
 	handler := NewUserHandler(s.srv, &sessionManager{})
 
 	if s.NoError(handler.Create(c)) {
-		user := UserCreateBody{}
+		user := dto.CreateUserResponse{}
 		err := json.Unmarshal(rec.Body.Bytes(), &user)
 		s.NoError(err)
-		s.NotEmpty(user.Email)
+		s.False(user.ID.IsNil())
 
-		// count, err := s.repo.GetUserRepo().Count(uuid.Nil, "")
-		// s.NoError(err)
-		// s.Equal(1, count)
+		count, err := s.repo.GetUserRepo().Count(ctx, user.ID)
+		s.NoError(err)
+		s.Equal(1, count)
 
-		// email, err := s.repo.GetEmailRepo().FindByAddress(body.Email)
-		// s.NoError(err)
-		// s.NotNil(email)
+		email, err := s.repo.GetEmailRepo().GetByAddress(ctx, body.Email)
+		s.NoError(err)
+		s.NotNil(email)
 	}
 }

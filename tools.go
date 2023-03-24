@@ -9,6 +9,6 @@ import (
 
 	_ "github.com/cosmtrek/air"
 	_ "github.com/mattn/goveralls"
-	_ "github.com/powerman/dockerize"
 	_ "golang.org/x/tools/cmd/stringer"
+	_ "gotest.tools/gotestsum"
 )

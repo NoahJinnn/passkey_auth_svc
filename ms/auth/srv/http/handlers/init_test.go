@@ -5,10 +5,12 @@ import (
 	"net/http"
 
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
 var ctx = context.Background()
+var defaultConfig = config.Config{}
 
 type sessionManager struct {
 }

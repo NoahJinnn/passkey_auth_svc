@@ -26,6 +26,7 @@ type IRepo interface {
 	GetUserRepo() IUserRepo
 	GetWebauthnCredentialRepo() IWebauthnCredentialRepo
 	GetWebauthnSessionRepo() IWebauthnSessionRepo
+	GetEmailRepo() IEmailRepo
 }
 
 type Repo struct {
@@ -97,4 +98,8 @@ func (r Repo) GetWebauthnCredentialRepo() IWebauthnCredentialRepo {
 
 func (r Repo) GetWebauthnSessionRepo() IWebauthnSessionRepo {
 	return NewWebauthnSessionRepo(r.Db)
+}
+
+func (r Repo) GetEmailRepo() IEmailRepo {
+	return NewEmailRepo(r.Db)
 }
