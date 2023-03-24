@@ -1,4 +1,4 @@
-package server
+package http
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/hellohq/hqservice/ms/auth/dal"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/handlers"
-	hqMiddlewares "github.com/hellohq/hqservice/ms/auth/srv/http/server/middlewares"
+	hqMiddlewares "github.com/hellohq/hqservice/ms/auth/srv/http/middlewares"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -20,7 +20,7 @@ type (
 	Log = *structlog.Logger
 )
 
-// NewServer returns OpenAPI server configured to listen on the TCP network
+// NewServer returns Echo server configured to listen on the TCP network
 // address cfg.Host:cfg.Port and handle requests on incoming connections.
 func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, error) {
 	srv := &handlers.HttpDeps{
