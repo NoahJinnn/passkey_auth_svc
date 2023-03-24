@@ -1,10 +1,11 @@
-package session
+package test
 
 import (
 	"context"
 	"testing"
 
 	"github.com/hellohq/hqservice/ms/auth/dal/test"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/session"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
@@ -16,7 +17,7 @@ func TestDefaultManager(t *testing.T) {
 	ctx := context.Background()
 	repo := test.NewJwkRepo(nil)
 
-	dm, err := NewDefaultManager(keys, repo)
+	dm, err := session.NewDefaultManager(keys, repo)
 	require.NoError(t, err)
 	all, err := repo.GetAllJwk(ctx)
 

@@ -1,4 +1,4 @@
-package session
+package test
 
 import (
 	"testing"
@@ -6,23 +6,23 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ms/auth/config"
-	"github.com/hellohq/hqservice/ms/auth/srv/test"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/session"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNewGenerator(t *testing.T) {
-	manager := test.JwkManager{}
+	manager := JwkManager{}
 	cfg := config.Session{}
-	sessionGenerator, err := NewManager(&manager, cfg)
+	sessionGenerator, err := session.NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 }
 
 func TestGenerator_Generate(t *testing.T) {
-	manager := test.JwkManager{}
+	manager := JwkManager{}
 	cfg := config.Session{}
-	sessionGenerator, err := NewManager(&manager, cfg)
+	sessionGenerator, err := session.NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -36,9 +36,9 @@ func TestGenerator_Generate(t *testing.T) {
 
 func TestGenerator_Verify(t *testing.T) {
 	sessionLifespan := "5m"
-	manager := test.JwkManager{}
+	manager := JwkManager{}
 	cfg := config.Session{Lifespan: sessionLifespan}
-	sessionGenerator, err := NewManager(&manager, cfg)
+	sessionGenerator, err := session.NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -61,9 +61,9 @@ func TestGenerator_Verify(t *testing.T) {
 }
 
 func TestGenerator_Verify_Error(t *testing.T) {
-	manager := test.JwkManager{}
+	manager := JwkManager{}
 	cfg := config.Session{}
-	sessionGenerator, err := NewManager(&manager, cfg)
+	sessionGenerator, err := session.NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -91,9 +91,9 @@ func TestGenerator_Verify_Error(t *testing.T) {
 }
 
 func TestGenerator_DeleteCookie(t *testing.T) {
-	manager := test.JwkManager{}
+	manager := JwkManager{}
 	cfg := config.Session{}
-	sessionGenerator, err := NewManager(&manager, cfg)
+	sessionGenerator, err := session.NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
