@@ -29,7 +29,7 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 	}
 	e := echo.New()
 	e.HideBanner = true
-
+	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: false, Logger: e.Logger})
 	if cfg.Server.Cors.Enabled {
 		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 			AllowOrigins:     cfg.Server.Cors.AllowOrigins,

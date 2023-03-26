@@ -56,6 +56,7 @@ type Config struct {
 	Webauthn WebauthnSettings
 	Session  Session
 	Secrets  Secrets
+	Emails   Emails
 	Postgres *PostgresConfig
 	Plaid    *PlaidConfig
 }
@@ -123,9 +124,14 @@ func GetServe() (c *Config, err error) {
 				SameSite: "strict",
 				Secure:   true,
 			},
+			EnableAuthTokenHeader: true,
 		},
 		Secrets: Secrets{
 			Keys: []string{own.Secrets.Value(&err)},
+		},
+		Emails: Emails{
+			RequireVerification: false,
+			MaxNumOfAddresses:   50,
 		},
 	}
 

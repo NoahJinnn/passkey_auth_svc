@@ -2,12 +2,12 @@ package svcs
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ent/email"
+	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
 )
@@ -18,11 +18,13 @@ type IUserSvc interface {
 
 type userSvc struct {
 	repo *dal.Repo
+	cfg  *config.Config
 }
 
-func NewUserSvc(repo *dal.Repo) IUserSvc {
+func NewUserSvc(cfg *config.Config, repo *dal.Repo) IUserSvc {
 	return &userSvc{
 		repo: repo,
+		cfg:  cfg,
 	}
 }
 
@@ -48,14 +50,43 @@ func (svc *userSvc) Create(ctx Ctx, address string) (newU *ent.User, emailID uui
 					// The email already exists and is assigned already.
 					return dto.NewHTTPError(http.StatusConflict).SetInternal(fmt.Errorf("user with email %s already exists", address))
 				}
+
+				// TODO: Implement email verification flow
+				// if !svc.cfg.Emails.RequireVerification {
+				// 	Assign the email address to the user because it's currently unassigned and email verification is turned off.
+				// 	email.UserID = newU.ID
+				// 	err = svc.repo.GetEmailRepo.Update(*email)
+				// 	if err != nil {
+				// 		return fmt.Errorf("failed to update email address: %w", err)
+				// 	}
+				// }
 			} else {
-				// Create new email
-				email, err = client.Email.Create().
-					SetAddress(address).
+				if svc.cfg.Emails.RequireVerification {
+					// The email can only be assigned to the user via passcode verification.
+					email, err = client.Email.Create().
+						SetAddress(address).
+						Save(ctx)
+					if err != nil {
+						return fmt.Errorf("failed creating email: %w", err)
+					}
+				} else {
+					email, err = client.Email.Create().
+						SetAddress(address).
+						SetUserID(newU.ID).
+						Save(ctx)
+					if err != nil {
+						return fmt.Errorf("failed creating email: %w", err)
+					}
+				}
+			}
+
+			if !svc.cfg.Emails.RequireVerification {
+				_, err = client.PrimaryEmail.Create().
 					SetUserID(newU.ID).
+					SetEmailID(email.ID).
 					Save(ctx)
 				if err != nil {
-					return fmt.Errorf("failed creating email: %w", err)
+					return fmt.Errorf("failed to store primary email: %w", err)
 				}
 			}
 			emailID = email.ID
@@ -63,7 +94,7 @@ func (svc *userSvc) Create(ctx Ctx, address string) (newU *ent.User, emailID uui
 		})
 		return exec(ctx, tx.Client())
 	}); err != nil {
-		log.Fatal(err)
+		return newU, emailID, err
 	}
 	return newU, emailID, nil
 }

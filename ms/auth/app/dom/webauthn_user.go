@@ -9,6 +9,7 @@ import (
 )
 
 func NewWebauthnUser(user ent.User, credentials []*ent.WebauthnCredential) (*WebauthnUser, error) {
+	// TODO: Make user has single email then remove PrimaryEmail required
 	email := user.Edges.PrimaryEmail
 	if email == nil {
 		return nil, errors.New("primary email unavailable")

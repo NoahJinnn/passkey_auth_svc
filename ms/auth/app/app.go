@@ -51,5 +51,5 @@ func (a App) GetWebauthnSvc() svcs.IWebauthnSvc {
 }
 
 func (a App) GetUserSvc() svcs.IUserSvc {
-	return svcs.NewUserSvc(a.repo)
+	return svcs.NewUserSvc(a.cfg, a.repo)
 }
