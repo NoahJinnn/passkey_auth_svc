@@ -27,16 +27,16 @@ func (r *webauthnRepo) GetById(ctx Ctx, id string) (*ent.WebauthnCredential, err
 	panic("implement me")
 }
 
-func (r *webauthnRepo) GetFromUser(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error) {
+func (r *webauthnRepo) GetFromUser(ctx Ctx, userId uuid.UUID) (credentials []*ent.WebauthnCredential, err error) {
 
 	// Query all ent.WebauthnCredential by ent.User id and sort by created at return them
-	credentials, err := r.db.WebauthnCredential.
+	credentials, err = r.db.WebauthnCredential.
 		Query().
 		Where(webauthncredential.HasUserWith(user.ID(userId))).
 		Order(ent.Asc(webauthncredential.FieldCreatedAt)).
 		All(ctx)
 
-	if err != nil {
+	if err != nil && !ent.IsNotFound(err) {
 		return nil, err
 	}
 

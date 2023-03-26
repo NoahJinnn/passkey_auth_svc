@@ -113,7 +113,7 @@ func GetServe() (c *Config, err error) {
 			RelyingParty: RelyingParty{
 				Id:          "localhost",
 				DisplayName: "Authentication Service",
-				Origins:     []string{"http://localhost"},
+				Origins:     []string{"http://localhost:17000"},
 			},
 			Timeout: 60000,
 		},

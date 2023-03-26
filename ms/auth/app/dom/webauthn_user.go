@@ -1,23 +1,23 @@
 package dom
 
 import (
-	"errors"
+	"context"
+	"fmt"
 
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
 )
 
-func NewWebauthnUser(user ent.User, credentials []*ent.WebauthnCredential) (*WebauthnUser, error) {
-	// TODO: Make user has single email then remove PrimaryEmail required
-	email := user.Edges.PrimaryEmail
-	if email == nil {
-		return nil, errors.New("primary email unavailable")
+func NewWebauthnUser(ctx context.Context, user ent.User, credentials []*ent.WebauthnCredential) (*WebauthnUser, error) {
+	email, err := user.QueryPrimaryEmail().QueryEmail().Only(ctx)
+	if email == nil || err != nil {
+		return nil, fmt.Errorf("primary email unavailable %v", err)
 	}
 
 	return &WebauthnUser{
 		UserId:              user.ID,
-		Email:               email.Edges.Email.Address,
+		Email:               email.Address,
 		WebauthnCredentials: credentials,
 	}, nil
 }

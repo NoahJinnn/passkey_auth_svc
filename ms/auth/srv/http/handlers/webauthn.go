@@ -32,7 +32,6 @@ func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
 	}
 
 	options, err := h.GetWebauthnSvc().WebauthnBeginRegistration(c.Request().Context(), uId)
-
 	if err != nil {
 		return fmt.Errorf("failed to create webauthn creation options: %w", err)
 	}

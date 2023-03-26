@@ -2,6 +2,7 @@ package svcs
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
@@ -25,6 +26,7 @@ var (
 	WebauthnOperationAuthentication string = "authentication"
 )
 
+func init() { log.SetFlags(log.Lshortfile | log.LstdFlags) }
 func NewWebAuthn(cfg *config.Config, repo *dal.Repo) IWebauthnSvc {
 	f := false
 	wa, err := webauthn.New(&webauthn.Config{
@@ -53,6 +55,7 @@ func NewWebAuthn(cfg *config.Config, repo *dal.Repo) IWebauthnSvc {
 
 func (svc *webauthnSvc) WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, error) {
 	user, err := svc.repo.GetUserRepo().GetById(ctx, userId)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
@@ -66,7 +69,7 @@ func (svc *webauthnSvc) WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*p
 		return nil, fmt.Errorf("failed to get webauthn credentials: %w", err)
 	}
 
-	webauthnUser, err := dom.NewWebauthnUser(*user, credentials)
+	webauthnUser, err := dom.NewWebauthnUser(ctx, *user, credentials)
 	if err != nil {
 		return nil, err
 	}
