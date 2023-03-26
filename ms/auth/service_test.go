@@ -13,6 +13,11 @@ import (
 	"github.com/powerman/check"
 )
 
+// Const shared by tests. Recommended naming scheme: <dataType><Variant>.
+var (
+	ctx = def.NewContext((&Service{}).Name())
+)
+
 func TestSmoke(tt *testing.T) {
 	t := check.T(tt)
 

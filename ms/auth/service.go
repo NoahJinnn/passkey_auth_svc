@@ -4,16 +4,13 @@ package hq
 import (
 	"context"
 	"net/http"
-	"regexp"
 
 	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
 	server "github.com/hellohq/hqservice/ms/auth/srv/http"
-	"github.com/hellohq/hqservice/ms/auth/srv/http/middlewares"
 	"github.com/hellohq/hqservice/pkg/concurrent"
-	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/hellohq/hqservice/pkg/serve"
 	"github.com/labstack/echo/v4"
 	"github.com/powerman/pqx"
@@ -24,8 +21,6 @@ import (
 
 // Ctx is a synonym for convenience.
 type Ctx = context.Context
-
-var reg = prometheus.NewPedanticRegistry()
 
 // Service implements main.embeddedService interface.
 type Service struct {
@@ -40,9 +35,6 @@ func (s *Service) Name() string { return config.ServiceName }
 
 // Init implements main.embeddedService interface.
 func (s *Service) Init(sharedCfg *sharedconfig.Shared, _, serveCmd *cobra.Command) error {
-	namespace := regexp.MustCompile(`[^a-zA-Z0-9]+`).ReplaceAllString(def.ProgName, "_")
-	middlewares.InitMetrics(reg, namespace)
-
 	return config.Init(sharedCfg, config.FlagSets{
 		Serve: serveCmd.Flags(),
 	})
@@ -90,6 +82,8 @@ func (s *Service) serveEcho(ctx Ctx) error {
 	})
 	return e.Start(":1323")
 }
+
+var reg = prometheus.NewPedanticRegistry()
 
 func (s *Service) serveMetrics(ctx Ctx) error {
 	return serve.Metrics(ctx, s.cfg.Server.BindMetricsAddr, reg)
