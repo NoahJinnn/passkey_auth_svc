@@ -3,8 +3,6 @@ package hq
 import (
 	"testing"
 
-	"github.com/hellohq/hqservice/ms/auth/app"
-	"github.com/hellohq/hqservice/ms/auth/dal"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/middlewares"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/powerman/check"
@@ -13,10 +11,7 @@ import (
 
 func TestMain(m *testing.M) {
 	def.Init()
-	dal.InitMetrics(reg, "test")
-	app.InitMetrics(reg)
 	middlewares.InitMetrics(reg, "test")
-	initMetrics(reg, "test")
 	check.TestMain(m)
 }
 

@@ -41,7 +41,6 @@ func (s *Service) Name() string { return config.ServiceName }
 // Init implements main.embeddedService interface.
 func (s *Service) Init(sharedCfg *sharedconfig.Shared, _, serveCmd *cobra.Command) error {
 	namespace := regexp.MustCompile(`[^a-zA-Z0-9]+`).ReplaceAllString(def.ProgName, "_")
-	initMetrics(reg, namespace)
 	middlewares.InitMetrics(reg, namespace)
 
 	return config.Init(sharedCfg, config.FlagSets{
