@@ -11,14 +11,17 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/hellohq/hqservice/ent/assetinfo"
-	"github.com/hellohq/hqservice/ent/bankaccount"
-	"github.com/hellohq/hqservice/ent/car"
-	"github.com/hellohq/hqservice/ent/collectible"
-	"github.com/hellohq/hqservice/ent/cryptoaccount"
-	"github.com/hellohq/hqservice/ent/loan"
-	"github.com/hellohq/hqservice/ent/privateshare"
+	"github.com/hellohq/hqservice/ent/email"
+	"github.com/hellohq/hqservice/ent/identity"
+	"github.com/hellohq/hqservice/ent/jwk"
+	"github.com/hellohq/hqservice/ent/passcode"
+	"github.com/hellohq/hqservice/ent/passwordcredential"
+	"github.com/hellohq/hqservice/ent/primaryemail"
 	"github.com/hellohq/hqservice/ent/user"
+	"github.com/hellohq/hqservice/ent/webauthncredential"
+	"github.com/hellohq/hqservice/ent/webauthncredentialtransport"
+	"github.com/hellohq/hqservice/ent/webauthnsessiondata"
+	"github.com/hellohq/hqservice/ent/webauthnsessiondataallowedcredential"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -40,20 +43,49 @@ type (
 	MutateFunc    = ent.MutateFunc
 )
 
+type clientCtxKey struct{}
+
+// FromContext returns a Client stored inside a context, or nil if there isn't one.
+func FromContext(ctx context.Context) *Client {
+	c, _ := ctx.Value(clientCtxKey{}).(*Client)
+	return c
+}
+
+// NewContext returns a new context with the given Client attached.
+func NewContext(parent context.Context, c *Client) context.Context {
+	return context.WithValue(parent, clientCtxKey{}, c)
+}
+
+type txCtxKey struct{}
+
+// TxFromContext returns a Tx stored inside a context, or nil if there isn't one.
+func TxFromContext(ctx context.Context) *Tx {
+	tx, _ := ctx.Value(txCtxKey{}).(*Tx)
+	return tx
+}
+
+// NewTxContext returns a new context with the given Tx attached.
+func NewTxContext(parent context.Context, tx *Tx) context.Context {
+	return context.WithValue(parent, txCtxKey{}, tx)
+}
+
 // OrderFunc applies an ordering on the sql selector.
 type OrderFunc func(*sql.Selector)
 
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		assetinfo.Table:     assetinfo.ValidColumn,
-		bankaccount.Table:   bankaccount.ValidColumn,
-		car.Table:           car.ValidColumn,
-		collectible.Table:   collectible.ValidColumn,
-		cryptoaccount.Table: cryptoaccount.ValidColumn,
-		loan.Table:          loan.ValidColumn,
-		privateshare.Table:  privateshare.ValidColumn,
-		user.Table:          user.ValidColumn,
+		email.Table:                       email.ValidColumn,
+		identity.Table:                    identity.ValidColumn,
+		jwk.Table:                         jwk.ValidColumn,
+		passcode.Table:                    passcode.ValidColumn,
+		passwordcredential.Table:          passwordcredential.ValidColumn,
+		primaryemail.Table:                primaryemail.ValidColumn,
+		user.Table:                        user.ValidColumn,
+		webauthncredential.Table:          webauthncredential.ValidColumn,
+		webauthncredentialtransport.Table: webauthncredentialtransport.ValidColumn,
+		webauthnsessiondata.Table:         webauthnsessiondata.ValidColumn,
+		webauthnsessiondataallowedcredential.Table: webauthnsessiondataallowedcredential.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

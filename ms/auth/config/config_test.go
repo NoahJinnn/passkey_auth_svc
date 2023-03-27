@@ -20,16 +20,17 @@ func Test(t *testing.T) {
 			User:   "auth",
 			Pass:   "authpass",
 		}),
-		BindAddr:        netx.NewAddr(def.Hostname, sharedconfig.AuthPort),
-		BindAddrInt:     netx.NewAddr(def.Hostname, sharedconfig.AuthPortInt),
-		BindMetricsAddr: netx.NewAddr(def.Hostname, sharedconfig.MetricsPort),
-		AuthAddr:        netx.NewAddr(def.Hostname, sharedconfig.AuthPort),
+		Server: Server{
+			BindAddr:        netx.NewAddr(def.Hostname, sharedconfig.AuthPort),
+			BindAddrInt:     netx.NewAddr(def.Hostname, sharedconfig.AuthPortInt),
+			BindMetricsAddr: netx.NewAddr(def.Hostname, sharedconfig.MetricsPort),
+		},
 	}
 
 	t.Run("required", func(tt *testing.T) {
 		t := check.T(tt)
 		require(t, "PostgresPass")
-		os.Setenv("MONO_AUTH_POSTGRES_AUTH_PASS", "authpass")
+		os.Setenv("HQ_AUTH_POSTGRES_AUTH_PASS", "authpass")
 	})
 	t.Run("default", func(tt *testing.T) {
 		t := check.T(tt)
@@ -39,14 +40,14 @@ func Test(t *testing.T) {
 	})
 	t.Run("constraint", func(tt *testing.T) {
 		t := check.T(tt)
-		constraint(t, "MONO_AUTH_POSTGRES_AUTH_LOGIN", "", `^PostgresUser .* empty`)
-		constraint(t, "MONO_AUTH_POSTGRES_AUTH_PASS", "", `^PostgresPass .* empty`)
+		constraint(t, "HQ_AUTH_POSTGRES_AUTH_LOGIN", "", `^PostgresUser .* empty`)
+		constraint(t, "HQ_AUTH_POSTGRES_AUTH_PASS", "", `^PostgresPass .* empty`)
 
 	})
 	t.Run("env", func(tt *testing.T) {
 		t := check.T(tt)
-		os.Setenv("MONO_AUTH_POSTGRES_AUTH_LOGIN", "auth3")
-		os.Setenv("MONO_AUTH_POSTGRES_AUTH_PASS", "authpass3")
+		os.Setenv("HQ_AUTH_POSTGRES_AUTH_LOGIN", "auth3")
+		os.Setenv("HQ_AUTH_POSTGRES_AUTH_PASS", "authpass3")
 
 		c, err := testGetServe()
 		t.Nil(err)

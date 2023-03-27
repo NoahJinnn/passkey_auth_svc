@@ -11,14 +11,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/hellohq/hqservice/ent/bankaccount"
-	"github.com/hellohq/hqservice/ent/car"
-	"github.com/hellohq/hqservice/ent/collectible"
-	"github.com/hellohq/hqservice/ent/cryptoaccount"
-	"github.com/hellohq/hqservice/ent/loan"
+	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ent/email"
+	"github.com/hellohq/hqservice/ent/passcode"
+	"github.com/hellohq/hqservice/ent/passwordcredential"
 	"github.com/hellohq/hqservice/ent/predicate"
-	"github.com/hellohq/hqservice/ent/privateshare"
+	"github.com/hellohq/hqservice/ent/primaryemail"
 	"github.com/hellohq/hqservice/ent/user"
+	"github.com/hellohq/hqservice/ent/webauthncredential"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -34,170 +34,93 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return uu
 }
 
-// SetFirstName sets the "first_name" field.
-func (uu *UserUpdate) SetFirstName(s string) *UserUpdate {
-	uu.mutation.SetFirstName(s)
-	return uu
-}
-
-// SetLastName sets the "last_name" field.
-func (uu *UserUpdate) SetLastName(s string) *UserUpdate {
-	uu.mutation.SetLastName(s)
-	return uu
-}
-
-// SetEmail sets the "email" field.
-func (uu *UserUpdate) SetEmail(s string) *UserUpdate {
-	uu.mutation.SetEmail(s)
-	return uu
-}
-
-// SetPassword sets the "password" field.
-func (uu *UserUpdate) SetPassword(s string) *UserUpdate {
-	uu.mutation.SetPassword(s)
-	return uu
-}
-
-// SetPhoneNumber sets the "phone_number" field.
-func (uu *UserUpdate) SetPhoneNumber(s string) *UserUpdate {
-	uu.mutation.SetPhoneNumber(s)
-	return uu
-}
-
-// SetNillablePhoneNumber sets the "phone_number" field if the given value is not nil.
-func (uu *UserUpdate) SetNillablePhoneNumber(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetPhoneNumber(*s)
-	}
-	return uu
-}
-
-// ClearPhoneNumber clears the value of the "phone_number" field.
-func (uu *UserUpdate) ClearPhoneNumber() *UserUpdate {
-	uu.mutation.ClearPhoneNumber()
-	return uu
-}
-
-// SetAddress sets the "address" field.
-func (uu *UserUpdate) SetAddress(s string) *UserUpdate {
-	uu.mutation.SetAddress(s)
-	return uu
-}
-
-// SetNillableAddress sets the "address" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableAddress(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetAddress(*s)
-	}
-	return uu
-}
-
-// ClearAddress clears the value of the "address" field.
-func (uu *UserUpdate) ClearAddress() *UserUpdate {
-	uu.mutation.ClearAddress()
-	return uu
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (uu *UserUpdate) SetCreatedAt(t time.Time) *UserUpdate {
-	uu.mutation.SetCreatedAt(t)
-	return uu
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (uu *UserUpdate) SetUpdatedAt(t time.Time) *UserUpdate {
 	uu.mutation.SetUpdatedAt(t)
 	return uu
 }
 
-// AddBankAccountIDs adds the "bank_accounts" edge to the BankAccount entity by IDs.
-func (uu *UserUpdate) AddBankAccountIDs(ids ...uint) *UserUpdate {
-	uu.mutation.AddBankAccountIDs(ids...)
+// AddEmailIDs adds the "emails" edge to the Email entity by IDs.
+func (uu *UserUpdate) AddEmailIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddEmailIDs(ids...)
 	return uu
 }
 
-// AddBankAccounts adds the "bank_accounts" edges to the BankAccount entity.
-func (uu *UserUpdate) AddBankAccounts(b ...*BankAccount) *UserUpdate {
-	ids := make([]uint, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+// AddEmails adds the "emails" edges to the Email entity.
+func (uu *UserUpdate) AddEmails(e ...*Email) *UserUpdate {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
 	}
-	return uu.AddBankAccountIDs(ids...)
+	return uu.AddEmailIDs(ids...)
 }
 
-// AddCarIDs adds the "cars" edge to the Car entity by IDs.
-func (uu *UserUpdate) AddCarIDs(ids ...uint) *UserUpdate {
-	uu.mutation.AddCarIDs(ids...)
+// AddPasscodeIDs adds the "passcodes" edge to the Passcode entity by IDs.
+func (uu *UserUpdate) AddPasscodeIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddPasscodeIDs(ids...)
 	return uu
 }
 
-// AddCars adds the "cars" edges to the Car entity.
-func (uu *UserUpdate) AddCars(c ...*Car) *UserUpdate {
-	ids := make([]uint, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return uu.AddCarIDs(ids...)
-}
-
-// AddCollectibleIDs adds the "collectibles" edge to the Collectible entity by IDs.
-func (uu *UserUpdate) AddCollectibleIDs(ids ...uint) *UserUpdate {
-	uu.mutation.AddCollectibleIDs(ids...)
-	return uu
-}
-
-// AddCollectibles adds the "collectibles" edges to the Collectible entity.
-func (uu *UserUpdate) AddCollectibles(c ...*Collectible) *UserUpdate {
-	ids := make([]uint, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return uu.AddCollectibleIDs(ids...)
-}
-
-// AddCryptoAccountIDs adds the "crypto_accounts" edge to the CryptoAccount entity by IDs.
-func (uu *UserUpdate) AddCryptoAccountIDs(ids ...uint) *UserUpdate {
-	uu.mutation.AddCryptoAccountIDs(ids...)
-	return uu
-}
-
-// AddCryptoAccounts adds the "crypto_accounts" edges to the CryptoAccount entity.
-func (uu *UserUpdate) AddCryptoAccounts(c ...*CryptoAccount) *UserUpdate {
-	ids := make([]uint, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return uu.AddCryptoAccountIDs(ids...)
-}
-
-// AddLoanIDs adds the "loans" edge to the Loan entity by IDs.
-func (uu *UserUpdate) AddLoanIDs(ids ...uint) *UserUpdate {
-	uu.mutation.AddLoanIDs(ids...)
-	return uu
-}
-
-// AddLoans adds the "loans" edges to the Loan entity.
-func (uu *UserUpdate) AddLoans(l ...*Loan) *UserUpdate {
-	ids := make([]uint, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
-	}
-	return uu.AddLoanIDs(ids...)
-}
-
-// AddPrivateShareIDs adds the "private_shares" edge to the PrivateShare entity by IDs.
-func (uu *UserUpdate) AddPrivateShareIDs(ids ...uint) *UserUpdate {
-	uu.mutation.AddPrivateShareIDs(ids...)
-	return uu
-}
-
-// AddPrivateShares adds the "private_shares" edges to the PrivateShare entity.
-func (uu *UserUpdate) AddPrivateShares(p ...*PrivateShare) *UserUpdate {
-	ids := make([]uint, len(p))
+// AddPasscodes adds the "passcodes" edges to the Passcode entity.
+func (uu *UserUpdate) AddPasscodes(p ...*Passcode) *UserUpdate {
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return uu.AddPrivateShareIDs(ids...)
+	return uu.AddPasscodeIDs(ids...)
+}
+
+// SetPasswordCredentialID sets the "password_credential" edge to the PasswordCredential entity by ID.
+func (uu *UserUpdate) SetPasswordCredentialID(id uuid.UUID) *UserUpdate {
+	uu.mutation.SetPasswordCredentialID(id)
+	return uu
+}
+
+// SetNillablePasswordCredentialID sets the "password_credential" edge to the PasswordCredential entity by ID if the given value is not nil.
+func (uu *UserUpdate) SetNillablePasswordCredentialID(id *uuid.UUID) *UserUpdate {
+	if id != nil {
+		uu = uu.SetPasswordCredentialID(*id)
+	}
+	return uu
+}
+
+// SetPasswordCredential sets the "password_credential" edge to the PasswordCredential entity.
+func (uu *UserUpdate) SetPasswordCredential(p *PasswordCredential) *UserUpdate {
+	return uu.SetPasswordCredentialID(p.ID)
+}
+
+// SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID.
+func (uu *UserUpdate) SetPrimaryEmailID(id uuid.UUID) *UserUpdate {
+	uu.mutation.SetPrimaryEmailID(id)
+	return uu
+}
+
+// SetNillablePrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID if the given value is not nil.
+func (uu *UserUpdate) SetNillablePrimaryEmailID(id *uuid.UUID) *UserUpdate {
+	if id != nil {
+		uu = uu.SetPrimaryEmailID(*id)
+	}
+	return uu
+}
+
+// SetPrimaryEmail sets the "primary_email" edge to the PrimaryEmail entity.
+func (uu *UserUpdate) SetPrimaryEmail(p *PrimaryEmail) *UserUpdate {
+	return uu.SetPrimaryEmailID(p.ID)
+}
+
+// AddWebauthnCredentialIDs adds the "webauthn_credentials" edge to the WebauthnCredential entity by IDs.
+func (uu *UserUpdate) AddWebauthnCredentialIDs(ids ...string) *UserUpdate {
+	uu.mutation.AddWebauthnCredentialIDs(ids...)
+	return uu
+}
+
+// AddWebauthnCredentials adds the "webauthn_credentials" edges to the WebauthnCredential entity.
+func (uu *UserUpdate) AddWebauthnCredentials(w ...*WebauthnCredential) *UserUpdate {
+	ids := make([]string, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uu.AddWebauthnCredentialIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -205,134 +128,84 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearBankAccounts clears all "bank_accounts" edges to the BankAccount entity.
-func (uu *UserUpdate) ClearBankAccounts() *UserUpdate {
-	uu.mutation.ClearBankAccounts()
+// ClearEmails clears all "emails" edges to the Email entity.
+func (uu *UserUpdate) ClearEmails() *UserUpdate {
+	uu.mutation.ClearEmails()
 	return uu
 }
 
-// RemoveBankAccountIDs removes the "bank_accounts" edge to BankAccount entities by IDs.
-func (uu *UserUpdate) RemoveBankAccountIDs(ids ...uint) *UserUpdate {
-	uu.mutation.RemoveBankAccountIDs(ids...)
+// RemoveEmailIDs removes the "emails" edge to Email entities by IDs.
+func (uu *UserUpdate) RemoveEmailIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveEmailIDs(ids...)
 	return uu
 }
 
-// RemoveBankAccounts removes "bank_accounts" edges to BankAccount entities.
-func (uu *UserUpdate) RemoveBankAccounts(b ...*BankAccount) *UserUpdate {
-	ids := make([]uint, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+// RemoveEmails removes "emails" edges to Email entities.
+func (uu *UserUpdate) RemoveEmails(e ...*Email) *UserUpdate {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
 	}
-	return uu.RemoveBankAccountIDs(ids...)
+	return uu.RemoveEmailIDs(ids...)
 }
 
-// ClearCars clears all "cars" edges to the Car entity.
-func (uu *UserUpdate) ClearCars() *UserUpdate {
-	uu.mutation.ClearCars()
+// ClearPasscodes clears all "passcodes" edges to the Passcode entity.
+func (uu *UserUpdate) ClearPasscodes() *UserUpdate {
+	uu.mutation.ClearPasscodes()
 	return uu
 }
 
-// RemoveCarIDs removes the "cars" edge to Car entities by IDs.
-func (uu *UserUpdate) RemoveCarIDs(ids ...uint) *UserUpdate {
-	uu.mutation.RemoveCarIDs(ids...)
+// RemovePasscodeIDs removes the "passcodes" edge to Passcode entities by IDs.
+func (uu *UserUpdate) RemovePasscodeIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemovePasscodeIDs(ids...)
 	return uu
 }
 
-// RemoveCars removes "cars" edges to Car entities.
-func (uu *UserUpdate) RemoveCars(c ...*Car) *UserUpdate {
-	ids := make([]uint, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return uu.RemoveCarIDs(ids...)
-}
-
-// ClearCollectibles clears all "collectibles" edges to the Collectible entity.
-func (uu *UserUpdate) ClearCollectibles() *UserUpdate {
-	uu.mutation.ClearCollectibles()
-	return uu
-}
-
-// RemoveCollectibleIDs removes the "collectibles" edge to Collectible entities by IDs.
-func (uu *UserUpdate) RemoveCollectibleIDs(ids ...uint) *UserUpdate {
-	uu.mutation.RemoveCollectibleIDs(ids...)
-	return uu
-}
-
-// RemoveCollectibles removes "collectibles" edges to Collectible entities.
-func (uu *UserUpdate) RemoveCollectibles(c ...*Collectible) *UserUpdate {
-	ids := make([]uint, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return uu.RemoveCollectibleIDs(ids...)
-}
-
-// ClearCryptoAccounts clears all "crypto_accounts" edges to the CryptoAccount entity.
-func (uu *UserUpdate) ClearCryptoAccounts() *UserUpdate {
-	uu.mutation.ClearCryptoAccounts()
-	return uu
-}
-
-// RemoveCryptoAccountIDs removes the "crypto_accounts" edge to CryptoAccount entities by IDs.
-func (uu *UserUpdate) RemoveCryptoAccountIDs(ids ...uint) *UserUpdate {
-	uu.mutation.RemoveCryptoAccountIDs(ids...)
-	return uu
-}
-
-// RemoveCryptoAccounts removes "crypto_accounts" edges to CryptoAccount entities.
-func (uu *UserUpdate) RemoveCryptoAccounts(c ...*CryptoAccount) *UserUpdate {
-	ids := make([]uint, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return uu.RemoveCryptoAccountIDs(ids...)
-}
-
-// ClearLoans clears all "loans" edges to the Loan entity.
-func (uu *UserUpdate) ClearLoans() *UserUpdate {
-	uu.mutation.ClearLoans()
-	return uu
-}
-
-// RemoveLoanIDs removes the "loans" edge to Loan entities by IDs.
-func (uu *UserUpdate) RemoveLoanIDs(ids ...uint) *UserUpdate {
-	uu.mutation.RemoveLoanIDs(ids...)
-	return uu
-}
-
-// RemoveLoans removes "loans" edges to Loan entities.
-func (uu *UserUpdate) RemoveLoans(l ...*Loan) *UserUpdate {
-	ids := make([]uint, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
-	}
-	return uu.RemoveLoanIDs(ids...)
-}
-
-// ClearPrivateShares clears all "private_shares" edges to the PrivateShare entity.
-func (uu *UserUpdate) ClearPrivateShares() *UserUpdate {
-	uu.mutation.ClearPrivateShares()
-	return uu
-}
-
-// RemovePrivateShareIDs removes the "private_shares" edge to PrivateShare entities by IDs.
-func (uu *UserUpdate) RemovePrivateShareIDs(ids ...uint) *UserUpdate {
-	uu.mutation.RemovePrivateShareIDs(ids...)
-	return uu
-}
-
-// RemovePrivateShares removes "private_shares" edges to PrivateShare entities.
-func (uu *UserUpdate) RemovePrivateShares(p ...*PrivateShare) *UserUpdate {
-	ids := make([]uint, len(p))
+// RemovePasscodes removes "passcodes" edges to Passcode entities.
+func (uu *UserUpdate) RemovePasscodes(p ...*Passcode) *UserUpdate {
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return uu.RemovePrivateShareIDs(ids...)
+	return uu.RemovePasscodeIDs(ids...)
+}
+
+// ClearPasswordCredential clears the "password_credential" edge to the PasswordCredential entity.
+func (uu *UserUpdate) ClearPasswordCredential() *UserUpdate {
+	uu.mutation.ClearPasswordCredential()
+	return uu
+}
+
+// ClearPrimaryEmail clears the "primary_email" edge to the PrimaryEmail entity.
+func (uu *UserUpdate) ClearPrimaryEmail() *UserUpdate {
+	uu.mutation.ClearPrimaryEmail()
+	return uu
+}
+
+// ClearWebauthnCredentials clears all "webauthn_credentials" edges to the WebauthnCredential entity.
+func (uu *UserUpdate) ClearWebauthnCredentials() *UserUpdate {
+	uu.mutation.ClearWebauthnCredentials()
+	return uu
+}
+
+// RemoveWebauthnCredentialIDs removes the "webauthn_credentials" edge to WebauthnCredential entities by IDs.
+func (uu *UserUpdate) RemoveWebauthnCredentialIDs(ids ...string) *UserUpdate {
+	uu.mutation.RemoveWebauthnCredentialIDs(ids...)
+	return uu
+}
+
+// RemoveWebauthnCredentials removes "webauthn_credentials" edges to WebauthnCredential entities.
+func (uu *UserUpdate) RemoveWebauthnCredentials(w ...*WebauthnCredential) *UserUpdate {
+	ids := make([]string, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uu.RemoveWebauthnCredentialIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
+	uu.defaults()
 	return withHooks[int, UserMutation](ctx, uu.sqlSave, uu.mutation, uu.hooks)
 }
 
@@ -358,8 +231,16 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (uu *UserUpdate) defaults() {
+	if _, ok := uu.mutation.UpdatedAt(); !ok {
+		v := user.UpdateDefaultUpdatedAt()
+		uu.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUint))
+	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID))
 	if ps := uu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -367,63 +248,36 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := uu.mutation.FirstName(); ok {
-		_spec.SetField(user.FieldFirstName, field.TypeString, value)
-	}
-	if value, ok := uu.mutation.LastName(); ok {
-		_spec.SetField(user.FieldLastName, field.TypeString, value)
-	}
-	if value, ok := uu.mutation.Email(); ok {
-		_spec.SetField(user.FieldEmail, field.TypeString, value)
-	}
-	if value, ok := uu.mutation.Password(); ok {
-		_spec.SetField(user.FieldPassword, field.TypeString, value)
-	}
-	if value, ok := uu.mutation.PhoneNumber(); ok {
-		_spec.SetField(user.FieldPhoneNumber, field.TypeString, value)
-	}
-	if uu.mutation.PhoneNumberCleared() {
-		_spec.ClearField(user.FieldPhoneNumber, field.TypeString)
-	}
-	if value, ok := uu.mutation.Address(); ok {
-		_spec.SetField(user.FieldAddress, field.TypeString, value)
-	}
-	if uu.mutation.AddressCleared() {
-		_spec.ClearField(user.FieldAddress, field.TypeString)
-	}
-	if value, ok := uu.mutation.CreatedAt(); ok {
-		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
-	}
 	if value, ok := uu.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if uu.mutation.BankAccountsCleared() {
+	if uu.mutation.EmailsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.BankAccountsTable,
-			Columns: []string{user.BankAccountsColumn},
+			Table:   user.EmailsTable,
+			Columns: []string{user.EmailsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: bankaccount.FieldID,
+					Type:   field.TypeUUID,
+					Column: email.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedBankAccountsIDs(); len(nodes) > 0 && !uu.mutation.BankAccountsCleared() {
+	if nodes := uu.mutation.RemovedEmailsIDs(); len(nodes) > 0 && !uu.mutation.EmailsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.BankAccountsTable,
-			Columns: []string{user.BankAccountsColumn},
+			Table:   user.EmailsTable,
+			Columns: []string{user.EmailsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: bankaccount.FieldID,
+					Type:   field.TypeUUID,
+					Column: email.FieldID,
 				},
 			},
 		}
@@ -432,71 +286,17 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.BankAccountsIDs(); len(nodes) > 0 {
+	if nodes := uu.mutation.EmailsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.BankAccountsTable,
-			Columns: []string{user.BankAccountsColumn},
+			Table:   user.EmailsTable,
+			Columns: []string{user.EmailsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: bankaccount.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if uu.mutation.CarsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.CarsTable,
-			Columns: []string{user.CarsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: car.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.RemovedCarsIDs(); len(nodes) > 0 && !uu.mutation.CarsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.CarsTable,
-			Columns: []string{user.CarsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: car.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.CarsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.CarsTable,
-			Columns: []string{user.CarsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: car.FieldID,
+					Type:   field.TypeUUID,
+					Column: email.FieldID,
 				},
 			},
 		}
@@ -505,33 +305,33 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.CollectiblesCleared() {
+	if uu.mutation.PasscodesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.CollectiblesTable,
-			Columns: []string{user.CollectiblesColumn},
+			Table:   user.PasscodesTable,
+			Columns: []string{user.PasscodesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: collectible.FieldID,
+					Type:   field.TypeUUID,
+					Column: passcode.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedCollectiblesIDs(); len(nodes) > 0 && !uu.mutation.CollectiblesCleared() {
+	if nodes := uu.mutation.RemovedPasscodesIDs(); len(nodes) > 0 && !uu.mutation.PasscodesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.CollectiblesTable,
-			Columns: []string{user.CollectiblesColumn},
+			Table:   user.PasscodesTable,
+			Columns: []string{user.PasscodesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: collectible.FieldID,
+					Type:   field.TypeUUID,
+					Column: passcode.FieldID,
 				},
 			},
 		}
@@ -540,71 +340,17 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.CollectiblesIDs(); len(nodes) > 0 {
+	if nodes := uu.mutation.PasscodesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.CollectiblesTable,
-			Columns: []string{user.CollectiblesColumn},
+			Table:   user.PasscodesTable,
+			Columns: []string{user.PasscodesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: collectible.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if uu.mutation.CryptoAccountsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.CryptoAccountsTable,
-			Columns: []string{user.CryptoAccountsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: cryptoaccount.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.RemovedCryptoAccountsIDs(); len(nodes) > 0 && !uu.mutation.CryptoAccountsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.CryptoAccountsTable,
-			Columns: []string{user.CryptoAccountsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: cryptoaccount.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.CryptoAccountsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.CryptoAccountsTable,
-			Columns: []string{user.CryptoAccountsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: cryptoaccount.FieldID,
+					Type:   field.TypeUUID,
+					Column: passcode.FieldID,
 				},
 			},
 		}
@@ -613,52 +359,33 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.LoansCleared() {
+	if uu.mutation.PasswordCredentialCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   user.LoansTable,
-			Columns: []string{user.LoansColumn},
+			Table:   user.PasswordCredentialTable,
+			Columns: []string{user.PasswordCredentialColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: loan.FieldID,
+					Type:   field.TypeUUID,
+					Column: passwordcredential.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedLoansIDs(); len(nodes) > 0 && !uu.mutation.LoansCleared() {
+	if nodes := uu.mutation.PasswordCredentialIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   user.LoansTable,
-			Columns: []string{user.LoansColumn},
+			Table:   user.PasswordCredentialTable,
+			Columns: []string{user.PasswordCredentialColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: loan.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.LoansIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.LoansTable,
-			Columns: []string{user.LoansColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: loan.FieldID,
+					Type:   field.TypeUUID,
+					Column: passwordcredential.FieldID,
 				},
 			},
 		}
@@ -667,33 +394,68 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.PrivateSharesCleared() {
+	if uu.mutation.PrimaryEmailCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   user.PrivateSharesTable,
-			Columns: []string{user.PrivateSharesColumn},
+			Table:   user.PrimaryEmailTable,
+			Columns: []string{user.PrimaryEmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: privateshare.FieldID,
+					Type:   field.TypeUUID,
+					Column: primaryemail.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedPrivateSharesIDs(); len(nodes) > 0 && !uu.mutation.PrivateSharesCleared() {
+	if nodes := uu.mutation.PrimaryEmailIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   user.PrivateSharesTable,
-			Columns: []string{user.PrivateSharesColumn},
+			Table:   user.PrimaryEmailTable,
+			Columns: []string{user.PrimaryEmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: privateshare.FieldID,
+					Type:   field.TypeUUID,
+					Column: primaryemail.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.WebauthnCredentialsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WebauthnCredentialsTable,
+			Columns: []string{user.WebauthnCredentialsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: webauthncredential.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedWebauthnCredentialsIDs(); len(nodes) > 0 && !uu.mutation.WebauthnCredentialsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WebauthnCredentialsTable,
+			Columns: []string{user.WebauthnCredentialsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: webauthncredential.FieldID,
 				},
 			},
 		}
@@ -702,17 +464,17 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.PrivateSharesIDs(); len(nodes) > 0 {
+	if nodes := uu.mutation.WebauthnCredentialsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.PrivateSharesTable,
-			Columns: []string{user.PrivateSharesColumn},
+			Table:   user.WebauthnCredentialsTable,
+			Columns: []string{user.WebauthnCredentialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: privateshare.FieldID,
+					Type:   field.TypeString,
+					Column: webauthncredential.FieldID,
 				},
 			},
 		}
@@ -741,170 +503,93 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// SetFirstName sets the "first_name" field.
-func (uuo *UserUpdateOne) SetFirstName(s string) *UserUpdateOne {
-	uuo.mutation.SetFirstName(s)
-	return uuo
-}
-
-// SetLastName sets the "last_name" field.
-func (uuo *UserUpdateOne) SetLastName(s string) *UserUpdateOne {
-	uuo.mutation.SetLastName(s)
-	return uuo
-}
-
-// SetEmail sets the "email" field.
-func (uuo *UserUpdateOne) SetEmail(s string) *UserUpdateOne {
-	uuo.mutation.SetEmail(s)
-	return uuo
-}
-
-// SetPassword sets the "password" field.
-func (uuo *UserUpdateOne) SetPassword(s string) *UserUpdateOne {
-	uuo.mutation.SetPassword(s)
-	return uuo
-}
-
-// SetPhoneNumber sets the "phone_number" field.
-func (uuo *UserUpdateOne) SetPhoneNumber(s string) *UserUpdateOne {
-	uuo.mutation.SetPhoneNumber(s)
-	return uuo
-}
-
-// SetNillablePhoneNumber sets the "phone_number" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillablePhoneNumber(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetPhoneNumber(*s)
-	}
-	return uuo
-}
-
-// ClearPhoneNumber clears the value of the "phone_number" field.
-func (uuo *UserUpdateOne) ClearPhoneNumber() *UserUpdateOne {
-	uuo.mutation.ClearPhoneNumber()
-	return uuo
-}
-
-// SetAddress sets the "address" field.
-func (uuo *UserUpdateOne) SetAddress(s string) *UserUpdateOne {
-	uuo.mutation.SetAddress(s)
-	return uuo
-}
-
-// SetNillableAddress sets the "address" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableAddress(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetAddress(*s)
-	}
-	return uuo
-}
-
-// ClearAddress clears the value of the "address" field.
-func (uuo *UserUpdateOne) ClearAddress() *UserUpdateOne {
-	uuo.mutation.ClearAddress()
-	return uuo
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (uuo *UserUpdateOne) SetCreatedAt(t time.Time) *UserUpdateOne {
-	uuo.mutation.SetCreatedAt(t)
-	return uuo
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (uuo *UserUpdateOne) SetUpdatedAt(t time.Time) *UserUpdateOne {
 	uuo.mutation.SetUpdatedAt(t)
 	return uuo
 }
 
-// AddBankAccountIDs adds the "bank_accounts" edge to the BankAccount entity by IDs.
-func (uuo *UserUpdateOne) AddBankAccountIDs(ids ...uint) *UserUpdateOne {
-	uuo.mutation.AddBankAccountIDs(ids...)
+// AddEmailIDs adds the "emails" edge to the Email entity by IDs.
+func (uuo *UserUpdateOne) AddEmailIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddEmailIDs(ids...)
 	return uuo
 }
 
-// AddBankAccounts adds the "bank_accounts" edges to the BankAccount entity.
-func (uuo *UserUpdateOne) AddBankAccounts(b ...*BankAccount) *UserUpdateOne {
-	ids := make([]uint, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+// AddEmails adds the "emails" edges to the Email entity.
+func (uuo *UserUpdateOne) AddEmails(e ...*Email) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
 	}
-	return uuo.AddBankAccountIDs(ids...)
+	return uuo.AddEmailIDs(ids...)
 }
 
-// AddCarIDs adds the "cars" edge to the Car entity by IDs.
-func (uuo *UserUpdateOne) AddCarIDs(ids ...uint) *UserUpdateOne {
-	uuo.mutation.AddCarIDs(ids...)
+// AddPasscodeIDs adds the "passcodes" edge to the Passcode entity by IDs.
+func (uuo *UserUpdateOne) AddPasscodeIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddPasscodeIDs(ids...)
 	return uuo
 }
 
-// AddCars adds the "cars" edges to the Car entity.
-func (uuo *UserUpdateOne) AddCars(c ...*Car) *UserUpdateOne {
-	ids := make([]uint, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return uuo.AddCarIDs(ids...)
-}
-
-// AddCollectibleIDs adds the "collectibles" edge to the Collectible entity by IDs.
-func (uuo *UserUpdateOne) AddCollectibleIDs(ids ...uint) *UserUpdateOne {
-	uuo.mutation.AddCollectibleIDs(ids...)
-	return uuo
-}
-
-// AddCollectibles adds the "collectibles" edges to the Collectible entity.
-func (uuo *UserUpdateOne) AddCollectibles(c ...*Collectible) *UserUpdateOne {
-	ids := make([]uint, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return uuo.AddCollectibleIDs(ids...)
-}
-
-// AddCryptoAccountIDs adds the "crypto_accounts" edge to the CryptoAccount entity by IDs.
-func (uuo *UserUpdateOne) AddCryptoAccountIDs(ids ...uint) *UserUpdateOne {
-	uuo.mutation.AddCryptoAccountIDs(ids...)
-	return uuo
-}
-
-// AddCryptoAccounts adds the "crypto_accounts" edges to the CryptoAccount entity.
-func (uuo *UserUpdateOne) AddCryptoAccounts(c ...*CryptoAccount) *UserUpdateOne {
-	ids := make([]uint, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return uuo.AddCryptoAccountIDs(ids...)
-}
-
-// AddLoanIDs adds the "loans" edge to the Loan entity by IDs.
-func (uuo *UserUpdateOne) AddLoanIDs(ids ...uint) *UserUpdateOne {
-	uuo.mutation.AddLoanIDs(ids...)
-	return uuo
-}
-
-// AddLoans adds the "loans" edges to the Loan entity.
-func (uuo *UserUpdateOne) AddLoans(l ...*Loan) *UserUpdateOne {
-	ids := make([]uint, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
-	}
-	return uuo.AddLoanIDs(ids...)
-}
-
-// AddPrivateShareIDs adds the "private_shares" edge to the PrivateShare entity by IDs.
-func (uuo *UserUpdateOne) AddPrivateShareIDs(ids ...uint) *UserUpdateOne {
-	uuo.mutation.AddPrivateShareIDs(ids...)
-	return uuo
-}
-
-// AddPrivateShares adds the "private_shares" edges to the PrivateShare entity.
-func (uuo *UserUpdateOne) AddPrivateShares(p ...*PrivateShare) *UserUpdateOne {
-	ids := make([]uint, len(p))
+// AddPasscodes adds the "passcodes" edges to the Passcode entity.
+func (uuo *UserUpdateOne) AddPasscodes(p ...*Passcode) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return uuo.AddPrivateShareIDs(ids...)
+	return uuo.AddPasscodeIDs(ids...)
+}
+
+// SetPasswordCredentialID sets the "password_credential" edge to the PasswordCredential entity by ID.
+func (uuo *UserUpdateOne) SetPasswordCredentialID(id uuid.UUID) *UserUpdateOne {
+	uuo.mutation.SetPasswordCredentialID(id)
+	return uuo
+}
+
+// SetNillablePasswordCredentialID sets the "password_credential" edge to the PasswordCredential entity by ID if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillablePasswordCredentialID(id *uuid.UUID) *UserUpdateOne {
+	if id != nil {
+		uuo = uuo.SetPasswordCredentialID(*id)
+	}
+	return uuo
+}
+
+// SetPasswordCredential sets the "password_credential" edge to the PasswordCredential entity.
+func (uuo *UserUpdateOne) SetPasswordCredential(p *PasswordCredential) *UserUpdateOne {
+	return uuo.SetPasswordCredentialID(p.ID)
+}
+
+// SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID.
+func (uuo *UserUpdateOne) SetPrimaryEmailID(id uuid.UUID) *UserUpdateOne {
+	uuo.mutation.SetPrimaryEmailID(id)
+	return uuo
+}
+
+// SetNillablePrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillablePrimaryEmailID(id *uuid.UUID) *UserUpdateOne {
+	if id != nil {
+		uuo = uuo.SetPrimaryEmailID(*id)
+	}
+	return uuo
+}
+
+// SetPrimaryEmail sets the "primary_email" edge to the PrimaryEmail entity.
+func (uuo *UserUpdateOne) SetPrimaryEmail(p *PrimaryEmail) *UserUpdateOne {
+	return uuo.SetPrimaryEmailID(p.ID)
+}
+
+// AddWebauthnCredentialIDs adds the "webauthn_credentials" edge to the WebauthnCredential entity by IDs.
+func (uuo *UserUpdateOne) AddWebauthnCredentialIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.AddWebauthnCredentialIDs(ids...)
+	return uuo
+}
+
+// AddWebauthnCredentials adds the "webauthn_credentials" edges to the WebauthnCredential entity.
+func (uuo *UserUpdateOne) AddWebauthnCredentials(w ...*WebauthnCredential) *UserUpdateOne {
+	ids := make([]string, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uuo.AddWebauthnCredentialIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -912,130 +597,79 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearBankAccounts clears all "bank_accounts" edges to the BankAccount entity.
-func (uuo *UserUpdateOne) ClearBankAccounts() *UserUpdateOne {
-	uuo.mutation.ClearBankAccounts()
+// ClearEmails clears all "emails" edges to the Email entity.
+func (uuo *UserUpdateOne) ClearEmails() *UserUpdateOne {
+	uuo.mutation.ClearEmails()
 	return uuo
 }
 
-// RemoveBankAccountIDs removes the "bank_accounts" edge to BankAccount entities by IDs.
-func (uuo *UserUpdateOne) RemoveBankAccountIDs(ids ...uint) *UserUpdateOne {
-	uuo.mutation.RemoveBankAccountIDs(ids...)
+// RemoveEmailIDs removes the "emails" edge to Email entities by IDs.
+func (uuo *UserUpdateOne) RemoveEmailIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveEmailIDs(ids...)
 	return uuo
 }
 
-// RemoveBankAccounts removes "bank_accounts" edges to BankAccount entities.
-func (uuo *UserUpdateOne) RemoveBankAccounts(b ...*BankAccount) *UserUpdateOne {
-	ids := make([]uint, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+// RemoveEmails removes "emails" edges to Email entities.
+func (uuo *UserUpdateOne) RemoveEmails(e ...*Email) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
 	}
-	return uuo.RemoveBankAccountIDs(ids...)
+	return uuo.RemoveEmailIDs(ids...)
 }
 
-// ClearCars clears all "cars" edges to the Car entity.
-func (uuo *UserUpdateOne) ClearCars() *UserUpdateOne {
-	uuo.mutation.ClearCars()
+// ClearPasscodes clears all "passcodes" edges to the Passcode entity.
+func (uuo *UserUpdateOne) ClearPasscodes() *UserUpdateOne {
+	uuo.mutation.ClearPasscodes()
 	return uuo
 }
 
-// RemoveCarIDs removes the "cars" edge to Car entities by IDs.
-func (uuo *UserUpdateOne) RemoveCarIDs(ids ...uint) *UserUpdateOne {
-	uuo.mutation.RemoveCarIDs(ids...)
+// RemovePasscodeIDs removes the "passcodes" edge to Passcode entities by IDs.
+func (uuo *UserUpdateOne) RemovePasscodeIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemovePasscodeIDs(ids...)
 	return uuo
 }
 
-// RemoveCars removes "cars" edges to Car entities.
-func (uuo *UserUpdateOne) RemoveCars(c ...*Car) *UserUpdateOne {
-	ids := make([]uint, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return uuo.RemoveCarIDs(ids...)
-}
-
-// ClearCollectibles clears all "collectibles" edges to the Collectible entity.
-func (uuo *UserUpdateOne) ClearCollectibles() *UserUpdateOne {
-	uuo.mutation.ClearCollectibles()
-	return uuo
-}
-
-// RemoveCollectibleIDs removes the "collectibles" edge to Collectible entities by IDs.
-func (uuo *UserUpdateOne) RemoveCollectibleIDs(ids ...uint) *UserUpdateOne {
-	uuo.mutation.RemoveCollectibleIDs(ids...)
-	return uuo
-}
-
-// RemoveCollectibles removes "collectibles" edges to Collectible entities.
-func (uuo *UserUpdateOne) RemoveCollectibles(c ...*Collectible) *UserUpdateOne {
-	ids := make([]uint, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return uuo.RemoveCollectibleIDs(ids...)
-}
-
-// ClearCryptoAccounts clears all "crypto_accounts" edges to the CryptoAccount entity.
-func (uuo *UserUpdateOne) ClearCryptoAccounts() *UserUpdateOne {
-	uuo.mutation.ClearCryptoAccounts()
-	return uuo
-}
-
-// RemoveCryptoAccountIDs removes the "crypto_accounts" edge to CryptoAccount entities by IDs.
-func (uuo *UserUpdateOne) RemoveCryptoAccountIDs(ids ...uint) *UserUpdateOne {
-	uuo.mutation.RemoveCryptoAccountIDs(ids...)
-	return uuo
-}
-
-// RemoveCryptoAccounts removes "crypto_accounts" edges to CryptoAccount entities.
-func (uuo *UserUpdateOne) RemoveCryptoAccounts(c ...*CryptoAccount) *UserUpdateOne {
-	ids := make([]uint, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return uuo.RemoveCryptoAccountIDs(ids...)
-}
-
-// ClearLoans clears all "loans" edges to the Loan entity.
-func (uuo *UserUpdateOne) ClearLoans() *UserUpdateOne {
-	uuo.mutation.ClearLoans()
-	return uuo
-}
-
-// RemoveLoanIDs removes the "loans" edge to Loan entities by IDs.
-func (uuo *UserUpdateOne) RemoveLoanIDs(ids ...uint) *UserUpdateOne {
-	uuo.mutation.RemoveLoanIDs(ids...)
-	return uuo
-}
-
-// RemoveLoans removes "loans" edges to Loan entities.
-func (uuo *UserUpdateOne) RemoveLoans(l ...*Loan) *UserUpdateOne {
-	ids := make([]uint, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
-	}
-	return uuo.RemoveLoanIDs(ids...)
-}
-
-// ClearPrivateShares clears all "private_shares" edges to the PrivateShare entity.
-func (uuo *UserUpdateOne) ClearPrivateShares() *UserUpdateOne {
-	uuo.mutation.ClearPrivateShares()
-	return uuo
-}
-
-// RemovePrivateShareIDs removes the "private_shares" edge to PrivateShare entities by IDs.
-func (uuo *UserUpdateOne) RemovePrivateShareIDs(ids ...uint) *UserUpdateOne {
-	uuo.mutation.RemovePrivateShareIDs(ids...)
-	return uuo
-}
-
-// RemovePrivateShares removes "private_shares" edges to PrivateShare entities.
-func (uuo *UserUpdateOne) RemovePrivateShares(p ...*PrivateShare) *UserUpdateOne {
-	ids := make([]uint, len(p))
+// RemovePasscodes removes "passcodes" edges to Passcode entities.
+func (uuo *UserUpdateOne) RemovePasscodes(p ...*Passcode) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return uuo.RemovePrivateShareIDs(ids...)
+	return uuo.RemovePasscodeIDs(ids...)
+}
+
+// ClearPasswordCredential clears the "password_credential" edge to the PasswordCredential entity.
+func (uuo *UserUpdateOne) ClearPasswordCredential() *UserUpdateOne {
+	uuo.mutation.ClearPasswordCredential()
+	return uuo
+}
+
+// ClearPrimaryEmail clears the "primary_email" edge to the PrimaryEmail entity.
+func (uuo *UserUpdateOne) ClearPrimaryEmail() *UserUpdateOne {
+	uuo.mutation.ClearPrimaryEmail()
+	return uuo
+}
+
+// ClearWebauthnCredentials clears all "webauthn_credentials" edges to the WebauthnCredential entity.
+func (uuo *UserUpdateOne) ClearWebauthnCredentials() *UserUpdateOne {
+	uuo.mutation.ClearWebauthnCredentials()
+	return uuo
+}
+
+// RemoveWebauthnCredentialIDs removes the "webauthn_credentials" edge to WebauthnCredential entities by IDs.
+func (uuo *UserUpdateOne) RemoveWebauthnCredentialIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.RemoveWebauthnCredentialIDs(ids...)
+	return uuo
+}
+
+// RemoveWebauthnCredentials removes "webauthn_credentials" edges to WebauthnCredential entities.
+func (uuo *UserUpdateOne) RemoveWebauthnCredentials(w ...*WebauthnCredential) *UserUpdateOne {
+	ids := make([]string, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uuo.RemoveWebauthnCredentialIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -1053,6 +687,7 @@ func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne 
 
 // Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	uuo.defaults()
 	return withHooks[*User, UserMutation](ctx, uuo.sqlSave, uuo.mutation, uuo.hooks)
 }
 
@@ -1078,8 +713,16 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (uuo *UserUpdateOne) defaults() {
+	if _, ok := uuo.mutation.UpdatedAt(); !ok {
+		v := user.UpdateDefaultUpdatedAt()
+		uuo.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
-	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUint))
+	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID))
 	id, ok := uuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
@@ -1104,63 +747,36 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			}
 		}
 	}
-	if value, ok := uuo.mutation.FirstName(); ok {
-		_spec.SetField(user.FieldFirstName, field.TypeString, value)
-	}
-	if value, ok := uuo.mutation.LastName(); ok {
-		_spec.SetField(user.FieldLastName, field.TypeString, value)
-	}
-	if value, ok := uuo.mutation.Email(); ok {
-		_spec.SetField(user.FieldEmail, field.TypeString, value)
-	}
-	if value, ok := uuo.mutation.Password(); ok {
-		_spec.SetField(user.FieldPassword, field.TypeString, value)
-	}
-	if value, ok := uuo.mutation.PhoneNumber(); ok {
-		_spec.SetField(user.FieldPhoneNumber, field.TypeString, value)
-	}
-	if uuo.mutation.PhoneNumberCleared() {
-		_spec.ClearField(user.FieldPhoneNumber, field.TypeString)
-	}
-	if value, ok := uuo.mutation.Address(); ok {
-		_spec.SetField(user.FieldAddress, field.TypeString, value)
-	}
-	if uuo.mutation.AddressCleared() {
-		_spec.ClearField(user.FieldAddress, field.TypeString)
-	}
-	if value, ok := uuo.mutation.CreatedAt(); ok {
-		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
-	}
 	if value, ok := uuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if uuo.mutation.BankAccountsCleared() {
+	if uuo.mutation.EmailsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.BankAccountsTable,
-			Columns: []string{user.BankAccountsColumn},
+			Table:   user.EmailsTable,
+			Columns: []string{user.EmailsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: bankaccount.FieldID,
+					Type:   field.TypeUUID,
+					Column: email.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedBankAccountsIDs(); len(nodes) > 0 && !uuo.mutation.BankAccountsCleared() {
+	if nodes := uuo.mutation.RemovedEmailsIDs(); len(nodes) > 0 && !uuo.mutation.EmailsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.BankAccountsTable,
-			Columns: []string{user.BankAccountsColumn},
+			Table:   user.EmailsTable,
+			Columns: []string{user.EmailsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: bankaccount.FieldID,
+					Type:   field.TypeUUID,
+					Column: email.FieldID,
 				},
 			},
 		}
@@ -1169,71 +785,17 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.BankAccountsIDs(); len(nodes) > 0 {
+	if nodes := uuo.mutation.EmailsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.BankAccountsTable,
-			Columns: []string{user.BankAccountsColumn},
+			Table:   user.EmailsTable,
+			Columns: []string{user.EmailsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: bankaccount.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if uuo.mutation.CarsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.CarsTable,
-			Columns: []string{user.CarsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: car.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.RemovedCarsIDs(); len(nodes) > 0 && !uuo.mutation.CarsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.CarsTable,
-			Columns: []string{user.CarsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: car.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.CarsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.CarsTable,
-			Columns: []string{user.CarsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: car.FieldID,
+					Type:   field.TypeUUID,
+					Column: email.FieldID,
 				},
 			},
 		}
@@ -1242,33 +804,33 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.CollectiblesCleared() {
+	if uuo.mutation.PasscodesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.CollectiblesTable,
-			Columns: []string{user.CollectiblesColumn},
+			Table:   user.PasscodesTable,
+			Columns: []string{user.PasscodesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: collectible.FieldID,
+					Type:   field.TypeUUID,
+					Column: passcode.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedCollectiblesIDs(); len(nodes) > 0 && !uuo.mutation.CollectiblesCleared() {
+	if nodes := uuo.mutation.RemovedPasscodesIDs(); len(nodes) > 0 && !uuo.mutation.PasscodesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.CollectiblesTable,
-			Columns: []string{user.CollectiblesColumn},
+			Table:   user.PasscodesTable,
+			Columns: []string{user.PasscodesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: collectible.FieldID,
+					Type:   field.TypeUUID,
+					Column: passcode.FieldID,
 				},
 			},
 		}
@@ -1277,71 +839,17 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.CollectiblesIDs(); len(nodes) > 0 {
+	if nodes := uuo.mutation.PasscodesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.CollectiblesTable,
-			Columns: []string{user.CollectiblesColumn},
+			Table:   user.PasscodesTable,
+			Columns: []string{user.PasscodesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: collectible.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if uuo.mutation.CryptoAccountsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.CryptoAccountsTable,
-			Columns: []string{user.CryptoAccountsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: cryptoaccount.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.RemovedCryptoAccountsIDs(); len(nodes) > 0 && !uuo.mutation.CryptoAccountsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.CryptoAccountsTable,
-			Columns: []string{user.CryptoAccountsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: cryptoaccount.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.CryptoAccountsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.CryptoAccountsTable,
-			Columns: []string{user.CryptoAccountsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: cryptoaccount.FieldID,
+					Type:   field.TypeUUID,
+					Column: passcode.FieldID,
 				},
 			},
 		}
@@ -1350,52 +858,33 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.LoansCleared() {
+	if uuo.mutation.PasswordCredentialCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   user.LoansTable,
-			Columns: []string{user.LoansColumn},
+			Table:   user.PasswordCredentialTable,
+			Columns: []string{user.PasswordCredentialColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: loan.FieldID,
+					Type:   field.TypeUUID,
+					Column: passwordcredential.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedLoansIDs(); len(nodes) > 0 && !uuo.mutation.LoansCleared() {
+	if nodes := uuo.mutation.PasswordCredentialIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   user.LoansTable,
-			Columns: []string{user.LoansColumn},
+			Table:   user.PasswordCredentialTable,
+			Columns: []string{user.PasswordCredentialColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: loan.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.LoansIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.LoansTable,
-			Columns: []string{user.LoansColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: loan.FieldID,
+					Type:   field.TypeUUID,
+					Column: passwordcredential.FieldID,
 				},
 			},
 		}
@@ -1404,33 +893,68 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.PrivateSharesCleared() {
+	if uuo.mutation.PrimaryEmailCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   user.PrivateSharesTable,
-			Columns: []string{user.PrivateSharesColumn},
+			Table:   user.PrimaryEmailTable,
+			Columns: []string{user.PrimaryEmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: privateshare.FieldID,
+					Type:   field.TypeUUID,
+					Column: primaryemail.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedPrivateSharesIDs(); len(nodes) > 0 && !uuo.mutation.PrivateSharesCleared() {
+	if nodes := uuo.mutation.PrimaryEmailIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   user.PrivateSharesTable,
-			Columns: []string{user.PrivateSharesColumn},
+			Table:   user.PrimaryEmailTable,
+			Columns: []string{user.PrimaryEmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: privateshare.FieldID,
+					Type:   field.TypeUUID,
+					Column: primaryemail.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.WebauthnCredentialsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WebauthnCredentialsTable,
+			Columns: []string{user.WebauthnCredentialsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: webauthncredential.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedWebauthnCredentialsIDs(); len(nodes) > 0 && !uuo.mutation.WebauthnCredentialsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WebauthnCredentialsTable,
+			Columns: []string{user.WebauthnCredentialsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeString,
+					Column: webauthncredential.FieldID,
 				},
 			},
 		}
@@ -1439,17 +963,17 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.PrivateSharesIDs(); len(nodes) > 0 {
+	if nodes := uuo.mutation.WebauthnCredentialsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.PrivateSharesTable,
-			Columns: []string{user.PrivateSharesColumn},
+			Table:   user.WebauthnCredentialsTable,
+			Columns: []string{user.WebauthnCredentialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: privateshare.FieldID,
+					Type:   field.TypeString,
+					Column: webauthncredential.FieldID,
 				},
 			},
 		}
