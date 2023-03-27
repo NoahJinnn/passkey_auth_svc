@@ -2,7 +2,6 @@
 
 scriptsdir=$( dirname -- "$0"; )
 cd $scriptsdir/../../
-
 if ! command -v doppler &> /dev/null; then
     echo "Doppler is not installed or not in PATH, please run 'task scripts:install:doppler' and try again"
 
@@ -12,5 +11,5 @@ else
     echo "HQ service started by exec built app"
     doppler run -- docker compose down --volumes &&
     doppler run -- docker compose up -d --remove-orphans &&
-    doppler run -- air serve
+    doppler run -- air serve "$1"
 fi

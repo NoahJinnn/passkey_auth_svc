@@ -21,9 +21,7 @@ func Test(t *testing.T) {
 			Pass:   "authpass",
 		}),
 		Server: Server{
-			BindAddr:        netx.NewAddr(def.Hostname, sharedconfig.AuthPort),
-			BindAddrInt:     netx.NewAddr(def.Hostname, sharedconfig.AuthPortInt),
-			BindMetricsAddr: netx.NewAddr(def.Hostname, sharedconfig.MetricsPort),
+			BindAddr: netx.NewAddr(def.Hostname, sharedconfig.AuthPort),
 		},
 	}
 
