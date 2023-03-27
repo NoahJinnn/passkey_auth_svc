@@ -22,22 +22,17 @@ type Shared struct {
 	AuthAddrHost    appcfg.NotEmptyString `env:"AUTH_ADDR_HOST"`
 	AuthAddrHostInt appcfg.NotEmptyString `env:"AUTH_ADDR_HOST_INT"`
 	AuthAddrPort    appcfg.Port           `env:"AUTH_ADDR_PORT"`
-	AuthAddrPortInt appcfg.Port           `env:"AUTH_ADDR_PORT_INT"`
 }
 
 // Default ports.
 const (
-	MonoPort = 17000 + iota
-	MetricsPort
-	AuthPort
-	AuthPortInt
+	AuthPort = 17000 + iota
 )
 
 var shared = &Shared{ //nolint:gochecknoglobals // Config is global anyway.
 	AuthAddrHost:    appcfg.MustNotEmptyString(def.Hostname),
 	AuthAddrHostInt: appcfg.MustNotEmptyString(def.Hostname),
 	AuthAddrPort:    appcfg.MustPort(strconv.Itoa(AuthPort)),
-	AuthAddrPortInt: appcfg.MustPort(strconv.Itoa(AuthPortInt)),
 }
 
 // Get updates config defaults (from env) and returns shared config.

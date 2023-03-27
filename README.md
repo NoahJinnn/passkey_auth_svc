@@ -1,62 +1,6 @@
 # HQ Service modulith
 
 ## Overview
-
-### Structure of Go packages
-
-- `api/*` - definitions of own and 3rd-party (in `api/ext-*`)
-  APIs/protocols and related auto-generated code
-- `cmd/*` - main application(s)
-- `internal/*` - packages shared by embedded microservices, e.g.:
-  - `internal/config` - configuration (default values, env) shared by
-    embedded microservices' subcommands and tests
-  - `internal/dom` - domain types shared by microservices (Entities)
-- `ms/*` - embedded microservices, with structure:
-  - `internal/config` - configuration(s) (default values, env, flags) for
-    microservice's subcommands and tests
-  - `internal/app` - define interfaces ("ports") for The Clean
-    Architecture (or "Ports and Adapters" architecture) and implements
-    business-logic
-  - `internal/srv/*` - adapters for served APIs/UI
-  - `internal/sub` - adapter for incoming events
-  - `internal/dal` - adapter for data storage
-  - `internal/migrations` - DB migrations (in both SQL and Go)
-  - `internal/svc/*` - adapters for accessing external services
-- `pkg/*` - helper packages, not related to architecture and
-  business-logic (may be later moved to own modules and/or replaced by
-  external dependencies), e.g.:
-  - `pkg/def/` - project-wide defaults
-- `*/old/*` - contains legacy code which shouldn't be modified - this code
-  is supposed to be extracted from `old/` directories (and refactored to
-  follow Clean Architecture) when it'll need any non-trivial modification
-  which require testing
-
-### Features
-
-- [x] Project structure (mostly) follows
-      [Standard Go Project Layout](https://github.com/golang-standards/project-layout).
-- [x] Strict but convenient golangci-lint configuration.
-- [x] Embedded microservices:
-  - [x] Well isolated from each other.
-  - [x] Can be easily extracted from monolith into separate projects.
-  - [x] Share common configuration (both env vars and flags).
-  - [x] Each has own CLI subcommands, DB migrations, ports, metrics, …
-- [x] Easily testable code (thanks to The Clean Architecture).
-- [x] Avoids (and resists to) using global objects (to ensure embedded
-      microservices won't conflict on these global objects).
-- [x] CLI subcommands support using [cobra](https://github.com/spf13/cobra).
-- [x] Graceful shutdown support.
-- [x] Configuration defaults can be overwritten by env vars and flags.
-- [x] Example tests, both unit and integration.
-- [x] Production logging using [structlog](https://github.com/powerman/structlog).
-- [x] Production metrics using Prometheus.
-- [x] Docker and docker-compose support.
-- [x] Smart test coverage report, with optional support for coveralls.io.
-- [x] Linters for Dockerfile and shell scripts.
-- [x] CI/CD setup for GitHub Actions.
-
-## Development
-
 ### Requirements
 
 - Go 1.19
@@ -64,7 +8,6 @@
 - [Docker Compose](https://docs.docker.com/compose/install/) 1.25+
 
 ### Setup
-
 #### Environment management
 
 Setup Doppler:
@@ -216,10 +159,6 @@ hq version v0.2.0 7562a1e 2020-10-22_03:19:37 go1.15.3
 
 $ ./bin/hq serve
          hq: inf      main: `started` version f/design-task-command-to-run-hqservice 51adc59-dirty 2023-02-15_09:36:06
-           hq: inf   openapi: `OpenAPI protocol` version 0.2.0
-           hq: inf     serve: `serve` 127.0.0.1:17001 [Prometheus metrics]
-           hq: inf     serve: `serve` 127.0.0.1:17000 [OpenAPI]
-           hq: inf   swagger: `Serving plaid connector at http://127.0.0.1:17000`
 ```
 
 ## TODO
