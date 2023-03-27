@@ -10,5 +10,7 @@ elif ! command -v air &> /dev/null; then
     echo "Air is not installed or not in GOPATH, please run 'task scripts:install:gotools' and try again"
 else
     echo "HQ service started by exec built app"
+    doppler run -- docker compose down --volumes
+    doppler run -- docker compose up -d --remove-orphans
     doppler run -- air serve
 fi
