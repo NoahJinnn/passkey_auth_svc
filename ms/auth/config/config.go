@@ -41,6 +41,8 @@ var (
 		PostgresAddrPort appcfg.Port           `env:"AUTH_POSTGRES_ADDR_PORT"`
 		PostgresDBName   appcfg.NotEmptyString `env:"AUTH_POSTGRES_DB_NAME"`
 		Secrets          appcfg.NotEmptyString `env:"AUTH_SECRETS"`
+		RpId             appcfg.NotEmptyString `env:"AUTH_RP_ID"`
+		Origin           appcfg.NotEmptyString `env:"AUTH_RP_ORIGIN"`
 	}{
 		MetricsAddrPort:  appcfg.MustPort(strconv.Itoa(sharedconfig.MetricsPort)),
 		PostgresUser:     appcfg.MustNotEmptyString(ServiceName),
@@ -48,6 +50,8 @@ var (
 		PostgresAddrHost: appcfg.MustNotEmptyString("localhost"),
 		PostgresDBName:   appcfg.MustNotEmptyString("postgres"),
 		Secrets:          appcfg.MustNotEmptyString("needstobeatleast16"),
+		RpId:             appcfg.MustNotEmptyString("localhost"),
+		Origin:           appcfg.MustNotEmptyString("localhost:17000"),
 	}
 )
 
@@ -111,9 +115,9 @@ func GetServe() (c *Config, err error) {
 		// TODO: Add env vars for below config fields
 		Webauthn: WebauthnSettings{
 			RelyingParty: RelyingParty{
-				Id:          "localhost",
+				Id:          own.RpId.Value(&err),
 				DisplayName: "Authentication Service",
-				Origins:     []string{"http://localhost:17000"},
+				Origins:     []string{own.Origin.Value(&err)},
 			},
 			Timeout: 60000,
 		},

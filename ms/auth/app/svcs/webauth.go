@@ -2,7 +2,6 @@ package svcs
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
@@ -26,7 +25,6 @@ var (
 	WebauthnOperationAuthentication string = "authentication"
 )
 
-func init() { log.SetFlags(log.Lshortfile | log.LstdFlags) }
 func NewWebAuthn(cfg *config.Config, repo *dal.Repo) IWebauthnSvc {
 	f := false
 	wa, err := webauthn.New(&webauthn.Config{
