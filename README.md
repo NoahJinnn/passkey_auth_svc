@@ -109,6 +109,11 @@ docker volume rm hqservice_postgres
 task scripts:run
 ```
 
+#### Run with command args
+```bash
+# cmd/hq/main.go is the entry point with the `main` function
+task scripts:run -- --port 17002 --wa.id example  # Specific auth service running on port `17002` with webauthn ID equals `example`  
+```
 #### Build first, then run
 
 In this example below, we demonstrate using the `Taskfile` command to build our binary, then, run our built `hq` binary.
