@@ -37,7 +37,6 @@ func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID
 				Name:                 string(name),
 				WebauthnCredentialID: credentialID,
 			}
-			// c.Transports = append(c.Transports, t)
 			c.Edges.WebauthnCredentialTransports = append(c.Edges.WebauthnCredentialTransports, &t)
 		}
 	}
@@ -48,6 +47,7 @@ func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID
 func WebauthnCredentialFromModel(credential *ent.WebauthnCredential) *webauthn.Credential {
 	credId, _ := base64.RawURLEncoding.DecodeString(credential.ID)
 	pKey, _ := base64.RawURLEncoding.DecodeString(credential.PublicKey)
+	// Make sure credential transports is loaded into the model
 	transports := credential.Edges.WebauthnCredentialTransports
 	transport := make([]protocol.AuthenticatorTransport, len(transports))
 
