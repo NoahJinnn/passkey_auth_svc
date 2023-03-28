@@ -52,7 +52,14 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 		return dto.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	credentialId, userId, err := h.Appl.GetWebauthnSvc().WebauthnFinishRegistration(c.Request().Context(), request, sessionToken.Subject())
+	credentialId, userId, err := h.GetWebauthnSvc().WebauthnFinishRegistration(
+		c.Request().Context(),
+		request,
+		sessionToken.Subject(),
+	)
+	if err != nil {
+		return dto.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 
 	return c.JSON(http.StatusOK, map[string]string{"credential_id": credentialId, "user_id": userId})
 }
