@@ -10,7 +10,6 @@ import (
 )
 
 type IWebauthnCredentialRepo interface {
-	GetById(ctx Ctx, id string) (*ent.WebauthnCredential, error)
 	GetFromUser(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error)
 	Create(ctx Ctx, credential ent.WebauthnCredential) error
 }
@@ -21,10 +20,6 @@ type webauthnRepo struct {
 
 func NewWebauthnCredentialRepo(db *ent.Client) IWebauthnCredentialRepo {
 	return &webauthnRepo{db: db}
-}
-
-func (r *webauthnRepo) GetById(ctx Ctx, id string) (*ent.WebauthnCredential, error) {
-	panic("implement me")
 }
 
 func (r *webauthnRepo) GetFromUser(ctx Ctx, userId uuid.UUID) (credentials []*ent.WebauthnCredential, err error) {

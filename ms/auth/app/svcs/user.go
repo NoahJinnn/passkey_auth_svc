@@ -29,7 +29,6 @@ func NewUserSvc(cfg *config.Config, repo *dal.Repo) IUserSvc {
 }
 
 func (svc *userSvc) Create(ctx Ctx, address string) (newU *ent.User, emailID uuid.UUID, err error) {
-
 	if err := svc.repo.WithTx(ctx, func(tx *ent.Tx) error {
 		exec := (func(ctx Ctx, client *ent.Client) error {
 			newU, err = client.User.Create().Save(ctx)

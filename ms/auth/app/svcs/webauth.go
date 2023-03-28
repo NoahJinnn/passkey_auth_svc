@@ -31,26 +31,7 @@ var (
 	WebauthnOperationAuthentication string = "authentication"
 )
 
-func NewWebAuthn(cfg *config.Config, repo *dal.Repo) IWebauthnSvc {
-	f := false
-	wa, err := webauthn.New(&webauthn.Config{
-		RPDisplayName:         cfg.Webauthn.RelyingParty.DisplayName,
-		RPID:                  cfg.Webauthn.RelyingParty.Id,
-		RPOrigin:              cfg.Webauthn.RelyingParty.Origin,
-		RPOrigins:             cfg.Webauthn.RelyingParty.Origins,
-		AttestationPreference: protocol.PreferNoAttestation,
-		AuthenticatorSelection: protocol.AuthenticatorSelection{
-			RequireResidentKey: &f,
-			ResidentKey:        protocol.ResidentKeyRequirementDiscouraged,
-			UserVerification:   protocol.VerificationRequired,
-		},
-		Timeout: cfg.Webauthn.Timeout,
-		Debug:   false,
-	})
-
-	if err != nil {
-		panic(fmt.Errorf("failed to create webauthn instance: %w", err))
-	}
+func NewWebAuthn(cfg *config.Config, repo *dal.Repo, wa *webauthn.WebAuthn) IWebauthnSvc {
 	return &webauthnSvc{
 		repo: repo,
 		wa:   wa,
