@@ -1,6 +1,8 @@
 package dal
 
 import (
+	"fmt"
+
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ent/user"
@@ -9,10 +11,8 @@ import (
 
 type IWebauthnCredentialRepo interface {
 	GetById(ctx Ctx, id string) (*ent.WebauthnCredential, error)
-	Create(ctx Ctx, credential ent.WebauthnCredential) error
-	Update(ctx Ctx, credential ent.WebauthnCredential) error
-	Delete(ctx Ctx, credential ent.WebauthnCredential) error
 	GetFromUser(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error)
+	Create(ctx Ctx, credential ent.WebauthnCredential) error
 }
 
 type webauthnRepo struct {
@@ -28,7 +28,6 @@ func (r *webauthnRepo) GetById(ctx Ctx, id string) (*ent.WebauthnCredential, err
 }
 
 func (r *webauthnRepo) GetFromUser(ctx Ctx, userId uuid.UUID) (credentials []*ent.WebauthnCredential, err error) {
-
 	// Query all ent.WebauthnCredential by ent.User id and sort by created at return them
 	credentials, err = r.db.WebauthnCredential.
 		Query().
@@ -44,13 +43,20 @@ func (r *webauthnRepo) GetFromUser(ctx Ctx, userId uuid.UUID) (credentials []*en
 }
 
 func (r *webauthnRepo) Create(ctx Ctx, credential ent.WebauthnCredential) error {
-	panic("implement me")
-}
-
-func (r *webauthnRepo) Update(ctx Ctx, credential ent.WebauthnCredential) error {
-	panic("implement me")
-}
-
-func (r *webauthnRepo) Delete(ctx Ctx, credential ent.WebauthnCredential) error {
-	panic("implement me")
+	_, err := r.db.WebauthnCredential.Create().
+		SetUserID(credential.UserID).
+		SetPublicKey(credential.PublicKey).
+		SetAttestationType(credential.AttestationType).
+		SetAaguid(credential.Aaguid).
+		SetSignCount(credential.SignCount).
+		SetName(credential.Name).
+		SetBackupEligible(credential.BackupEligible).
+		SetBackupState(credential.BackupState).
+		SetLastUsedAt(credential.LastUsedAt).
+		AddWebauthnCredentialTransports(credential.Edges.WebauthnCredentialTransports...).
+		Save(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to store credential: %w", err)
+	}
+	return nil
 }
