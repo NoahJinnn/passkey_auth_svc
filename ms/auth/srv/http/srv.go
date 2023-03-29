@@ -28,6 +28,7 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 		Cfg:  cfg,
 	}
 	e := echo.New()
+	e.File("/.well-known/apple-app-site-association", "static/apple-app-site-association")
 	e.HideBanner = true
 
 	// TODO: Turn Debug to "false" in production
