@@ -12,6 +12,9 @@
 package config
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/appcfg"
@@ -32,14 +35,15 @@ var (
 	shared      *sharedconfig.Shared
 	own         = &struct {
 		// Below envs is loaded by Doppler
-		PostgresUser     appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_LOGIN"`
-		PostgresPass     appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_PASS"`
-		PostgresAddrHost appcfg.NotEmptyString `env:"AUTH_POSTGRES_ADDR_HOST"`
-		PostgresAddrPort appcfg.Port           `env:"AUTH_POSTGRES_ADDR_PORT"`
-		PostgresDBName   appcfg.NotEmptyString `env:"AUTH_POSTGRES_DB_NAME"`
-		Secrets          appcfg.NotEmptyString `env:"AUTH_SECRETS"`
-		RpId             appcfg.NotEmptyString `env:"AUTH_RP_ID"`
-		RpOrigin         appcfg.NotEmptyString `env:"AUTH_RP_ORIGIN"`
+		PostgresUser         appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_LOGIN"`
+		PostgresPass         appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_PASS"`
+		PostgresAddrHost     appcfg.NotEmptyString `env:"AUTH_POSTGRES_ADDR_HOST"`
+		PostgresAddrPort     appcfg.Port           `env:"AUTH_POSTGRES_ADDR_PORT"`
+		PostgresDBName       appcfg.NotEmptyString `env:"AUTH_POSTGRES_DB_NAME"`
+		Secrets              appcfg.NotEmptyString `env:"AUTH_SECRETS"`
+		RpId                 appcfg.NotEmptyString `env:"AUTH_RP_ID"`
+		RpOrigin             appcfg.NotEmptyString `env:"AUTH_RP_ORIGIN"`
+		AppleAssociationSite appcfg.String         `env:"APPLE_SITE_ASSOCIATION"`
 	}{
 		PostgresUser:     appcfg.MustNotEmptyString(ServiceName),
 		PostgresAddrPort: appcfg.MustPort("5432"),
@@ -61,6 +65,31 @@ type Config struct {
 	Plaid    *PlaidConfig
 }
 
+// Save apple association site file to static folder
+func saveAppleAssociationSite(content string) error {
+
+	_, err := os.Stat("static")
+	if err != nil {
+		fmt.Println("Static dir does not exist", err)
+		if err := os.Mkdir("static", os.ModePerm); err != nil {
+			return fmt.Errorf("create static dir failed: %w", err)
+		}
+	}
+
+	destination, err := os.Create("static/apple-app-site-association")
+	if err != nil {
+		return fmt.Errorf("os.Create: %w", err)
+	}
+	defer destination.Close()
+
+	_, err = fmt.Fprintf(destination, "%s", content)
+	if err != nil {
+		return fmt.Errorf("os.Create: %w", err)
+	}
+	fmt.Println("Apple association site file saved")
+	return nil
+}
+
 // Init updates config defaults (from env) and setup subcommands flags.
 //
 // Init must be called once before using this package.
@@ -69,6 +98,11 @@ func Init(sharedCfg *sharedconfig.Shared, flagsets FlagSets) error {
 	shared, fs = sharedCfg, flagsets
 	fromEnv := appcfg.NewFromEnv(sharedconfig.EnvPrefix)
 	err := appcfg.ProvideStruct(own, fromEnv)
+	if err != nil {
+		return err
+	}
+
+	err = saveAppleAssociationSite(own.AppleAssociationSite.Value(&err))
 	if err != nil {
 		return err
 	}
