@@ -33,3 +33,12 @@ func (r *webauthnRepo) Create(ctx Ctx, credential ent.WebauthnCredential) error 
 	r.init = append(r.init, &credential)
 	return nil
 }
+
+func (r *webauthnRepo) Update(ctx Ctx, credential ent.WebauthnCredential) error {
+	for i, data := range r.init {
+		if data.ID == credential.ID {
+			r.init[i] = &credential
+		}
+	}
+	return nil
+}

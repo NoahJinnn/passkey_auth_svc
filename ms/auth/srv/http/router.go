@@ -66,11 +66,15 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 	// e.POST("/user", userHandler.GetUserIdByEmail)
 	// e.POST("/logout", userHandler.Logout, hqMiddlewares.Session(sessionManager))
 
-	webauthnHandler := handlers.NewWebauthnHandler(srv)
+	webauthnHandler := handlers.NewWebauthnHandler(srv, sessionManager)
 	webauthn := e.Group("/webauthn")
 	webauthnRegistration := webauthn.Group("/registration", hqMiddlewares.Session(sessionManager))
 	webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
 	webauthnRegistration.POST("/finalize", webauthnHandler.FinishRegistration)
+
+	webauthnLogin := webauthn.Group("/login")
+	webauthnLogin.POST("/initialize", webauthnHandler.BeginLogin)
+	// webauthnLogin.POST("/finalize", webauthnHandler.FinishLogin)
 
 	e.Logger.Fatal(e.Start(cfg.Server.BindAddr.String()))
 	return e, nil

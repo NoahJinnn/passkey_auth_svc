@@ -1,10 +1,12 @@
 package svcs
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
@@ -17,8 +19,10 @@ import (
 )
 
 type IWebauthnSvc interface {
-	WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, error)
-	WebauthnFinishRegistration(ctx Ctx, request *protocol.ParsedCredentialCreationData, sessionUserId string) (credentialId string, userId string, err error)
+	BeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, error)
+	FinishRegistration(ctx Ctx, request *protocol.ParsedCredentialCreationData, sessionUserId string) (credentialId string, userId uuid.UUID, err error)
+	BeginLogin(ctx Ctx, reqUserId *string) (*protocol.CredentialAssertion, error)
+	FinishLogin(ctx Ctx, request *protocol.ParsedCredentialAssertionData) (credentialId string, userId uuid.UUID, err error)
 }
 
 type webauthnSvc struct {
@@ -38,7 +42,7 @@ func NewWebAuthn(cfg *config.Config, repo dal.IRepo, wa *webauthn.WebAuthn) IWeb
 	}
 }
 
-func (svc *webauthnSvc) WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, error) {
+func (svc *webauthnSvc) BeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, error) {
 	webauthnUser, _, err := svc.getWebauthnUser(ctx, userId)
 	if webauthnUser == nil {
 		// TODO: audit logger
@@ -68,7 +72,7 @@ func (svc *webauthnSvc) WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*p
 	return options, nil
 }
 
-func (svc *webauthnSvc) WebauthnFinishRegistration(ctx Ctx, request *protocol.ParsedCredentialCreationData, sessionUserId string) (credentialId string, userId string, err error) {
+func (svc *webauthnSvc) FinishRegistration(ctx Ctx, request *protocol.ParsedCredentialCreationData, sessionUserId string) (credentialId string, userId uuid.UUID, err error) {
 	if err := svc.repo.WithTx(ctx, func(ctx Ctx, client *ent.Client) error {
 		sessionDataRepo := svc.repo.GetWebauthnSessionRepo()
 		sessionData, err := sessionDataRepo.GetByChallenge(ctx, request.Response.CollectedClientData.Challenge)
@@ -134,6 +138,150 @@ func (svc *webauthnSvc) WebauthnFinishRegistration(ctx Ctx, request *protocol.Pa
 		}
 
 		// TODO: audit logger
+		return nil
+	}); err != nil {
+		return credentialId, userId, err
+	}
+	return credentialId, userId, nil
+}
+
+func (svc *webauthnSvc) BeginLogin(ctx Ctx, reqUserId *string) (*protocol.CredentialAssertion, error) {
+	var options *protocol.CredentialAssertion
+	var sessionData *webauthn.SessionData
+	if reqUserId != nil {
+		// non discoverable login initialization
+		userId, err := uuid.FromString(*reqUserId)
+		if err != nil {
+			// TODO: audit logger
+			return nil, dto.NewHTTPError(http.StatusBadRequest, "failed to parse UserID as uuid").SetInternal(err)
+		}
+		var webauthnUser *dom.WebauthnUser
+		webauthnUser, _, err = svc.getWebauthnUser(ctx, userId)
+		if err != nil {
+			return nil, dto.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to get user: %w", err))
+		}
+		if webauthnUser == nil {
+			// TODO: audit logger
+			return nil, dto.NewHTTPError(http.StatusBadRequest, "user not found")
+		}
+
+		if len(webauthnUser.WebAuthnCredentials()) > 0 {
+			options, sessionData, err = svc.wa.BeginLogin(webauthnUser, webauthn.WithUserVerification(protocol.VerificationRequired))
+			if err != nil {
+				return nil, fmt.Errorf("failed to create webauthn assertion options: %w", err)
+			}
+		}
+	}
+	if options == nil && sessionData == nil {
+		var err error
+		options, sessionData, err = svc.wa.BeginDiscoverableLogin(webauthn.WithUserVerification(protocol.VerificationRequired))
+		if err != nil {
+			return nil, fmt.Errorf("failed to create webauthn assertion options for discoverable login: %w", err)
+		}
+	}
+
+	err := svc.repo.GetWebauthnSessionRepo().Create(ctx, *dom.WebauthnSessionDataToModel(sessionData, WebauthnOperationAuthentication))
+	if err != nil {
+		return nil, fmt.Errorf("failed to store webauthn assertion session data: %w", err)
+	}
+
+	// Remove all transports, because of a bug in android and windows where the internal authenticator gets triggered,
+	// when the transports array contains the type 'internal' although the credential is not available on the device.
+	for i := range options.Response.AllowedCredentials {
+		options.Response.AllowedCredentials[i].Transport = nil
+	}
+
+	return options, nil
+}
+
+func (svc *webauthnSvc) FinishLogin(ctx Ctx, request *protocol.ParsedCredentialAssertionData) (credentialId string, userId uuid.UUID, err error) {
+	if err := svc.repo.WithTx(ctx, func(ctx Ctx, client *ent.Client) error {
+		sessionDataRepo := svc.repo.GetWebauthnSessionRepo()
+		sessionData, err := sessionDataRepo.GetByChallenge(ctx, request.Response.CollectedClientData.Challenge)
+		if err != nil {
+			return fmt.Errorf("failed to get webauthn assertion session data: %w", err)
+		}
+
+		if sessionData != nil && sessionData.Operation != WebauthnOperationAuthentication {
+			sessionData = nil
+		}
+
+		if sessionData == nil {
+			// TODO: audit logger
+			return dto.NewHTTPError(http.StatusUnauthorized, "Stored challenge and received challenge do not match").SetInternal(errors.New("sessionData not found"))
+		}
+
+		model := dom.WebauthnSessionDataFromModel(sessionData)
+
+		var credential *webauthn.Credential
+		var webauthnUser *dom.WebauthnUser
+		if sessionData.UserID.IsNil() {
+			// Discoverable Login
+			userId, err := uuid.FromBytes(request.Response.UserHandle)
+			if err != nil {
+				return dto.NewHTTPError(http.StatusBadRequest, "failed to parse userHandle as uuid").SetInternal(err)
+			}
+			webauthnUser, _, err = svc.getWebauthnUser(ctx, userId)
+			if err != nil {
+				return fmt.Errorf("failed to get user: %w", err)
+			}
+
+			if webauthnUser == nil {
+				// TODO: audit logger
+				return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
+			}
+
+			credential, err = svc.wa.ValidateDiscoverableLogin(func(rawID, userHandle []byte) (user webauthn.User, err error) {
+				return webauthnUser, nil
+			}, *model, request)
+			if err != nil {
+				// TODO: audit logger
+				return dto.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
+			}
+		} else {
+			// non discoverable Login
+			webauthnUser, _, err = svc.getWebauthnUser(ctx, sessionData.UserID)
+			if err != nil {
+				return fmt.Errorf("failed to get user: %w", err)
+			}
+			if webauthnUser == nil {
+				// TODO: audit logger
+				return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
+			}
+			credential, err = svc.wa.ValidateLogin(webauthnUser, *model, request)
+			if err != nil {
+				// TODO: audit logger
+				return dto.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
+			}
+		}
+
+		var dbCred *ent.WebauthnCredential
+		for i := range webauthnUser.WebauthnCredentials {
+			if webauthnUser.WebauthnCredentials[i].ID == base64.RawURLEncoding.EncodeToString(credential.ID) {
+				dbCred = webauthnUser.WebauthnCredentials[i]
+				break
+			}
+		}
+		if dbCred != nil {
+			if dbCred.BackupEligible != request.Response.AuthenticatorData.Flags.HasBackupEligible() || dbCred.BackupState != request.Response.AuthenticatorData.Flags.HasBackupState() {
+				dbCred.BackupState = request.Response.AuthenticatorData.Flags.HasBackupState()
+				dbCred.BackupEligible = request.Response.AuthenticatorData.Flags.HasBackupEligible()
+			}
+
+			now := time.Now().UTC()
+			dbCred.LastUsedAt = now
+
+			err = svc.repo.GetWebauthnCredentialRepo().Update(ctx, *dbCred)
+			if err != nil {
+				return fmt.Errorf("failed to update webauthn credential: %w", err)
+			}
+		}
+
+		err = sessionDataRepo.Delete(ctx, *sessionData)
+		if err != nil {
+			return fmt.Errorf("failed to delete assertion session data: %w", err)
+		}
+		credentialId = base64.RawURLEncoding.EncodeToString(credential.ID)
 		return nil
 	}); err != nil {
 		return credentialId, userId, err
