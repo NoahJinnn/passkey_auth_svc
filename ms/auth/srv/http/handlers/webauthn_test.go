@@ -98,7 +98,7 @@ func TestWebauthnHandler_BeginRegistration(t *testing.T) {
 	handler := NewWebauthnHandler(&HttpDeps{
 		Appl: appl,
 		Cfg:  &defaultConfig,
-	})
+	}, &sessionManager{})
 	err = handler.BeginRegistration(c)
 	require.NoError(t, err)
 	if assert.NoError(t, handler.BeginRegistration(c)) {
@@ -141,7 +141,7 @@ func TestWebauthnHandler_FinishRegistration(t *testing.T) {
 	handler := NewWebauthnHandler(&HttpDeps{
 		Appl: appl,
 		Cfg:  &defaultConfig,
-	})
+	}, &sessionManager{})
 
 	if assert.NoError(t, handler.FinishRegistration(c)) {
 		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)

@@ -12,6 +12,7 @@ import (
 type IWebauthnCredentialRepo interface {
 	GetFromUser(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error)
 	Create(ctx Ctx, credential ent.WebauthnCredential) error
+	Update(ctx Ctx, credential ent.WebauthnCredential) error
 }
 
 type webauthnRepo struct {
@@ -53,6 +54,26 @@ func (r *webauthnRepo) Create(ctx Ctx, credential ent.WebauthnCredential) error 
 		Save(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to store credential: %w", err)
+	}
+	return nil
+}
+
+func (r *webauthnRepo) Update(ctx Ctx, credential ent.WebauthnCredential) error {
+	_, err := r.db.WebauthnCredential.
+		UpdateOneID(credential.ID).
+		SetUserID(credential.UserID).
+		SetPublicKey(credential.PublicKey).
+		SetAttestationType(credential.AttestationType).
+		SetAaguid(credential.Aaguid).
+		SetSignCount(credential.SignCount).
+		SetName(credential.Name).
+		SetBackupEligible(credential.BackupEligible).
+		SetBackupState(credential.BackupState).
+		SetLastUsedAt(credential.LastUsedAt).
+		AddWebauthnCredentialTransports(credential.Edges.WebauthnCredentialTransports...).
+		Save(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to update credential: %w", err)
 	}
 	return nil
 }
