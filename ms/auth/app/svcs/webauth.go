@@ -22,7 +22,7 @@ type IWebauthnSvc interface {
 }
 
 type webauthnSvc struct {
-	repo *dal.Repo
+	repo dal.IRepo
 	wa   *webauthn.WebAuthn
 }
 
@@ -31,7 +31,7 @@ var (
 	WebauthnOperationAuthentication string = "authentication"
 )
 
-func NewWebAuthn(cfg *config.Config, repo *dal.Repo, wa *webauthn.WebAuthn) IWebauthnSvc {
+func NewWebAuthn(cfg *config.Config, repo dal.IRepo, wa *webauthn.WebAuthn) IWebauthnSvc {
 	return &webauthnSvc{
 		repo: repo,
 		wa:   wa,
@@ -40,7 +40,6 @@ func NewWebAuthn(cfg *config.Config, repo *dal.Repo, wa *webauthn.WebAuthn) IWeb
 
 func (svc *webauthnSvc) WebauthnBeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, error) {
 	webauthnUser, _, err := svc.getWebauthnUser(ctx, userId)
-
 	if webauthnUser == nil {
 		// TODO: audit logger
 		return nil, fmt.Errorf("failed to get webauthnuser: %w", err)

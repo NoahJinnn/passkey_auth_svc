@@ -5,8 +5,6 @@
 package app
 
 import (
-	"context"
-	"errors"
 	"fmt"
 
 	"github.com/go-webauthn/webauthn/protocol"
@@ -14,18 +12,6 @@ import (
 	"github.com/hellohq/hqservice/ms/auth/app/svcs"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
-)
-
-// Ctx is a synonym for convenience.
-type Ctx = context.Context
-
-// Errors.
-var (
-	ErrAccessDenied  = errors.New("access denied")
-	ErrAlreadyExist  = errors.New("already exists")
-	ErrNotFound      = errors.New("not found")
-	ErrValidate      = errors.New("validate")
-	ErrWrongPassword = errors.New("wrong password")
 )
 
 // Appl provides application features (use cases) service.

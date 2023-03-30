@@ -39,6 +39,8 @@ func (r *userRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.User, error) {
 	u, err := r.db.User.
 		Query().
 		Where(user.ID(id)).
+		WithEmails().
+		WithPrimaryEmail().
 		Only(ctx)
 
 	if err != nil {
