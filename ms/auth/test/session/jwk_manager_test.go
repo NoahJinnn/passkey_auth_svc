@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/hellohq/hqservice/ms/auth/dal/test"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/session"
+	test "github.com/hellohq/hqservice/ms/auth/test/dal"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"

@@ -4,10 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
-	"github.com/hellohq/hqservice/ent"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 )
@@ -20,7 +18,6 @@ type TestDB struct {
 	pool        *dockertest.Pool
 	resource    *dockertest.Resource
 	DatabaseUrl string
-	DbCon       *ent.Client
 	Dialect     string
 }
 
@@ -71,17 +68,11 @@ func StartDB(name string, dialect string) (*TestDB, error) {
 		return nil, fmt.Errorf("could not connect to docker: %w", err)
 	}
 
-	client, err := ent.Open("postgres", databaseUrl)
-	if err != nil {
-		log.Fatalf("failed opening connection to postgres: %v", err)
-	}
-
 	return &TestDB{
 		pool:        pool,
 		resource:    resource,
-		DatabaseUrl: databaseUrl,
-		DbCon:       client,
 		Dialect:     dialect,
+		DatabaseUrl: databaseUrl,
 	}, nil
 }
 

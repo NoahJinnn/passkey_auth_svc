@@ -1,8 +1,4 @@
-//go:generate -command mockgen sh -c "$(git rev-parse --show-toplevel)/.gobincache/$DOLLAR{DOLLAR}0 \"$DOLLAR{DOLLAR}@\"" mockgen
-//go:generate mockgen -package=$GOPACKAGE -source=$GOFILE -destination=mock.$GOFILE -imports=
-
-// Package app provides business logic.
-package app
+package test
 
 import (
 	"fmt"
@@ -14,21 +10,15 @@ import (
 	"github.com/hellohq/hqservice/ms/auth/dal"
 )
 
-// Appl provides application features (use cases) service.
-type Appl interface {
-	GetWebauthnSvc() svcs.IWebauthnSvc
-	GetUserSvc() svcs.IUserSvc
-}
-
 // App implements interface Appl.
-type App struct {
+type app struct {
 	cfg  *config.Config
-	repo *dal.Repo
+	repo dal.IRepo
 	wa   *webauthn.WebAuthn
 }
 
 // New creates and returns new App.
-func New(cfg *config.Config, repo *dal.Repo) App {
+func NewApp(cfg *config.Config, repo dal.IRepo) app {
 	f := false
 	wa, err := webauthn.New(&webauthn.Config{
 		RPDisplayName:         cfg.Webauthn.RelyingParty.DisplayName,
@@ -48,17 +38,17 @@ func New(cfg *config.Config, repo *dal.Repo) App {
 	if err != nil {
 		panic(fmt.Errorf("failed to create webauthn instance: %w", err))
 	}
-	return App{
+	return app{
 		cfg:  cfg,
 		repo: repo,
 		wa:   wa,
 	}
 }
 
-func (a App) GetWebauthnSvc() svcs.IWebauthnSvc {
+func (a app) GetWebauthnSvc() svcs.IWebauthnSvc {
 	return svcs.NewWebAuthn(a.cfg, a.repo, a.wa)
 }
 
-func (a App) GetUserSvc() svcs.IUserSvc {
+func (a app) GetUserSvc() svcs.IUserSvc {
 	return svcs.NewUserSvc(a.cfg, a.repo)
 }

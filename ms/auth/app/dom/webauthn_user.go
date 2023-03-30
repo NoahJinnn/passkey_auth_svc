@@ -2,7 +2,6 @@ package dom
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gofrs/uuid"
@@ -10,9 +9,14 @@ import (
 )
 
 func NewWebauthnUser(ctx context.Context, user ent.User, credentials []*ent.WebauthnCredential) (*WebauthnUser, error) {
-	email, err := user.QueryPrimaryEmail().QueryEmail().Only(ctx)
-	if email == nil || err != nil {
-		return nil, fmt.Errorf("primary email unavailable %v", err)
+	emails := user.Edges.Emails
+	primEmail := user.Edges.PrimaryEmail
+	var email ent.Email
+	for _, m := range emails {
+		if m.UserID == primEmail.UserID {
+			email = *m
+			break
+		}
 	}
 
 	return &WebauthnUser{
