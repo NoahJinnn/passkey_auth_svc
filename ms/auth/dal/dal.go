@@ -21,7 +21,7 @@ const (
 
 // Repo provides data storage.
 type IRepo interface {
-	WithTx(ctx context.Context, fn func(tx *ent.Tx) error) error
+	WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error
 	GetJwkRepo() IJwkRepo
 	GetUserRepo() IUserRepo
 	GetWebauthnCredentialRepo() IWebauthnCredentialRepo
@@ -61,7 +61,11 @@ func (r Repo) Close() {
 	r.Db.Close()
 }
 
-func (r Repo) WithTx(ctx context.Context, fn func(tx *ent.Tx) error) error {
+func (r Repo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error {
+	txForw := func(db *ent.Client) error {
+		return exec(ctx, db)
+	}
+
 	tx, err := r.Db.Tx(ctx)
 	if err != nil {
 		return err
@@ -72,7 +76,7 @@ func (r Repo) WithTx(ctx context.Context, fn func(tx *ent.Tx) error) error {
 			panic(v)
 		}
 	}()
-	if err := fn(tx); err != nil {
+	if err := txForw(tx.Client()); err != nil {
 		if rerr := tx.Rollback(); rerr != nil {
 			err = fmt.Errorf("%w: rolling back transaction: %v", err, rerr)
 		}

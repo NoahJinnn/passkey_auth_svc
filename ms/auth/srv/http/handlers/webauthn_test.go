@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ms/auth/app/svcs"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
 	test "github.com/hellohq/hqservice/ms/auth/test/app"
 	testRepo "github.com/hellohq/hqservice/ms/auth/test/dal"
 	"github.com/labstack/echo/v4"
@@ -93,7 +95,6 @@ func TestWebauthnHandler_BeginRegistration(t *testing.T) {
 	c.Set("session", token)
 
 	appl := test.NewApp(&defaultConfig, testRepo.NewRepo(nil, users, nil, credentials, sessionData, nil))
-
 	handler := NewWebauthnHandler(&HttpDeps{
 		Appl: appl,
 		Cfg:  &defaultConfig,
@@ -114,5 +115,51 @@ func TestWebauthnHandler_BeginRegistration(t *testing.T) {
 		assert.Equal(t, creationOptions.Response.AuthenticatorSelection.ResidentKey, protocol.ResidentKeyRequirementRequired)
 		assert.Equal(t, creationOptions.Response.AuthenticatorSelection.UserVerification, protocol.VerificationRequired)
 		assert.True(t, *creationOptions.Response.AuthenticatorSelection.RequireResidentKey)
+	}
+}
+
+func TestWebauthnHandler_FinishRegistration(t *testing.T) {
+	body := `{
+"id": "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH",
+"rawId": "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH",
+"type": "public-key",
+"response": {
+"attestationObject": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVjeSZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NFYmehnq3OAAI1vMYKZIsLJfHwVQMAWgGhXZHA-Erj4xfo8FKEcB_PmR7mOUVuOn7GZhLwV-kTSh2hrVc6QE7NOikFYXiDo2M_mJ3huHJkDnnc5dHtIxfedbpMdex5fY3hoFs-fwymQjtdqdvti5c4x6UBAgMmIAEhWCDxvVrRgK4vpnr6JxTx-KfpSNyQUtvc47ryryZmj-P5kSJYIDox8N9bHQBrxN-b5kXqfmj3GwAJW7nNCh8UPbus3B6I",
+"clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoidE9yTkRDRDJ4UWY0ekZqRWp3eGFQOGZPRXJQM3p6MDhyTW9UbEpHdG5LVSIsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MCIsImNyb3NzT3JpZ2luIjpmYWxzZX0"
+}
+}`
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/webauthn/registration/finalize", strings.NewReader(body))
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	token := jwt.New()
+	err := token.Set(jwt.SubjectKey, userId)
+	require.NoError(t, err)
+	c.Set("session", token)
+
+	appl := test.NewApp(&defaultConfig, testRepo.NewRepo(nil, users, nil, nil, sessionData, nil))
+	handler := NewWebauthnHandler(&HttpDeps{
+		Appl: appl,
+		Cfg:  &defaultConfig,
+	})
+
+	if assert.NoError(t, handler.FinishRegistration(c)) {
+		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
+		assert.Regexp(t, `{"credential_id":".*"}`, rec.Body.String())
+	}
+
+	req2 := httptest.NewRequest(http.MethodPost, "/webauthn/registration/finalize", strings.NewReader(body))
+	rec2 := httptest.NewRecorder()
+	c2 := e.NewContext(req2, rec2)
+	token2 := jwt.New()
+	err = token.Set(jwt.SubjectKey, userId)
+	require.NoError(t, err)
+	c2.Set("session", token2)
+
+	err = handler.FinishRegistration(c2)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusBadRequest, httpError.Code)
+		assert.Equal(t, "Stored challenge and received challenge do not match: sessionData not found", err.Error())
 	}
 }

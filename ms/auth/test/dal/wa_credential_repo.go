@@ -7,7 +7,7 @@ import (
 )
 
 type webauthnRepo struct {
-	credentials []*ent.WebauthnCredential
+	init []*ent.WebauthnCredential
 }
 
 func NewWebauthnCredentialRepo(init []*ent.WebauthnCredential) dal.IWebauthnCredentialRepo {
@@ -20,7 +20,7 @@ func (r *webauthnRepo) GetById(ctx Ctx, id string) (*ent.WebauthnCredential, err
 
 func (r *webauthnRepo) GetFromUser(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error) {
 	var found []*ent.WebauthnCredential
-	for _, cre := range r.credentials {
+	for _, cre := range r.init {
 		if cre.UserID == userId {
 			found = append(found, cre)
 		}
@@ -30,13 +30,6 @@ func (r *webauthnRepo) GetFromUser(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCr
 }
 
 func (r *webauthnRepo) Create(ctx Ctx, credential ent.WebauthnCredential) error {
-	panic("implement me")
-}
-
-func (r *webauthnRepo) Update(ctx Ctx, credential ent.WebauthnCredential) error {
-	panic("implement me")
-}
-
-func (r *webauthnRepo) Delete(ctx Ctx, credential ent.WebauthnCredential) error {
-	panic("implement me")
+	r.init = append(r.init, &credential)
+	return nil
 }
