@@ -39,6 +39,7 @@ func (r *webauthnRepo) GetFromUser(ctx Ctx, userId uuid.UUID) (credentials []*en
 
 func (r *webauthnRepo) Create(ctx Ctx, credential ent.WebauthnCredential) error {
 	_, err := r.db.WebauthnCredential.Create().
+		SetID(credential.ID).
 		SetUserID(credential.UserID).
 		SetPublicKey(credential.PublicKey).
 		SetAttestationType(credential.AttestationType).

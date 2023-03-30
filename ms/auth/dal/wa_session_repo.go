@@ -41,7 +41,7 @@ func (r *webauthnSessionRepo) GetByChallenge(ctx Ctx, challenge string) (*ent.We
 
 func (r *webauthnSessionRepo) Create(ctx Ctx, sessionData ent.WebauthnSessionData) error {
 	_, err := r.db.WebauthnSessionData.Create().
-		SetUserID(sessionData.ID).
+		SetUserID(sessionData.UserID).
 		SetChallenge(sessionData.Challenge).
 		SetOperation(sessionData.Operation).
 		SetUserVerification(sessionData.UserVerification).
