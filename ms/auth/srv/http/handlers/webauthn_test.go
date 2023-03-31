@@ -163,3 +163,77 @@ func TestWebauthnHandler_FinishRegistration(t *testing.T) {
 		assert.Equal(t, "Stored challenge and received challenge do not match: sessionData not found", err.Error())
 	}
 }
+
+func TestWebauthnHandler_BeginLogin(t *testing.T) {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/webauthn/login/begin", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	token := jwt.New()
+	err := token.Set(jwt.SubjectKey, userId)
+	require.NoError(t, err)
+	c.Set("session", token)
+
+	appl := test.NewApp(&defaultConfig, testRepo.NewRepo(nil, users, nil, nil, sessionData, nil))
+	handler := NewWebauthnHandler(&HttpDeps{
+		Appl: appl,
+		Cfg:  &defaultConfig,
+	}, &sessionManager{})
+	require.NoError(t, err)
+
+	if assert.NoError(t, handler.BeginLogin(c)) {
+		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
+		assertionOptions := protocol.CredentialAssertion{}
+		err = json.Unmarshal(rec.Body.Bytes(), &assertionOptions)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, assertionOptions.Response.Challenge)
+		assert.Equal(t, assertionOptions.Response.UserVerification, protocol.VerificationRequired)
+		assert.Equal(t, defaultConfig.Webauthn.RelyingParty.Id, assertionOptions.Response.RelyingPartyID)
+	}
+}
+
+func TestWebauthnHandler_FinishLogin(t *testing.T) {
+	body := `{
+		"id": "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH",
+		"rawId": "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH",
+		"type": "public-key",
+		"response": {
+		"authenticatorData": "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MFYmezOw",
+		"clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiZ0tKS21oOTB2T3BZTzU1b0hwcWFIWF9vTUNxNG9UWnQtRDBiNnRlSXpyRSIsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MCIsImNyb3NzT3JpZ2luIjpmYWxzZX0",
+		"signature": "MEYCIQDi2vYVspG6pf38I4GyQCPOojGbvX4nwSPXCi0hm80twAIhAO3EWjhAnj0UpjU_l0AH5sEh3zq4LDvkvo3AUqaqfGYD",
+		"userHandle": "7E7wSVuIQyGhcyGw7_BqBA"
+		}
+		}`
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/webauthn/login/finalize", strings.NewReader(body))
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	appl := test.NewApp(&defaultConfig, testRepo.NewRepo(nil, users, nil, credentials, sessionData, nil))
+	handler := NewWebauthnHandler(&HttpDeps{
+		Appl: appl,
+		Cfg:  &defaultConfig,
+	}, &sessionManager{})
+	if assert.NoError(t, handler.FinishLogin(c)) {
+		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
+		cookies := rec.Result().Cookies()
+		if assert.NotEmpty(t, cookies) {
+			for _, cookie := range cookies {
+				if cookie.Name == "hqservice" {
+					assert.Equal(t, userId, cookie.Value)
+				}
+			}
+		}
+	}
+
+	req2 := httptest.NewRequest(http.MethodPost, "/webauthn/login/finalize", strings.NewReader(body))
+	rec2 := httptest.NewRecorder()
+	c2 := e.NewContext(req2, rec2)
+
+	err := handler.FinishLogin(c2)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusUnauthorized, httpError.Code)
+		assert.Equal(t, "Stored challenge and received challenge do not match: sessionData not found", err.Error())
+	}
+}
