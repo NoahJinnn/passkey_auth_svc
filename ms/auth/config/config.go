@@ -35,15 +35,16 @@ var (
 	shared      *sharedconfig.Shared
 	own         = &struct {
 		// Below envs is loaded by Doppler
-		PostgresUser         appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_LOGIN"`
-		PostgresPass         appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_PASS"`
-		PostgresAddrHost     appcfg.NotEmptyString `env:"AUTH_POSTGRES_ADDR_HOST"`
-		PostgresAddrPort     appcfg.Port           `env:"AUTH_POSTGRES_ADDR_PORT"`
-		PostgresDBName       appcfg.NotEmptyString `env:"AUTH_POSTGRES_DB_NAME"`
-		Secrets              appcfg.NotEmptyString `env:"AUTH_SECRETS"`
-		RpId                 appcfg.NotEmptyString `env:"AUTH_RP_ID"`
-		RpOrigin             appcfg.NotEmptyString `env:"AUTH_RP_ORIGIN"`
-		AppleAssociationSite appcfg.String         `env:"APPLE_SITE_ASSOCIATION"`
+		PostgresUser       appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_LOGIN"`
+		PostgresPass       appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_PASS"`
+		PostgresAddrHost   appcfg.NotEmptyString `env:"AUTH_POSTGRES_ADDR_HOST"`
+		PostgresAddrPort   appcfg.Port           `env:"AUTH_POSTGRES_ADDR_PORT"`
+		PostgresDBName     appcfg.NotEmptyString `env:"AUTH_POSTGRES_DB_NAME"`
+		Secrets            appcfg.NotEmptyString `env:"AUTH_SECRETS"`
+		RpId               appcfg.NotEmptyString `env:"AUTH_RP_ID"`
+		RpOrigin           appcfg.NotEmptyString `env:"AUTH_RP_ORIGIN"`
+		IosAssociationSite appcfg.String         `env:"IOS_SITE_ASSOCIATION"`
+		AndroidAssetLinks  appcfg.String         `env:"ANDROID_ASSET_LINKS"`
 	}{
 		PostgresUser:     appcfg.MustNotEmptyString(ServiceName),
 		PostgresAddrPort: appcfg.MustPort("5432"),
@@ -66,7 +67,7 @@ type Config struct {
 }
 
 // Save apple association site file to static folder
-func saveAppleAssociationSite(content string) error {
+func saveStaticFileConfig(content string, filename string) error {
 
 	_, err := os.Stat("static")
 	if err != nil {
@@ -76,7 +77,7 @@ func saveAppleAssociationSite(content string) error {
 		}
 	}
 
-	destination, err := os.Create("static/apple-app-site-association")
+	destination, err := os.Create(fmt.Sprintf("static/%s", filename))
 	if err != nil {
 		return fmt.Errorf("os.Create: %w", err)
 	}
@@ -86,7 +87,7 @@ func saveAppleAssociationSite(content string) error {
 	if err != nil {
 		return fmt.Errorf("os.Create: %w", err)
 	}
-	fmt.Println("Apple association site file saved")
+	fmt.Printf("File %s saved successfully\n", filename)
 	return nil
 }
 
@@ -102,7 +103,12 @@ func Init(sharedCfg *sharedconfig.Shared, flagsets FlagSets) error {
 		return err
 	}
 
-	err = saveAppleAssociationSite(own.AppleAssociationSite.Value(&err))
+	err = saveStaticFileConfig(own.IosAssociationSite.Value(&err), "apple-app-site-association")
+	if err != nil {
+		return err
+	}
+
+	err = saveStaticFileConfig(own.AndroidAssetLinks.Value(&err), "assetlinks.json")
 	if err != nil {
 		return err
 	}
