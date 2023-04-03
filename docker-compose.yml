@@ -27,31 +27,15 @@ services:
         install -m 0440 -o root -g postgres /dev.key /server.key
         exec docker-entrypoint.sh postgres -c ssl=on \
             --ssl_cert_file=/server.crt --ssl_key_file=/server.key
-  
-  # postgres-setup:
-  #   depends_on:
-  #     - postgres
-  #   image: "postgres:15.2" # We're using 12.
-  #   container_name: "mono_postgres-setup"
-  #   restart: "no"
-  #   volumes:
-  #     - "./scripts/postgres-setup:/usr/local/bin/postgres-setup"
-  #   environment:
-  #     HQ_AUTH_POSTGRES_AUTH_LOGIN: "${HQ_AUTH_POSTGRES_AUTH_LOGIN}"
-  #     HQ_AUTH_POSTGRES_AUTH_PASS: "${HQ_AUTH_POSTGRES_AUTH_PASS}"
-  #     PGHOST: "postgres"
-  #     PGUSER: "postgres"
-  #     PGPASSWORD: "postgres"
-  #   command:
-  #     - bash
-  #     - -c
-  #     - |
-  #       while ! timeout --foreground 0.5 bash -c "echo -n >/dev/tcp/$${PGHOST}/$${PGPORT:-5432}" 2>/dev/null; do
-  #           echo waiting for postgres
-  #           sleep 0.5
-  #       done
-  #       set -x -e -o pipefail
-  #       postgres-setup | psql
+    networks:
+      - intranet
+  mailslurper:
+    image: marcopas/docker-mailslurper:latest
+    ports:
+      - '8080:8080' # web UI
+      - '8085:8085'
+    networks:
+      - intranet 
 
   # hq:
   #   build:
