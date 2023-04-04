@@ -62,7 +62,8 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 	user := e.Group("/users")
 	userHandler := handlers.NewUserHandler(srv, sessionManager)
 	user.POST("", userHandler.Create)
-	// user.GET("/:id", userHandler.Get, hqMiddlewares.Session(sessionManager))
+	user.GET("/:id", userHandler.Get, hqMiddlewares.Session(sessionManager))
+	e.POST("/logout", userHandler.Logout, hqMiddlewares.Session(sessionManager))
 
 	// e.POST("/user", userHandler.GetUserIdByEmail)
 	// e.POST("/logout", userHandler.Logout, hqMiddlewares.Session(sessionManager))
@@ -75,7 +76,7 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 
 	webauthnLogin := webauthn.Group("/login")
 	webauthnLogin.POST("/initialize", webauthnHandler.BeginLogin)
-	// webauthnLogin.POST("/finalize", webauthnHandler.FinishLogin)
+	webauthnLogin.POST("/finalize", webauthnHandler.FinishLogin)
 
 	e.Logger.Fatal(e.Start(cfg.Server.BindAddr.String()))
 	return e, nil

@@ -1,6 +1,7 @@
 package svcs
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -13,6 +14,7 @@ import (
 )
 
 type IUserSvc interface {
+	GetById(ctx Ctx, userID uuid.UUID) (*ent.User, *string, error)
 	Create(ctx Ctx, email string) (newU *ent.User, emailID uuid.UUID, err error)
 }
 
@@ -93,4 +95,25 @@ func (svc *userSvc) Create(ctx Ctx, address string) (newU *ent.User, emailID uui
 		return newU, emailID, err
 	}
 	return newU, emailID, nil
+}
+
+func (svc *userSvc) GetById(ctx Ctx, userID uuid.UUID) (*ent.User, *string, error) {
+	user, err := svc.repo.GetUserRepo().GetById(ctx, userID)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	if user == nil {
+		return nil, nil, dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
+	}
+
+	var emailAddress *string
+	if e := user.Edges.PrimaryEmail; e != nil {
+		model, err := e.QueryEmail().Only(ctx)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to get email address of primary email: %w", err)
+		}
+		emailAddress = &model.Address
+	}
+	return user, emailAddress, nil
 }
