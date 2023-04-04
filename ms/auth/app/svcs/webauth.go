@@ -23,6 +23,9 @@ type IWebauthnSvc interface {
 	FinishRegistration(ctx Ctx, request *protocol.ParsedCredentialCreationData, sessionUserId string) (credentialId string, userId uuid.UUID, err error)
 	BeginLogin(ctx Ctx, reqUserId *string) (*protocol.CredentialAssertion, error)
 	FinishLogin(ctx Ctx, request *protocol.ParsedCredentialAssertionData) (credentialId string, userId uuid.UUID, err error)
+	ListCredentials(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error)
+	UpdateCredential(ctx Ctx, userId uuid.UUID, id string, name *string) error
+	DeleteCredential(ctx Ctx, userId uuid.UUID, id string) error
 }
 
 type webauthnSvc struct {
@@ -287,6 +290,54 @@ func (svc *webauthnSvc) FinishLogin(ctx Ctx, request *protocol.ParsedCredentialA
 		return credentialId, userId, err
 	}
 	return credentialId, userId, nil
+}
+
+func (svc *webauthnSvc) ListCredentials(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error) {
+	return svc.repo.GetWebauthnCredentialRepo().GetFromUser(ctx, userId)
+}
+
+func (svc *webauthnSvc) UpdateCredential(ctx Ctx, userId uuid.UUID, id string, name *string) error {
+
+	user, err := svc.repo.GetUserRepo().GetById(ctx, userId)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+
+	credential, err := svc.repo.GetWebauthnCredentialRepo().GetById(ctx, id)
+	if err != nil {
+		return fmt.Errorf("failed to get webauthn credentials: %w", err)
+	}
+
+	if credential == nil || credential.UserID.String() != user.ID.String() {
+		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("the user does not have a webauthn credential with the specified credentialId"))
+	}
+	if name != nil {
+		credential.Name = *name
+	}
+
+	return svc.repo.WithTx(ctx, func(ctx Ctx, client *ent.Client) error {
+		return svc.repo.GetWebauthnCredentialRepo().Update(ctx, *credential)
+	})
+}
+
+func (svc *webauthnSvc) DeleteCredential(ctx Ctx, userId uuid.UUID, id string) error {
+	user, err := svc.repo.GetUserRepo().GetById(ctx, userId)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+
+	credential, err := svc.repo.GetWebauthnCredentialRepo().GetById(ctx, id)
+	if err != nil {
+		return fmt.Errorf("failed to get webauthn credentials: %w", err)
+	}
+
+	if credential == nil || credential.UserID.String() != user.ID.String() {
+		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("the user does not have a webauthn credential with the specified credentialId"))
+	}
+
+	return svc.repo.WithTx(ctx, func(ctx Ctx, client *ent.Client) error {
+		return svc.repo.GetWebauthnCredentialRepo().Delete(ctx, *credential)
+	})
 }
 
 func (svc *webauthnSvc) getWebauthnUser(ctx Ctx, userId uuid.UUID) (*dom.WebauthnUser, *ent.User, error) {

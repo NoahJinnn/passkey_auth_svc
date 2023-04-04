@@ -11,8 +11,10 @@ import (
 
 type IWebauthnCredentialRepo interface {
 	GetFromUser(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error)
+	GetById(ctx Ctx, id string) (*ent.WebauthnCredential, error)
 	Create(ctx Ctx, credential ent.WebauthnCredential) error
 	Update(ctx Ctx, credential ent.WebauthnCredential) error
+	Delete(ctx Ctx, credential ent.WebauthnCredential) error
 }
 
 type webauthnRepo struct {
@@ -21,6 +23,19 @@ type webauthnRepo struct {
 
 func NewWebauthnCredentialRepo(db *ent.Client) IWebauthnCredentialRepo {
 	return &webauthnRepo{db: db}
+}
+
+func (r *webauthnRepo) GetById(ctx Ctx, id string) (credential *ent.WebauthnCredential, err error) {
+	credential, err = r.db.WebauthnCredential.
+		Query().
+		Where(webauthncredential.ID(id)).
+		Only(ctx)
+
+	if err != nil && !ent.IsNotFound(err) {
+		return nil, err
+	}
+
+	return credential, nil
 }
 
 func (r *webauthnRepo) GetFromUser(ctx Ctx, userId uuid.UUID) (credentials []*ent.WebauthnCredential, err error) {
@@ -74,6 +89,14 @@ func (r *webauthnRepo) Update(ctx Ctx, credential ent.WebauthnCredential) error 
 		Save(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to update credential: %w", err)
+	}
+	return nil
+}
+
+func (r *webauthnRepo) Delete(ctx Ctx, credential ent.WebauthnCredential) error {
+	err := r.db.WebauthnCredential.DeleteOneID(credential.ID).Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to delete credential: %w", err)
 	}
 	return nil
 }
