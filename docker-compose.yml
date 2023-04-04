@@ -36,7 +36,8 @@ services:
       - '8085:8085'
     networks:
       - intranet 
-
+networks:
+  intranet:
   # hq:
   #   build:
   #     context: .
