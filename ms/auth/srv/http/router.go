@@ -78,6 +78,11 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 	webauthnLogin.POST("/initialize", webauthnHandler.BeginLogin)
 	webauthnLogin.POST("/finalize", webauthnHandler.FinishLogin)
 
+	webauthnCredentials := webauthn.Group("/credentials", hqMiddlewares.Session(sessionManager))
+	webauthnCredentials.GET("", webauthnHandler.ListCredentials)
+	webauthnCredentials.PATCH("/:id", webauthnHandler.UpdateCredential)
+	webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)
+
 	e.Logger.Fatal(e.Start(cfg.Server.BindAddr.String()))
 	return e, nil
 }
