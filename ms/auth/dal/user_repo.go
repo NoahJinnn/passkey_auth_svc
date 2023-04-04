@@ -41,6 +41,7 @@ func (r *userRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.User, error) {
 		Where(user.ID(id)).
 		WithEmails().
 		WithPrimaryEmail().
+		WithWebauthnCredentials().
 		Only(ctx)
 
 	if err != nil {

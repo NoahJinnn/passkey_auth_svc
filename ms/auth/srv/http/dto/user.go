@@ -14,11 +14,11 @@ type CreateUserResponse struct {
 }
 
 type GetUserResponse struct {
-	ID                  uuid.UUID                `json:"id"`
-	Email               *string                  `json:"email,omitempty"`
-	WebauthnCredentials []ent.WebauthnCredential `json:"webauthn_credentials"` // deprecated
-	UpdatedAt           time.Time                `json:"updated_at"`
-	CreatedAt           time.Time                `json:"created_at"`
+	ID                  uuid.UUID                 `json:"id"`
+	Email               *string                   `json:"email,omitempty"`
+	WebauthnCredentials []*ent.WebauthnCredential `json:"webauthn_credentials"` // deprecated
+	UpdatedAt           time.Time                 `json:"updated_at"`
+	CreatedAt           time.Time                 `json:"created_at"`
 }
 
 type UserInfoResponse struct {
