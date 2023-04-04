@@ -42,3 +42,7 @@ func (r *webauthnRepo) Update(ctx Ctx, credential ent.WebauthnCredential) error 
 	}
 	return nil
 }
+
+func (r *webauthnRepo) Delete(ctx Ctx, credential ent.WebauthnCredential) error {
+	panic("implement me")
+}

@@ -64,9 +64,7 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 	user.POST("", userHandler.Create)
 	user.GET("/:id", userHandler.Get, hqMiddlewares.Session(sessionManager))
 	e.POST("/logout", userHandler.Logout, hqMiddlewares.Session(sessionManager))
-
 	// e.POST("/user", userHandler.GetUserIdByEmail)
-	// e.POST("/logout", userHandler.Logout, hqMiddlewares.Session(sessionManager))
 
 	webauthnHandler := handlers.NewWebauthnHandler(srv, sessionManager)
 	webauthn := e.Group("/webauthn")
