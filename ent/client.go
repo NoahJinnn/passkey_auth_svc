@@ -8,20 +8,24 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/migrate"
 
-	"github.com/hellohq/hqservice/ent/assetinfo"
-	"github.com/hellohq/hqservice/ent/bankaccount"
-	"github.com/hellohq/hqservice/ent/car"
-	"github.com/hellohq/hqservice/ent/collectible"
-	"github.com/hellohq/hqservice/ent/cryptoaccount"
-	"github.com/hellohq/hqservice/ent/loan"
-	"github.com/hellohq/hqservice/ent/privateshare"
-	"github.com/hellohq/hqservice/ent/user"
-
+	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/hellohq/hqservice/ent/email"
+	"github.com/hellohq/hqservice/ent/identity"
+	"github.com/hellohq/hqservice/ent/jwk"
+	"github.com/hellohq/hqservice/ent/passcode"
+	"github.com/hellohq/hqservice/ent/passwordcredential"
+	"github.com/hellohq/hqservice/ent/primaryemail"
+	"github.com/hellohq/hqservice/ent/user"
+	"github.com/hellohq/hqservice/ent/webauthncredential"
+	"github.com/hellohq/hqservice/ent/webauthncredentialtransport"
+	"github.com/hellohq/hqservice/ent/webauthnsessiondata"
+	"github.com/hellohq/hqservice/ent/webauthnsessiondataallowedcredential"
 )
 
 // Client is the client that holds all ent builders.
@@ -29,22 +33,28 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// AssetInfo is the client for interacting with the AssetInfo builders.
-	AssetInfo *AssetInfoClient
-	// BankAccount is the client for interacting with the BankAccount builders.
-	BankAccount *BankAccountClient
-	// Car is the client for interacting with the Car builders.
-	Car *CarClient
-	// Collectible is the client for interacting with the Collectible builders.
-	Collectible *CollectibleClient
-	// CryptoAccount is the client for interacting with the CryptoAccount builders.
-	CryptoAccount *CryptoAccountClient
-	// Loan is the client for interacting with the Loan builders.
-	Loan *LoanClient
-	// PrivateShare is the client for interacting with the PrivateShare builders.
-	PrivateShare *PrivateShareClient
+	// Email is the client for interacting with the Email builders.
+	Email *EmailClient
+	// Identity is the client for interacting with the Identity builders.
+	Identity *IdentityClient
+	// Jwk is the client for interacting with the Jwk builders.
+	Jwk *JwkClient
+	// Passcode is the client for interacting with the Passcode builders.
+	Passcode *PasscodeClient
+	// PasswordCredential is the client for interacting with the PasswordCredential builders.
+	PasswordCredential *PasswordCredentialClient
+	// PrimaryEmail is the client for interacting with the PrimaryEmail builders.
+	PrimaryEmail *PrimaryEmailClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// WebauthnCredential is the client for interacting with the WebauthnCredential builders.
+	WebauthnCredential *WebauthnCredentialClient
+	// WebauthnCredentialTransport is the client for interacting with the WebauthnCredentialTransport builders.
+	WebauthnCredentialTransport *WebauthnCredentialTransportClient
+	// WebauthnSessionData is the client for interacting with the WebauthnSessionData builders.
+	WebauthnSessionData *WebauthnSessionDataClient
+	// WebauthnSessionDataAllowedCredential is the client for interacting with the WebauthnSessionDataAllowedCredential builders.
+	WebauthnSessionDataAllowedCredential *WebauthnSessionDataAllowedCredentialClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -58,14 +68,66 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.AssetInfo = NewAssetInfoClient(c.config)
-	c.BankAccount = NewBankAccountClient(c.config)
-	c.Car = NewCarClient(c.config)
-	c.Collectible = NewCollectibleClient(c.config)
-	c.CryptoAccount = NewCryptoAccountClient(c.config)
-	c.Loan = NewLoanClient(c.config)
-	c.PrivateShare = NewPrivateShareClient(c.config)
+	c.Email = NewEmailClient(c.config)
+	c.Identity = NewIdentityClient(c.config)
+	c.Jwk = NewJwkClient(c.config)
+	c.Passcode = NewPasscodeClient(c.config)
+	c.PasswordCredential = NewPasswordCredentialClient(c.config)
+	c.PrimaryEmail = NewPrimaryEmailClient(c.config)
 	c.User = NewUserClient(c.config)
+	c.WebauthnCredential = NewWebauthnCredentialClient(c.config)
+	c.WebauthnCredentialTransport = NewWebauthnCredentialTransportClient(c.config)
+	c.WebauthnSessionData = NewWebauthnSessionDataClient(c.config)
+	c.WebauthnSessionDataAllowedCredential = NewWebauthnSessionDataAllowedCredentialClient(c.config)
+}
+
+type (
+	// config is the configuration for the client and its builder.
+	config struct {
+		// driver used for executing database requests.
+		driver dialect.Driver
+		// debug enable a debug logging.
+		debug bool
+		// log used for logging on debug mode.
+		log func(...any)
+		// hooks to execute on mutations.
+		hooks *hooks
+		// interceptors to execute on queries.
+		inters *inters
+	}
+	// Option function to configure the client.
+	Option func(*config)
+)
+
+// options applies the options on the config object.
+func (c *config) options(opts ...Option) {
+	for _, opt := range opts {
+		opt(c)
+	}
+	if c.debug {
+		c.driver = dialect.Debug(c.driver, c.log)
+	}
+}
+
+// Debug enables debug logging on the ent.Driver.
+func Debug() Option {
+	return func(c *config) {
+		c.debug = true
+	}
+}
+
+// Log sets the logging function for debug mode.
+func Log(fn func(...any)) Option {
+	return func(c *config) {
+		c.log = fn
+	}
+}
+
+// Driver configures the client driver.
+func Driver(driver dialect.Driver) Option {
+	return func(c *config) {
+		c.driver = driver
+	}
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -97,16 +159,19 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:           ctx,
-		config:        cfg,
-		AssetInfo:     NewAssetInfoClient(cfg),
-		BankAccount:   NewBankAccountClient(cfg),
-		Car:           NewCarClient(cfg),
-		Collectible:   NewCollectibleClient(cfg),
-		CryptoAccount: NewCryptoAccountClient(cfg),
-		Loan:          NewLoanClient(cfg),
-		PrivateShare:  NewPrivateShareClient(cfg),
-		User:          NewUserClient(cfg),
+		ctx:                                  ctx,
+		config:                               cfg,
+		Email:                                NewEmailClient(cfg),
+		Identity:                             NewIdentityClient(cfg),
+		Jwk:                                  NewJwkClient(cfg),
+		Passcode:                             NewPasscodeClient(cfg),
+		PasswordCredential:                   NewPasswordCredentialClient(cfg),
+		PrimaryEmail:                         NewPrimaryEmailClient(cfg),
+		User:                                 NewUserClient(cfg),
+		WebauthnCredential:                   NewWebauthnCredentialClient(cfg),
+		WebauthnCredentialTransport:          NewWebauthnCredentialTransportClient(cfg),
+		WebauthnSessionData:                  NewWebauthnSessionDataClient(cfg),
+		WebauthnSessionDataAllowedCredential: NewWebauthnSessionDataAllowedCredentialClient(cfg),
 	}, nil
 }
 
@@ -124,23 +189,26 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:           ctx,
-		config:        cfg,
-		AssetInfo:     NewAssetInfoClient(cfg),
-		BankAccount:   NewBankAccountClient(cfg),
-		Car:           NewCarClient(cfg),
-		Collectible:   NewCollectibleClient(cfg),
-		CryptoAccount: NewCryptoAccountClient(cfg),
-		Loan:          NewLoanClient(cfg),
-		PrivateShare:  NewPrivateShareClient(cfg),
-		User:          NewUserClient(cfg),
+		ctx:                                  ctx,
+		config:                               cfg,
+		Email:                                NewEmailClient(cfg),
+		Identity:                             NewIdentityClient(cfg),
+		Jwk:                                  NewJwkClient(cfg),
+		Passcode:                             NewPasscodeClient(cfg),
+		PasswordCredential:                   NewPasswordCredentialClient(cfg),
+		PrimaryEmail:                         NewPrimaryEmailClient(cfg),
+		User:                                 NewUserClient(cfg),
+		WebauthnCredential:                   NewWebauthnCredentialClient(cfg),
+		WebauthnCredentialTransport:          NewWebauthnCredentialTransportClient(cfg),
+		WebauthnSessionData:                  NewWebauthnSessionDataClient(cfg),
+		WebauthnSessionDataAllowedCredential: NewWebauthnSessionDataAllowedCredentialClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		AssetInfo.
+//		Email.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -162,139 +230,143 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.AssetInfo.Use(hooks...)
-	c.BankAccount.Use(hooks...)
-	c.Car.Use(hooks...)
-	c.Collectible.Use(hooks...)
-	c.CryptoAccount.Use(hooks...)
-	c.Loan.Use(hooks...)
-	c.PrivateShare.Use(hooks...)
-	c.User.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.Email, c.Identity, c.Jwk, c.Passcode, c.PasswordCredential, c.PrimaryEmail,
+		c.User, c.WebauthnCredential, c.WebauthnCredentialTransport,
+		c.WebauthnSessionData, c.WebauthnSessionDataAllowedCredential,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.AssetInfo.Intercept(interceptors...)
-	c.BankAccount.Intercept(interceptors...)
-	c.Car.Intercept(interceptors...)
-	c.Collectible.Intercept(interceptors...)
-	c.CryptoAccount.Intercept(interceptors...)
-	c.Loan.Intercept(interceptors...)
-	c.PrivateShare.Intercept(interceptors...)
-	c.User.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.Email, c.Identity, c.Jwk, c.Passcode, c.PasswordCredential, c.PrimaryEmail,
+		c.User, c.WebauthnCredential, c.WebauthnCredentialTransport,
+		c.WebauthnSessionData, c.WebauthnSessionDataAllowedCredential,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
-	case *AssetInfoMutation:
-		return c.AssetInfo.mutate(ctx, m)
-	case *BankAccountMutation:
-		return c.BankAccount.mutate(ctx, m)
-	case *CarMutation:
-		return c.Car.mutate(ctx, m)
-	case *CollectibleMutation:
-		return c.Collectible.mutate(ctx, m)
-	case *CryptoAccountMutation:
-		return c.CryptoAccount.mutate(ctx, m)
-	case *LoanMutation:
-		return c.Loan.mutate(ctx, m)
-	case *PrivateShareMutation:
-		return c.PrivateShare.mutate(ctx, m)
+	case *EmailMutation:
+		return c.Email.mutate(ctx, m)
+	case *IdentityMutation:
+		return c.Identity.mutate(ctx, m)
+	case *JwkMutation:
+		return c.Jwk.mutate(ctx, m)
+	case *PasscodeMutation:
+		return c.Passcode.mutate(ctx, m)
+	case *PasswordCredentialMutation:
+		return c.PasswordCredential.mutate(ctx, m)
+	case *PrimaryEmailMutation:
+		return c.PrimaryEmail.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
+	case *WebauthnCredentialMutation:
+		return c.WebauthnCredential.mutate(ctx, m)
+	case *WebauthnCredentialTransportMutation:
+		return c.WebauthnCredentialTransport.mutate(ctx, m)
+	case *WebauthnSessionDataMutation:
+		return c.WebauthnSessionData.mutate(ctx, m)
+	case *WebauthnSessionDataAllowedCredentialMutation:
+		return c.WebauthnSessionDataAllowedCredential.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
 }
 
-// AssetInfoClient is a client for the AssetInfo schema.
-type AssetInfoClient struct {
+// EmailClient is a client for the Email schema.
+type EmailClient struct {
 	config
 }
 
-// NewAssetInfoClient returns a client for the AssetInfo from the given config.
-func NewAssetInfoClient(c config) *AssetInfoClient {
-	return &AssetInfoClient{config: c}
+// NewEmailClient returns a client for the Email from the given config.
+func NewEmailClient(c config) *EmailClient {
+	return &EmailClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `assetinfo.Hooks(f(g(h())))`.
-func (c *AssetInfoClient) Use(hooks ...Hook) {
-	c.hooks.AssetInfo = append(c.hooks.AssetInfo, hooks...)
+// A call to `Use(f, g, h)` equals to `email.Hooks(f(g(h())))`.
+func (c *EmailClient) Use(hooks ...Hook) {
+	c.hooks.Email = append(c.hooks.Email, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `assetinfo.Intercept(f(g(h())))`.
-func (c *AssetInfoClient) Intercept(interceptors ...Interceptor) {
-	c.inters.AssetInfo = append(c.inters.AssetInfo, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `email.Intercept(f(g(h())))`.
+func (c *EmailClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Email = append(c.inters.Email, interceptors...)
 }
 
-// Create returns a builder for creating a AssetInfo entity.
-func (c *AssetInfoClient) Create() *AssetInfoCreate {
-	mutation := newAssetInfoMutation(c.config, OpCreate)
-	return &AssetInfoCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a Email entity.
+func (c *EmailClient) Create() *EmailCreate {
+	mutation := newEmailMutation(c.config, OpCreate)
+	return &EmailCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of AssetInfo entities.
-func (c *AssetInfoClient) CreateBulk(builders ...*AssetInfoCreate) *AssetInfoCreateBulk {
-	return &AssetInfoCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Email entities.
+func (c *EmailClient) CreateBulk(builders ...*EmailCreate) *EmailCreateBulk {
+	return &EmailCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for AssetInfo.
-func (c *AssetInfoClient) Update() *AssetInfoUpdate {
-	mutation := newAssetInfoMutation(c.config, OpUpdate)
-	return &AssetInfoUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Email.
+func (c *EmailClient) Update() *EmailUpdate {
+	mutation := newEmailMutation(c.config, OpUpdate)
+	return &EmailUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *AssetInfoClient) UpdateOne(ai *AssetInfo) *AssetInfoUpdateOne {
-	mutation := newAssetInfoMutation(c.config, OpUpdateOne, withAssetInfo(ai))
-	return &AssetInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *EmailClient) UpdateOne(e *Email) *EmailUpdateOne {
+	mutation := newEmailMutation(c.config, OpUpdateOne, withEmail(e))
+	return &EmailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *AssetInfoClient) UpdateOneID(id uint) *AssetInfoUpdateOne {
-	mutation := newAssetInfoMutation(c.config, OpUpdateOne, withAssetInfoID(id))
-	return &AssetInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *EmailClient) UpdateOneID(id uuid.UUID) *EmailUpdateOne {
+	mutation := newEmailMutation(c.config, OpUpdateOne, withEmailID(id))
+	return &EmailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for AssetInfo.
-func (c *AssetInfoClient) Delete() *AssetInfoDelete {
-	mutation := newAssetInfoMutation(c.config, OpDelete)
-	return &AssetInfoDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Email.
+func (c *EmailClient) Delete() *EmailDelete {
+	mutation := newEmailMutation(c.config, OpDelete)
+	return &EmailDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *AssetInfoClient) DeleteOne(ai *AssetInfo) *AssetInfoDeleteOne {
-	return c.DeleteOneID(ai.ID)
+func (c *EmailClient) DeleteOne(e *Email) *EmailDeleteOne {
+	return c.DeleteOneID(e.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *AssetInfoClient) DeleteOneID(id uint) *AssetInfoDeleteOne {
-	builder := c.Delete().Where(assetinfo.ID(id))
+func (c *EmailClient) DeleteOneID(id uuid.UUID) *EmailDeleteOne {
+	builder := c.Delete().Where(email.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &AssetInfoDeleteOne{builder}
+	return &EmailDeleteOne{builder}
 }
 
-// Query returns a query builder for AssetInfo.
-func (c *AssetInfoClient) Query() *AssetInfoQuery {
-	return &AssetInfoQuery{
+// Query returns a query builder for Email.
+func (c *EmailClient) Query() *EmailQuery {
+	return &EmailQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeAssetInfo},
+		ctx:    &QueryContext{Type: TypeEmail},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a AssetInfo entity by its id.
-func (c *AssetInfoClient) Get(ctx context.Context, id uint) (*AssetInfo, error) {
-	return c.Query().Where(assetinfo.ID(id)).Only(ctx)
+// Get returns a Email entity by its id.
+func (c *EmailClient) Get(ctx context.Context, id uuid.UUID) (*Email, error) {
+	return c.Query().Where(email.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *AssetInfoClient) GetX(ctx context.Context, id uint) *AssetInfo {
+func (c *EmailClient) GetX(ctx context.Context, id uuid.UUID) *Email {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -302,251 +374,181 @@ func (c *AssetInfoClient) GetX(ctx context.Context, id uint) *AssetInfo {
 	return obj
 }
 
-// Hooks returns the client hooks.
-func (c *AssetInfoClient) Hooks() []Hook {
-	return c.hooks.AssetInfo
-}
-
-// Interceptors returns the client interceptors.
-func (c *AssetInfoClient) Interceptors() []Interceptor {
-	return c.inters.AssetInfo
-}
-
-func (c *AssetInfoClient) mutate(ctx context.Context, m *AssetInfoMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&AssetInfoCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&AssetInfoUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&AssetInfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&AssetInfoDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown AssetInfo mutation op: %q", m.Op())
-	}
-}
-
-// BankAccountClient is a client for the BankAccount schema.
-type BankAccountClient struct {
-	config
-}
-
-// NewBankAccountClient returns a client for the BankAccount from the given config.
-func NewBankAccountClient(c config) *BankAccountClient {
-	return &BankAccountClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `bankaccount.Hooks(f(g(h())))`.
-func (c *BankAccountClient) Use(hooks ...Hook) {
-	c.hooks.BankAccount = append(c.hooks.BankAccount, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `bankaccount.Intercept(f(g(h())))`.
-func (c *BankAccountClient) Intercept(interceptors ...Interceptor) {
-	c.inters.BankAccount = append(c.inters.BankAccount, interceptors...)
-}
-
-// Create returns a builder for creating a BankAccount entity.
-func (c *BankAccountClient) Create() *BankAccountCreate {
-	mutation := newBankAccountMutation(c.config, OpCreate)
-	return &BankAccountCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of BankAccount entities.
-func (c *BankAccountClient) CreateBulk(builders ...*BankAccountCreate) *BankAccountCreateBulk {
-	return &BankAccountCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for BankAccount.
-func (c *BankAccountClient) Update() *BankAccountUpdate {
-	mutation := newBankAccountMutation(c.config, OpUpdate)
-	return &BankAccountUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *BankAccountClient) UpdateOne(ba *BankAccount) *BankAccountUpdateOne {
-	mutation := newBankAccountMutation(c.config, OpUpdateOne, withBankAccount(ba))
-	return &BankAccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *BankAccountClient) UpdateOneID(id uint) *BankAccountUpdateOne {
-	mutation := newBankAccountMutation(c.config, OpUpdateOne, withBankAccountID(id))
-	return &BankAccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for BankAccount.
-func (c *BankAccountClient) Delete() *BankAccountDelete {
-	mutation := newBankAccountMutation(c.config, OpDelete)
-	return &BankAccountDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *BankAccountClient) DeleteOne(ba *BankAccount) *BankAccountDeleteOne {
-	return c.DeleteOneID(ba.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *BankAccountClient) DeleteOneID(id uint) *BankAccountDeleteOne {
-	builder := c.Delete().Where(bankaccount.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &BankAccountDeleteOne{builder}
-}
-
-// Query returns a query builder for BankAccount.
-func (c *BankAccountClient) Query() *BankAccountQuery {
-	return &BankAccountQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeBankAccount},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a BankAccount entity by its id.
-func (c *BankAccountClient) Get(ctx context.Context, id uint) (*BankAccount, error) {
-	return c.Query().Where(bankaccount.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *BankAccountClient) GetX(ctx context.Context, id uint) *BankAccount {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryUser queries the user edge of a BankAccount.
-func (c *BankAccountClient) QueryUser(ba *BankAccount) *UserQuery {
+// QueryUser queries the user edge of a Email.
+func (c *EmailClient) QueryUser(e *Email) *UserQuery {
 	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := ba.ID
+		id := e.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(bankaccount.Table, bankaccount.FieldID, id),
+			sqlgraph.From(email.Table, email.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, bankaccount.UserTable, bankaccount.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, email.UserTable, email.UserColumn),
 		)
-		fromV = sqlgraph.Neighbors(ba.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryIdentities queries the identities edge of a Email.
+func (c *EmailClient) QueryIdentities(e *Email) *IdentityQuery {
+	query := (&IdentityClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(email.Table, email.FieldID, id),
+			sqlgraph.To(identity.Table, identity.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, email.IdentitiesTable, email.IdentitiesColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPasscodes queries the passcodes edge of a Email.
+func (c *EmailClient) QueryPasscodes(e *Email) *PasscodeQuery {
+	query := (&PasscodeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(email.Table, email.FieldID, id),
+			sqlgraph.To(passcode.Table, passcode.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, email.PasscodesTable, email.PasscodesColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPrimaryEmail queries the primary_email edge of a Email.
+func (c *EmailClient) QueryPrimaryEmail(e *Email) *PrimaryEmailQuery {
+	query := (&PrimaryEmailClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := e.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(email.Table, email.FieldID, id),
+			sqlgraph.To(primaryemail.Table, primaryemail.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, email.PrimaryEmailTable, email.PrimaryEmailColumn),
+		)
+		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *BankAccountClient) Hooks() []Hook {
-	return c.hooks.BankAccount
+func (c *EmailClient) Hooks() []Hook {
+	return c.hooks.Email
 }
 
 // Interceptors returns the client interceptors.
-func (c *BankAccountClient) Interceptors() []Interceptor {
-	return c.inters.BankAccount
+func (c *EmailClient) Interceptors() []Interceptor {
+	return c.inters.Email
 }
 
-func (c *BankAccountClient) mutate(ctx context.Context, m *BankAccountMutation) (Value, error) {
+func (c *EmailClient) mutate(ctx context.Context, m *EmailMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&BankAccountCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&EmailCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&BankAccountUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&EmailUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&BankAccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&EmailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&BankAccountDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&EmailDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown BankAccount mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown Email mutation op: %q", m.Op())
 	}
 }
 
-// CarClient is a client for the Car schema.
-type CarClient struct {
+// IdentityClient is a client for the Identity schema.
+type IdentityClient struct {
 	config
 }
 
-// NewCarClient returns a client for the Car from the given config.
-func NewCarClient(c config) *CarClient {
-	return &CarClient{config: c}
+// NewIdentityClient returns a client for the Identity from the given config.
+func NewIdentityClient(c config) *IdentityClient {
+	return &IdentityClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `car.Hooks(f(g(h())))`.
-func (c *CarClient) Use(hooks ...Hook) {
-	c.hooks.Car = append(c.hooks.Car, hooks...)
+// A call to `Use(f, g, h)` equals to `identity.Hooks(f(g(h())))`.
+func (c *IdentityClient) Use(hooks ...Hook) {
+	c.hooks.Identity = append(c.hooks.Identity, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `car.Intercept(f(g(h())))`.
-func (c *CarClient) Intercept(interceptors ...Interceptor) {
-	c.inters.Car = append(c.inters.Car, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `identity.Intercept(f(g(h())))`.
+func (c *IdentityClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Identity = append(c.inters.Identity, interceptors...)
 }
 
-// Create returns a builder for creating a Car entity.
-func (c *CarClient) Create() *CarCreate {
-	mutation := newCarMutation(c.config, OpCreate)
-	return &CarCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a Identity entity.
+func (c *IdentityClient) Create() *IdentityCreate {
+	mutation := newIdentityMutation(c.config, OpCreate)
+	return &IdentityCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of Car entities.
-func (c *CarClient) CreateBulk(builders ...*CarCreate) *CarCreateBulk {
-	return &CarCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Identity entities.
+func (c *IdentityClient) CreateBulk(builders ...*IdentityCreate) *IdentityCreateBulk {
+	return &IdentityCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for Car.
-func (c *CarClient) Update() *CarUpdate {
-	mutation := newCarMutation(c.config, OpUpdate)
-	return &CarUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Identity.
+func (c *IdentityClient) Update() *IdentityUpdate {
+	mutation := newIdentityMutation(c.config, OpUpdate)
+	return &IdentityUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *CarClient) UpdateOne(ca *Car) *CarUpdateOne {
-	mutation := newCarMutation(c.config, OpUpdateOne, withCar(ca))
-	return &CarUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *IdentityClient) UpdateOne(i *Identity) *IdentityUpdateOne {
+	mutation := newIdentityMutation(c.config, OpUpdateOne, withIdentity(i))
+	return &IdentityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *CarClient) UpdateOneID(id uint) *CarUpdateOne {
-	mutation := newCarMutation(c.config, OpUpdateOne, withCarID(id))
-	return &CarUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *IdentityClient) UpdateOneID(id uuid.UUID) *IdentityUpdateOne {
+	mutation := newIdentityMutation(c.config, OpUpdateOne, withIdentityID(id))
+	return &IdentityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for Car.
-func (c *CarClient) Delete() *CarDelete {
-	mutation := newCarMutation(c.config, OpDelete)
-	return &CarDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Identity.
+func (c *IdentityClient) Delete() *IdentityDelete {
+	mutation := newIdentityMutation(c.config, OpDelete)
+	return &IdentityDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *CarClient) DeleteOne(ca *Car) *CarDeleteOne {
-	return c.DeleteOneID(ca.ID)
+func (c *IdentityClient) DeleteOne(i *Identity) *IdentityDeleteOne {
+	return c.DeleteOneID(i.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *CarClient) DeleteOneID(id uint) *CarDeleteOne {
-	builder := c.Delete().Where(car.ID(id))
+func (c *IdentityClient) DeleteOneID(id uuid.UUID) *IdentityDeleteOne {
+	builder := c.Delete().Where(identity.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &CarDeleteOne{builder}
+	return &IdentityDeleteOne{builder}
 }
 
-// Query returns a query builder for Car.
-func (c *CarClient) Query() *CarQuery {
-	return &CarQuery{
+// Query returns a query builder for Identity.
+func (c *IdentityClient) Query() *IdentityQuery {
+	return &IdentityQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeCar},
+		ctx:    &QueryContext{Type: TypeIdentity},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a Car entity by its id.
-func (c *CarClient) Get(ctx context.Context, id uint) (*Car, error) {
-	return c.Query().Where(car.ID(id)).Only(ctx)
+// Get returns a Identity entity by its id.
+func (c *IdentityClient) Get(ctx context.Context, id uuid.UUID) (*Identity, error) {
+	return c.Query().Where(identity.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *CarClient) GetX(ctx context.Context, id uint) *Car {
+func (c *IdentityClient) GetX(ctx context.Context, id uuid.UUID) *Identity {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -554,133 +556,133 @@ func (c *CarClient) GetX(ctx context.Context, id uint) *Car {
 	return obj
 }
 
-// QueryUser queries the user edge of a Car.
-func (c *CarClient) QueryUser(ca *Car) *UserQuery {
-	query := (&UserClient{config: c.config}).Query()
+// QueryEmail queries the email edge of a Identity.
+func (c *IdentityClient) QueryEmail(i *Identity) *EmailQuery {
+	query := (&EmailClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := ca.ID
+		id := i.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(car.Table, car.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, car.UserTable, car.UserColumn),
+			sqlgraph.From(identity.Table, identity.FieldID, id),
+			sqlgraph.To(email.Table, email.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, identity.EmailTable, identity.EmailColumn),
 		)
-		fromV = sqlgraph.Neighbors(ca.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *CarClient) Hooks() []Hook {
-	return c.hooks.Car
+func (c *IdentityClient) Hooks() []Hook {
+	return c.hooks.Identity
 }
 
 // Interceptors returns the client interceptors.
-func (c *CarClient) Interceptors() []Interceptor {
-	return c.inters.Car
+func (c *IdentityClient) Interceptors() []Interceptor {
+	return c.inters.Identity
 }
 
-func (c *CarClient) mutate(ctx context.Context, m *CarMutation) (Value, error) {
+func (c *IdentityClient) mutate(ctx context.Context, m *IdentityMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&CarCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&IdentityCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&CarUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&IdentityUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&CarUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&IdentityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&CarDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&IdentityDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown Car mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown Identity mutation op: %q", m.Op())
 	}
 }
 
-// CollectibleClient is a client for the Collectible schema.
-type CollectibleClient struct {
+// JwkClient is a client for the Jwk schema.
+type JwkClient struct {
 	config
 }
 
-// NewCollectibleClient returns a client for the Collectible from the given config.
-func NewCollectibleClient(c config) *CollectibleClient {
-	return &CollectibleClient{config: c}
+// NewJwkClient returns a client for the Jwk from the given config.
+func NewJwkClient(c config) *JwkClient {
+	return &JwkClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `collectible.Hooks(f(g(h())))`.
-func (c *CollectibleClient) Use(hooks ...Hook) {
-	c.hooks.Collectible = append(c.hooks.Collectible, hooks...)
+// A call to `Use(f, g, h)` equals to `jwk.Hooks(f(g(h())))`.
+func (c *JwkClient) Use(hooks ...Hook) {
+	c.hooks.Jwk = append(c.hooks.Jwk, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `collectible.Intercept(f(g(h())))`.
-func (c *CollectibleClient) Intercept(interceptors ...Interceptor) {
-	c.inters.Collectible = append(c.inters.Collectible, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `jwk.Intercept(f(g(h())))`.
+func (c *JwkClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Jwk = append(c.inters.Jwk, interceptors...)
 }
 
-// Create returns a builder for creating a Collectible entity.
-func (c *CollectibleClient) Create() *CollectibleCreate {
-	mutation := newCollectibleMutation(c.config, OpCreate)
-	return &CollectibleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a Jwk entity.
+func (c *JwkClient) Create() *JwkCreate {
+	mutation := newJwkMutation(c.config, OpCreate)
+	return &JwkCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of Collectible entities.
-func (c *CollectibleClient) CreateBulk(builders ...*CollectibleCreate) *CollectibleCreateBulk {
-	return &CollectibleCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Jwk entities.
+func (c *JwkClient) CreateBulk(builders ...*JwkCreate) *JwkCreateBulk {
+	return &JwkCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for Collectible.
-func (c *CollectibleClient) Update() *CollectibleUpdate {
-	mutation := newCollectibleMutation(c.config, OpUpdate)
-	return &CollectibleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Jwk.
+func (c *JwkClient) Update() *JwkUpdate {
+	mutation := newJwkMutation(c.config, OpUpdate)
+	return &JwkUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *CollectibleClient) UpdateOne(co *Collectible) *CollectibleUpdateOne {
-	mutation := newCollectibleMutation(c.config, OpUpdateOne, withCollectible(co))
-	return &CollectibleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *JwkClient) UpdateOne(j *Jwk) *JwkUpdateOne {
+	mutation := newJwkMutation(c.config, OpUpdateOne, withJwk(j))
+	return &JwkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *CollectibleClient) UpdateOneID(id uint) *CollectibleUpdateOne {
-	mutation := newCollectibleMutation(c.config, OpUpdateOne, withCollectibleID(id))
-	return &CollectibleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *JwkClient) UpdateOneID(id uint) *JwkUpdateOne {
+	mutation := newJwkMutation(c.config, OpUpdateOne, withJwkID(id))
+	return &JwkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for Collectible.
-func (c *CollectibleClient) Delete() *CollectibleDelete {
-	mutation := newCollectibleMutation(c.config, OpDelete)
-	return &CollectibleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Jwk.
+func (c *JwkClient) Delete() *JwkDelete {
+	mutation := newJwkMutation(c.config, OpDelete)
+	return &JwkDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *CollectibleClient) DeleteOne(co *Collectible) *CollectibleDeleteOne {
-	return c.DeleteOneID(co.ID)
+func (c *JwkClient) DeleteOne(j *Jwk) *JwkDeleteOne {
+	return c.DeleteOneID(j.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *CollectibleClient) DeleteOneID(id uint) *CollectibleDeleteOne {
-	builder := c.Delete().Where(collectible.ID(id))
+func (c *JwkClient) DeleteOneID(id uint) *JwkDeleteOne {
+	builder := c.Delete().Where(jwk.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &CollectibleDeleteOne{builder}
+	return &JwkDeleteOne{builder}
 }
 
-// Query returns a query builder for Collectible.
-func (c *CollectibleClient) Query() *CollectibleQuery {
-	return &CollectibleQuery{
+// Query returns a query builder for Jwk.
+func (c *JwkClient) Query() *JwkQuery {
+	return &JwkQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeCollectible},
+		ctx:    &QueryContext{Type: TypeJwk},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a Collectible entity by its id.
-func (c *CollectibleClient) Get(ctx context.Context, id uint) (*Collectible, error) {
-	return c.Query().Where(collectible.ID(id)).Only(ctx)
+// Get returns a Jwk entity by its id.
+func (c *JwkClient) Get(ctx context.Context, id uint) (*Jwk, error) {
+	return c.Query().Where(jwk.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *CollectibleClient) GetX(ctx context.Context, id uint) *Collectible {
+func (c *JwkClient) GetX(ctx context.Context, id uint) *Jwk {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -688,133 +690,117 @@ func (c *CollectibleClient) GetX(ctx context.Context, id uint) *Collectible {
 	return obj
 }
 
-// QueryUser queries the user edge of a Collectible.
-func (c *CollectibleClient) QueryUser(co *Collectible) *UserQuery {
-	query := (&UserClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := co.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(collectible.Table, collectible.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, collectible.UserTable, collectible.UserColumn),
-		)
-		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
-func (c *CollectibleClient) Hooks() []Hook {
-	return c.hooks.Collectible
+func (c *JwkClient) Hooks() []Hook {
+	return c.hooks.Jwk
 }
 
 // Interceptors returns the client interceptors.
-func (c *CollectibleClient) Interceptors() []Interceptor {
-	return c.inters.Collectible
+func (c *JwkClient) Interceptors() []Interceptor {
+	return c.inters.Jwk
 }
 
-func (c *CollectibleClient) mutate(ctx context.Context, m *CollectibleMutation) (Value, error) {
+func (c *JwkClient) mutate(ctx context.Context, m *JwkMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&CollectibleCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&JwkCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&CollectibleUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&JwkUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&CollectibleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&JwkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&CollectibleDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&JwkDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown Collectible mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown Jwk mutation op: %q", m.Op())
 	}
 }
 
-// CryptoAccountClient is a client for the CryptoAccount schema.
-type CryptoAccountClient struct {
+// PasscodeClient is a client for the Passcode schema.
+type PasscodeClient struct {
 	config
 }
 
-// NewCryptoAccountClient returns a client for the CryptoAccount from the given config.
-func NewCryptoAccountClient(c config) *CryptoAccountClient {
-	return &CryptoAccountClient{config: c}
+// NewPasscodeClient returns a client for the Passcode from the given config.
+func NewPasscodeClient(c config) *PasscodeClient {
+	return &PasscodeClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `cryptoaccount.Hooks(f(g(h())))`.
-func (c *CryptoAccountClient) Use(hooks ...Hook) {
-	c.hooks.CryptoAccount = append(c.hooks.CryptoAccount, hooks...)
+// A call to `Use(f, g, h)` equals to `passcode.Hooks(f(g(h())))`.
+func (c *PasscodeClient) Use(hooks ...Hook) {
+	c.hooks.Passcode = append(c.hooks.Passcode, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `cryptoaccount.Intercept(f(g(h())))`.
-func (c *CryptoAccountClient) Intercept(interceptors ...Interceptor) {
-	c.inters.CryptoAccount = append(c.inters.CryptoAccount, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `passcode.Intercept(f(g(h())))`.
+func (c *PasscodeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Passcode = append(c.inters.Passcode, interceptors...)
 }
 
-// Create returns a builder for creating a CryptoAccount entity.
-func (c *CryptoAccountClient) Create() *CryptoAccountCreate {
-	mutation := newCryptoAccountMutation(c.config, OpCreate)
-	return &CryptoAccountCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a Passcode entity.
+func (c *PasscodeClient) Create() *PasscodeCreate {
+	mutation := newPasscodeMutation(c.config, OpCreate)
+	return &PasscodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of CryptoAccount entities.
-func (c *CryptoAccountClient) CreateBulk(builders ...*CryptoAccountCreate) *CryptoAccountCreateBulk {
-	return &CryptoAccountCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Passcode entities.
+func (c *PasscodeClient) CreateBulk(builders ...*PasscodeCreate) *PasscodeCreateBulk {
+	return &PasscodeCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for CryptoAccount.
-func (c *CryptoAccountClient) Update() *CryptoAccountUpdate {
-	mutation := newCryptoAccountMutation(c.config, OpUpdate)
-	return &CryptoAccountUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Passcode.
+func (c *PasscodeClient) Update() *PasscodeUpdate {
+	mutation := newPasscodeMutation(c.config, OpUpdate)
+	return &PasscodeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *CryptoAccountClient) UpdateOne(ca *CryptoAccount) *CryptoAccountUpdateOne {
-	mutation := newCryptoAccountMutation(c.config, OpUpdateOne, withCryptoAccount(ca))
-	return &CryptoAccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *PasscodeClient) UpdateOne(pa *Passcode) *PasscodeUpdateOne {
+	mutation := newPasscodeMutation(c.config, OpUpdateOne, withPasscode(pa))
+	return &PasscodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *CryptoAccountClient) UpdateOneID(id uint) *CryptoAccountUpdateOne {
-	mutation := newCryptoAccountMutation(c.config, OpUpdateOne, withCryptoAccountID(id))
-	return &CryptoAccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *PasscodeClient) UpdateOneID(id uuid.UUID) *PasscodeUpdateOne {
+	mutation := newPasscodeMutation(c.config, OpUpdateOne, withPasscodeID(id))
+	return &PasscodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for CryptoAccount.
-func (c *CryptoAccountClient) Delete() *CryptoAccountDelete {
-	mutation := newCryptoAccountMutation(c.config, OpDelete)
-	return &CryptoAccountDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Passcode.
+func (c *PasscodeClient) Delete() *PasscodeDelete {
+	mutation := newPasscodeMutation(c.config, OpDelete)
+	return &PasscodeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *CryptoAccountClient) DeleteOne(ca *CryptoAccount) *CryptoAccountDeleteOne {
-	return c.DeleteOneID(ca.ID)
+func (c *PasscodeClient) DeleteOne(pa *Passcode) *PasscodeDeleteOne {
+	return c.DeleteOneID(pa.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *CryptoAccountClient) DeleteOneID(id uint) *CryptoAccountDeleteOne {
-	builder := c.Delete().Where(cryptoaccount.ID(id))
+func (c *PasscodeClient) DeleteOneID(id uuid.UUID) *PasscodeDeleteOne {
+	builder := c.Delete().Where(passcode.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &CryptoAccountDeleteOne{builder}
+	return &PasscodeDeleteOne{builder}
 }
 
-// Query returns a query builder for CryptoAccount.
-func (c *CryptoAccountClient) Query() *CryptoAccountQuery {
-	return &CryptoAccountQuery{
+// Query returns a query builder for Passcode.
+func (c *PasscodeClient) Query() *PasscodeQuery {
+	return &PasscodeQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeCryptoAccount},
+		ctx:    &QueryContext{Type: TypePasscode},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a CryptoAccount entity by its id.
-func (c *CryptoAccountClient) Get(ctx context.Context, id uint) (*CryptoAccount, error) {
-	return c.Query().Where(cryptoaccount.ID(id)).Only(ctx)
+// Get returns a Passcode entity by its id.
+func (c *PasscodeClient) Get(ctx context.Context, id uuid.UUID) (*Passcode, error) {
+	return c.Query().Where(passcode.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *CryptoAccountClient) GetX(ctx context.Context, id uint) *CryptoAccount {
+func (c *PasscodeClient) GetX(ctx context.Context, id uuid.UUID) *Passcode {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -822,133 +808,149 @@ func (c *CryptoAccountClient) GetX(ctx context.Context, id uint) *CryptoAccount 
 	return obj
 }
 
-// QueryUser queries the user edge of a CryptoAccount.
-func (c *CryptoAccountClient) QueryUser(ca *CryptoAccount) *UserQuery {
+// QueryEmail queries the email edge of a Passcode.
+func (c *PasscodeClient) QueryEmail(pa *Passcode) *EmailQuery {
+	query := (&EmailClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pa.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(passcode.Table, passcode.FieldID, id),
+			sqlgraph.To(email.Table, email.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, passcode.EmailTable, passcode.EmailColumn),
+		)
+		fromV = sqlgraph.Neighbors(pa.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a Passcode.
+func (c *PasscodeClient) QueryUser(pa *Passcode) *UserQuery {
 	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := ca.ID
+		id := pa.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(cryptoaccount.Table, cryptoaccount.FieldID, id),
+			sqlgraph.From(passcode.Table, passcode.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, cryptoaccount.UserTable, cryptoaccount.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, passcode.UserTable, passcode.UserColumn),
 		)
-		fromV = sqlgraph.Neighbors(ca.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(pa.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *CryptoAccountClient) Hooks() []Hook {
-	return c.hooks.CryptoAccount
+func (c *PasscodeClient) Hooks() []Hook {
+	return c.hooks.Passcode
 }
 
 // Interceptors returns the client interceptors.
-func (c *CryptoAccountClient) Interceptors() []Interceptor {
-	return c.inters.CryptoAccount
+func (c *PasscodeClient) Interceptors() []Interceptor {
+	return c.inters.Passcode
 }
 
-func (c *CryptoAccountClient) mutate(ctx context.Context, m *CryptoAccountMutation) (Value, error) {
+func (c *PasscodeClient) mutate(ctx context.Context, m *PasscodeMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&CryptoAccountCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&PasscodeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&CryptoAccountUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&PasscodeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&CryptoAccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&PasscodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&CryptoAccountDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&PasscodeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown CryptoAccount mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown Passcode mutation op: %q", m.Op())
 	}
 }
 
-// LoanClient is a client for the Loan schema.
-type LoanClient struct {
+// PasswordCredentialClient is a client for the PasswordCredential schema.
+type PasswordCredentialClient struct {
 	config
 }
 
-// NewLoanClient returns a client for the Loan from the given config.
-func NewLoanClient(c config) *LoanClient {
-	return &LoanClient{config: c}
+// NewPasswordCredentialClient returns a client for the PasswordCredential from the given config.
+func NewPasswordCredentialClient(c config) *PasswordCredentialClient {
+	return &PasswordCredentialClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `loan.Hooks(f(g(h())))`.
-func (c *LoanClient) Use(hooks ...Hook) {
-	c.hooks.Loan = append(c.hooks.Loan, hooks...)
+// A call to `Use(f, g, h)` equals to `passwordcredential.Hooks(f(g(h())))`.
+func (c *PasswordCredentialClient) Use(hooks ...Hook) {
+	c.hooks.PasswordCredential = append(c.hooks.PasswordCredential, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `loan.Intercept(f(g(h())))`.
-func (c *LoanClient) Intercept(interceptors ...Interceptor) {
-	c.inters.Loan = append(c.inters.Loan, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `passwordcredential.Intercept(f(g(h())))`.
+func (c *PasswordCredentialClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PasswordCredential = append(c.inters.PasswordCredential, interceptors...)
 }
 
-// Create returns a builder for creating a Loan entity.
-func (c *LoanClient) Create() *LoanCreate {
-	mutation := newLoanMutation(c.config, OpCreate)
-	return &LoanCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a PasswordCredential entity.
+func (c *PasswordCredentialClient) Create() *PasswordCredentialCreate {
+	mutation := newPasswordCredentialMutation(c.config, OpCreate)
+	return &PasswordCredentialCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of Loan entities.
-func (c *LoanClient) CreateBulk(builders ...*LoanCreate) *LoanCreateBulk {
-	return &LoanCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of PasswordCredential entities.
+func (c *PasswordCredentialClient) CreateBulk(builders ...*PasswordCredentialCreate) *PasswordCredentialCreateBulk {
+	return &PasswordCredentialCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for Loan.
-func (c *LoanClient) Update() *LoanUpdate {
-	mutation := newLoanMutation(c.config, OpUpdate)
-	return &LoanUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for PasswordCredential.
+func (c *PasswordCredentialClient) Update() *PasswordCredentialUpdate {
+	mutation := newPasswordCredentialMutation(c.config, OpUpdate)
+	return &PasswordCredentialUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *LoanClient) UpdateOne(l *Loan) *LoanUpdateOne {
-	mutation := newLoanMutation(c.config, OpUpdateOne, withLoan(l))
-	return &LoanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *PasswordCredentialClient) UpdateOne(pc *PasswordCredential) *PasswordCredentialUpdateOne {
+	mutation := newPasswordCredentialMutation(c.config, OpUpdateOne, withPasswordCredential(pc))
+	return &PasswordCredentialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *LoanClient) UpdateOneID(id uint) *LoanUpdateOne {
-	mutation := newLoanMutation(c.config, OpUpdateOne, withLoanID(id))
-	return &LoanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *PasswordCredentialClient) UpdateOneID(id uuid.UUID) *PasswordCredentialUpdateOne {
+	mutation := newPasswordCredentialMutation(c.config, OpUpdateOne, withPasswordCredentialID(id))
+	return &PasswordCredentialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for Loan.
-func (c *LoanClient) Delete() *LoanDelete {
-	mutation := newLoanMutation(c.config, OpDelete)
-	return &LoanDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for PasswordCredential.
+func (c *PasswordCredentialClient) Delete() *PasswordCredentialDelete {
+	mutation := newPasswordCredentialMutation(c.config, OpDelete)
+	return &PasswordCredentialDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *LoanClient) DeleteOne(l *Loan) *LoanDeleteOne {
-	return c.DeleteOneID(l.ID)
+func (c *PasswordCredentialClient) DeleteOne(pc *PasswordCredential) *PasswordCredentialDeleteOne {
+	return c.DeleteOneID(pc.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *LoanClient) DeleteOneID(id uint) *LoanDeleteOne {
-	builder := c.Delete().Where(loan.ID(id))
+func (c *PasswordCredentialClient) DeleteOneID(id uuid.UUID) *PasswordCredentialDeleteOne {
+	builder := c.Delete().Where(passwordcredential.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &LoanDeleteOne{builder}
+	return &PasswordCredentialDeleteOne{builder}
 }
 
-// Query returns a query builder for Loan.
-func (c *LoanClient) Query() *LoanQuery {
-	return &LoanQuery{
+// Query returns a query builder for PasswordCredential.
+func (c *PasswordCredentialClient) Query() *PasswordCredentialQuery {
+	return &PasswordCredentialQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeLoan},
+		ctx:    &QueryContext{Type: TypePasswordCredential},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a Loan entity by its id.
-func (c *LoanClient) Get(ctx context.Context, id uint) (*Loan, error) {
-	return c.Query().Where(loan.ID(id)).Only(ctx)
+// Get returns a PasswordCredential entity by its id.
+func (c *PasswordCredentialClient) Get(ctx context.Context, id uuid.UUID) (*PasswordCredential, error) {
+	return c.Query().Where(passwordcredential.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *LoanClient) GetX(ctx context.Context, id uint) *Loan {
+func (c *PasswordCredentialClient) GetX(ctx context.Context, id uuid.UUID) *PasswordCredential {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -956,133 +958,133 @@ func (c *LoanClient) GetX(ctx context.Context, id uint) *Loan {
 	return obj
 }
 
-// QueryUser queries the user edge of a Loan.
-func (c *LoanClient) QueryUser(l *Loan) *UserQuery {
+// QueryUser queries the user edge of a PasswordCredential.
+func (c *PasswordCredentialClient) QueryUser(pc *PasswordCredential) *UserQuery {
 	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := l.ID
+		id := pc.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(loan.Table, loan.FieldID, id),
+			sqlgraph.From(passwordcredential.Table, passwordcredential.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, loan.UserTable, loan.UserColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, passwordcredential.UserTable, passwordcredential.UserColumn),
 		)
-		fromV = sqlgraph.Neighbors(l.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(pc.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *LoanClient) Hooks() []Hook {
-	return c.hooks.Loan
+func (c *PasswordCredentialClient) Hooks() []Hook {
+	return c.hooks.PasswordCredential
 }
 
 // Interceptors returns the client interceptors.
-func (c *LoanClient) Interceptors() []Interceptor {
-	return c.inters.Loan
+func (c *PasswordCredentialClient) Interceptors() []Interceptor {
+	return c.inters.PasswordCredential
 }
 
-func (c *LoanClient) mutate(ctx context.Context, m *LoanMutation) (Value, error) {
+func (c *PasswordCredentialClient) mutate(ctx context.Context, m *PasswordCredentialMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&LoanCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&PasswordCredentialCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&LoanUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&PasswordCredentialUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&LoanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&PasswordCredentialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&LoanDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&PasswordCredentialDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown Loan mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown PasswordCredential mutation op: %q", m.Op())
 	}
 }
 
-// PrivateShareClient is a client for the PrivateShare schema.
-type PrivateShareClient struct {
+// PrimaryEmailClient is a client for the PrimaryEmail schema.
+type PrimaryEmailClient struct {
 	config
 }
 
-// NewPrivateShareClient returns a client for the PrivateShare from the given config.
-func NewPrivateShareClient(c config) *PrivateShareClient {
-	return &PrivateShareClient{config: c}
+// NewPrimaryEmailClient returns a client for the PrimaryEmail from the given config.
+func NewPrimaryEmailClient(c config) *PrimaryEmailClient {
+	return &PrimaryEmailClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `privateshare.Hooks(f(g(h())))`.
-func (c *PrivateShareClient) Use(hooks ...Hook) {
-	c.hooks.PrivateShare = append(c.hooks.PrivateShare, hooks...)
+// A call to `Use(f, g, h)` equals to `primaryemail.Hooks(f(g(h())))`.
+func (c *PrimaryEmailClient) Use(hooks ...Hook) {
+	c.hooks.PrimaryEmail = append(c.hooks.PrimaryEmail, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `privateshare.Intercept(f(g(h())))`.
-func (c *PrivateShareClient) Intercept(interceptors ...Interceptor) {
-	c.inters.PrivateShare = append(c.inters.PrivateShare, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `primaryemail.Intercept(f(g(h())))`.
+func (c *PrimaryEmailClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PrimaryEmail = append(c.inters.PrimaryEmail, interceptors...)
 }
 
-// Create returns a builder for creating a PrivateShare entity.
-func (c *PrivateShareClient) Create() *PrivateShareCreate {
-	mutation := newPrivateShareMutation(c.config, OpCreate)
-	return &PrivateShareCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a PrimaryEmail entity.
+func (c *PrimaryEmailClient) Create() *PrimaryEmailCreate {
+	mutation := newPrimaryEmailMutation(c.config, OpCreate)
+	return &PrimaryEmailCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of PrivateShare entities.
-func (c *PrivateShareClient) CreateBulk(builders ...*PrivateShareCreate) *PrivateShareCreateBulk {
-	return &PrivateShareCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of PrimaryEmail entities.
+func (c *PrimaryEmailClient) CreateBulk(builders ...*PrimaryEmailCreate) *PrimaryEmailCreateBulk {
+	return &PrimaryEmailCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for PrivateShare.
-func (c *PrivateShareClient) Update() *PrivateShareUpdate {
-	mutation := newPrivateShareMutation(c.config, OpUpdate)
-	return &PrivateShareUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for PrimaryEmail.
+func (c *PrimaryEmailClient) Update() *PrimaryEmailUpdate {
+	mutation := newPrimaryEmailMutation(c.config, OpUpdate)
+	return &PrimaryEmailUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *PrivateShareClient) UpdateOne(ps *PrivateShare) *PrivateShareUpdateOne {
-	mutation := newPrivateShareMutation(c.config, OpUpdateOne, withPrivateShare(ps))
-	return &PrivateShareUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *PrimaryEmailClient) UpdateOne(pe *PrimaryEmail) *PrimaryEmailUpdateOne {
+	mutation := newPrimaryEmailMutation(c.config, OpUpdateOne, withPrimaryEmail(pe))
+	return &PrimaryEmailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *PrivateShareClient) UpdateOneID(id uint) *PrivateShareUpdateOne {
-	mutation := newPrivateShareMutation(c.config, OpUpdateOne, withPrivateShareID(id))
-	return &PrivateShareUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *PrimaryEmailClient) UpdateOneID(id uuid.UUID) *PrimaryEmailUpdateOne {
+	mutation := newPrimaryEmailMutation(c.config, OpUpdateOne, withPrimaryEmailID(id))
+	return &PrimaryEmailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for PrivateShare.
-func (c *PrivateShareClient) Delete() *PrivateShareDelete {
-	mutation := newPrivateShareMutation(c.config, OpDelete)
-	return &PrivateShareDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for PrimaryEmail.
+func (c *PrimaryEmailClient) Delete() *PrimaryEmailDelete {
+	mutation := newPrimaryEmailMutation(c.config, OpDelete)
+	return &PrimaryEmailDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *PrivateShareClient) DeleteOne(ps *PrivateShare) *PrivateShareDeleteOne {
-	return c.DeleteOneID(ps.ID)
+func (c *PrimaryEmailClient) DeleteOne(pe *PrimaryEmail) *PrimaryEmailDeleteOne {
+	return c.DeleteOneID(pe.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *PrivateShareClient) DeleteOneID(id uint) *PrivateShareDeleteOne {
-	builder := c.Delete().Where(privateshare.ID(id))
+func (c *PrimaryEmailClient) DeleteOneID(id uuid.UUID) *PrimaryEmailDeleteOne {
+	builder := c.Delete().Where(primaryemail.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &PrivateShareDeleteOne{builder}
+	return &PrimaryEmailDeleteOne{builder}
 }
 
-// Query returns a query builder for PrivateShare.
-func (c *PrivateShareClient) Query() *PrivateShareQuery {
-	return &PrivateShareQuery{
+// Query returns a query builder for PrimaryEmail.
+func (c *PrimaryEmailClient) Query() *PrimaryEmailQuery {
+	return &PrimaryEmailQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypePrivateShare},
+		ctx:    &QueryContext{Type: TypePrimaryEmail},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a PrivateShare entity by its id.
-func (c *PrivateShareClient) Get(ctx context.Context, id uint) (*PrivateShare, error) {
-	return c.Query().Where(privateshare.ID(id)).Only(ctx)
+// Get returns a PrimaryEmail entity by its id.
+func (c *PrimaryEmailClient) Get(ctx context.Context, id uuid.UUID) (*PrimaryEmail, error) {
+	return c.Query().Where(primaryemail.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *PrivateShareClient) GetX(ctx context.Context, id uint) *PrivateShare {
+func (c *PrimaryEmailClient) GetX(ctx context.Context, id uuid.UUID) *PrimaryEmail {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1090,44 +1092,60 @@ func (c *PrivateShareClient) GetX(ctx context.Context, id uint) *PrivateShare {
 	return obj
 }
 
-// QueryUser queries the user edge of a PrivateShare.
-func (c *PrivateShareClient) QueryUser(ps *PrivateShare) *UserQuery {
+// QueryEmail queries the email edge of a PrimaryEmail.
+func (c *PrimaryEmailClient) QueryEmail(pe *PrimaryEmail) *EmailQuery {
+	query := (&EmailClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pe.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(primaryemail.Table, primaryemail.FieldID, id),
+			sqlgraph.To(email.Table, email.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, primaryemail.EmailTable, primaryemail.EmailColumn),
+		)
+		fromV = sqlgraph.Neighbors(pe.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a PrimaryEmail.
+func (c *PrimaryEmailClient) QueryUser(pe *PrimaryEmail) *UserQuery {
 	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := ps.ID
+		id := pe.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(privateshare.Table, privateshare.FieldID, id),
+			sqlgraph.From(primaryemail.Table, primaryemail.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, privateshare.UserTable, privateshare.UserColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, primaryemail.UserTable, primaryemail.UserColumn),
 		)
-		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(pe.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *PrivateShareClient) Hooks() []Hook {
-	return c.hooks.PrivateShare
+func (c *PrimaryEmailClient) Hooks() []Hook {
+	return c.hooks.PrimaryEmail
 }
 
 // Interceptors returns the client interceptors.
-func (c *PrivateShareClient) Interceptors() []Interceptor {
-	return c.inters.PrivateShare
+func (c *PrimaryEmailClient) Interceptors() []Interceptor {
+	return c.inters.PrimaryEmail
 }
 
-func (c *PrivateShareClient) mutate(ctx context.Context, m *PrivateShareMutation) (Value, error) {
+func (c *PrimaryEmailClient) mutate(ctx context.Context, m *PrimaryEmailMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&PrivateShareCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&PrimaryEmailCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&PrivateShareUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&PrimaryEmailUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&PrivateShareUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&PrimaryEmailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&PrivateShareDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&PrimaryEmailDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown PrivateShare mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown PrimaryEmail mutation op: %q", m.Op())
 	}
 }
 
@@ -1177,7 +1195,7 @@ func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *UserClient) UpdateOneID(id uint) *UserUpdateOne {
+func (c *UserClient) UpdateOneID(id uuid.UUID) *UserUpdateOne {
 	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
 	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1194,7 +1212,7 @@ func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *UserClient) DeleteOneID(id uint) *UserDeleteOne {
+func (c *UserClient) DeleteOneID(id uuid.UUID) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1211,12 +1229,12 @@ func (c *UserClient) Query() *UserQuery {
 }
 
 // Get returns a User entity by its id.
-func (c *UserClient) Get(ctx context.Context, id uint) (*User, error) {
+func (c *UserClient) Get(ctx context.Context, id uuid.UUID) (*User, error) {
 	return c.Query().Where(user.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *UserClient) GetX(ctx context.Context, id uint) *User {
+func (c *UserClient) GetX(ctx context.Context, id uuid.UUID) *User {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1224,15 +1242,15 @@ func (c *UserClient) GetX(ctx context.Context, id uint) *User {
 	return obj
 }
 
-// QueryBankAccounts queries the bank_accounts edge of a User.
-func (c *UserClient) QueryBankAccounts(u *User) *BankAccountQuery {
-	query := (&BankAccountClient{config: c.config}).Query()
+// QueryEmails queries the emails edge of a User.
+func (c *UserClient) QueryEmails(u *User) *EmailQuery {
+	query := (&EmailClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(bankaccount.Table, bankaccount.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.BankAccountsTable, user.BankAccountsColumn),
+			sqlgraph.To(email.Table, email.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.EmailsTable, user.EmailsColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -1240,15 +1258,15 @@ func (c *UserClient) QueryBankAccounts(u *User) *BankAccountQuery {
 	return query
 }
 
-// QueryCars queries the cars edge of a User.
-func (c *UserClient) QueryCars(u *User) *CarQuery {
-	query := (&CarClient{config: c.config}).Query()
+// QueryPasscodes queries the passcodes edge of a User.
+func (c *UserClient) QueryPasscodes(u *User) *PasscodeQuery {
+	query := (&PasscodeClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(car.Table, car.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.CarsTable, user.CarsColumn),
+			sqlgraph.To(passcode.Table, passcode.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PasscodesTable, user.PasscodesColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -1256,15 +1274,15 @@ func (c *UserClient) QueryCars(u *User) *CarQuery {
 	return query
 }
 
-// QueryCollectibles queries the collectibles edge of a User.
-func (c *UserClient) QueryCollectibles(u *User) *CollectibleQuery {
-	query := (&CollectibleClient{config: c.config}).Query()
+// QueryPasswordCredential queries the password_credential edge of a User.
+func (c *UserClient) QueryPasswordCredential(u *User) *PasswordCredentialQuery {
+	query := (&PasswordCredentialClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(collectible.Table, collectible.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.CollectiblesTable, user.CollectiblesColumn),
+			sqlgraph.To(passwordcredential.Table, passwordcredential.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.PasswordCredentialTable, user.PasswordCredentialColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -1272,15 +1290,15 @@ func (c *UserClient) QueryCollectibles(u *User) *CollectibleQuery {
 	return query
 }
 
-// QueryCryptoAccounts queries the crypto_accounts edge of a User.
-func (c *UserClient) QueryCryptoAccounts(u *User) *CryptoAccountQuery {
-	query := (&CryptoAccountClient{config: c.config}).Query()
+// QueryPrimaryEmail queries the primary_email edge of a User.
+func (c *UserClient) QueryPrimaryEmail(u *User) *PrimaryEmailQuery {
+	query := (&PrimaryEmailClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(cryptoaccount.Table, cryptoaccount.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.CryptoAccountsTable, user.CryptoAccountsColumn),
+			sqlgraph.To(primaryemail.Table, primaryemail.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.PrimaryEmailTable, user.PrimaryEmailColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -1288,31 +1306,15 @@ func (c *UserClient) QueryCryptoAccounts(u *User) *CryptoAccountQuery {
 	return query
 }
 
-// QueryLoans queries the loans edge of a User.
-func (c *UserClient) QueryLoans(u *User) *LoanQuery {
-	query := (&LoanClient{config: c.config}).Query()
+// QueryWebauthnCredentials queries the webauthn_credentials edge of a User.
+func (c *UserClient) QueryWebauthnCredentials(u *User) *WebauthnCredentialQuery {
+	query := (&WebauthnCredentialClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(loan.Table, loan.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.LoansTable, user.LoansColumn),
-		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryPrivateShares queries the private_shares edge of a User.
-func (c *UserClient) QueryPrivateShares(u *User) *PrivateShareQuery {
-	query := (&PrivateShareClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(privateshare.Table, privateshare.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.PrivateSharesTable, user.PrivateSharesColumn),
+			sqlgraph.To(webauthncredential.Table, webauthncredential.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.WebauthnCredentialsTable, user.WebauthnCredentialsColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -1344,3 +1346,569 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 		return nil, fmt.Errorf("ent: unknown User mutation op: %q", m.Op())
 	}
 }
+
+// WebauthnCredentialClient is a client for the WebauthnCredential schema.
+type WebauthnCredentialClient struct {
+	config
+}
+
+// NewWebauthnCredentialClient returns a client for the WebauthnCredential from the given config.
+func NewWebauthnCredentialClient(c config) *WebauthnCredentialClient {
+	return &WebauthnCredentialClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `webauthncredential.Hooks(f(g(h())))`.
+func (c *WebauthnCredentialClient) Use(hooks ...Hook) {
+	c.hooks.WebauthnCredential = append(c.hooks.WebauthnCredential, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `webauthncredential.Intercept(f(g(h())))`.
+func (c *WebauthnCredentialClient) Intercept(interceptors ...Interceptor) {
+	c.inters.WebauthnCredential = append(c.inters.WebauthnCredential, interceptors...)
+}
+
+// Create returns a builder for creating a WebauthnCredential entity.
+func (c *WebauthnCredentialClient) Create() *WebauthnCredentialCreate {
+	mutation := newWebauthnCredentialMutation(c.config, OpCreate)
+	return &WebauthnCredentialCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of WebauthnCredential entities.
+func (c *WebauthnCredentialClient) CreateBulk(builders ...*WebauthnCredentialCreate) *WebauthnCredentialCreateBulk {
+	return &WebauthnCredentialCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for WebauthnCredential.
+func (c *WebauthnCredentialClient) Update() *WebauthnCredentialUpdate {
+	mutation := newWebauthnCredentialMutation(c.config, OpUpdate)
+	return &WebauthnCredentialUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *WebauthnCredentialClient) UpdateOne(wc *WebauthnCredential) *WebauthnCredentialUpdateOne {
+	mutation := newWebauthnCredentialMutation(c.config, OpUpdateOne, withWebauthnCredential(wc))
+	return &WebauthnCredentialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *WebauthnCredentialClient) UpdateOneID(id string) *WebauthnCredentialUpdateOne {
+	mutation := newWebauthnCredentialMutation(c.config, OpUpdateOne, withWebauthnCredentialID(id))
+	return &WebauthnCredentialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for WebauthnCredential.
+func (c *WebauthnCredentialClient) Delete() *WebauthnCredentialDelete {
+	mutation := newWebauthnCredentialMutation(c.config, OpDelete)
+	return &WebauthnCredentialDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *WebauthnCredentialClient) DeleteOne(wc *WebauthnCredential) *WebauthnCredentialDeleteOne {
+	return c.DeleteOneID(wc.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *WebauthnCredentialClient) DeleteOneID(id string) *WebauthnCredentialDeleteOne {
+	builder := c.Delete().Where(webauthncredential.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &WebauthnCredentialDeleteOne{builder}
+}
+
+// Query returns a query builder for WebauthnCredential.
+func (c *WebauthnCredentialClient) Query() *WebauthnCredentialQuery {
+	return &WebauthnCredentialQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeWebauthnCredential},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a WebauthnCredential entity by its id.
+func (c *WebauthnCredentialClient) Get(ctx context.Context, id string) (*WebauthnCredential, error) {
+	return c.Query().Where(webauthncredential.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *WebauthnCredentialClient) GetX(ctx context.Context, id string) *WebauthnCredential {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryWebauthnCredentialTransports queries the webauthn_credential_transports edge of a WebauthnCredential.
+func (c *WebauthnCredentialClient) QueryWebauthnCredentialTransports(wc *WebauthnCredential) *WebauthnCredentialTransportQuery {
+	query := (&WebauthnCredentialTransportClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := wc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(webauthncredential.Table, webauthncredential.FieldID, id),
+			sqlgraph.To(webauthncredentialtransport.Table, webauthncredentialtransport.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, webauthncredential.WebauthnCredentialTransportsTable, webauthncredential.WebauthnCredentialTransportsColumn),
+		)
+		fromV = sqlgraph.Neighbors(wc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a WebauthnCredential.
+func (c *WebauthnCredentialClient) QueryUser(wc *WebauthnCredential) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := wc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(webauthncredential.Table, webauthncredential.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, webauthncredential.UserTable, webauthncredential.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(wc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *WebauthnCredentialClient) Hooks() []Hook {
+	return c.hooks.WebauthnCredential
+}
+
+// Interceptors returns the client interceptors.
+func (c *WebauthnCredentialClient) Interceptors() []Interceptor {
+	return c.inters.WebauthnCredential
+}
+
+func (c *WebauthnCredentialClient) mutate(ctx context.Context, m *WebauthnCredentialMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&WebauthnCredentialCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&WebauthnCredentialUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&WebauthnCredentialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&WebauthnCredentialDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown WebauthnCredential mutation op: %q", m.Op())
+	}
+}
+
+// WebauthnCredentialTransportClient is a client for the WebauthnCredentialTransport schema.
+type WebauthnCredentialTransportClient struct {
+	config
+}
+
+// NewWebauthnCredentialTransportClient returns a client for the WebauthnCredentialTransport from the given config.
+func NewWebauthnCredentialTransportClient(c config) *WebauthnCredentialTransportClient {
+	return &WebauthnCredentialTransportClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `webauthncredentialtransport.Hooks(f(g(h())))`.
+func (c *WebauthnCredentialTransportClient) Use(hooks ...Hook) {
+	c.hooks.WebauthnCredentialTransport = append(c.hooks.WebauthnCredentialTransport, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `webauthncredentialtransport.Intercept(f(g(h())))`.
+func (c *WebauthnCredentialTransportClient) Intercept(interceptors ...Interceptor) {
+	c.inters.WebauthnCredentialTransport = append(c.inters.WebauthnCredentialTransport, interceptors...)
+}
+
+// Create returns a builder for creating a WebauthnCredentialTransport entity.
+func (c *WebauthnCredentialTransportClient) Create() *WebauthnCredentialTransportCreate {
+	mutation := newWebauthnCredentialTransportMutation(c.config, OpCreate)
+	return &WebauthnCredentialTransportCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of WebauthnCredentialTransport entities.
+func (c *WebauthnCredentialTransportClient) CreateBulk(builders ...*WebauthnCredentialTransportCreate) *WebauthnCredentialTransportCreateBulk {
+	return &WebauthnCredentialTransportCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for WebauthnCredentialTransport.
+func (c *WebauthnCredentialTransportClient) Update() *WebauthnCredentialTransportUpdate {
+	mutation := newWebauthnCredentialTransportMutation(c.config, OpUpdate)
+	return &WebauthnCredentialTransportUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *WebauthnCredentialTransportClient) UpdateOne(wct *WebauthnCredentialTransport) *WebauthnCredentialTransportUpdateOne {
+	mutation := newWebauthnCredentialTransportMutation(c.config, OpUpdateOne, withWebauthnCredentialTransport(wct))
+	return &WebauthnCredentialTransportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *WebauthnCredentialTransportClient) UpdateOneID(id string) *WebauthnCredentialTransportUpdateOne {
+	mutation := newWebauthnCredentialTransportMutation(c.config, OpUpdateOne, withWebauthnCredentialTransportID(id))
+	return &WebauthnCredentialTransportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for WebauthnCredentialTransport.
+func (c *WebauthnCredentialTransportClient) Delete() *WebauthnCredentialTransportDelete {
+	mutation := newWebauthnCredentialTransportMutation(c.config, OpDelete)
+	return &WebauthnCredentialTransportDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *WebauthnCredentialTransportClient) DeleteOne(wct *WebauthnCredentialTransport) *WebauthnCredentialTransportDeleteOne {
+	return c.DeleteOneID(wct.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *WebauthnCredentialTransportClient) DeleteOneID(id string) *WebauthnCredentialTransportDeleteOne {
+	builder := c.Delete().Where(webauthncredentialtransport.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &WebauthnCredentialTransportDeleteOne{builder}
+}
+
+// Query returns a query builder for WebauthnCredentialTransport.
+func (c *WebauthnCredentialTransportClient) Query() *WebauthnCredentialTransportQuery {
+	return &WebauthnCredentialTransportQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeWebauthnCredentialTransport},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a WebauthnCredentialTransport entity by its id.
+func (c *WebauthnCredentialTransportClient) Get(ctx context.Context, id string) (*WebauthnCredentialTransport, error) {
+	return c.Query().Where(webauthncredentialtransport.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *WebauthnCredentialTransportClient) GetX(ctx context.Context, id string) *WebauthnCredentialTransport {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryWebauthnCredential queries the webauthn_credential edge of a WebauthnCredentialTransport.
+func (c *WebauthnCredentialTransportClient) QueryWebauthnCredential(wct *WebauthnCredentialTransport) *WebauthnCredentialQuery {
+	query := (&WebauthnCredentialClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := wct.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(webauthncredentialtransport.Table, webauthncredentialtransport.FieldID, id),
+			sqlgraph.To(webauthncredential.Table, webauthncredential.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, webauthncredentialtransport.WebauthnCredentialTable, webauthncredentialtransport.WebauthnCredentialColumn),
+		)
+		fromV = sqlgraph.Neighbors(wct.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *WebauthnCredentialTransportClient) Hooks() []Hook {
+	return c.hooks.WebauthnCredentialTransport
+}
+
+// Interceptors returns the client interceptors.
+func (c *WebauthnCredentialTransportClient) Interceptors() []Interceptor {
+	return c.inters.WebauthnCredentialTransport
+}
+
+func (c *WebauthnCredentialTransportClient) mutate(ctx context.Context, m *WebauthnCredentialTransportMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&WebauthnCredentialTransportCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&WebauthnCredentialTransportUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&WebauthnCredentialTransportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&WebauthnCredentialTransportDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown WebauthnCredentialTransport mutation op: %q", m.Op())
+	}
+}
+
+// WebauthnSessionDataClient is a client for the WebauthnSessionData schema.
+type WebauthnSessionDataClient struct {
+	config
+}
+
+// NewWebauthnSessionDataClient returns a client for the WebauthnSessionData from the given config.
+func NewWebauthnSessionDataClient(c config) *WebauthnSessionDataClient {
+	return &WebauthnSessionDataClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `webauthnsessiondata.Hooks(f(g(h())))`.
+func (c *WebauthnSessionDataClient) Use(hooks ...Hook) {
+	c.hooks.WebauthnSessionData = append(c.hooks.WebauthnSessionData, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `webauthnsessiondata.Intercept(f(g(h())))`.
+func (c *WebauthnSessionDataClient) Intercept(interceptors ...Interceptor) {
+	c.inters.WebauthnSessionData = append(c.inters.WebauthnSessionData, interceptors...)
+}
+
+// Create returns a builder for creating a WebauthnSessionData entity.
+func (c *WebauthnSessionDataClient) Create() *WebauthnSessionDataCreate {
+	mutation := newWebauthnSessionDataMutation(c.config, OpCreate)
+	return &WebauthnSessionDataCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of WebauthnSessionData entities.
+func (c *WebauthnSessionDataClient) CreateBulk(builders ...*WebauthnSessionDataCreate) *WebauthnSessionDataCreateBulk {
+	return &WebauthnSessionDataCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for WebauthnSessionData.
+func (c *WebauthnSessionDataClient) Update() *WebauthnSessionDataUpdate {
+	mutation := newWebauthnSessionDataMutation(c.config, OpUpdate)
+	return &WebauthnSessionDataUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *WebauthnSessionDataClient) UpdateOne(wsd *WebauthnSessionData) *WebauthnSessionDataUpdateOne {
+	mutation := newWebauthnSessionDataMutation(c.config, OpUpdateOne, withWebauthnSessionData(wsd))
+	return &WebauthnSessionDataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *WebauthnSessionDataClient) UpdateOneID(id uuid.UUID) *WebauthnSessionDataUpdateOne {
+	mutation := newWebauthnSessionDataMutation(c.config, OpUpdateOne, withWebauthnSessionDataID(id))
+	return &WebauthnSessionDataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for WebauthnSessionData.
+func (c *WebauthnSessionDataClient) Delete() *WebauthnSessionDataDelete {
+	mutation := newWebauthnSessionDataMutation(c.config, OpDelete)
+	return &WebauthnSessionDataDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *WebauthnSessionDataClient) DeleteOne(wsd *WebauthnSessionData) *WebauthnSessionDataDeleteOne {
+	return c.DeleteOneID(wsd.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *WebauthnSessionDataClient) DeleteOneID(id uuid.UUID) *WebauthnSessionDataDeleteOne {
+	builder := c.Delete().Where(webauthnsessiondata.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &WebauthnSessionDataDeleteOne{builder}
+}
+
+// Query returns a query builder for WebauthnSessionData.
+func (c *WebauthnSessionDataClient) Query() *WebauthnSessionDataQuery {
+	return &WebauthnSessionDataQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeWebauthnSessionData},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a WebauthnSessionData entity by its id.
+func (c *WebauthnSessionDataClient) Get(ctx context.Context, id uuid.UUID) (*WebauthnSessionData, error) {
+	return c.Query().Where(webauthnsessiondata.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *WebauthnSessionDataClient) GetX(ctx context.Context, id uuid.UUID) *WebauthnSessionData {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryWebauthnSessionDataAllowedCredentials queries the webauthn_session_data_allowed_credentials edge of a WebauthnSessionData.
+func (c *WebauthnSessionDataClient) QueryWebauthnSessionDataAllowedCredentials(wsd *WebauthnSessionData) *WebauthnSessionDataAllowedCredentialQuery {
+	query := (&WebauthnSessionDataAllowedCredentialClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := wsd.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(webauthnsessiondata.Table, webauthnsessiondata.FieldID, id),
+			sqlgraph.To(webauthnsessiondataallowedcredential.Table, webauthnsessiondataallowedcredential.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, webauthnsessiondata.WebauthnSessionDataAllowedCredentialsTable, webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn),
+		)
+		fromV = sqlgraph.Neighbors(wsd.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *WebauthnSessionDataClient) Hooks() []Hook {
+	return c.hooks.WebauthnSessionData
+}
+
+// Interceptors returns the client interceptors.
+func (c *WebauthnSessionDataClient) Interceptors() []Interceptor {
+	return c.inters.WebauthnSessionData
+}
+
+func (c *WebauthnSessionDataClient) mutate(ctx context.Context, m *WebauthnSessionDataMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&WebauthnSessionDataCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&WebauthnSessionDataUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&WebauthnSessionDataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&WebauthnSessionDataDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown WebauthnSessionData mutation op: %q", m.Op())
+	}
+}
+
+// WebauthnSessionDataAllowedCredentialClient is a client for the WebauthnSessionDataAllowedCredential schema.
+type WebauthnSessionDataAllowedCredentialClient struct {
+	config
+}
+
+// NewWebauthnSessionDataAllowedCredentialClient returns a client for the WebauthnSessionDataAllowedCredential from the given config.
+func NewWebauthnSessionDataAllowedCredentialClient(c config) *WebauthnSessionDataAllowedCredentialClient {
+	return &WebauthnSessionDataAllowedCredentialClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `webauthnsessiondataallowedcredential.Hooks(f(g(h())))`.
+func (c *WebauthnSessionDataAllowedCredentialClient) Use(hooks ...Hook) {
+	c.hooks.WebauthnSessionDataAllowedCredential = append(c.hooks.WebauthnSessionDataAllowedCredential, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `webauthnsessiondataallowedcredential.Intercept(f(g(h())))`.
+func (c *WebauthnSessionDataAllowedCredentialClient) Intercept(interceptors ...Interceptor) {
+	c.inters.WebauthnSessionDataAllowedCredential = append(c.inters.WebauthnSessionDataAllowedCredential, interceptors...)
+}
+
+// Create returns a builder for creating a WebauthnSessionDataAllowedCredential entity.
+func (c *WebauthnSessionDataAllowedCredentialClient) Create() *WebauthnSessionDataAllowedCredentialCreate {
+	mutation := newWebauthnSessionDataAllowedCredentialMutation(c.config, OpCreate)
+	return &WebauthnSessionDataAllowedCredentialCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of WebauthnSessionDataAllowedCredential entities.
+func (c *WebauthnSessionDataAllowedCredentialClient) CreateBulk(builders ...*WebauthnSessionDataAllowedCredentialCreate) *WebauthnSessionDataAllowedCredentialCreateBulk {
+	return &WebauthnSessionDataAllowedCredentialCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for WebauthnSessionDataAllowedCredential.
+func (c *WebauthnSessionDataAllowedCredentialClient) Update() *WebauthnSessionDataAllowedCredentialUpdate {
+	mutation := newWebauthnSessionDataAllowedCredentialMutation(c.config, OpUpdate)
+	return &WebauthnSessionDataAllowedCredentialUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *WebauthnSessionDataAllowedCredentialClient) UpdateOne(wsdac *WebauthnSessionDataAllowedCredential) *WebauthnSessionDataAllowedCredentialUpdateOne {
+	mutation := newWebauthnSessionDataAllowedCredentialMutation(c.config, OpUpdateOne, withWebauthnSessionDataAllowedCredential(wsdac))
+	return &WebauthnSessionDataAllowedCredentialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *WebauthnSessionDataAllowedCredentialClient) UpdateOneID(id uuid.UUID) *WebauthnSessionDataAllowedCredentialUpdateOne {
+	mutation := newWebauthnSessionDataAllowedCredentialMutation(c.config, OpUpdateOne, withWebauthnSessionDataAllowedCredentialID(id))
+	return &WebauthnSessionDataAllowedCredentialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for WebauthnSessionDataAllowedCredential.
+func (c *WebauthnSessionDataAllowedCredentialClient) Delete() *WebauthnSessionDataAllowedCredentialDelete {
+	mutation := newWebauthnSessionDataAllowedCredentialMutation(c.config, OpDelete)
+	return &WebauthnSessionDataAllowedCredentialDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *WebauthnSessionDataAllowedCredentialClient) DeleteOne(wsdac *WebauthnSessionDataAllowedCredential) *WebauthnSessionDataAllowedCredentialDeleteOne {
+	return c.DeleteOneID(wsdac.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *WebauthnSessionDataAllowedCredentialClient) DeleteOneID(id uuid.UUID) *WebauthnSessionDataAllowedCredentialDeleteOne {
+	builder := c.Delete().Where(webauthnsessiondataallowedcredential.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &WebauthnSessionDataAllowedCredentialDeleteOne{builder}
+}
+
+// Query returns a query builder for WebauthnSessionDataAllowedCredential.
+func (c *WebauthnSessionDataAllowedCredentialClient) Query() *WebauthnSessionDataAllowedCredentialQuery {
+	return &WebauthnSessionDataAllowedCredentialQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeWebauthnSessionDataAllowedCredential},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a WebauthnSessionDataAllowedCredential entity by its id.
+func (c *WebauthnSessionDataAllowedCredentialClient) Get(ctx context.Context, id uuid.UUID) (*WebauthnSessionDataAllowedCredential, error) {
+	return c.Query().Where(webauthnsessiondataallowedcredential.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *WebauthnSessionDataAllowedCredentialClient) GetX(ctx context.Context, id uuid.UUID) *WebauthnSessionDataAllowedCredential {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryWebauthnSessionData queries the webauthn_session_data edge of a WebauthnSessionDataAllowedCredential.
+func (c *WebauthnSessionDataAllowedCredentialClient) QueryWebauthnSessionData(wsdac *WebauthnSessionDataAllowedCredential) *WebauthnSessionDataQuery {
+	query := (&WebauthnSessionDataClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := wsdac.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(webauthnsessiondataallowedcredential.Table, webauthnsessiondataallowedcredential.FieldID, id),
+			sqlgraph.To(webauthnsessiondata.Table, webauthnsessiondata.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, webauthnsessiondataallowedcredential.WebauthnSessionDataTable, webauthnsessiondataallowedcredential.WebauthnSessionDataColumn),
+		)
+		fromV = sqlgraph.Neighbors(wsdac.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *WebauthnSessionDataAllowedCredentialClient) Hooks() []Hook {
+	return c.hooks.WebauthnSessionDataAllowedCredential
+}
+
+// Interceptors returns the client interceptors.
+func (c *WebauthnSessionDataAllowedCredentialClient) Interceptors() []Interceptor {
+	return c.inters.WebauthnSessionDataAllowedCredential
+}
+
+func (c *WebauthnSessionDataAllowedCredentialClient) mutate(ctx context.Context, m *WebauthnSessionDataAllowedCredentialMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&WebauthnSessionDataAllowedCredentialCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&WebauthnSessionDataAllowedCredentialUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&WebauthnSessionDataAllowedCredentialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&WebauthnSessionDataAllowedCredentialDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown WebauthnSessionDataAllowedCredential mutation op: %q", m.Op())
+	}
+}
+
+// hooks and interceptors per client, for fast access.
+type (
+	hooks struct {
+		Email, Identity, Jwk, Passcode, PasswordCredential, PrimaryEmail, User,
+		WebauthnCredential, WebauthnCredentialTransport, WebauthnSessionData,
+		WebauthnSessionDataAllowedCredential []ent.Hook
+	}
+	inters struct {
+		Email, Identity, Jwk, Passcode, PasswordCredential, PrimaryEmail, User,
+		WebauthnCredential, WebauthnCredentialTransport, WebauthnSessionData,
+		WebauthnSessionDataAllowedCredential []ent.Interceptor
+	}
+)

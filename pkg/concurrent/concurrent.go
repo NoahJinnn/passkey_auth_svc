@@ -18,11 +18,11 @@ type SetupFunc func(Ctx) (interface{}, error)
 // values must be functions which returns values for these variables to
 // run in parallel all functions which corresponding variables is nil.
 //
-//      var a, b *int
-//	err = Setup(ctx, map[interface{}]SetupFunc{
-//		&a: setA,
-//		&b: setB,
-//	})
+//	     var a, b *int
+//		err = Setup(ctx, map[interface{}]SetupFunc{
+//			&a: setA,
+//			&b: setB,
+//		})
 //
 // Returns first non-nil error returned by any of executed functions.
 // It will panic if referenced variable can't be nil or corresponding

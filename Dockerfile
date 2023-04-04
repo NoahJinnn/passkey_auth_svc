@@ -7,6 +7,6 @@ HEALTHCHECK --interval=30s --timeout=5s \
 
 COPY . .
 
-ENTRYPOINT [ "bin/mono" ]
+ENTRYPOINT [ "bin/hq" ]
 
 CMD [ "serve" ]

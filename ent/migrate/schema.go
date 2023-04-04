@@ -3,156 +3,145 @@
 package migrate
 
 import (
-	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
 
 var (
-	// AssetInfoColumns holds the columns for the "asset_info" table.
-	AssetInfoColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "account_info", Type: field.TypeJSON},
-		{Name: "institution_info", Type: field.TypeJSON},
-		{Name: "asset_info", Type: field.TypeJSON},
-		{Name: "sensible_data", Type: field.TypeString},
-		{Name: "descriptions", Type: field.TypeString},
+	// EmailsColumns holds the columns for the "emails" table.
+	EmailsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "address", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
 	}
-	// AssetInfoTable holds the schema information for the "asset_info" table.
-	AssetInfoTable = &schema.Table{
-		Name:       "asset_info",
-		Columns:    AssetInfoColumns,
-		PrimaryKey: []*schema.Column{AssetInfoColumns[0]},
-	}
-	// BankAccountColumns holds the columns for the "bank_account" table.
-	BankAccountColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "asset_info_id", Type: field.TypeUint, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "user_id", Type: field.TypeUint, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
-	}
-	// BankAccountTable holds the schema information for the "bank_account" table.
-	BankAccountTable = &schema.Table{
-		Name:       "bank_account",
-		Columns:    BankAccountColumns,
-		PrimaryKey: []*schema.Column{BankAccountColumns[0]},
+	// EmailsTable holds the schema information for the "emails" table.
+	EmailsTable = &schema.Table{
+		Name:       "emails",
+		Columns:    EmailsColumns,
+		PrimaryKey: []*schema.Column{EmailsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "bank_account_users_bank_accounts",
-				Columns:    []*schema.Column{BankAccountColumns[4]},
+				Symbol:     "emails_users_emails",
+				Columns:    []*schema.Column{EmailsColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
 	}
-	// CarsColumns holds the columns for the "cars" table.
-	CarsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "asset_info_id", Type: field.TypeUint, SchemaType: map[string]string{"postgres": "serial"}},
+	// IdentitiesColumns holds the columns for the "identities" table.
+	IdentitiesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "provider_id", Type: field.TypeString},
+		{Name: "provider_name", Type: field.TypeString},
+		{Name: "data", Type: field.TypeString, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "user_id", Type: field.TypeUint, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "email_id", Type: field.TypeUUID, Nullable: true},
 	}
-	// CarsTable holds the schema information for the "cars" table.
-	CarsTable = &schema.Table{
-		Name:       "cars",
-		Columns:    CarsColumns,
-		PrimaryKey: []*schema.Column{CarsColumns[0]},
+	// IdentitiesTable holds the schema information for the "identities" table.
+	IdentitiesTable = &schema.Table{
+		Name:       "identities",
+		Columns:    IdentitiesColumns,
+		PrimaryKey: []*schema.Column{IdentitiesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "cars_users_cars",
-				Columns:    []*schema.Column{CarsColumns[4]},
+				Symbol:     "identities_emails_identities",
+				Columns:    []*schema.Column{IdentitiesColumns[6]},
+				RefColumns: []*schema.Column{EmailsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// JwksColumns holds the columns for the "jwks" table.
+	JwksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "key_data", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+	}
+	// JwksTable holds the schema information for the "jwks" table.
+	JwksTable = &schema.Table{
+		Name:       "jwks",
+		Columns:    JwksColumns,
+		PrimaryKey: []*schema.Column{JwksColumns[0]},
+	}
+	// PasscodesColumns holds the columns for the "passcodes" table.
+	PasscodesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "ttl", Type: field.TypeInt32},
+		{Name: "code", Type: field.TypeString},
+		{Name: "try_count", Type: field.TypeInt32},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "email_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
+	}
+	// PasscodesTable holds the schema information for the "passcodes" table.
+	PasscodesTable = &schema.Table{
+		Name:       "passcodes",
+		Columns:    PasscodesColumns,
+		PrimaryKey: []*schema.Column{PasscodesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "passcodes_emails_passcodes",
+				Columns:    []*schema.Column{PasscodesColumns[6]},
+				RefColumns: []*schema.Column{EmailsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "passcodes_users_passcodes",
+				Columns:    []*schema.Column{PasscodesColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
 	}
-	// CollectiblesColumns holds the columns for the "collectibles" table.
-	CollectiblesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "asset_info_id", Type: field.TypeUint, SchemaType: map[string]string{"postgres": "serial"}},
+	// PasswordCredentialsColumns holds the columns for the "password_credentials" table.
+	PasswordCredentialsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "password", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "user_id", Type: field.TypeUint, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "user_id", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
-	// CollectiblesTable holds the schema information for the "collectibles" table.
-	CollectiblesTable = &schema.Table{
-		Name:       "collectibles",
-		Columns:    CollectiblesColumns,
-		PrimaryKey: []*schema.Column{CollectiblesColumns[0]},
+	// PasswordCredentialsTable holds the schema information for the "password_credentials" table.
+	PasswordCredentialsTable = &schema.Table{
+		Name:       "password_credentials",
+		Columns:    PasswordCredentialsColumns,
+		PrimaryKey: []*schema.Column{PasswordCredentialsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "collectibles_users_collectibles",
-				Columns:    []*schema.Column{CollectiblesColumns[4]},
+				Symbol:     "password_credentials_users_password_credential",
+				Columns:    []*schema.Column{PasswordCredentialsColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
 	}
-	// CryptoAccountColumns holds the columns for the "crypto_account" table.
-	CryptoAccountColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "asset_info_id", Type: field.TypeUint, SchemaType: map[string]string{"postgres": "serial"}},
+	// PrimaryEmailsColumns holds the columns for the "primary_emails" table.
+	PrimaryEmailsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "user_id", Type: field.TypeUint, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "email_id", Type: field.TypeUUID, Unique: true, Nullable: true},
+		{Name: "user_id", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
-	// CryptoAccountTable holds the schema information for the "crypto_account" table.
-	CryptoAccountTable = &schema.Table{
-		Name:       "crypto_account",
-		Columns:    CryptoAccountColumns,
-		PrimaryKey: []*schema.Column{CryptoAccountColumns[0]},
+	// PrimaryEmailsTable holds the schema information for the "primary_emails" table.
+	PrimaryEmailsTable = &schema.Table{
+		Name:       "primary_emails",
+		Columns:    PrimaryEmailsColumns,
+		PrimaryKey: []*schema.Column{PrimaryEmailsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "crypto_account_users_crypto_accounts",
-				Columns:    []*schema.Column{CryptoAccountColumns[4]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
+				Symbol:     "primary_emails_emails_primary_email",
+				Columns:    []*schema.Column{PrimaryEmailsColumns[3]},
+				RefColumns: []*schema.Column{EmailsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
-		},
-	}
-	// LoansColumns holds the columns for the "loans" table.
-	LoansColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "asset_info_id", Type: field.TypeUint, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "user_id", Type: field.TypeUint, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
-	}
-	// LoansTable holds the schema information for the "loans" table.
-	LoansTable = &schema.Table{
-		Name:       "loans",
-		Columns:    LoansColumns,
-		PrimaryKey: []*schema.Column{LoansColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "loans_users_loans",
-				Columns:    []*schema.Column{LoansColumns[4]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
-	// PrivateSharesColumns holds the columns for the "private_shares" table.
-	PrivateSharesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "asset_info_id", Type: field.TypeUint, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "user_id", Type: field.TypeUint, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
-	}
-	// PrivateSharesTable holds the schema information for the "private_shares" table.
-	PrivateSharesTable = &schema.Table{
-		Name:       "private_shares",
-		Columns:    PrivateSharesColumns,
-		PrimaryKey: []*schema.Column{PrivateSharesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "private_shares_users_private_shares",
-				Columns:    []*schema.Column{PrivateSharesColumns[4]},
+				Symbol:     "primary_emails_users_primary_email",
+				Columns:    []*schema.Column{PrimaryEmailsColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -160,13 +149,7 @@ var (
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "first_name", Type: field.TypeString},
-		{Name: "last_name", Type: field.TypeString},
-		{Name: "email", Type: field.TypeString, Unique: true},
-		{Name: "password", Type: field.TypeString},
-		{Name: "phone_number", Type: field.TypeString, Nullable: true},
-		{Name: "address", Type: field.TypeString, Nullable: true},
+		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
@@ -176,33 +159,118 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
+	// WebauthnCredentialsColumns holds the columns for the "webauthn_credentials" table.
+	WebauthnCredentialsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "public_key", Type: field.TypeString},
+		{Name: "attestation_type", Type: field.TypeString},
+		{Name: "aaguid", Type: field.TypeUUID},
+		{Name: "sign_count", Type: field.TypeInt32},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString, Nullable: true},
+		{Name: "backup_eligible", Type: field.TypeBool},
+		{Name: "backup_state", Type: field.TypeBool},
+		{Name: "last_used_at", Type: field.TypeTime, Nullable: true},
+		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
+	}
+	// WebauthnCredentialsTable holds the schema information for the "webauthn_credentials" table.
+	WebauthnCredentialsTable = &schema.Table{
+		Name:       "webauthn_credentials",
+		Columns:    WebauthnCredentialsColumns,
+		PrimaryKey: []*schema.Column{WebauthnCredentialsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "webauthn_credentials_users_webauthn_credentials",
+				Columns:    []*schema.Column{WebauthnCredentialsColumns[11]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// WebauthnCredentialTransportsColumns holds the columns for the "webauthn_credential_transports" table.
+	WebauthnCredentialTransportsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString},
+		{Name: "webauthn_credential_id", Type: field.TypeString, Nullable: true},
+	}
+	// WebauthnCredentialTransportsTable holds the schema information for the "webauthn_credential_transports" table.
+	WebauthnCredentialTransportsTable = &schema.Table{
+		Name:       "webauthn_credential_transports",
+		Columns:    WebauthnCredentialTransportsColumns,
+		PrimaryKey: []*schema.Column{WebauthnCredentialTransportsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "webauthn_credential_transports_webauthn_credentials_webauthn_credential_transports",
+				Columns:    []*schema.Column{WebauthnCredentialTransportsColumns[2]},
+				RefColumns: []*schema.Column{WebauthnCredentialsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// WebauthnSessionDataColumns holds the columns for the "webauthn_session_data" table.
+	WebauthnSessionDataColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "challenge", Type: field.TypeString, Unique: true},
+		{Name: "user_id", Type: field.TypeUUID},
+		{Name: "user_verification", Type: field.TypeString},
+		{Name: "operation", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// WebauthnSessionDataTable holds the schema information for the "webauthn_session_data" table.
+	WebauthnSessionDataTable = &schema.Table{
+		Name:       "webauthn_session_data",
+		Columns:    WebauthnSessionDataColumns,
+		PrimaryKey: []*schema.Column{WebauthnSessionDataColumns[0]},
+	}
+	// WebauthnSessionDataAllowedCredentialsColumns holds the columns for the "webauthn_session_data_allowed_credentials" table.
+	WebauthnSessionDataAllowedCredentialsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "credential_id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "webauthn_session_data_id", Type: field.TypeUUID, Nullable: true},
+	}
+	// WebauthnSessionDataAllowedCredentialsTable holds the schema information for the "webauthn_session_data_allowed_credentials" table.
+	WebauthnSessionDataAllowedCredentialsTable = &schema.Table{
+		Name:       "webauthn_session_data_allowed_credentials",
+		Columns:    WebauthnSessionDataAllowedCredentialsColumns,
+		PrimaryKey: []*schema.Column{WebauthnSessionDataAllowedCredentialsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "webauthn_session_data_allowed_credentials_webauthn_session_data_webauthn_session_data_allowed_credentials",
+				Columns:    []*schema.Column{WebauthnSessionDataAllowedCredentialsColumns[4]},
+				RefColumns: []*schema.Column{WebauthnSessionDataColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		AssetInfoTable,
-		BankAccountTable,
-		CarsTable,
-		CollectiblesTable,
-		CryptoAccountTable,
-		LoansTable,
-		PrivateSharesTable,
+		EmailsTable,
+		IdentitiesTable,
+		JwksTable,
+		PasscodesTable,
+		PasswordCredentialsTable,
+		PrimaryEmailsTable,
 		UsersTable,
+		WebauthnCredentialsTable,
+		WebauthnCredentialTransportsTable,
+		WebauthnSessionDataTable,
+		WebauthnSessionDataAllowedCredentialsTable,
 	}
 )
 
 func init() {
-	AssetInfoTable.Annotation = &entsql.Annotation{
-		Table: "asset_info",
-	}
-	BankAccountTable.ForeignKeys[0].RefTable = UsersTable
-	BankAccountTable.Annotation = &entsql.Annotation{
-		Table: "bank_account",
-	}
-	CarsTable.ForeignKeys[0].RefTable = UsersTable
-	CollectiblesTable.ForeignKeys[0].RefTable = UsersTable
-	CryptoAccountTable.ForeignKeys[0].RefTable = UsersTable
-	CryptoAccountTable.Annotation = &entsql.Annotation{
-		Table: "crypto_account",
-	}
-	LoansTable.ForeignKeys[0].RefTable = UsersTable
-	PrivateSharesTable.ForeignKeys[0].RefTable = UsersTable
+	EmailsTable.ForeignKeys[0].RefTable = UsersTable
+	IdentitiesTable.ForeignKeys[0].RefTable = EmailsTable
+	PasscodesTable.ForeignKeys[0].RefTable = EmailsTable
+	PasscodesTable.ForeignKeys[1].RefTable = UsersTable
+	PasswordCredentialsTable.ForeignKeys[0].RefTable = UsersTable
+	PrimaryEmailsTable.ForeignKeys[0].RefTable = EmailsTable
+	PrimaryEmailsTable.ForeignKeys[1].RefTable = UsersTable
+	WebauthnCredentialsTable.ForeignKeys[0].RefTable = UsersTable
+	WebauthnCredentialTransportsTable.ForeignKeys[0].RefTable = WebauthnCredentialsTable
+	WebauthnSessionDataAllowedCredentialsTable.ForeignKeys[0].RefTable = WebauthnSessionDataTable
 }

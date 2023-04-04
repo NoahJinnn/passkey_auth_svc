@@ -8,15 +8,15 @@ tasks:
   run:
     desc: "Go run app with dev env"
     cmds:
-      - ./sh/run_linux
-  
+      - ./sh/run_macos "{{.CLI_ARGS}}"
+
   test:
     deps: [install:hadolint]
     desc: "Run test"
     cmds:
-      - ./sh/test_linux
+      - ./sh/test_macos
 
   stat:
     desc: "Get code statistics"
     cmds:
-      - ./sh/stat_linux
+      - ./sh/stat_macos 

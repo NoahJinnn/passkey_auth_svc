@@ -5,111 +5,60 @@
 package app
 
 import (
-	"context"
-	"errors"
 	"fmt"
 
-	"github.com/hellohq/hqservice/api/openapi/model"
-	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/internal/sharedconfig"
-	plaid "github.com/plaid/plaid-go/v3/plaid"
-	"github.com/powerman/appcfg"
-)
-
-// Ctx is a synonym for convenience.
-type Ctx = context.Context
-
-// Errors.
-var (
-	ErrAccessDenied  = errors.New("access denied")
-	ErrAlreadyExist  = errors.New("already exists")
-	ErrNotFound      = errors.New("not found")
-	ErrValidate      = errors.New("validate")
-	ErrWrongPassword = errors.New("wrong password")
+	"github.com/go-webauthn/webauthn/protocol"
+	"github.com/go-webauthn/webauthn/webauthn"
+	"github.com/hellohq/hqservice/ms/auth/app/svcs"
+	"github.com/hellohq/hqservice/ms/auth/config"
+	"github.com/hellohq/hqservice/ms/auth/dal"
 )
 
 // Appl provides application features (use cases) service.
 type Appl interface {
-	// HealthCheck returns error if service is unhealthy or current
-	// status otherwise.
-	// Errors: none.
-	HealthCheck(Ctx) (interface{}, error)
-	IPlaidSvc
-	IUserSvc
-}
-
-type IPlaidSvc interface {
-	Info() *GetInfoResp
-	GetSandboxAccessToken(ctx Ctx, institutionID string) (*GetAccessTokenResp, error)
-	LinkTokenCreate(
-		ctx Ctx, paymentInitiation *plaid.LinkTokenCreateRequestPaymentInitiation,
-	) (*LinkTokenCreateResp, error)
-	GetAccessToken(ctx Ctx, publicToken string) (*GetAccessTokenResp, error)
-	GetAuthAccount(ctx Ctx) (*GetAuthAccountResp, error)
-	GetTransactions(ctx Ctx) (*GetTransactionsResp, error)
-	GetIdentity(ctx Ctx) (*GetIdentityResp, error)
-	GetBalance(ctx Ctx) (*GetAccountsResp, error)
-	GetAccounts(ctx Ctx) (*GetAccountsResp, error)
-}
-
-type IUserSvc interface {
-	GetAllUsers(ctx Ctx) ([]*User, error)
-	GetUserById(ctx Ctx, id uint) (*User, error)
-	CreateUser(ctx Ctx, u *model.User) (*User, error)
-	UpdateUser(ctx Ctx, u *model.User) (*User, error)
-}
-
-// Repo provides data storage.
-type Repo interface {
-	GetAllUsers(ctx Ctx) ([]*User, error)
-	GetUserById(ctx Ctx, id uint) (*User, error)
-	CreateUser(ctx Ctx, u *User) (*ent.User, error)
-	UpdateUser(ctx Ctx, u *User) (*ent.User, error)
-}
-
-// Ref: https://github.com/plaid/quickstart/blob/master/.env.example
-// Config contains configuration for business-logic.
-type Config struct {
-	// See https://dashboard.plaid.com/account/keys
-	ClientId appcfg.String `env:"PLAID_CLIENT_ID"`
-	Secret   appcfg.String `env:"PLAID_SECRET"`
-	// See sandbox, development, product
-	Env appcfg.String `env:"PLAID_ENV"`
-	// See https://plaid.com/docs/api/tokens/#link-token-create-request-products
-	Products appcfg.String `env:"PLAID_PRODUCTS"`
-	// See https://plaid.com/docs/api/tokens/#link-token-create-request-country-codes
-	CountryCodes appcfg.String `env:"PLAID_COUNTRY_CODES"`
-	// See https://dashboard.plaid.com/team/api
-	RedirectUri appcfg.String `env:"PLAID_REDIRECT_URI"`
+	GetWebauthnSvc() svcs.IWebauthnSvc
+	GetUserSvc() svcs.IUserSvc
 }
 
 // App implements interface Appl.
 type App struct {
-	cfg         *Config
-	plaidClient *plaid.APIClient
-	repo        Repo
+	cfg  *config.Config
+	repo *dal.Repo
+	wa   *webauthn.WebAuthn
 }
 
 // New creates and returns new App.
-func New(repo Repo) (*App, error) {
-	var cfg = &Config{}
-	fromEnv := appcfg.NewFromEnv(sharedconfig.EnvPrefix)
-	err := appcfg.ProvideStruct(cfg, fromEnv)
+func New(cfg *config.Config, repo *dal.Repo) App {
+	f := false
+	wa, err := webauthn.New(&webauthn.Config{
+		RPDisplayName:         cfg.Webauthn.RelyingParty.DisplayName,
+		RPID:                  cfg.Webauthn.RelyingParty.Id,
+		RPOrigin:              cfg.Webauthn.RelyingParty.Origin,
+		RPOrigins:             cfg.Webauthn.RelyingParty.Origins,
+		AttestationPreference: protocol.PreferNoAttestation,
+		AuthenticatorSelection: protocol.AuthenticatorSelection{
+			RequireResidentKey: &f,
+			ResidentKey:        protocol.ResidentKeyRequirementDiscouraged,
+			UserVerification:   protocol.VerificationRequired,
+		},
+		Timeout: cfg.Webauthn.Timeout,
+		Debug:   false,
+	})
 
 	if err != nil {
-		return nil, fmt.Errorf("load app config failed: %w", err)
+		panic(fmt.Errorf("failed to create webauthn instance: %w", err))
 	}
-
-	plaidClient := NewPlaidClient(*cfg)
-
-	a := &App{
-		cfg:         cfg,
-		plaidClient: plaidClient,
-		repo:        repo,
+	return App{
+		cfg:  cfg,
+		repo: repo,
+		wa:   wa,
 	}
-	return a, nil
 }
 
-func (a *App) HealthCheck(_ Ctx) (interface{}, error) {
-	return "OK", nil
+func (a App) GetWebauthnSvc() svcs.IWebauthnSvc {
+	return svcs.NewWebAuthn(a.cfg, a.repo, a.wa)
+}
+
+func (a App) GetUserSvc() svcs.IUserSvc {
+	return svcs.NewUserSvc(a.cfg, a.repo)
 }

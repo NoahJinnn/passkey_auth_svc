@@ -1,19 +1,19 @@
-// Package mono provides embedded microservice.
+// Package hq provides embedded microservice.
 package hq
 
 import (
 	"context"
-	"regexp"
+	"net/http"
 
-	"github.com/hellohq/hqservice/api/openapi/restapi"
 	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
-	"github.com/hellohq/hqservice/ms/auth/srv/openapi"
+	server "github.com/hellohq/hqservice/ms/auth/srv/http"
 	"github.com/hellohq/hqservice/pkg/concurrent"
-	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/hellohq/hqservice/pkg/serve"
+	"github.com/labstack/echo/v4"
+	"github.com/powerman/pqx"
 	"github.com/powerman/structlog"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/cobra"
@@ -22,13 +22,11 @@ import (
 // Ctx is a synonym for convenience.
 type Ctx = context.Context
 
-var reg = prometheus.NewPedanticRegistry()
-
 // Service implements main.embeddedService interface.
 type Service struct {
 	cfg  *config.Config
-	srv  *restapi.Server
-	appl *app.App
+	srv  *echo.Echo
+	appl app.App
 	repo *dal.Repo
 }
 
@@ -37,10 +35,6 @@ func (s *Service) Name() string { return config.ServiceName }
 
 // Init implements main.embeddedService interface.
 func (s *Service) Init(sharedCfg *sharedconfig.Shared, _, serveCmd *cobra.Command) error {
-	namespace := regexp.MustCompile(`[^a-zA-Z0-9]+`).ReplaceAllString(def.ProgName, "_")
-	initMetrics(reg, namespace)
-	openapi.InitMetrics(reg, namespace)
-
 	return config.Init(sharedCfg, config.FlagSets{
 		Serve: serveCmd.Flags(),
 	})
@@ -63,24 +57,16 @@ func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func()) (er
 	if err != nil {
 		return log.Err("failed to connect", "err", err)
 	}
+	s.appl = app.New(s.cfg, s.repo)
 
-	if s.appl == nil {
-		s.appl, err = app.New(s.repo)
-		if err != nil {
-			return log.Err("failed to create Appl", "err", err)
-		}
-	}
-
-	s.srv, err = openapi.NewServer(s.appl, openapi.Config{
-		Addr: s.cfg.BindAddr,
-	})
+	s.srv, err = server.NewServer(s.appl, *s.repo, s.cfg)
 	if err != nil {
 		return log.Err("failed to openapi.NewServer", "err", err)
 	}
 
 	err = concurrent.Serve(ctxShutdown, shutdown,
 		s.serveMetrics,
-		s.serveOpenAPI,
+		s.serveEcho,
 	)
 
 	if err != nil {
@@ -89,14 +75,22 @@ func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func()) (er
 	return nil
 }
 
-func (s *Service) serveMetrics(ctx Ctx) error {
-	return serve.Metrics(ctx, s.cfg.BindMetricsAddr, reg)
+func (s *Service) serveEcho(ctx Ctx) error {
+	e := echo.New()
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello, World!")
+	})
+	return e.Start(":1323")
 }
 
-func (s *Service) serveOpenAPI(ctx Ctx) error {
-	return openapi.OpenAPI(ctx, s.srv, "OpenAPI")
+var reg = prometheus.NewPedanticRegistry()
+
+func (s *Service) serveMetrics(ctx Ctx) error {
+	return serve.Metrics(ctx, s.cfg.Server.BindMetricsAddr, reg)
 }
 
 func (s *Service) connectRepo(ctx Ctx) (interface{}, error) {
-	return dal.New(ctx, s.cfg.Postgres)
+	s.cfg.Postgres.SSLMode = pqx.SSLRequire
+	dateSourceName := s.cfg.Postgres.FormatDSN()
+	return dal.New(ctx, dateSourceName)
 }

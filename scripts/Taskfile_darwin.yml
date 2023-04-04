@@ -8,7 +8,7 @@ tasks:
   run:
     desc: "Go run app with dev env"
     cmds:
-      - ./sh/run_macos
+      - ./sh/run_macos "{{.CLI_ARGS}}"
 
   test:
     deps: [install:hadolint]

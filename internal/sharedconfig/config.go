@@ -15,40 +15,24 @@ import (
 )
 
 // EnvPrefix defines common prefix for environment variables.
-const EnvPrefix = "MONO_"
+const EnvPrefix = "HQ_"
 
 // Shared contains configurable values shared by microservices.
 type Shared struct {
-	AddrHost          appcfg.NotEmptyString `env:"ADDR_HOST"`
-	AddrHostInt       appcfg.NotEmptyString `env:"ADDR_HOST_INT"`
-	MetricsAddrPort   appcfg.Port           `env:"METRICS_ADDR_PORT"`
-	XPostgresAddrHost appcfg.NotEmptyString `env:"X_POSTGRES_ADDR_HOST"`
-	XPostgresAddrPort appcfg.Port           `env:"X_POSTGRES_ADDR_PORT"`
-	XPostgresDBName   appcfg.NotEmptyString `env:"X_POSTGRES_DB_NAME"`
-	AuthAddrHost      appcfg.NotEmptyString `env:"AUTH_ADDR_HOST"`
-	AuthAddrHostInt   appcfg.NotEmptyString `env:"AUTH_ADDR_HOST_INT"`
-	AuthAddrPort      appcfg.Port           `env:"AUTH_ADDR_PORT"`
-	AuthAddrPortInt   appcfg.Port           `env:"AUTH_ADDR_PORT_INT"`
+	AuthAddrHost    appcfg.NotEmptyString `env:"AUTH_ADDR_HOST"`
+	AuthAddrHostInt appcfg.NotEmptyString `env:"AUTH_ADDR_HOST_INT"`
+	AuthAddrPort    appcfg.Port           `env:"AUTH_ADDR_PORT"`
 }
 
 // Default ports.
 const (
-	MonoPort = 17000 + iota
-	MetricsPort
-	AuthPort
-	AuthPortInt
+	AuthPort = 17000 + iota
 )
 
 var shared = &Shared{ //nolint:gochecknoglobals // Config is global anyway.
-	AddrHost:          appcfg.MustNotEmptyString(def.Hostname),
-	AddrHostInt:       appcfg.MustNotEmptyString(def.Hostname),
-	AuthAddrHost:      appcfg.MustNotEmptyString(def.Hostname),
-	AuthAddrHostInt:   appcfg.MustNotEmptyString(def.Hostname),
-	AuthAddrPort:      appcfg.MustPort(strconv.Itoa(AuthPort)),
-	AuthAddrPortInt:   appcfg.MustPort(strconv.Itoa(AuthPortInt)),
-	MetricsAddrPort:   appcfg.MustPort(strconv.Itoa(MetricsPort)),
-	XPostgresAddrPort: appcfg.MustPort("5432"),
-	XPostgresDBName:   appcfg.MustNotEmptyString("postgres"),
+	AuthAddrHost:    appcfg.MustNotEmptyString(def.Hostname),
+	AuthAddrHostInt: appcfg.MustNotEmptyString(def.Hostname),
+	AuthAddrPort:    appcfg.MustPort(strconv.Itoa(AuthPort)),
 }
 
 // Get updates config defaults (from env) and returns shared config.

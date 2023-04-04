@@ -2,15 +2,29 @@ package dal
 
 import (
 	"fmt"
-	"log"
 
+	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ent/user"
-	dom "github.com/hellohq/hqservice/ms/auth/app"
 )
 
-func (repo *Repo) GetAllUsers(ctx Ctx) ([]*dom.User, error) {
-	eus, err := repo.Db.User.
+type IUserRepo interface {
+	GetAll(ctx Ctx) ([]*ent.User, error)
+	GetById(ctx Ctx, id uuid.UUID) (*ent.User, error)
+	Create(ctx Ctx, u *ent.User) (*ent.User, error)
+	Count(ctx Ctx, id uuid.UUID) (int, error)
+}
+
+type userRepo struct {
+	db *ent.Client
+}
+
+func NewUserRepo(db *ent.Client) IUserRepo {
+	return &userRepo{db: db}
+}
+
+func (r *userRepo) GetAll(ctx Ctx) ([]*ent.User, error) {
+	us, err := r.db.User.
 		Query().
 		All(ctx)
 
@@ -18,62 +32,45 @@ func (repo *Repo) GetAllUsers(ctx Ctx) ([]*dom.User, error) {
 		return nil, fmt.Errorf("failed querying all users: %w", err)
 	}
 
-	us := dom.UserListFromEnt(eus)
-
-	log.Println("users returned: ", us)
 	return us, nil
 }
 
-func (repo *Repo) GetUserById(ctx Ctx, id uint) (*dom.User, error) {
-	eu, err := repo.Db.User.
+func (r *userRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.User, error) {
+	u, err := r.db.User.
 		Query().
 		Where(user.ID(id)).
+		WithEmails().
+		WithPrimaryEmail().
 		Only(ctx)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed querying user by id: %w", err)
 	}
 
-	u := &dom.User{}
-	u = u.FromEnt(eu)
-	log.Println("users returned: ", u)
 	return u, nil
 }
 
-func (repo *Repo) CreateUser(ctx Ctx, u *dom.User) (*ent.User, error) {
-	eu, err := repo.Db.User.
+func (r *userRepo) Create(ctx Ctx, u *ent.User) (*ent.User, error) {
+	newu, err := r.db.User.
 		Create().
-		SetFirstName(u.FirstName).
-		SetLastName(u.LastName).
-		SetEmail(u.Email).
-		SetPassword(u.Password).
-		SetPhoneNumber(u.PhoneNumber).
-		SetAddress(u.Address).
 		Save(ctx)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed querying user by id: %w", err)
+		return nil, fmt.Errorf("failed creating user by id: %w", err)
 	}
 
-	log.Println("users returned: ", u)
-	return eu, nil
+	return newu, nil
 }
 
-func (repo *Repo) UpdateUser(ctx Ctx, u *dom.User) (*ent.User, error) {
-	eu, err := repo.Db.User.
-		UpdateOneID(u.ID).
-		SetFirstName(u.FirstName).
-		SetLastName(u.LastName).
-		SetEmail(u.Email).
-		SetPassword(u.Password).
-		SetPhoneNumber(u.PhoneNumber).
-		SetAddress(u.Address).
-		Save(ctx)
+func (r *userRepo) Count(ctx Ctx, id uuid.UUID) (int, error) {
+	count, err := r.db.User.
+		Query().
+		Where(user.ID(id)).
+		Count(ctx)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed querying user by id: %w", err)
+		return 0, fmt.Errorf("failed counting users: %w", err)
 	}
 
-	log.Println("users returned: ", u)
-	return eu, nil
+	return count, nil
 }
