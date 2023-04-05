@@ -43,6 +43,7 @@ var (
 		Secrets            appcfg.NotEmptyString `env:"AUTH_SECRETS"`
 		RpId               appcfg.NotEmptyString `env:"AUTH_RP_ID"`
 		RpOrigin           appcfg.NotEmptyString `env:"AUTH_RP_ORIGIN"`
+		RpOrigins          appcfg.StringSlice    `env:"AUTH_RP_ORIGINS"`
 		IosAssociationSite appcfg.String         `env:"IOS_SITE_ASSOCIATION"`
 		AndroidAssetLinks  appcfg.String         `env:"ANDROID_ASSET_LINKS"`
 	}{
@@ -123,6 +124,7 @@ func Init(sharedCfg *sharedconfig.Shared, flagsets FlagSets) error {
 	appcfg.AddPFlag(fs.Serve, &own.PostgresPass, "postgres.pass", "PostgreSQL password")
 	appcfg.AddPFlag(fs.Serve, &own.RpId, "wa.id", "Webauthn id")
 	appcfg.AddPFlag(fs.Serve, &own.RpOrigin, "wa.origin", "Webauthn origin")
+	appcfg.AddPFlag(fs.Serve, &own.RpOrigins, "wa.origins", "Webauthn origin")
 
 	return nil
 }
@@ -154,7 +156,7 @@ func GetServe() (c *Config, err error) {
 			RelyingParty: RelyingParty{
 				Id:          own.RpId.Value(&err),
 				DisplayName: "Authentication Service",
-				Origins:     []string{own.RpOrigin.Value(&err)},
+				Origins:     own.RpOrigins.Value(&err),
 			},
 			Timeout: 60000,
 		},
