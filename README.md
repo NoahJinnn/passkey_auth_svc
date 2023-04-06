@@ -1,3 +1,28 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [HQ Service modulith](#hq-service-modulith)
+  - [Overview](#overview)
+    - [Requirements](#requirements)
+    - [Setup](#setup)
+      - [Environment management](#environment-management)
+      - [Naming convention](#naming-convention)
+      - [HTTPS](#https)
+    - [Usage](#usage)
+      - [Cheatsheet](#cheatsheet)
+  - [Run](#run)
+    - [Docker](#docker)
+      - [Run local PostgresSQL DB](#run-local-postgressql-db)
+      - [Remove container storage](#remove-container-storage)
+    - [Source](#source)
+      - [Run directly, without building](#run-directly-without-building)
+      - [Run with command args](#run-with-command-args)
+      - [Build first, then run](#build-first-then-run)
+  - [TODO](#todo)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # HQ Service modulith
 
 ## Overview
