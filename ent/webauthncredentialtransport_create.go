@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/webauthncredential"
 	"github.com/hellohq/hqservice/ent/webauthncredentialtransport"
 )
@@ -41,8 +42,16 @@ func (wctc *WebauthnCredentialTransportCreate) SetNillableWebauthnCredentialID(s
 }
 
 // SetID sets the "id" field.
-func (wctc *WebauthnCredentialTransportCreate) SetID(s string) *WebauthnCredentialTransportCreate {
-	wctc.mutation.SetID(s)
+func (wctc *WebauthnCredentialTransportCreate) SetID(u uuid.UUID) *WebauthnCredentialTransportCreate {
+	wctc.mutation.SetID(u)
+	return wctc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (wctc *WebauthnCredentialTransportCreate) SetNillableID(u *uuid.UUID) *WebauthnCredentialTransportCreate {
+	if u != nil {
+		wctc.SetID(*u)
+	}
 	return wctc
 }
 
@@ -58,6 +67,7 @@ func (wctc *WebauthnCredentialTransportCreate) Mutation() *WebauthnCredentialTra
 
 // Save creates the WebauthnCredentialTransport in the database.
 func (wctc *WebauthnCredentialTransportCreate) Save(ctx context.Context) (*WebauthnCredentialTransport, error) {
+	wctc.defaults()
 	return withHooks[*WebauthnCredentialTransport, WebauthnCredentialTransportMutation](ctx, wctc.sqlSave, wctc.mutation, wctc.hooks)
 }
 
@@ -83,6 +93,14 @@ func (wctc *WebauthnCredentialTransportCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (wctc *WebauthnCredentialTransportCreate) defaults() {
+	if _, ok := wctc.mutation.ID(); !ok {
+		v := webauthncredentialtransport.DefaultID()
+		wctc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (wctc *WebauthnCredentialTransportCreate) check() error {
 	if _, ok := wctc.mutation.Name(); !ok {
@@ -103,10 +121,10 @@ func (wctc *WebauthnCredentialTransportCreate) sqlSave(ctx context.Context) (*We
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(string); ok {
-			_node.ID = id
-		} else {
-			return nil, fmt.Errorf("unexpected WebauthnCredentialTransport.ID type: %T", _spec.ID.Value)
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
 		}
 	}
 	wctc.mutation.id = &_node.ID
@@ -117,11 +135,11 @@ func (wctc *WebauthnCredentialTransportCreate) sqlSave(ctx context.Context) (*We
 func (wctc *WebauthnCredentialTransportCreate) createSpec() (*WebauthnCredentialTransport, *sqlgraph.CreateSpec) {
 	var (
 		_node = &WebauthnCredentialTransport{config: wctc.config}
-		_spec = sqlgraph.NewCreateSpec(webauthncredentialtransport.Table, sqlgraph.NewFieldSpec(webauthncredentialtransport.FieldID, field.TypeString))
+		_spec = sqlgraph.NewCreateSpec(webauthncredentialtransport.Table, sqlgraph.NewFieldSpec(webauthncredentialtransport.FieldID, field.TypeUUID))
 	)
 	if id, ok := wctc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := wctc.mutation.Name(); ok {
 		_spec.SetField(webauthncredentialtransport.FieldName, field.TypeString, value)
@@ -164,6 +182,7 @@ func (wctcb *WebauthnCredentialTransportCreateBulk) Save(ctx context.Context) ([
 	for i := range wctcb.builders {
 		func(i int, root context.Context) {
 			builder := wctcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*WebauthnCredentialTransportMutation)
 				if !ok {

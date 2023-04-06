@@ -4773,8 +4773,8 @@ type WebauthnCredentialMutation struct {
 	backup_state                          *bool
 	last_used_at                          *time.Time
 	clearedFields                         map[string]struct{}
-	webauthn_credential_transports        map[string]struct{}
-	removedwebauthn_credential_transports map[string]struct{}
+	webauthn_credential_transports        map[uuid.UUID]struct{}
+	removedwebauthn_credential_transports map[uuid.UUID]struct{}
 	clearedwebauthn_credential_transports bool
 	user                                  *uuid.UUID
 	cleareduser                           bool
@@ -5343,9 +5343,9 @@ func (m *WebauthnCredentialMutation) ResetLastUsedAt() {
 }
 
 // AddWebauthnCredentialTransportIDs adds the "webauthn_credential_transports" edge to the WebauthnCredentialTransport entity by ids.
-func (m *WebauthnCredentialMutation) AddWebauthnCredentialTransportIDs(ids ...string) {
+func (m *WebauthnCredentialMutation) AddWebauthnCredentialTransportIDs(ids ...uuid.UUID) {
 	if m.webauthn_credential_transports == nil {
-		m.webauthn_credential_transports = make(map[string]struct{})
+		m.webauthn_credential_transports = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.webauthn_credential_transports[ids[i]] = struct{}{}
@@ -5363,9 +5363,9 @@ func (m *WebauthnCredentialMutation) WebauthnCredentialTransportsCleared() bool 
 }
 
 // RemoveWebauthnCredentialTransportIDs removes the "webauthn_credential_transports" edge to the WebauthnCredentialTransport entity by IDs.
-func (m *WebauthnCredentialMutation) RemoveWebauthnCredentialTransportIDs(ids ...string) {
+func (m *WebauthnCredentialMutation) RemoveWebauthnCredentialTransportIDs(ids ...uuid.UUID) {
 	if m.removedwebauthn_credential_transports == nil {
-		m.removedwebauthn_credential_transports = make(map[string]struct{})
+		m.removedwebauthn_credential_transports = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.webauthn_credential_transports, ids[i])
@@ -5374,7 +5374,7 @@ func (m *WebauthnCredentialMutation) RemoveWebauthnCredentialTransportIDs(ids ..
 }
 
 // RemovedWebauthnCredentialTransports returns the removed IDs of the "webauthn_credential_transports" edge to the WebauthnCredentialTransport entity.
-func (m *WebauthnCredentialMutation) RemovedWebauthnCredentialTransportsIDs() (ids []string) {
+func (m *WebauthnCredentialMutation) RemovedWebauthnCredentialTransportsIDs() (ids []uuid.UUID) {
 	for id := range m.removedwebauthn_credential_transports {
 		ids = append(ids, id)
 	}
@@ -5382,7 +5382,7 @@ func (m *WebauthnCredentialMutation) RemovedWebauthnCredentialTransportsIDs() (i
 }
 
 // WebauthnCredentialTransportsIDs returns the "webauthn_credential_transports" edge IDs in the mutation.
-func (m *WebauthnCredentialMutation) WebauthnCredentialTransportsIDs() (ids []string) {
+func (m *WebauthnCredentialMutation) WebauthnCredentialTransportsIDs() (ids []uuid.UUID) {
 	for id := range m.webauthn_credential_transports {
 		ids = append(ids, id)
 	}
@@ -5866,7 +5866,7 @@ type WebauthnCredentialTransportMutation struct {
 	config
 	op                         Op
 	typ                        string
-	id                         *string
+	id                         *uuid.UUID
 	name                       *string
 	clearedFields              map[string]struct{}
 	webauthn_credential        *string
@@ -5896,7 +5896,7 @@ func newWebauthnCredentialTransportMutation(c config, op Op, opts ...webauthncre
 }
 
 // withWebauthnCredentialTransportID sets the ID field of the mutation.
-func withWebauthnCredentialTransportID(id string) webauthncredentialtransportOption {
+func withWebauthnCredentialTransportID(id uuid.UUID) webauthncredentialtransportOption {
 	return func(m *WebauthnCredentialTransportMutation) {
 		var (
 			err   error
@@ -5948,13 +5948,13 @@ func (m WebauthnCredentialTransportMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of WebauthnCredentialTransport entities.
-func (m *WebauthnCredentialTransportMutation) SetID(id string) {
+func (m *WebauthnCredentialTransportMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *WebauthnCredentialTransportMutation) ID() (id string, exists bool) {
+func (m *WebauthnCredentialTransportMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -5965,12 +5965,12 @@ func (m *WebauthnCredentialTransportMutation) ID() (id string, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *WebauthnCredentialTransportMutation) IDs(ctx context.Context) ([]string, error) {
+func (m *WebauthnCredentialTransportMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []string{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):

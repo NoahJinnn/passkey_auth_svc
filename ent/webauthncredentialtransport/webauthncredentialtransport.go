@@ -2,6 +2,10 @@
 
 package webauthncredentialtransport
 
+import (
+	"github.com/gofrs/uuid"
+)
+
 const (
 	// Label holds the string label denoting the webauthncredentialtransport type in the database.
 	Label = "webauthn_credential_transport"
@@ -40,3 +44,8 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
+)

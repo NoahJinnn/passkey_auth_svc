@@ -130,7 +130,7 @@ func (svc *webauthnSvc) FinishRegistration(ctx Ctx, request *protocol.ParsedCred
 		backupEligible := request.Response.AttestationObject.AuthData.Flags.HasBackupEligible()
 		backupState := request.Response.AttestationObject.AuthData.Flags.HasBackupState()
 		model := dom.WebauthnCredentialToModel(credential, sessionData.UserID, backupEligible, backupState)
-		err = svc.repo.GetWebauthnCredentialRepo().Create(ctx, *model)
+		err = svc.repo.GetWebauthnCredentialRepo().Create(ctx, *model, credential.Transport)
 		if err != nil {
 			return fmt.Errorf("failed to store webauthn credential: %w", err)
 		}

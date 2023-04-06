@@ -54,10 +54,6 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 	}
 
 	request, err := protocol.ParseCredentialCreationResponse(c.Request())
-	fmt.Printf("request.Response.CollectedClientData.Origin %s", request.Response.CollectedClientData.Origin)
-	fmt.Printf("request.Response.CollectedClientData.Challenge: %s", request.Response.CollectedClientData.Challenge)
-	fmt.Printf("request.ID: %s", request.ID)
-	fmt.Printf("request.rawID: %s", request.RawID)
 	if err != nil {
 		return dto.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

@@ -136,14 +136,14 @@ func (wcc *WebauthnCredentialCreate) SetID(s string) *WebauthnCredentialCreate {
 }
 
 // AddWebauthnCredentialTransportIDs adds the "webauthn_credential_transports" edge to the WebauthnCredentialTransport entity by IDs.
-func (wcc *WebauthnCredentialCreate) AddWebauthnCredentialTransportIDs(ids ...string) *WebauthnCredentialCreate {
+func (wcc *WebauthnCredentialCreate) AddWebauthnCredentialTransportIDs(ids ...uuid.UUID) *WebauthnCredentialCreate {
 	wcc.mutation.AddWebauthnCredentialTransportIDs(ids...)
 	return wcc
 }
 
 // AddWebauthnCredentialTransports adds the "webauthn_credential_transports" edges to the WebauthnCredentialTransport entity.
 func (wcc *WebauthnCredentialCreate) AddWebauthnCredentialTransports(w ...*WebauthnCredentialTransport) *WebauthnCredentialCreate {
-	ids := make([]string, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -310,7 +310,7 @@ func (wcc *WebauthnCredentialCreate) createSpec() (*WebauthnCredential, *sqlgrap
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeUUID,
 					Column: webauthncredentialtransport.FieldID,
 				},
 			},

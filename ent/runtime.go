@@ -15,6 +15,7 @@ import (
 	"github.com/hellohq/hqservice/ent/schema"
 	"github.com/hellohq/hqservice/ent/user"
 	"github.com/hellohq/hqservice/ent/webauthncredential"
+	"github.com/hellohq/hqservice/ent/webauthncredentialtransport"
 	"github.com/hellohq/hqservice/ent/webauthnsessiondata"
 	"github.com/hellohq/hqservice/ent/webauthnsessiondataallowedcredential"
 )
@@ -137,6 +138,12 @@ func init() {
 	webauthncredential.DefaultUpdatedAt = webauthncredentialDescUpdatedAt.Default.(func() time.Time)
 	// webauthncredential.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	webauthncredential.UpdateDefaultUpdatedAt = webauthncredentialDescUpdatedAt.UpdateDefault.(func() time.Time)
+	webauthncredentialtransportFields := schema.WebauthnCredentialTransport{}.Fields()
+	_ = webauthncredentialtransportFields
+	// webauthncredentialtransportDescID is the schema descriptor for id field.
+	webauthncredentialtransportDescID := webauthncredentialtransportFields[0].Descriptor()
+	// webauthncredentialtransport.DefaultID holds the default value on creation for the id field.
+	webauthncredentialtransport.DefaultID = webauthncredentialtransportDescID.Default.(func() uuid.UUID)
 	webauthnsessiondataFields := schema.WebauthnSessionData{}.Fields()
 	_ = webauthnsessiondataFields
 	// webauthnsessiondataDescCreatedAt is the schema descriptor for created_at field.

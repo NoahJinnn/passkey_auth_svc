@@ -98,7 +98,7 @@ func (wctu *WebauthnCredentialTransportUpdate) ExecX(ctx context.Context) {
 }
 
 func (wctu *WebauthnCredentialTransportUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(webauthncredentialtransport.Table, webauthncredentialtransport.Columns, sqlgraph.NewFieldSpec(webauthncredentialtransport.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(webauthncredentialtransport.Table, webauthncredentialtransport.Columns, sqlgraph.NewFieldSpec(webauthncredentialtransport.FieldID, field.TypeUUID))
 	if ps := wctu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -247,7 +247,7 @@ func (wctuo *WebauthnCredentialTransportUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (wctuo *WebauthnCredentialTransportUpdateOne) sqlSave(ctx context.Context) (_node *WebauthnCredentialTransport, err error) {
-	_spec := sqlgraph.NewUpdateSpec(webauthncredentialtransport.Table, webauthncredentialtransport.Columns, sqlgraph.NewFieldSpec(webauthncredentialtransport.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(webauthncredentialtransport.Table, webauthncredentialtransport.Columns, sqlgraph.NewFieldSpec(webauthncredentialtransport.FieldID, field.TypeUUID))
 	id, ok := wctuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "WebauthnCredentialTransport.id" for update`)}

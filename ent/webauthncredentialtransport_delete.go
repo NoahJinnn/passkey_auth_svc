@@ -40,7 +40,7 @@ func (wctd *WebauthnCredentialTransportDelete) ExecX(ctx context.Context) int {
 }
 
 func (wctd *WebauthnCredentialTransportDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(webauthncredentialtransport.Table, sqlgraph.NewFieldSpec(webauthncredentialtransport.FieldID, field.TypeString))
+	_spec := sqlgraph.NewDeleteSpec(webauthncredentialtransport.Table, sqlgraph.NewFieldSpec(webauthncredentialtransport.FieldID, field.TypeUUID))
 	if ps := wctd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

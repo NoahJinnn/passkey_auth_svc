@@ -29,18 +29,6 @@ func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID
 		BackupState:     backupState,
 	}
 
-	for _, name := range credential.Transport {
-		if string(name) != "" {
-			id, _ := uuid.NewV4()
-			t := ent.WebauthnCredentialTransport{
-				ID:                   id.String(),
-				Name:                 string(name),
-				WebauthnCredentialID: credentialID,
-			}
-			c.Edges.WebauthnCredentialTransports = append(c.Edges.WebauthnCredentialTransports, &t)
-		}
-	}
-
 	return c
 }
 

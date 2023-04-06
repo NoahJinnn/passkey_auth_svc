@@ -141,14 +141,14 @@ func (wcu *WebauthnCredentialUpdate) ClearLastUsedAt() *WebauthnCredentialUpdate
 }
 
 // AddWebauthnCredentialTransportIDs adds the "webauthn_credential_transports" edge to the WebauthnCredentialTransport entity by IDs.
-func (wcu *WebauthnCredentialUpdate) AddWebauthnCredentialTransportIDs(ids ...string) *WebauthnCredentialUpdate {
+func (wcu *WebauthnCredentialUpdate) AddWebauthnCredentialTransportIDs(ids ...uuid.UUID) *WebauthnCredentialUpdate {
 	wcu.mutation.AddWebauthnCredentialTransportIDs(ids...)
 	return wcu
 }
 
 // AddWebauthnCredentialTransports adds the "webauthn_credential_transports" edges to the WebauthnCredentialTransport entity.
 func (wcu *WebauthnCredentialUpdate) AddWebauthnCredentialTransports(w ...*WebauthnCredentialTransport) *WebauthnCredentialUpdate {
-	ids := make([]string, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -172,14 +172,14 @@ func (wcu *WebauthnCredentialUpdate) ClearWebauthnCredentialTransports() *Webaut
 }
 
 // RemoveWebauthnCredentialTransportIDs removes the "webauthn_credential_transports" edge to WebauthnCredentialTransport entities by IDs.
-func (wcu *WebauthnCredentialUpdate) RemoveWebauthnCredentialTransportIDs(ids ...string) *WebauthnCredentialUpdate {
+func (wcu *WebauthnCredentialUpdate) RemoveWebauthnCredentialTransportIDs(ids ...uuid.UUID) *WebauthnCredentialUpdate {
 	wcu.mutation.RemoveWebauthnCredentialTransportIDs(ids...)
 	return wcu
 }
 
 // RemoveWebauthnCredentialTransports removes "webauthn_credential_transports" edges to WebauthnCredentialTransport entities.
 func (wcu *WebauthnCredentialUpdate) RemoveWebauthnCredentialTransports(w ...*WebauthnCredentialTransport) *WebauthnCredentialUpdate {
-	ids := make([]string, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -282,7 +282,7 @@ func (wcu *WebauthnCredentialUpdate) sqlSave(ctx context.Context) (n int, err er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeUUID,
 					Column: webauthncredentialtransport.FieldID,
 				},
 			},
@@ -298,7 +298,7 @@ func (wcu *WebauthnCredentialUpdate) sqlSave(ctx context.Context) (n int, err er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeUUID,
 					Column: webauthncredentialtransport.FieldID,
 				},
 			},
@@ -317,7 +317,7 @@ func (wcu *WebauthnCredentialUpdate) sqlSave(ctx context.Context) (n int, err er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeUUID,
 					Column: webauthncredentialtransport.FieldID,
 				},
 			},
@@ -492,14 +492,14 @@ func (wcuo *WebauthnCredentialUpdateOne) ClearLastUsedAt() *WebauthnCredentialUp
 }
 
 // AddWebauthnCredentialTransportIDs adds the "webauthn_credential_transports" edge to the WebauthnCredentialTransport entity by IDs.
-func (wcuo *WebauthnCredentialUpdateOne) AddWebauthnCredentialTransportIDs(ids ...string) *WebauthnCredentialUpdateOne {
+func (wcuo *WebauthnCredentialUpdateOne) AddWebauthnCredentialTransportIDs(ids ...uuid.UUID) *WebauthnCredentialUpdateOne {
 	wcuo.mutation.AddWebauthnCredentialTransportIDs(ids...)
 	return wcuo
 }
 
 // AddWebauthnCredentialTransports adds the "webauthn_credential_transports" edges to the WebauthnCredentialTransport entity.
 func (wcuo *WebauthnCredentialUpdateOne) AddWebauthnCredentialTransports(w ...*WebauthnCredentialTransport) *WebauthnCredentialUpdateOne {
-	ids := make([]string, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -523,14 +523,14 @@ func (wcuo *WebauthnCredentialUpdateOne) ClearWebauthnCredentialTransports() *We
 }
 
 // RemoveWebauthnCredentialTransportIDs removes the "webauthn_credential_transports" edge to WebauthnCredentialTransport entities by IDs.
-func (wcuo *WebauthnCredentialUpdateOne) RemoveWebauthnCredentialTransportIDs(ids ...string) *WebauthnCredentialUpdateOne {
+func (wcuo *WebauthnCredentialUpdateOne) RemoveWebauthnCredentialTransportIDs(ids ...uuid.UUID) *WebauthnCredentialUpdateOne {
 	wcuo.mutation.RemoveWebauthnCredentialTransportIDs(ids...)
 	return wcuo
 }
 
 // RemoveWebauthnCredentialTransports removes "webauthn_credential_transports" edges to WebauthnCredentialTransport entities.
 func (wcuo *WebauthnCredentialUpdateOne) RemoveWebauthnCredentialTransports(w ...*WebauthnCredentialTransport) *WebauthnCredentialUpdateOne {
-	ids := make([]string, len(w))
+	ids := make([]uuid.UUID, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
@@ -663,7 +663,7 @@ func (wcuo *WebauthnCredentialUpdateOne) sqlSave(ctx context.Context) (_node *We
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeUUID,
 					Column: webauthncredentialtransport.FieldID,
 				},
 			},
@@ -679,7 +679,7 @@ func (wcuo *WebauthnCredentialUpdateOne) sqlSave(ctx context.Context) (_node *We
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeUUID,
 					Column: webauthncredentialtransport.FieldID,
 				},
 			},
@@ -698,7 +698,7 @@ func (wcuo *WebauthnCredentialUpdateOne) sqlSave(ctx context.Context) (_node *We
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
+					Type:   field.TypeUUID,
 					Column: webauthncredentialtransport.FieldID,
 				},
 			},

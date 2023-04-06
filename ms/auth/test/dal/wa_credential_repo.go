@@ -1,6 +1,7 @@
 package test
 
 import (
+	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ms/auth/dal"
@@ -29,7 +30,7 @@ func (r *webauthnRepo) GetFromUser(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCr
 	return found, nil
 }
 
-func (r *webauthnRepo) Create(ctx Ctx, credential ent.WebauthnCredential) error {
+func (r *webauthnRepo) Create(ctx Ctx, credential ent.WebauthnCredential, transports []protocol.AuthenticatorTransport) error {
 	r.init = append(r.init, &credential)
 	return nil
 }

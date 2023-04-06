@@ -190,7 +190,7 @@ var (
 	}
 	// WebauthnCredentialTransportsColumns holds the columns for the "webauthn_credential_transports" table.
 	WebauthnCredentialTransportsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString},
+		{Name: "id", Type: field.TypeUUID},
 		{Name: "name", Type: field.TypeString},
 		{Name: "webauthn_credential_id", Type: field.TypeString, Nullable: true},
 	}

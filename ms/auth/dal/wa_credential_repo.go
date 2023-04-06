@@ -1,8 +1,7 @@
 package dal
 
 import (
-	"fmt"
-
+	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ent/user"
@@ -12,7 +11,7 @@ import (
 type IWebauthnCredentialRepo interface {
 	GetFromUser(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error)
 	GetById(ctx Ctx, id string) (*ent.WebauthnCredential, error)
-	Create(ctx Ctx, credential ent.WebauthnCredential) error
+	Create(ctx Ctx, credential ent.WebauthnCredential, transports []protocol.AuthenticatorTransport) error
 	Update(ctx Ctx, credential ent.WebauthnCredential) error
 	Delete(ctx Ctx, credential ent.WebauthnCredential) error
 }
@@ -43,6 +42,7 @@ func (r *webauthnRepo) GetFromUser(ctx Ctx, userId uuid.UUID) (credentials []*en
 	credentials, err = r.db.WebauthnCredential.
 		Query().
 		Where(webauthncredential.HasUserWith(user.ID(userId))).
+		WithWebauthnCredentialTransports().
 		Order(ent.Asc(webauthncredential.FieldCreatedAt)).
 		All(ctx)
 
@@ -53,8 +53,18 @@ func (r *webauthnRepo) GetFromUser(ctx Ctx, userId uuid.UUID) (credentials []*en
 	return credentials, nil
 }
 
-func (r *webauthnRepo) Create(ctx Ctx, credential ent.WebauthnCredential) error {
-	_, err := r.db.WebauthnCredential.Create().
+func (r *webauthnRepo) Create(ctx Ctx, credential ent.WebauthnCredential, transports []protocol.AuthenticatorTransport) error {
+	bulk := make([]*ent.WebauthnCredentialTransportCreate, len(transports))
+	for i, transport := range transports {
+		bulk[i] = r.db.WebauthnCredentialTransport.Create().SetName(string(transport))
+	}
+
+	createdTransports, err := r.db.WebauthnCredentialTransport.CreateBulk(bulk...).Save(ctx)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.WebauthnCredential.Create().
 		SetID(credential.ID).
 		SetUserID(credential.UserID).
 		SetPublicKey(credential.PublicKey).
@@ -65,10 +75,11 @@ func (r *webauthnRepo) Create(ctx Ctx, credential ent.WebauthnCredential) error 
 		SetBackupEligible(credential.BackupEligible).
 		SetBackupState(credential.BackupState).
 		SetLastUsedAt(credential.LastUsedAt).
-		AddWebauthnCredentialTransports(credential.Edges.WebauthnCredentialTransports...).
+		AddWebauthnCredentialTransports(createdTransports...).
 		Save(ctx)
+
 	if err != nil {
-		return fmt.Errorf("failed to store credential: %w", err)
+		return err
 	}
 	return nil
 }
@@ -88,7 +99,7 @@ func (r *webauthnRepo) Update(ctx Ctx, credential ent.WebauthnCredential) error 
 		AddWebauthnCredentialTransports(credential.Edges.WebauthnCredentialTransports...).
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to update credential: %w", err)
+		return err
 	}
 	return nil
 }
@@ -96,7 +107,7 @@ func (r *webauthnRepo) Update(ctx Ctx, credential ent.WebauthnCredential) error 
 func (r *webauthnRepo) Delete(ctx Ctx, credential ent.WebauthnCredential) error {
 	err := r.db.WebauthnCredential.DeleteOneID(credential.ID).Exec(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to delete credential: %w", err)
+		return err
 	}
 	return nil
 }

@@ -1543,7 +1543,7 @@ func (c *WebauthnCredentialTransportClient) UpdateOne(wct *WebauthnCredentialTra
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *WebauthnCredentialTransportClient) UpdateOneID(id string) *WebauthnCredentialTransportUpdateOne {
+func (c *WebauthnCredentialTransportClient) UpdateOneID(id uuid.UUID) *WebauthnCredentialTransportUpdateOne {
 	mutation := newWebauthnCredentialTransportMutation(c.config, OpUpdateOne, withWebauthnCredentialTransportID(id))
 	return &WebauthnCredentialTransportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1560,7 +1560,7 @@ func (c *WebauthnCredentialTransportClient) DeleteOne(wct *WebauthnCredentialTra
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *WebauthnCredentialTransportClient) DeleteOneID(id string) *WebauthnCredentialTransportDeleteOne {
+func (c *WebauthnCredentialTransportClient) DeleteOneID(id uuid.UUID) *WebauthnCredentialTransportDeleteOne {
 	builder := c.Delete().Where(webauthncredentialtransport.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1577,12 +1577,12 @@ func (c *WebauthnCredentialTransportClient) Query() *WebauthnCredentialTransport
 }
 
 // Get returns a WebauthnCredentialTransport entity by its id.
-func (c *WebauthnCredentialTransportClient) Get(ctx context.Context, id string) (*WebauthnCredentialTransport, error) {
+func (c *WebauthnCredentialTransportClient) Get(ctx context.Context, id uuid.UUID) (*WebauthnCredentialTransport, error) {
 	return c.Query().Where(webauthncredentialtransport.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *WebauthnCredentialTransportClient) GetX(ctx context.Context, id string) *WebauthnCredentialTransport {
+func (c *WebauthnCredentialTransportClient) GetX(ctx context.Context, id uuid.UUID) *WebauthnCredentialTransport {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)

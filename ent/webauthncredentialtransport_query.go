@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/predicate"
 	"github.com/hellohq/hqservice/ent/webauthncredential"
 	"github.com/hellohq/hqservice/ent/webauthncredentialtransport"
@@ -105,8 +106,8 @@ func (wctq *WebauthnCredentialTransportQuery) FirstX(ctx context.Context) *Webau
 
 // FirstID returns the first WebauthnCredentialTransport ID from the query.
 // Returns a *NotFoundError when no WebauthnCredentialTransport ID was found.
-func (wctq *WebauthnCredentialTransportQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (wctq *WebauthnCredentialTransportQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = wctq.Limit(1).IDs(setContextOp(ctx, wctq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -118,7 +119,7 @@ func (wctq *WebauthnCredentialTransportQuery) FirstID(ctx context.Context) (id s
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (wctq *WebauthnCredentialTransportQuery) FirstIDX(ctx context.Context) string {
+func (wctq *WebauthnCredentialTransportQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := wctq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -156,8 +157,8 @@ func (wctq *WebauthnCredentialTransportQuery) OnlyX(ctx context.Context) *Webaut
 // OnlyID is like Only, but returns the only WebauthnCredentialTransport ID in the query.
 // Returns a *NotSingularError when more than one WebauthnCredentialTransport ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (wctq *WebauthnCredentialTransportQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (wctq *WebauthnCredentialTransportQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = wctq.Limit(2).IDs(setContextOp(ctx, wctq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -173,7 +174,7 @@ func (wctq *WebauthnCredentialTransportQuery) OnlyID(ctx context.Context) (id st
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (wctq *WebauthnCredentialTransportQuery) OnlyIDX(ctx context.Context) string {
+func (wctq *WebauthnCredentialTransportQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := wctq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -201,7 +202,7 @@ func (wctq *WebauthnCredentialTransportQuery) AllX(ctx context.Context) []*Webau
 }
 
 // IDs executes the query and returns a list of WebauthnCredentialTransport IDs.
-func (wctq *WebauthnCredentialTransportQuery) IDs(ctx context.Context) (ids []string, err error) {
+func (wctq *WebauthnCredentialTransportQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if wctq.ctx.Unique == nil && wctq.path != nil {
 		wctq.Unique(true)
 	}
@@ -213,7 +214,7 @@ func (wctq *WebauthnCredentialTransportQuery) IDs(ctx context.Context) (ids []st
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (wctq *WebauthnCredentialTransportQuery) IDsX(ctx context.Context) []string {
+func (wctq *WebauthnCredentialTransportQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := wctq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -440,7 +441,7 @@ func (wctq *WebauthnCredentialTransportQuery) sqlCount(ctx context.Context) (int
 }
 
 func (wctq *WebauthnCredentialTransportQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(webauthncredentialtransport.Table, webauthncredentialtransport.Columns, sqlgraph.NewFieldSpec(webauthncredentialtransport.FieldID, field.TypeString))
+	_spec := sqlgraph.NewQuerySpec(webauthncredentialtransport.Table, webauthncredentialtransport.Columns, sqlgraph.NewFieldSpec(webauthncredentialtransport.FieldID, field.TypeUUID))
 	_spec.From = wctq.sql
 	if unique := wctq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
