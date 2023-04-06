@@ -1,119 +1,6 @@
-# Example Go monolith with embedded microservices and The Clean Architecture
-
-[![PkgGoDev](https://pkg.go.dev/badge/github.com/powerman/go-monolith-example)](https://pkg.go.dev/github.com/powerman/go-monolith-example)
-[![Go Report Card](https://goreportcard.com/badge/github.com/powerman/go-monolith-example)](https://goreportcard.com/report/github.com/powerman/go-monolith-example)
-[![CI/CD](https://github.com/powerman/go-monolith-example/workflows/CI/CD/badge.svg?event=push)](https://github.com/powerman/go-monolith-example/actions?query=workflow%3ACI%2FCD)
-[![Coverage Status](https://coveralls.io/repos/github/powerman/go-monolith-example/badge.svg?branch=master)](https://coveralls.io/github/powerman/go-monolith-example?branch=master)
-[![Project Layout](https://img.shields.io/badge/Standard%20Go-Project%20Layout-informational)](https://github.com/golang-standards/project-layout)
-[![Release](https://img.shields.io/github/v/release/powerman/go-monolith-example)](https://github.com/powerman/go-monolith-example/releases/latest)
-
-This project shows an example of how to implement monolith with embedded
-microservices (a.k.a. modular monolith). This way you'll get many upsides
-of monorepo without it complexity and at same time most of upsides of
-microservice architecture without some of it complexity.
-
-The embedded microservices use Uncle Bob's "Clean Architecture", check
-[Example Go microservice](https://github.com/powerman/go-service-example)
-for more details.
-
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**
-
-- [Overview](#overview)
-  - [Structure of Go packages](#structure-of-go-packages)
-  - [Features](#features)
-- [Development](#development)
-  - [Requirements](#requirements)
-  - [Setup](#setup)
-    - [Environment vars](#environment-vars)
-    - [Secrets](#secrets)
-    - [docker-compose](#docker-compose)
-    - [HTTPS](#https)
-  - [Usage](#usage)
-    - [Cheatsheet](#cheatsheet)
-- [Run](#run)
-  - [Docker](#docker)
-    - [Run local PostgresSQL DB](#run-local-postgressql-db)
-    - [Remove container storage](#remove-container-storage)
-  - [Source](#source)
-    - [Run directly, without building](#run-directly-without-building)
-    - [Build first, then run](#build-first-then-run)
-- [TODO](#todo)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+# HQ Service modulith
 
 ## Overview
-
-### Structure of Go packages
-
-- `api/*` - definitions of own and 3rd-party (in `api/ext-*`)
-  APIs/protocols and related auto-generated code
-- `cmd/*` - main application(s)
-- `internal/*` - packages shared by embedded microservices, e.g.:
-  - `internal/config` - configuration (default values, env) shared by
-    embedded microservices' subcommands and tests
-  - `internal/dom` - domain types shared by microservices (Entities)
-- `ms/*` - embedded microservices, with structure:
-  - `internal/config` - configuration(s) (default values, env, flags) for
-    microservice's subcommands and tests
-  - `internal/app` - define interfaces ("ports") for The Clean
-    Architecture (or "Ports and Adapters" architecture) and implements
-    business-logic
-  - `internal/srv/*` - adapters for served APIs/UI
-  - `internal/sub` - adapter for incoming events
-  - `internal/dal` - adapter for data storage
-  - `internal/migrations` - DB migrations (in both SQL and Go)
-  - `internal/svc/*` - adapters for accessing external services
-- `pkg/*` - helper packages, not related to architecture and
-  business-logic (may be later moved to own modules and/or replaced by
-  external dependencies), e.g.:
-  - `pkg/def/` - project-wide defaults
-- `*/old/*` - contains legacy code which shouldn't be modified - this code
-  is supposed to be extracted from `old/` directories (and refactored to
-  follow Clean Architecture) when it'll need any non-trivial modification
-  which require testing
-
-### Features
-
-- [X] Project structure (mostly) follows
-  [Standard Go Project Layout](https://github.com/golang-standards/project-layout).
-- [X] Strict but convenient golangci-lint configuration.
-- [X] Embedded microservices:
-  - [X] Well isolated from each other.
-  - [X] Can be easily extracted from monolith into separate projects.
-  - [X] Share common configuration (both env vars and flags).
-  - [X] Each has own CLI subcommands, DB migrations, ports, metrics, …
-- [X] Easily testable code (thanks to The Clean Architecture).
-- [X] Avoids (and resists to) using global objects (to ensure embedded
-  microservices won't conflict on these global objects).
-- [X] CLI subcommands support using [cobra](https://github.com/spf13/cobra).
-- [X] Graceful shutdown support.
-- [X] Configuration defaults can be overwritten by env vars and flags.
-- [X] Example JSON-RPC 2.0 over HTTP API, with CORS support.
-- [X] Example gRPC API:
-  - [X] External and internal APIs on different host/port.
-  - [X] gRPC services with and without token-based authentication.
-  - [X] API design (mostly) follows
-    [Google API Design Guide](https://cloud.google.com/apis/design) and
-    [Google API Improvement Proposals](https://google.aip.dev/).
-- [X] Example OpenAPI 2.0 using grpc-gateway, with CORS suport:
-  - [X] Access to gRPC using HTTP/1 (except bi-directional streaming).
-  - [X] Generates `swagger.json` from gRPC `.proto` files.
-  - [X] Embedded [Swagger UI](https://swagger.io/tools/swagger-ui/).
-- [X] Example DAL (data access layer):
-  - [X] MySQL 5.7 (strictest SQL mode).
-  - [X] PostgreSQL 11 (secure schema usage pattern).
-- [X] Example tests, both unit and integration.
-- [X] Production logging using [structlog](https://github.com/powerman/structlog).
-- [X] Production metrics using Prometheus.
-- [X] Docker and docker-compose support.
-- [X] Smart test coverage report, with optional support for coveralls.io.
-- [X] Linters for Dockerfile and shell scripts.
-- [X] CI/CD setup for GitHub Actions and CircleCI.
-
-## Development
-
 ### Requirements
 
 - Go 1.19
@@ -121,25 +8,28 @@ for more details.
 - [Docker Compose](https://docs.docker.com/compose/install/) 1.25+
 
 ### Setup
+#### Environment management
 
-#### Environment vars
+Setup Doppler:
 
-1. After cloning the repo copy `env.sh.dist` to `env.sh`.
-2. Review `env.sh` and update for your system as needed.
-
-#### Secrets
-
-Setup Doppler with:
 ```bash
-task scripts:install:doppler 
+task scripts:install:doppler
 ```
 
-#### docker-compose
+#### Naming convention
 
-It's recommended to add shell alias `alias dc="if test -f env.sh; then
-source env.sh; fi && docker-compose"` and then run `dc` instead of
-`docker-compose` - this way you won't have to run `source env.sh` after
-changing it.
+Variables required to run and test project.
+Should be kept in sorted order.
+Avoid referencing one variable from another if their order may change,
+use lower-case variables defined above for such a shared values.
+Naming convention:
+
+```
+<PROJECT>_<VAR>         - global vars, not specific for some embedded microservice (e.g. domain)
+<PROJECT>_X_<SVC>_<VAR> - vars related to external services (e.g. databases)
+<PROJECT>_<MS>_<VAR>    - vars related to embedded microservice (e.g. addr)
+<PROJECT>__<MS>_<VAR>   - private vars for embedded microservice
+```
 
 #### HTTPS
 
@@ -152,7 +42,6 @@ changing it.
    was created this way:
 
 ```
-$ . ./env.sh   # Sets $EASYRSA_PKI=configs/dev-pki.
 $ /path/to/easyrsa init-pki
 $ echo Dev CA $(go list -m) | /path/to/easyrsa build-ca nopass
 $ /path/to/easyrsa --days=3650 "--subject-alt-name=DNS:postgres" build-server-full postgres nopass
@@ -163,29 +52,23 @@ $ /path/to/easyrsa --days=3650 "--subject-alt-name=IP:127.0.0.1" build-server-fu
 ### Usage
 
 To develop this project you'll need only standard tools: `go generate`,
-`go test`, `go build`, `docker build`. Provided scripts are for
-convenience only.
+`go test`, `go build`, `docker build` with `doppler run`
 
-- Always load `env.sh` *in every terminal* used to run any project-related
-  commands (including `go test`): `source env.sh`.
-    - When `env.sh.dist` change (e.g. by `git pull`) next run of `source
-    env.sh` will fail and remind you to manually update `env.sh` to match
-    current `env.sh.dist`.
 - `go generate ./...` - do not forget to run after making changes related
   to auto-generated code
-- `go test ./...` - test project (excluding integration tests), fast
+- `doppler run -- go test ./...` - test project (excluding integration tests), fast
 - `./scripts/test` - thoroughly test project, slow
 - `./scripts/test-ci-circle` - run tests locally like CircleCI will do
 - `./scripts/cover` - analyse and show coverage
 - `./scripts/build` - build docker image and binaries in `bin/`
   - Then use mentioned above `dc` (or `docker-compose`) to run and control
     the project.
-    - Access project at host/port(s) defined in `env.sh`.
+  - Access project at host/port(s) defined in `doppler`.
 
 #### Cheatsheet
 
 ```sh
-dc up -d --remove-orphans               # (re)start all project's services
+doppler run -- dc up -d --remove-orphans               # (re)start all project's services
 dc logs -f -t                           # view logs of all services
 dc logs -f SERVICENAME                  # view logs of some service
 dc ps                                   # status of all services
@@ -204,15 +87,17 @@ available networks, then you'll have to restart docker service or reboot.
 
 ### Docker
 
-#### Run local PostgresSQL DB 
+#### Run local PostgresSQL DB
+
 ```bash
 doppler run -- docker-compose up -d --remove-orphans
 ```
 
 #### Remove container storage
+
 ```bash
 docker-compose stop && docker-compose rm -f
-docker volume rm hqservice_postgres 
+docker volume rm hqservice_postgres
 ```
 
 ### Source
@@ -220,26 +105,31 @@ docker volume rm hqservice_postgres
 #### Run directly, without building
 
 ```bash
-# cmd/mono/main.go is the entry point with the `main` function
+# cmd/hq/main.go is the entry point with the `main` function
 task scripts:run
 ```
 
+#### Run with command args
+```bash
+# cmd/hq/main.go is the entry point with the `main` function
+task scripts:run -- --port 17002 --wa.id example  # Specific auth service running on port `17002` with webauthn ID equals `example`  
+```
 #### Build first, then run
 
-In this example below, we demonstrate using the `Taskfile` command to build our binary, then, run our built `mono` binary.
+In this example below, we demonstrate using the `Taskfile` command to build our binary, then, run our built `hq` binary.
 
 ```bash
 # build binary only
-# our binary gets installed into the ./bin/ folder, as `mono`.
+# our binary gets installed into the ./bin/ folder, as `hq`.
 $ task scripts:build:binary
 
-# so now, we can just run the built `mono` binary.
-$ ./bin/mono -h
+# so now, we can just run the built `hq` binary.
+$ ./bin/hq -h
 Example monolith with embedded microservices
 
 Usage:
-  mono [flags]
-  mono [command]
+  hq [flags]
+  hq [command]
 
 Available Commands:
   help        Help about any command
@@ -247,17 +137,17 @@ Available Commands:
   serve       Starts embedded microservices
 
 Flags:
-  -h, --help                    help for mono
+  -h, --help                    help for hq
       --log.level OneOfString   log level [debug|info|warn|err] (default debug)
-  -v, --version                 version for mono
+  -v, --version                 version for hq
 
-Use "mono [command] --help" for more information about a command.
+Use "hq [command] --help" for more information about a command.
 
-$ ./bin/mono serve -h
+$ ./bin/hq serve -h
 Starts embedded microservices
 
 Usage:
-  mono serve [flags]
+  hq serve [flags]
 
 Flags:
   -h, --help                        help for serve
@@ -269,49 +159,40 @@ Flags:
 Global Flags:
       --log.level OneOfString   log level [debug|info|warn|err] (default debug)
 
-$ ./bin/mono -v
-mono version v0.2.0 7562a1e 2020-10-22_03:19:37 go1.15.3
+$ ./bin/hq -v
+hq version v0.2.0 7562a1e 2020-10-22_03:19:37 go1.15.3
 
-$ ./bin/mono serve
-         mono: inf      main: `started` version f/design-task-command-to-run-hqservice 51adc59-dirty 2023-02-15_09:36:06
-           hq: inf   openapi: `OpenAPI protocol` version 0.2.0
-           hq: inf     serve: `serve` 127.0.0.1:17001 [Prometheus metrics]
-           hq: inf     serve: `serve` 127.0.0.1:17000 [OpenAPI]
-           hq: inf   swagger: `Serving plaid connector at http://127.0.0.1:17000`
+$ ./bin/hq serve
+         hq: inf      main: `started` version f/design-task-command-to-run-hqservice 51adc59-dirty 2023-02-15_09:36:06
 ```
 
 ## TODO
 
 Functionality Group 1: add/connect assets and debts
+
 - [x] Plaid aggregator with dev env
 - [ ] Plaid aggregator with stg, prd env
-- [x] Create database `User` model, and other models using PostgreSQL
-      1. Bank Account
-      2. Crypto Account
-      3. Cars
-      4. Collectibles
-      5. Loans
-      6. Private Shares
-- [ ] Create CRUD REST API for all types of asset, debt and user model
-- [ ] Integration test APIs
+- [ ] Implement [webauthn](https://github.com/go-webauthn/webauthn) API
+- [ ] Implement [Lago](https://www.getlago.com/resources/compare/lago-vs-stripe) for billing service
+- [ ] Implement authorization with `casbin`
+- [ ] Create `User` table
+- [ ] Create CRUD REST API for `User` model
+- [ ] Create asset tables based on Kubera features
+- [ ] Create CRUD REST API for asset models
+- [ ] Integration test for `auth` svc APIs
 
 Functionality Group 2: Recap feature (‘reflections’)
-- [ ] Create DB models:
-      1. Asset
-      2. Cashflow
-      3. Indices
-      4. IRR
-      5. Reflections
+
+- [ ] Create DB models: 1. Asset 2. Cashflow 3. Indices 4. IRR 5. Reflections
 - [ ] Create CRUD REST API for all types of model
 - [ ] Integration test APIs
 
 Functionality Group 3: Insurance
+
 - [ ] Create DB model for Insurance to store Insurance providers information, link to static assets
 - [ ] Create CRUD REST API for Insurance model
 - [ ] Integration test APIs
-Functionality Group 4: Safety Deposit Box
+      Functionality Group 4: Safety Deposit Box
 - Need to discuss
-Functionality Group 5: Beneficiary 
+  Functionality Group 5: Beneficiary
 - Need to discuss
-
-

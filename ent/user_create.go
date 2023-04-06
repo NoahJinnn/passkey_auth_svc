@@ -10,13 +10,13 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/hellohq/hqservice/ent/bankaccount"
-	"github.com/hellohq/hqservice/ent/car"
-	"github.com/hellohq/hqservice/ent/collectible"
-	"github.com/hellohq/hqservice/ent/cryptoaccount"
-	"github.com/hellohq/hqservice/ent/loan"
-	"github.com/hellohq/hqservice/ent/privateshare"
+	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ent/email"
+	"github.com/hellohq/hqservice/ent/passcode"
+	"github.com/hellohq/hqservice/ent/passwordcredential"
+	"github.com/hellohq/hqservice/ent/primaryemail"
 	"github.com/hellohq/hqservice/ent/user"
+	"github.com/hellohq/hqservice/ent/webauthncredential"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -26,61 +26,17 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
-// SetFirstName sets the "first_name" field.
-func (uc *UserCreate) SetFirstName(s string) *UserCreate {
-	uc.mutation.SetFirstName(s)
-	return uc
-}
-
-// SetLastName sets the "last_name" field.
-func (uc *UserCreate) SetLastName(s string) *UserCreate {
-	uc.mutation.SetLastName(s)
-	return uc
-}
-
-// SetEmail sets the "email" field.
-func (uc *UserCreate) SetEmail(s string) *UserCreate {
-	uc.mutation.SetEmail(s)
-	return uc
-}
-
-// SetPassword sets the "password" field.
-func (uc *UserCreate) SetPassword(s string) *UserCreate {
-	uc.mutation.SetPassword(s)
-	return uc
-}
-
-// SetPhoneNumber sets the "phone_number" field.
-func (uc *UserCreate) SetPhoneNumber(s string) *UserCreate {
-	uc.mutation.SetPhoneNumber(s)
-	return uc
-}
-
-// SetNillablePhoneNumber sets the "phone_number" field if the given value is not nil.
-func (uc *UserCreate) SetNillablePhoneNumber(s *string) *UserCreate {
-	if s != nil {
-		uc.SetPhoneNumber(*s)
-	}
-	return uc
-}
-
-// SetAddress sets the "address" field.
-func (uc *UserCreate) SetAddress(s string) *UserCreate {
-	uc.mutation.SetAddress(s)
-	return uc
-}
-
-// SetNillableAddress sets the "address" field if the given value is not nil.
-func (uc *UserCreate) SetNillableAddress(s *string) *UserCreate {
-	if s != nil {
-		uc.SetAddress(*s)
-	}
-	return uc
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (uc *UserCreate) SetCreatedAt(t time.Time) *UserCreate {
 	uc.mutation.SetCreatedAt(t)
+	return uc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (uc *UserCreate) SetNillableCreatedAt(t *time.Time) *UserCreate {
+	if t != nil {
+		uc.SetCreatedAt(*t)
+	}
 	return uc
 }
 
@@ -90,100 +46,109 @@ func (uc *UserCreate) SetUpdatedAt(t time.Time) *UserCreate {
 	return uc
 }
 
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (uc *UserCreate) SetNillableUpdatedAt(t *time.Time) *UserCreate {
+	if t != nil {
+		uc.SetUpdatedAt(*t)
+	}
+	return uc
+}
+
 // SetID sets the "id" field.
-func (uc *UserCreate) SetID(u uint) *UserCreate {
+func (uc *UserCreate) SetID(u uuid.UUID) *UserCreate {
 	uc.mutation.SetID(u)
 	return uc
 }
 
-// AddBankAccountIDs adds the "bank_accounts" edge to the BankAccount entity by IDs.
-func (uc *UserCreate) AddBankAccountIDs(ids ...uint) *UserCreate {
-	uc.mutation.AddBankAccountIDs(ids...)
-	return uc
-}
-
-// AddBankAccounts adds the "bank_accounts" edges to the BankAccount entity.
-func (uc *UserCreate) AddBankAccounts(b ...*BankAccount) *UserCreate {
-	ids := make([]uint, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+// SetNillableID sets the "id" field if the given value is not nil.
+func (uc *UserCreate) SetNillableID(u *uuid.UUID) *UserCreate {
+	if u != nil {
+		uc.SetID(*u)
 	}
-	return uc.AddBankAccountIDs(ids...)
-}
-
-// AddCarIDs adds the "cars" edge to the Car entity by IDs.
-func (uc *UserCreate) AddCarIDs(ids ...uint) *UserCreate {
-	uc.mutation.AddCarIDs(ids...)
 	return uc
 }
 
-// AddCars adds the "cars" edges to the Car entity.
-func (uc *UserCreate) AddCars(c ...*Car) *UserCreate {
-	ids := make([]uint, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+// AddEmailIDs adds the "emails" edge to the Email entity by IDs.
+func (uc *UserCreate) AddEmailIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddEmailIDs(ids...)
+	return uc
+}
+
+// AddEmails adds the "emails" edges to the Email entity.
+func (uc *UserCreate) AddEmails(e ...*Email) *UserCreate {
+	ids := make([]uuid.UUID, len(e))
+	for i := range e {
+		ids[i] = e[i].ID
 	}
-	return uc.AddCarIDs(ids...)
+	return uc.AddEmailIDs(ids...)
 }
 
-// AddCollectibleIDs adds the "collectibles" edge to the Collectible entity by IDs.
-func (uc *UserCreate) AddCollectibleIDs(ids ...uint) *UserCreate {
-	uc.mutation.AddCollectibleIDs(ids...)
+// AddPasscodeIDs adds the "passcodes" edge to the Passcode entity by IDs.
+func (uc *UserCreate) AddPasscodeIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddPasscodeIDs(ids...)
 	return uc
 }
 
-// AddCollectibles adds the "collectibles" edges to the Collectible entity.
-func (uc *UserCreate) AddCollectibles(c ...*Collectible) *UserCreate {
-	ids := make([]uint, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return uc.AddCollectibleIDs(ids...)
-}
-
-// AddCryptoAccountIDs adds the "crypto_accounts" edge to the CryptoAccount entity by IDs.
-func (uc *UserCreate) AddCryptoAccountIDs(ids ...uint) *UserCreate {
-	uc.mutation.AddCryptoAccountIDs(ids...)
-	return uc
-}
-
-// AddCryptoAccounts adds the "crypto_accounts" edges to the CryptoAccount entity.
-func (uc *UserCreate) AddCryptoAccounts(c ...*CryptoAccount) *UserCreate {
-	ids := make([]uint, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return uc.AddCryptoAccountIDs(ids...)
-}
-
-// AddLoanIDs adds the "loans" edge to the Loan entity by IDs.
-func (uc *UserCreate) AddLoanIDs(ids ...uint) *UserCreate {
-	uc.mutation.AddLoanIDs(ids...)
-	return uc
-}
-
-// AddLoans adds the "loans" edges to the Loan entity.
-func (uc *UserCreate) AddLoans(l ...*Loan) *UserCreate {
-	ids := make([]uint, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
-	}
-	return uc.AddLoanIDs(ids...)
-}
-
-// AddPrivateShareIDs adds the "private_shares" edge to the PrivateShare entity by IDs.
-func (uc *UserCreate) AddPrivateShareIDs(ids ...uint) *UserCreate {
-	uc.mutation.AddPrivateShareIDs(ids...)
-	return uc
-}
-
-// AddPrivateShares adds the "private_shares" edges to the PrivateShare entity.
-func (uc *UserCreate) AddPrivateShares(p ...*PrivateShare) *UserCreate {
-	ids := make([]uint, len(p))
+// AddPasscodes adds the "passcodes" edges to the Passcode entity.
+func (uc *UserCreate) AddPasscodes(p ...*Passcode) *UserCreate {
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return uc.AddPrivateShareIDs(ids...)
+	return uc.AddPasscodeIDs(ids...)
+}
+
+// SetPasswordCredentialID sets the "password_credential" edge to the PasswordCredential entity by ID.
+func (uc *UserCreate) SetPasswordCredentialID(id uuid.UUID) *UserCreate {
+	uc.mutation.SetPasswordCredentialID(id)
+	return uc
+}
+
+// SetNillablePasswordCredentialID sets the "password_credential" edge to the PasswordCredential entity by ID if the given value is not nil.
+func (uc *UserCreate) SetNillablePasswordCredentialID(id *uuid.UUID) *UserCreate {
+	if id != nil {
+		uc = uc.SetPasswordCredentialID(*id)
+	}
+	return uc
+}
+
+// SetPasswordCredential sets the "password_credential" edge to the PasswordCredential entity.
+func (uc *UserCreate) SetPasswordCredential(p *PasswordCredential) *UserCreate {
+	return uc.SetPasswordCredentialID(p.ID)
+}
+
+// SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID.
+func (uc *UserCreate) SetPrimaryEmailID(id uuid.UUID) *UserCreate {
+	uc.mutation.SetPrimaryEmailID(id)
+	return uc
+}
+
+// SetNillablePrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID if the given value is not nil.
+func (uc *UserCreate) SetNillablePrimaryEmailID(id *uuid.UUID) *UserCreate {
+	if id != nil {
+		uc = uc.SetPrimaryEmailID(*id)
+	}
+	return uc
+}
+
+// SetPrimaryEmail sets the "primary_email" edge to the PrimaryEmail entity.
+func (uc *UserCreate) SetPrimaryEmail(p *PrimaryEmail) *UserCreate {
+	return uc.SetPrimaryEmailID(p.ID)
+}
+
+// AddWebauthnCredentialIDs adds the "webauthn_credentials" edge to the WebauthnCredential entity by IDs.
+func (uc *UserCreate) AddWebauthnCredentialIDs(ids ...string) *UserCreate {
+	uc.mutation.AddWebauthnCredentialIDs(ids...)
+	return uc
+}
+
+// AddWebauthnCredentials adds the "webauthn_credentials" edges to the WebauthnCredential entity.
+func (uc *UserCreate) AddWebauthnCredentials(w ...*WebauthnCredential) *UserCreate {
+	ids := make([]string, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uc.AddWebauthnCredentialIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -193,6 +158,7 @@ func (uc *UserCreate) Mutation() *UserMutation {
 
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
+	uc.defaults()
 	return withHooks[*User, UserMutation](ctx, uc.sqlSave, uc.mutation, uc.hooks)
 }
 
@@ -218,20 +184,24 @@ func (uc *UserCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (uc *UserCreate) defaults() {
+	if _, ok := uc.mutation.CreatedAt(); !ok {
+		v := user.DefaultCreatedAt()
+		uc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := uc.mutation.UpdatedAt(); !ok {
+		v := user.DefaultUpdatedAt()
+		uc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := uc.mutation.ID(); !ok {
+		v := user.DefaultID()
+		uc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
-	if _, ok := uc.mutation.FirstName(); !ok {
-		return &ValidationError{Name: "first_name", err: errors.New(`ent: missing required field "User.first_name"`)}
-	}
-	if _, ok := uc.mutation.LastName(); !ok {
-		return &ValidationError{Name: "last_name", err: errors.New(`ent: missing required field "User.last_name"`)}
-	}
-	if _, ok := uc.mutation.Email(); !ok {
-		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "User.email"`)}
-	}
-	if _, ok := uc.mutation.Password(); !ok {
-		return &ValidationError{Name: "password", err: errors.New(`ent: missing required field "User.password"`)}
-	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "User.created_at"`)}
 	}
@@ -252,9 +222,12 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != _node.ID {
-		id := _spec.ID.Value.(int64)
-		_node.ID = uint(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	uc.mutation.id = &_node.ID
 	uc.mutation.done = true
@@ -264,35 +237,11 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	var (
 		_node = &User{config: uc.config}
-		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUint))
+		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID))
 	)
 	if id, ok := uc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
-	}
-	if value, ok := uc.mutation.FirstName(); ok {
-		_spec.SetField(user.FieldFirstName, field.TypeString, value)
-		_node.FirstName = value
-	}
-	if value, ok := uc.mutation.LastName(); ok {
-		_spec.SetField(user.FieldLastName, field.TypeString, value)
-		_node.LastName = value
-	}
-	if value, ok := uc.mutation.Email(); ok {
-		_spec.SetField(user.FieldEmail, field.TypeString, value)
-		_node.Email = value
-	}
-	if value, ok := uc.mutation.Password(); ok {
-		_spec.SetField(user.FieldPassword, field.TypeString, value)
-		_node.Password = value
-	}
-	if value, ok := uc.mutation.PhoneNumber(); ok {
-		_spec.SetField(user.FieldPhoneNumber, field.TypeString, value)
-		_node.PhoneNumber = value
-	}
-	if value, ok := uc.mutation.Address(); ok {
-		_spec.SetField(user.FieldAddress, field.TypeString, value)
-		_node.Address = value
+		_spec.ID.Value = &id
 	}
 	if value, ok := uc.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
@@ -302,17 +251,17 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if nodes := uc.mutation.BankAccountsIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.EmailsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.BankAccountsTable,
-			Columns: []string{user.BankAccountsColumn},
+			Table:   user.EmailsTable,
+			Columns: []string{user.EmailsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: bankaccount.FieldID,
+					Type:   field.TypeUUID,
+					Column: email.FieldID,
 				},
 			},
 		}
@@ -321,17 +270,17 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.CarsIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.PasscodesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.CarsTable,
-			Columns: []string{user.CarsColumn},
+			Table:   user.PasscodesTable,
+			Columns: []string{user.PasscodesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: car.FieldID,
+					Type:   field.TypeUUID,
+					Column: passcode.FieldID,
 				},
 			},
 		}
@@ -340,17 +289,17 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.CollectiblesIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.PasswordCredentialIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   user.CollectiblesTable,
-			Columns: []string{user.CollectiblesColumn},
+			Table:   user.PasswordCredentialTable,
+			Columns: []string{user.PasswordCredentialColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: collectible.FieldID,
+					Type:   field.TypeUUID,
+					Column: passwordcredential.FieldID,
 				},
 			},
 		}
@@ -359,17 +308,17 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.CryptoAccountsIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.PrimaryEmailIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   user.CryptoAccountsTable,
-			Columns: []string{user.CryptoAccountsColumn},
+			Table:   user.PrimaryEmailTable,
+			Columns: []string{user.PrimaryEmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: cryptoaccount.FieldID,
+					Type:   field.TypeUUID,
+					Column: primaryemail.FieldID,
 				},
 			},
 		}
@@ -378,36 +327,17 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.LoansIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.WebauthnCredentialsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.LoansTable,
-			Columns: []string{user.LoansColumn},
+			Table:   user.WebauthnCredentialsTable,
+			Columns: []string{user.WebauthnCredentialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: loan.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := uc.mutation.PrivateSharesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.PrivateSharesTable,
-			Columns: []string{user.PrivateSharesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUint,
-					Column: privateshare.FieldID,
+					Type:   field.TypeString,
+					Column: webauthncredential.FieldID,
 				},
 			},
 		}
@@ -433,6 +363,7 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	for i := range ucb.builders {
 		func(i int, root context.Context) {
 			builder := ucb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UserMutation)
 				if !ok {
@@ -459,10 +390,6 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = uint(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
