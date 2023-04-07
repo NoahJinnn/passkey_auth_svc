@@ -214,48 +214,9 @@ func (svc *webauthnSvc) FinishLogin(ctx Ctx, request *protocol.ParsedCredentialA
 			return dto.NewHTTPError(http.StatusUnauthorized, "Stored challenge and received challenge do not match").SetInternal(errors.New("sessionData not found"))
 		}
 
-		model := dom.WebauthnSessionDataFromModel(sessionData)
-
-		var credential *webauthn.Credential
-		var webauthnUser *dom.WebauthnUser
-		if sessionData.UserID.IsNil() {
-			// Discoverable Login
-			userId, err := uuid.FromBytes(request.Response.UserHandle)
-			if err != nil {
-				return dto.NewHTTPError(http.StatusBadRequest, "failed to parse userHandle as uuid").SetInternal(err)
-			}
-			webauthnUser, _, err = svc.getWebauthnUser(ctx, userId)
-			if err != nil {
-				return fmt.Errorf("failed to get user: %w", err)
-			}
-
-			if webauthnUser == nil {
-				// TODO: audit logger
-				return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
-			}
-
-			credential, err = svc.wa.ValidateDiscoverableLogin(func(rawID, userHandle []byte) (user webauthn.User, err error) {
-				return webauthnUser, nil
-			}, *model, request)
-			if err != nil {
-				// TODO: audit logger
-				return dto.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
-			}
-		} else {
-			// non discoverable Login
-			webauthnUser, _, err = svc.getWebauthnUser(ctx, sessionData.UserID)
-			if err != nil {
-				return fmt.Errorf("failed to get user: %w", err)
-			}
-			if webauthnUser == nil {
-				// TODO: audit logger
-				return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
-			}
-			credential, err = svc.wa.ValidateLogin(webauthnUser, *model, request)
-			if err != nil {
-				// TODO: audit logger
-				return dto.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
-			}
+		credential, webauthnUser, err := svc.getCredentialFromLoginSession(ctx, request, sessionData)
+		if err != nil {
+			return err
 		}
 
 		var dbCred *ent.WebauthnCredential
@@ -362,4 +323,48 @@ func (svc *webauthnSvc) getWebauthnUser(ctx Ctx, userId uuid.UUID) (*dom.Webauth
 	}
 
 	return webauthnUser, user, nil
+}
+
+func (svc *webauthnSvc) getCredentialFromLoginSession(ctx Ctx, request *protocol.ParsedCredentialAssertionData, sessionData *ent.WebauthnSessionData) (credential *webauthn.Credential, webauthnUser *dom.WebauthnUser, err error) {
+	model := dom.WebauthnSessionDataFromModel(sessionData)
+	if sessionData.UserID.IsNil() {
+		// Discoverable Login
+		userId, err := uuid.FromBytes(request.Response.UserHandle)
+		if err != nil {
+			return nil, nil, dto.NewHTTPError(http.StatusBadRequest, "failed to parse userHandle as uuid").SetInternal(err)
+		}
+		webauthnUser, _, err = svc.getWebauthnUser(ctx, userId)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to get webauthn user: %w", err)
+		}
+
+		if webauthnUser == nil {
+			// TODO: audit logger
+			return nil, nil, dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
+		}
+
+		credential, err = svc.wa.ValidateDiscoverableLogin(func(rawID, userHandle []byte) (user webauthn.User, err error) {
+			return webauthnUser, nil
+		}, *model, request)
+		if err != nil {
+			// TODO: audit logger
+			return nil, nil, dto.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
+		}
+	} else {
+		// non discoverable Login
+		webauthnUser, _, err = svc.getWebauthnUser(ctx, sessionData.UserID)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to get webauthn user: %w", err)
+		}
+		if webauthnUser == nil {
+			// TODO: audit logger
+			return nil, nil, dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
+		}
+		credential, err = svc.wa.ValidateLogin(webauthnUser, *model, request)
+		if err != nil {
+			// TODO: audit logger
+			return nil, nil, dto.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
+		}
+	}
+	return credential, webauthnUser, nil
 }
