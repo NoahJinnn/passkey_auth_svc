@@ -96,7 +96,6 @@ func (r *webauthnRepo) Update(ctx Ctx, credential ent.WebauthnCredential) error 
 		SetBackupEligible(credential.BackupEligible).
 		SetBackupState(credential.BackupState).
 		SetLastUsedAt(credential.LastUsedAt).
-		AddWebauthnCredentialTransports(credential.Edges.WebauthnCredentialTransports...).
 		Save(ctx)
 	if err != nil {
 		return err
