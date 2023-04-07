@@ -58,13 +58,15 @@ var (
 )
 
 type Config struct {
-	Server   Server
-	Webauthn WebauthnSettings
-	Session  Session
-	Secrets  Secrets
-	Emails   Emails
-	Postgres *PostgresConfig
-	Plaid    *PlaidConfig
+	Server      Server
+	Webauthn    WebauthnSettings
+	Session     Session
+	Secrets     Secrets
+	Emails      Emails
+	Passcode    Passcode
+	ServiceName string
+	Postgres    *PostgresConfig
+	Plaid       *PlaidConfig
 }
 
 // Save apple association site file to static folder
@@ -176,11 +178,17 @@ func GetServe() (c *Config, err error) {
 			RequireVerification: false,
 			MaxNumOfAddresses:   50,
 		},
+		ServiceName: ServiceName,
 	}
-
 	if err != nil {
 		return nil, appcfg.WrapPErr(err, fs.Serve, own, shared)
 	}
+
+	err = c.Validate()
+	if err != nil {
+		return nil, err
+	}
+
 	return c, nil
 }
 
@@ -189,4 +197,25 @@ func GetServe() (c *Config, err error) {
 func cleanup() {
 	own = nil
 	shared = nil
+}
+
+func (c *Config) Validate() error {
+	err := c.Webauthn.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate webauthn settings: %w", err)
+	}
+	err = c.Passcode.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate passcode settings: %w", err)
+	}
+	err = c.Session.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate session settings: %w", err)
+	}
+	err = c.Secrets.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate secrets settings: %w", err)
+	}
+
+	return nil
 }

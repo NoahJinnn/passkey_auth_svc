@@ -2,24 +2,8 @@ package config
 
 import (
 	"errors"
-	"fmt"
 	"time"
 )
-
-func (c *Config) Validate() error {
-
-	err := c.Webauthn.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate webauthn settings: %w", err)
-	}
-
-	err = c.Session.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate session settings: %w", err)
-	}
-
-	return nil
-}
 
 type Session struct {
 	EnableAuthTokenHeader bool   `yaml:"enable_auth_token_header" json:"enable_auth_token_header" koanf:"enable_auth_token_header" split_words:"true"`
