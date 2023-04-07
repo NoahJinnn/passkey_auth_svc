@@ -52,3 +52,7 @@ func (a app) GetWebauthnSvc() svcs.IWebauthnSvc {
 func (a app) GetUserSvc() svcs.IUserSvc {
 	return svcs.NewUserSvc(a.cfg, a.repo)
 }
+
+func (a app) GetPasscodeSvc() svcs.IPasscodeSvc {
+	return svcs.NewPasscodeSvc(a.cfg, a.repo)
+}

@@ -1,6 +1,7 @@
 package test
 
 import (
+	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ms/auth/dal"
 )
@@ -17,6 +18,17 @@ func (r *emailRepo) GetByAddress(ctx Ctx, address string) (*ent.Email, error) {
 
 	for _, m := range r.emails {
 		if m.Address == address {
+			return m, nil
+		}
+	}
+
+	return nil, nil
+}
+
+func (r *emailRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.Email, error) {
+
+	for _, m := range r.emails {
+		if m.ID == id {
 			return m, nil
 		}
 	}

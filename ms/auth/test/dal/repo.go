@@ -34,6 +34,7 @@ type repo struct {
 	webAuthnCredentialRepo dal.IWebauthnCredentialRepo
 	webAuthnSessionRepo    dal.IWebauthnSessionRepo
 	emailRepo              dal.IEmailRepo
+	passcodeRepo           dal.IPasscodeRepo
 }
 
 func (r repo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error {
@@ -62,4 +63,8 @@ func (r repo) GetWebauthnSessionRepo() dal.IWebauthnSessionRepo {
 
 func (r repo) GetEmailRepo() dal.IEmailRepo {
 	return r.emailRepo
+}
+
+func (r repo) GetPasscodeRepo() dal.IPasscodeRepo {
+	return r.passcodeRepo
 }
