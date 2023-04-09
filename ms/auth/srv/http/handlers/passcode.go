@@ -1,9 +1,7 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
@@ -17,7 +15,6 @@ type PasscodeHandler struct {
 }
 
 func NewPasscodeHandler(srv *HttpDeps, sessionManager session.Manager) *PasscodeHandler {
-
 	return &PasscodeHandler{
 		srv,
 		sessionManager,
@@ -47,20 +44,23 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		}
 	}
 
-	passcode, passcodeEnt, err := h.GetPasscodeSvc().InitPasscode(c.Request().Context(), userId, emailId)
-
-	durationTTL := time.Duration(h.Cfg.Passcode.TTL) * time.Second
-	data := map[string]interface{}{
-		"Code":        passcode,
-		"ServiceName": h.Cfg.ServiceName,
-		"TTL":         fmt.Sprintf("%.0f", durationTTL.Minutes()),
-	}
-
-	lang := c.Request().Header.Get("Accept-Language")
-	str, err := h.renderer.Render("loginTextMail", lang, data)
+	_, passcodeEnt, err := h.GetPasscodeSvc().InitPasscode(c.Request().Context(), userId, emailId)
 	if err != nil {
-		return fmt.Errorf("failed to render email template: %w", err)
+		return dto.ToHttpError(err)
 	}
+
+	// durationTTL := time.Duration(h.Cfg.Passcode.TTL) * time.Second
+	// data := map[string]interface{}{
+	// 	"Code":        passcode,
+	// 	"ServiceName": h.Cfg.ServiceName,
+	// 	"TTL":         fmt.Sprintf("%.0f", durationTTL.Minutes()),
+	// }
+
+	// lang := c.Request().Header.Get("Accept-Language")
+	// str, err := h.renderer.Render("loginTextMail", lang, data)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to render email template: %w", err)
+	// }
 
 	// TODO: Impl Email sender
 	// message := gomail.NewMessage()

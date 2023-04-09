@@ -8,6 +8,7 @@ import (
 	"github.com/hellohq/hqservice/ms/auth/dal"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/handlers"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/mail"
 	hqMiddlewares "github.com/hellohq/hqservice/ms/auth/srv/http/middlewares"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/session"
 	"github.com/labstack/echo/v4"
@@ -80,6 +81,11 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 	webauthnCredentials.GET("", webauthnHandler.ListCredentials)
 	webauthnCredentials.PATCH("/:id", webauthnHandler.UpdateCredential)
 	webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)
+
+	mail.NewMailer(srv.Cfg.Passcode.Smtp)
+	if err != nil {
+		panic(fmt.Errorf("failed to create mailer: %w", err))
+	}
 
 	e.Logger.Fatal(e.Start(cfg.Server.BindAddr.String()))
 	return e, nil
