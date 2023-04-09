@@ -46,6 +46,8 @@ var (
 		RpOrigins          appcfg.StringSlice    `env:"AUTH_RP_ORIGINS"`
 		IosAssociationSite appcfg.String         `env:"IOS_SITE_ASSOCIATION"`
 		AndroidAssetLinks  appcfg.String         `env:"ANDROID_ASSET_LINKS"`
+		OneSignalAppID     appcfg.String         `env:"ONESIGNAL_APP_ID"`
+		OneSignalAppKey    appcfg.String         `env:"ONESIGNAL_APP_KEY"`
 	}{
 		PostgresUser:     appcfg.MustNotEmptyString(ServiceName),
 		PostgresAddrPort: appcfg.MustPort("5432"),
@@ -179,6 +181,12 @@ func GetServe() (c *Config, err error) {
 			MaxNumOfAddresses:   50,
 		},
 		ServiceName: ServiceName,
+		Passcode: Passcode{
+			Smtp: SMTP{
+				OneSignalAppKey: own.OneSignalAppKey.Value(&err),
+				OneSignalAppID:  own.OneSignalAppID.Value(&err),
+			},
+		},
 	}
 	if err != nil {
 		return nil, appcfg.WrapPErr(err, fs.Serve, own, shared)
