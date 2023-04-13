@@ -137,7 +137,7 @@ task scripts:run
 #### Run with command args
 ```bash
 # cmd/hq/main.go is the entry point with the `main` function
-task scripts:run -- --port 17002 --wa.id example  # Specific auth service running on port `17002` with webauthn ID equals `example`  
+task scripts:run -- --port 17002 --wa.id example --wa.origins https://example.com  # Specific auth service running on port `17002` with webauthn ID equals `example`; webauthn origns equals `https://example.com`  
 ```
 #### Build first, then run
 
@@ -200,7 +200,7 @@ Functionality Group 1: add/connect assets and debts
 - [ ] Implement [webauthn](https://github.com/go-webauthn/webauthn) API
 - [ ] Implement [Lago](https://www.getlago.com/resources/compare/lago-vs-stripe) for billing service
 - [ ] Implement authorization with `casbin`
-- [ ] Create `User` table
+- [x] Create `User` table
 - [ ] Create CRUD REST API for `User` model
 - [ ] Create asset tables based on Kubera features
 - [ ] Create CRUD REST API for asset models
