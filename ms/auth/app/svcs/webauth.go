@@ -20,7 +20,7 @@ import (
 
 type IWebauthnSvc interface {
 	BeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, error)
-	FinishRegistration(ctx Ctx, request *protocol.ParsedCredentialCreationData, sessionUserId string) (credentialId string, userId uuid.UUID, err error)
+	FinishRegistration(ctx Ctx, request *protocol.ParsedCredentialCreationData, sessionUserId string) (credentialId string, userId string, err error)
 	BeginLogin(ctx Ctx, reqUserId *string) (*protocol.CredentialAssertion, error)
 	FinishLogin(ctx Ctx, request *protocol.ParsedCredentialAssertionData) (credentialId string, userId uuid.UUID, err error)
 	ListCredentials(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error)
@@ -75,7 +75,7 @@ func (svc *webauthnSvc) BeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.
 	return options, nil
 }
 
-func (svc *webauthnSvc) FinishRegistration(ctx Ctx, request *protocol.ParsedCredentialCreationData, sessionUserId string) (credentialId string, userId uuid.UUID, err error) {
+func (svc *webauthnSvc) FinishRegistration(ctx Ctx, request *protocol.ParsedCredentialCreationData, sessionUserId string) (credentialId string, userId string, err error) {
 	if err := svc.repo.WithTx(ctx, func(ctx Ctx, client *ent.Client) error {
 		sessionDataRepo := svc.repo.GetWebauthnSessionRepo()
 		sessionData, err := sessionDataRepo.GetByChallenge(ctx, request.Response.CollectedClientData.Challenge)
@@ -141,6 +141,8 @@ func (svc *webauthnSvc) FinishRegistration(ctx Ctx, request *protocol.ParsedCred
 		}
 
 		// TODO: audit logger
+		userId = webauthnUser.UserId.String()
+		credentialId = model.ID
 		return nil
 	}); err != nil {
 		return credentialId, userId, err

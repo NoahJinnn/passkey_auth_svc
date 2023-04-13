@@ -21,7 +21,7 @@ require (
 	entgo.io/ent v0.11.9
 	github.com/cosmtrek/air v1.41.0
 	github.com/go-playground/validator/v10 v10.11.2
-	github.com/go-webauthn/webauthn v0.7.1
+	github.com/go-webauthn/webauthn v0.8.2
 	github.com/golangci/golangci-lint v1.50.1
 	github.com/labstack/echo-jwt/v4 v4.1.0
 	github.com/labstack/echo/v4 v4.10.2

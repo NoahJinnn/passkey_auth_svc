@@ -55,6 +55,10 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 
 	request, err := protocol.ParseCredentialCreationResponse(c.Request())
 	if err != nil {
+		errT, ok := err.(*protocol.Error)
+		if ok {
+			fmt.Printf("ParseCredentialCreationResponse err: %+v\n", errT.DevInfo)
+		}
 		return dto.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
@@ -66,8 +70,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 	if err != nil {
 		return dto.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-
-	return c.JSON(http.StatusOK, map[string]string{"credential_id": credentialId, "user_id": userId.String()})
+	return c.JSON(http.StatusOK, map[string]string{"credential_id": credentialId, "user_id": userId})
 }
 
 type BeginAuthenticationBody struct {
