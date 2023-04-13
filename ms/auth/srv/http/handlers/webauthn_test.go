@@ -22,7 +22,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var userIdBytes = []byte{0xec, 0x4e, 0xf0, 0x49, 0x5b, 0x88, 0x43, 0x21, 0xa1, 0x73, 0x21, 0xb0, 0xef, 0xf0, 0x6a, 0x4}
+var userIdBytes = []byte{0x37, 0x45, 0x37, 0x77, 0x53, 0x56, 0x75, 0x49, 0x51, 0x79, 0x47, 0x68, 0x63, 0x79, 0x47, 0x77, 0x37, 0x5f, 0x42, 0x71, 0x42, 0x41}
 var credentials = []*ent.WebauthnCredential{
 	func() *ent.WebauthnCredential {
 		uId, _ := uuid.FromString(userId)
@@ -109,8 +109,11 @@ func TestWebauthnHandler_BeginRegistration(t *testing.T) {
 		err = d.Decode(&creationOptions)
 		assert.NoError(t, err)
 
+		respUserId, ok := (creationOptions.Response.User.ID).(string)
+		assert.True(t, ok)
+		assert.Equal(t, userIdBytes, []byte(respUserId))
+
 		assert.NotEmpty(t, creationOptions.Response.Challenge)
-		assert.Equal(t, userIdBytes, []byte(creationOptions.Response.User.ID))
 		assert.Equal(t, defaultConfig.Webauthn.RelyingParty.Id, creationOptions.Response.RelyingParty.ID)
 		assert.Equal(t, creationOptions.Response.AuthenticatorSelection.ResidentKey, protocol.ResidentKeyRequirementRequired)
 		assert.Equal(t, creationOptions.Response.AuthenticatorSelection.UserVerification, protocol.VerificationRequired)
