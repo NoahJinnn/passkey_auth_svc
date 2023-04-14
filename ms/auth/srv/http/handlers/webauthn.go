@@ -97,6 +97,10 @@ func (h *WebauthnHandler) BeginLogin(c echo.Context) error {
 func (h *WebauthnHandler) FinishLogin(c echo.Context) error {
 	request, err := protocol.ParseCredentialRequestResponse(c.Request())
 	if err != nil {
+		errT, ok := err.(*protocol.Error)
+		if ok {
+			fmt.Printf("ParseCredentialRequestResponse err: %+v\n", errT.DevInfo)
+		}
 		return dto.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
@@ -122,5 +126,5 @@ func (h *WebauthnHandler) FinishLogin(c echo.Context) error {
 		c.Response().Header().Set("Access-Control-Expose-Headers", "X-Auth-Token")
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"credential_id": credentialId, "user_id": userId.String()})
+	return c.JSON(http.StatusOK, map[string]string{"credential_id": credentialId, "user_id": userId})
 }

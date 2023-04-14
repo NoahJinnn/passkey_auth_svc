@@ -6,14 +6,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	hqJwt "github.com/hellohq/hqservice/pkg/crypto/jwt"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
 type Manager interface {
-	GenerateJWT(uuid.UUID) (string, error)
+	GenerateJWT(string) (string, error)
 	Verify(string) (jwt.Token, error)
 	GenerateCookie(token string) (*http.Cookie, error)
 	DeleteCookie() (*http.Cookie, error)
@@ -74,12 +73,12 @@ func NewManager(jwkManager JwkManager, config config.Session) (Manager, error) {
 }
 
 // GenerateJWT creates a new session JWT for the given user
-func (g *manager) GenerateJWT(userId uuid.UUID) (string, error) {
+func (g *manager) GenerateJWT(userId string) (string, error) {
 	issuedAt := time.Now()
 	expiration := issuedAt.Add(g.sessionLength)
 
 	token := jwt.New()
-	_ = token.Set(jwt.SubjectKey, userId.String())
+	_ = token.Set(jwt.SubjectKey, userId)
 	_ = token.Set(jwt.IssuedAtKey, issuedAt)
 	_ = token.Set(jwt.ExpirationKey, expiration)
 	//_ = token.Set(jwt.AudienceKey, []string{"http://localhost"})

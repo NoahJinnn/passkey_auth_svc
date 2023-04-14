@@ -34,7 +34,7 @@ type sessionManager struct {
 
 var userId = "ec4ef049-5b88-4321-a173-21b0eff06a04"
 
-func (s sessionManager) GenerateJWT(uuid uuid.UUID) (string, error) {
+func (s sessionManager) GenerateJWT(uuid string) (string, error) {
 	return userId, nil
 }
 
