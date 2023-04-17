@@ -46,7 +46,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 		return dto.ToHttpError(err)
 	}
 
-	token, err := h.sessionManager.GenerateJWT(newUser.ID)
+	token, err := h.sessionManager.GenerateJWT(newUser.ID.String())
 	if err != nil {
 		return fmt.Errorf("failed to generate jwt: %w", err)
 	}
