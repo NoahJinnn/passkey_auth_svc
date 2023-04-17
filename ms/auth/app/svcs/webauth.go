@@ -177,6 +177,7 @@ func (svc *webauthnSvc) BeginLogin(ctx Ctx, reqUserId *string) (*protocol.Creden
 			}
 		}
 	}
+
 	if options == nil && sessionData == nil {
 		var err error
 		options, sessionData, err = svc.wa.BeginDiscoverableLogin(webauthn.WithUserVerification(protocol.VerificationRequired))

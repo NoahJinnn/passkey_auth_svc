@@ -65,7 +65,6 @@ var (
 )
 
 func main() {
-	_ = os.Unsetenv("GO_TEST_DISABLE_SENSITIVE")
 	err := def.Init()
 	if err != nil {
 		log.Fatalf("failed to get defaults: %s", err)
