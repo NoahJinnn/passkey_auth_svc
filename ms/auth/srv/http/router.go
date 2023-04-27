@@ -81,6 +81,11 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 	webauthnCredentials.PATCH("/:id", webauthnHandler.UpdateCredential)
 	webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)
 
+	passcodeHandler := handlers.NewPasscodeHandler(srv, sessionManager)
+	passcode := e.Group("/passcode")
+	passcodeLogin := passcode.Group("/login")
+	passcodeLogin.POST("/initialize", passcodeHandler.Init)
+
 	e.Logger.Fatal(e.Start(cfg.Server.BindAddr.String()))
 	return e, nil
 }

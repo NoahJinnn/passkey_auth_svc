@@ -3,8 +3,5 @@
 scriptsdir=$( dirname -- "$0"; )
 cd $scriptsdir/../../../
 
-if !command -v "doppler" &> /dev/null; then
-    brew install dopplerhq/cli/doppler
-fi
-
+brew install dopplerhq/cli/doppler
 doppler setup --no-interactive

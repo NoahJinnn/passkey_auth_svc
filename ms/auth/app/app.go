@@ -18,6 +18,7 @@ import (
 type Appl interface {
 	GetWebauthnSvc() svcs.IWebauthnSvc
 	GetUserSvc() svcs.IUserSvc
+	GetPasscodeSvc() svcs.IPasscodeSvc
 }
 
 // App implements interface Appl.
@@ -61,4 +62,8 @@ func (a App) GetWebauthnSvc() svcs.IWebauthnSvc {
 
 func (a App) GetUserSvc() svcs.IUserSvc {
 	return svcs.NewUserSvc(a.cfg, a.repo)
+}
+
+func (a App) GetPasscodeSvc() svcs.IPasscodeSvc {
+	return svcs.NewPasscodeSvc(a.cfg, a.repo)
 }

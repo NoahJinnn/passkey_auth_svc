@@ -46,6 +46,8 @@ var (
 		RpOrigins          appcfg.StringSlice    `env:"AUTH_RP_ORIGINS"`
 		IosAssociationSite appcfg.String         `env:"IOS_SITE_ASSOCIATION"`
 		AndroidAssetLinks  appcfg.String         `env:"ANDROID_ASSET_LINKS"`
+		OneSignalAppID     appcfg.String         `env:"ONESIGNAL_APP_ID"`
+		OneSignalAppKey    appcfg.String         `env:"ONESIGNAL_APP_KEY"`
 	}{
 		PostgresUser:     appcfg.MustNotEmptyString(ServiceName),
 		PostgresAddrPort: appcfg.MustPort("5432"),
@@ -58,13 +60,15 @@ var (
 )
 
 type Config struct {
-	Server   Server
-	Webauthn WebauthnSettings
-	Session  Session
-	Secrets  Secrets
-	Emails   Emails
-	Postgres *PostgresConfig
-	Plaid    *PlaidConfig
+	Server      Server
+	Webauthn    WebauthnSettings
+	Session     Session
+	Secrets     Secrets
+	Emails      Emails
+	Passcode    Passcode
+	ServiceName string
+	Postgres    *PostgresConfig
+	Plaid       *PlaidConfig
 }
 
 // Save apple association site file to static folder
@@ -176,11 +180,27 @@ func GetServe() (c *Config, err error) {
 			RequireVerification: false,
 			MaxNumOfAddresses:   50,
 		},
+		ServiceName: ServiceName,
+		Passcode: Passcode{
+			Email: Email{
+				FromAddress: "noah@hellohq.com",
+				FromName:    "HelloHQ Pte. Ltd.",
+			},
+			Smtp: SMTP{
+				OneSignalAppKey: own.OneSignalAppKey.Value(&err),
+				OneSignalAppID:  own.OneSignalAppID.Value(&err),
+			},
+		},
 	}
-
 	if err != nil {
 		return nil, appcfg.WrapPErr(err, fs.Serve, own, shared)
 	}
+
+	err = c.Validate()
+	if err != nil {
+		return nil, err
+	}
+
 	return c, nil
 }
 
@@ -189,4 +209,25 @@ func GetServe() (c *Config, err error) {
 func cleanup() {
 	own = nil
 	shared = nil
+}
+
+func (c *Config) Validate() error {
+	err := c.Webauthn.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate webauthn settings: %w", err)
+	}
+	err = c.Passcode.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate passcode settings: %w", err)
+	}
+	err = c.Session.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate session settings: %w", err)
+	}
+	err = c.Secrets.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate secrets settings: %w", err)
+	}
+
+	return nil
 }
