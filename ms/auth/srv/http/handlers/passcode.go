@@ -1,13 +1,10 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
-	"github.com/hellohq/hqservice/ms/auth/srv/http/mail"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/session"
 	"github.com/labstack/echo/v4"
 )
@@ -15,17 +12,12 @@ import (
 type PasscodeHandler struct {
 	*HttpDeps
 	sessionManager session.Manager
-	mailer         mail.Mailer
-	renderer       mail.Renderer
 }
 
-func NewPasscodeHandler(srv *HttpDeps, sessionManager session.Manager, mailer mail.Mailer,
-	renderer mail.Renderer) *PasscodeHandler {
+func NewPasscodeHandler(srv *HttpDeps, sessionManager session.Manager) *PasscodeHandler {
 	return &PasscodeHandler{
 		srv,
 		sessionManager,
-		mailer,
-		renderer,
 	}
 }
 
@@ -51,34 +43,10 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 			return dto.NewHTTPError(http.StatusBadRequest, "failed to parse emailId as uuid").SetInternal(err)
 		}
 	}
-
-	passcode, passcodeEnt, err := h.GetPasscodeSvc().InitPasscode(c.Request().Context(), userId, emailId)
+	lang := c.Request().Header.Get("Accept-Language")
+	passcodeEnt, err := h.GetPasscodeSvc().InitPasscode(c.Request().Context(), userId, emailId, lang)
 	if err != nil {
 		return dto.ToHttpError(err)
-	}
-
-	durationTTL := time.Duration(h.Cfg.Passcode.TTL) * time.Second
-	data := map[string]interface{}{
-		"Code":        passcode,
-		"ServiceName": h.Cfg.ServiceName,
-		"TTL":         fmt.Sprintf("%.0f", durationTTL.Minutes()),
-	}
-
-	lang := c.Request().Header.Get("Accept-Language")
-	str, err := h.renderer.Render("loginTextMail", lang, data)
-	if err != nil {
-		return fmt.Errorf("failed to render email template: %w", err)
-	}
-
-	// TODO: Impl Email sender
-
-	// message.SetHeader("Subject", h.renderer.Translate(lang, "email_subject_login", data))
-
-	// message.SetBody("text/plain", str)
-
-	err = h.mailer.Send(str)
-	if err != nil {
-		return fmt.Errorf("failed to send passcode: %w", err)
 	}
 
 	return c.JSON(http.StatusOK, dto.PasscodeReturn{

@@ -41,6 +41,7 @@ func (r *passcodeRepo) Create(ctx Ctx, pc *ent.Passcode) error {
 		SetEmailID(pc.EmailID).
 		SetCode(pc.Code).
 		SetTTL(pc.TTL).
+		SetTryCount(0).
 		SetCreatedAt(pc.CreatedAt).
 		SetUpdatedAt(pc.UpdatedAt).
 		Save(ctx)
