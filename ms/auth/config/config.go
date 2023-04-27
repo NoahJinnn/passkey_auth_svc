@@ -182,6 +182,10 @@ func GetServe() (c *Config, err error) {
 		},
 		ServiceName: ServiceName,
 		Passcode: Passcode{
+			Email: Email{
+				FromAddress: "noah@hellohq.com",
+				FromName:    "HelloHQ Pte. Ltd.",
+			},
 			Smtp: SMTP{
 				OneSignalAppKey: own.OneSignalAppKey.Value(&err),
 				OneSignalAppID:  own.OneSignalAppID.Value(&err),

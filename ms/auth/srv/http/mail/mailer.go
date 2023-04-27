@@ -12,14 +12,13 @@ import (
 type Mailer struct {
 	apiClient *onesignal.APIClient
 	authCtx   context.Context
-	cfg       config.SMTP
+	cfg       *config.Passcode
 }
 
-func NewMailer(cfg config.SMTP) *Mailer {
-
+func NewMailer(cfg *config.Passcode) *Mailer {
 	configuration := onesignal.NewConfiguration()
 	apiClient := onesignal.NewAPIClient(configuration)
-	authCtx := context.WithValue(context.Background(), onesignal.AppAuth, cfg.OneSignalAppKey)
+	authCtx := context.WithValue(context.Background(), onesignal.AppAuth, cfg.Smtp.OneSignalAppKey)
 	return &Mailer{
 		apiClient,
 		authCtx,
@@ -27,19 +26,19 @@ func NewMailer(cfg config.SMTP) *Mailer {
 	}
 }
 
-func (m *Mailer) Send(body string) error {
-	notification := *onesignal.NewNotification(m.cfg.OneSignalAppID) // Notification |
-	notification.SetEmailSubject("Testing")
-	notification.SetEmailFromName("HelloHQ Pte. Ltd.")
-	notification.SetEmailFromAddress("noah@hellohq.com")
+func (m *Mailer) Send(email []string, subject string, body string) error {
+	notification := *onesignal.NewNotification(m.cfg.Smtp.OneSignalAppID) // Notification |
+	notification.SetEmailSubject(subject)
+	notification.SetEmailFromName(m.cfg.Email.FromName)
+	notification.SetEmailFromAddress(m.cfg.Email.FromAddress)
 	notification.SetEmailBody(body)
-	notification.SetIncludeEmailTokens([]string{"trannguyenhcmut@gmail.com"})
-	resp, r, err := m.apiClient.DefaultApi.CreateNotification(m.authCtx).Notification(notification).Execute()
+	notification.SetIncludeEmailTokens(email)
+	_, r, err := m.apiClient.DefaultApi.CreateNotification(m.authCtx).Notification(notification).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `DefaultApi.CreateNotification``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 		return err
 	}
-	fmt.Fprintf(os.Stdout, "Response from `DefaultApi.CreateNotification`: %v\n", resp)
+	fmt.Println("send passcode successfully")
 	return nil
 }
