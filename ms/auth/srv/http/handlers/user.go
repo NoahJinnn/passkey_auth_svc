@@ -58,7 +58,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 
 	c.SetCookie(cookie)
 
-	if h.Cfg.Session.EnableAuthTokenHeader && !h.Cfg.Emails.RequireVerification {
+	if h.Cfg.Session.EnableAuthTokenHeader {
 		c.Response().Header().Set("X-Auth-Token", token)
 		c.Response().Header().Set("Access-Control-Expose-Headers", "X-Auth-Token")
 	}
