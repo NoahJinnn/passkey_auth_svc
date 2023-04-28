@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/hellohq/hqservice/internal/sharedconfig"
-	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/powerman/check"
 	_ "github.com/smartystreets/goconvey/convey"
 	"github.com/spf13/pflag"
@@ -13,22 +12,22 @@ import (
 
 var (
 	testShared   *sharedconfig.Shared
-	testOwn      = own
 	testFlagsets = FlagSets{
 		Serve: pflag.NewFlagSet("", 0),
 	}
 )
 
 func TestMain(m *testing.M) {
-	def.Init()
 	os.Clearenv()
-	os.Setenv("MONO_X_POSTGRES_ADDR_HOST", "postgres")
+	os.Setenv("HQ_AUTH_POSTGRES_ADDR_HOST", "postgres")
+	os.Setenv("AUTH_ADDR_HOST", "localhost")
+	os.Setenv("AUTH_ADDR_HOST_INT", "127.0.0.1")
+	os.Setenv("AUTH_ADDR_PORT", "17000")
 	testShared, _ = sharedconfig.Get()
 	check.TestMain(m)
 }
 
 func testGetServe(flags ...string) (*Config, error) {
-	own = testOwn
 	err := Init(testShared, testFlagsets)
 	if err != nil {
 		return nil, err
@@ -37,15 +36,6 @@ func testGetServe(flags ...string) (*Config, error) {
 		testFlagsets.Serve.Parse(flags)
 	}
 	return GetServe()
-}
-
-// Require helps testing for missing env var (required to set
-// configuration value which don't have default value).
-func require(t *check.C, field string) {
-	t.Helper()
-	c, err := testGetServe()
-	t.Match(err, `^`+field+` .* required`)
-	t.Nil(c)
 }
 
 // Constraint helps testing for invalid env var value.

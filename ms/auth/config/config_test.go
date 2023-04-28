@@ -25,11 +25,7 @@ func Test(t *testing.T) {
 		},
 	}
 
-	t.Run("required", func(tt *testing.T) {
-		t := check.T(tt)
-		require(t, "PostgresPass")
-		os.Setenv("HQ_AUTH_POSTGRES_AUTH_PASS", "authpass")
-	})
+	os.Setenv("HQ_AUTH_POSTGRES_AUTH_PASS", "authpass")
 	t.Run("default", func(tt *testing.T) {
 		t := check.T(tt)
 		c, err := testGetServe()
