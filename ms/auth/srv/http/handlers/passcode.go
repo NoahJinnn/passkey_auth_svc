@@ -76,7 +76,6 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
 	token, err := h.sessionManager.GenerateJWT(passcode.UserID.String())
 	if err != nil {
 		return fmt.Errorf("failed to generate jwt: %w", err)
