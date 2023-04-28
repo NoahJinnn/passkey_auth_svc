@@ -8,7 +8,7 @@ import (
 
 type IPasscodeRepo interface {
 	GetById(ctx Ctx, id uuid.UUID) (*ent.Passcode, error)
-	Create(ctx Ctx, pc *ent.Passcode) error
+	Create(ctx Ctx, pc *ent.Passcode) (*ent.Passcode, error)
 	Update(ctx Ctx, pc *ent.Passcode) error
 	Delete(ctx Ctx, pc *ent.Passcode) error
 }
@@ -34,23 +34,21 @@ func (r *passcodeRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.Passcode, error) {
 	return pc, nil
 }
 
-func (r *passcodeRepo) Create(ctx Ctx, pc *ent.Passcode) error {
-	_, err := r.db.Passcode.
+func (r *passcodeRepo) Create(ctx Ctx, pc *ent.Passcode) (*ent.Passcode, error) {
+	pc, err := r.db.Passcode.
 		Create().
 		SetUserID(pc.UserID).
 		SetEmailID(pc.EmailID).
 		SetCode(pc.Code).
 		SetTTL(pc.TTL).
 		SetTryCount(0).
-		SetCreatedAt(pc.CreatedAt).
-		SetUpdatedAt(pc.UpdatedAt).
 		Save(ctx)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return pc, nil
 }
 
 func (r *passcodeRepo) Update(ctx Ctx, pc *ent.Passcode) error {
@@ -58,7 +56,7 @@ func (r *passcodeRepo) Update(ctx Ctx, pc *ent.Passcode) error {
 		UpdateOne(pc).
 		SetCode(pc.Code).
 		SetTTL(pc.TTL).
-		SetUpdatedAt(pc.UpdatedAt).
+		SetTryCount(pc.TryCount).
 		Save(ctx)
 
 	if err != nil {

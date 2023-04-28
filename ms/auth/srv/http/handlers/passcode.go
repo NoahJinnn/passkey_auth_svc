@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gofrs/uuid"
@@ -53,5 +54,50 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		Id:        passcodeEnt.ID.String(),
 		TTL:       h.Cfg.Passcode.TTL,
 		CreatedAt: passcodeEnt.CreatedAt,
+	})
+}
+
+func (h *PasscodeHandler) Finish(c echo.Context) error {
+	var body dto.PasscodeFinishRequest
+	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
+		return dto.ToHttpError(err)
+	}
+
+	if err := c.Validate(body); err != nil {
+		return dto.ToHttpError(err)
+	}
+
+	passcodeId, err := uuid.FromString(body.Id)
+	if err != nil {
+		return dto.NewHTTPError(http.StatusBadRequest, "failed to parse passcodeId as uuid").SetInternal(err)
+	}
+
+	passcode, err := h.GetPasscodeSvc().FinishPasscode(c.Request().Context(), passcodeId, body.Code)
+	if err != nil {
+		return err
+	}
+	token, err := h.sessionManager.GenerateJWT(passcode.UserID.String())
+	if err != nil {
+		return fmt.Errorf("failed to generate jwt: %w", err)
+	}
+
+	cookie, err := h.sessionManager.GenerateCookie(token)
+	if err != nil {
+		return fmt.Errorf("failed to create session token: %w", err)
+	}
+
+	c.SetCookie(cookie)
+
+	if h.Cfg.Session.EnableAuthTokenHeader {
+		c.Response().Header().Set("X-Auth-Token", token)
+		c.Response().Header().Set("Access-Control-Expose-Headers", "X-Auth-Token")
+	}
+
+	// TODO: audit logger
+
+	return c.JSON(http.StatusOK, dto.PasscodeReturn{
+		Id:        passcode.ID.String(),
+		TTL:       passcode.TTL,
+		CreatedAt: passcode.CreatedAt,
 	})
 }

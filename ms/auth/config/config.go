@@ -48,12 +48,15 @@ var (
 		AndroidAssetLinks  appcfg.String         `env:"ANDROID_ASSET_LINKS"`
 		OneSignalAppID     appcfg.String         `env:"ONESIGNAL_APP_ID"`
 		OneSignalAppKey    appcfg.String         `env:"ONESIGNAL_APP_KEY"`
+		FromAddress        appcfg.String         `env:"MAIL_FROM_ADDRESS"`
+		FromName           appcfg.String         `env:"MAIL_FROM_NAME"`
+		TTL                appcfg.Int            `env:"PASSCODE_TTL"`
 	}{
 		PostgresUser:     appcfg.MustNotEmptyString(ServiceName),
 		PostgresAddrPort: appcfg.MustPort("5432"),
 		PostgresAddrHost: appcfg.MustNotEmptyString("localhost"),
 		PostgresDBName:   appcfg.MustNotEmptyString("postgres"),
-		Secrets:          appcfg.MustNotEmptyString("needstobeatleast16"),
+		Secrets:          appcfg.MustNotEmptyString("needsToBeAtLeast16"),
 		RpId:             appcfg.MustNotEmptyString("localhost"),
 		RpOrigin:         appcfg.MustNotEmptyString("localhost:17000"),
 	}
@@ -64,7 +67,6 @@ type Config struct {
 	Webauthn    WebauthnSettings
 	Session     Session
 	Secrets     Secrets
-	Emails      Emails
 	Passcode    Passcode
 	ServiceName string
 	Postgres    *PostgresConfig
@@ -72,35 +74,36 @@ type Config struct {
 }
 
 // Save apple association site file to static folder
-func saveStaticFileConfig(content string, filename string) error {
-
-	_, err := os.Stat("static")
-	if err != nil {
-		fmt.Println("Static dir does not exist", err)
-		if err := os.Mkdir("static", os.ModePerm); err != nil {
-			return fmt.Errorf("create static dir failed: %w", err)
+func saveStaticFileConfig(fileNameContent map[string]string) error {
+	for filename, content := range fileNameContent {
+		_, err := os.Stat("static")
+		if err != nil {
+			fmt.Println("Static dir does not exist", err)
+			if err := os.Mkdir("static", os.ModePerm); err != nil {
+				return fmt.Errorf("create static dir failed: %w", err)
+			}
 		}
-	}
 
-	destination, err := os.Create(fmt.Sprintf("static/%s", filename))
-	if err != nil {
-		return fmt.Errorf("os.Create: %w", err)
-	}
-	defer destination.Close()
+		destination, err := os.Create(fmt.Sprintf("static/%s", filename))
+		if err != nil {
+			return fmt.Errorf("os.Create: %w", err)
+		}
+		defer destination.Close()
 
-	_, err = fmt.Fprintf(destination, "%s", content)
-	if err != nil {
-		return fmt.Errorf("os.Create: %w", err)
+		_, err = fmt.Fprintf(destination, "%s", content)
+		if err != nil {
+			return fmt.Errorf("os.Create: %w", err)
+		}
+		fmt.Printf("File %s saved successfully\n", filename)
 	}
-	fmt.Printf("File %s saved successfully\n", filename)
 	return nil
+
 }
 
 // Init updates config defaults (from env) and setup subcommands flags.
 //
 // Init must be called once before using this package.
 func Init(sharedCfg *sharedconfig.Shared, flagsets FlagSets) error {
-
 	shared, fs = sharedCfg, flagsets
 	fromEnv := appcfg.NewFromEnv(sharedconfig.EnvPrefix)
 	err := appcfg.ProvideStruct(own, fromEnv)
@@ -108,12 +111,11 @@ func Init(sharedCfg *sharedconfig.Shared, flagsets FlagSets) error {
 		return err
 	}
 
-	err = saveStaticFileConfig(own.IosAssociationSite.Value(&err), "apple-app-site-association")
-	if err != nil {
-		return err
+	filenameContent := map[string]string{
+		"apple-app-site-association": own.IosAssociationSite.Value(&err),
+		"assetlinks.json":            own.AndroidAssetLinks.Value(&err),
 	}
-
-	err = saveStaticFileConfig(own.AndroidAssetLinks.Value(&err), "assetlinks.json")
+	err = saveStaticFileConfig(filenameContent)
 	if err != nil {
 		return err
 	}
@@ -129,6 +131,10 @@ func Init(sharedCfg *sharedconfig.Shared, flagsets FlagSets) error {
 	appcfg.AddPFlag(fs.Serve, &own.RpId, "wa.id", "Webauthn id")
 	appcfg.AddPFlag(fs.Serve, &own.RpOrigin, "wa.origin", "Webauthn origin")
 	appcfg.AddPFlag(fs.Serve, &own.RpOrigins, "wa.origins", "Webauthn origin")
+	appcfg.AddPFlag(fs.Serve, &own.FromAddress, "from.mail", "sender email address")
+	appcfg.AddPFlag(fs.Serve, &own.FromName, "from.name", "sender email name")
+	appcfg.AddPFlag(fs.Serve, &own.OneSignalAppID, "onesignal.id", "onesignal app id")
+	appcfg.AddPFlag(fs.Serve, &own.OneSignalAppKey, "onesignal.key", "onesignal app key")
 
 	return nil
 }
@@ -176,20 +182,15 @@ func GetServe() (c *Config, err error) {
 		Secrets: Secrets{
 			Keys: []string{own.Secrets.Value(&err)},
 		},
-		Emails: Emails{
-			RequireVerification: false,
-			MaxNumOfAddresses:   50,
-		},
 		ServiceName: ServiceName,
 		Passcode: Passcode{
 			Email: Email{
-				FromAddress: "noah@hellohq.com",
-				FromName:    "HelloHQ Pte. Ltd.",
+				FromAddress: own.FromAddress.Value(&err),
+				FromName:    own.FromName.Value(&err),
 			},
-			Smtp: SMTP{
-				OneSignalAppKey: own.OneSignalAppKey.Value(&err),
-				OneSignalAppID:  own.OneSignalAppID.Value(&err),
-			},
+			OneSignalAppKey: own.OneSignalAppKey.Value(&err),
+			OneSignalAppID:  own.OneSignalAppID.Value(&err),
+			TTL:             int32(own.TTL.Value(&err)),
 		},
 	}
 	if err != nil {

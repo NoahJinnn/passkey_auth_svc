@@ -18,7 +18,7 @@ type Mailer struct {
 func NewMailer(cfg *config.Passcode) *Mailer {
 	configuration := onesignal.NewConfiguration()
 	apiClient := onesignal.NewAPIClient(configuration)
-	authCtx := context.WithValue(context.Background(), onesignal.AppAuth, cfg.Smtp.OneSignalAppKey)
+	authCtx := context.WithValue(context.Background(), onesignal.AppAuth, cfg.OneSignalAppKey)
 	return &Mailer{
 		apiClient,
 		authCtx,
@@ -27,7 +27,7 @@ func NewMailer(cfg *config.Passcode) *Mailer {
 }
 
 func (m *Mailer) Send(email []string, subject string, body string) error {
-	notification := *onesignal.NewNotification(m.cfg.Smtp.OneSignalAppID) // Notification |
+	notification := *onesignal.NewNotification(m.cfg.OneSignalAppID) // Notification |
 	notification.SetEmailSubject(subject)
 	notification.SetEmailFromName(m.cfg.Email.FromName)
 	notification.SetEmailFromAddress(m.cfg.Email.FromAddress)
