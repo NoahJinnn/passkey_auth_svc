@@ -58,6 +58,7 @@ func (r *passcodeRepo) Update(ctx Ctx, pc *ent.Passcode) error {
 		UpdateOne(pc).
 		SetCode(pc.Code).
 		SetTTL(pc.TTL).
+		SetTryCount(pc.TryCount).
 		SetUpdatedAt(pc.UpdatedAt).
 		Save(ctx)
 

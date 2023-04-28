@@ -85,6 +85,7 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 	passcode := e.Group("/passcode")
 	passcodeLogin := passcode.Group("/login")
 	passcodeLogin.POST("/initialize", passcodeHandler.Init)
+	passcodeLogin.POST("/finalize", passcodeHandler.Finish)
 
 	e.Logger.Fatal(e.Start(cfg.Server.BindAddr.String()))
 	return e, nil

@@ -17,6 +17,7 @@ import (
 
 type IPasscodeSvc interface {
 	InitPasscode(ctx Ctx, userId uuid.UUID, emailId uuid.UUID, acceptLang string) (*ent.Passcode, error)
+	FinishPasscode(ctx Ctx, passcodeId uuid.UUID, reqCode string) (*ent.Passcode, error)
 }
 
 type passcodeSvc struct {
@@ -26,6 +27,8 @@ type passcodeSvc struct {
 	mailer            *mail.Mailer
 	renderer          *mail.Renderer
 }
+
+var maxPasscodeTries = 3
 
 func NewPasscodeSvc(cfg *config.Config, repo dal.IRepo) IPasscodeSvc {
 	mailer := mail.NewMailer(&cfg.Passcode)
@@ -126,4 +129,91 @@ func (svc *passcodeSvc) InitPasscode(ctx Ctx, userId uuid.UUID, emailId uuid.UUI
 	}
 
 	return passcodeModel, nil
+}
+
+func (svc *passcodeSvc) FinishPasscode(ctx Ctx, passcodeId uuid.UUID, reqCode string) (*ent.Passcode, error) {
+	startTime := time.Now().UTC()
+	var passcode *ent.Passcode
+	// only if an internal server error occurs the transaction should be rolled back
+	var businessError error
+	if err := svc.repo.WithTx(ctx, func(ctx Ctx, client *ent.Client) error {
+		passcodeRepo := svc.repo.GetPasscodeRepo()
+		userRepo := svc.repo.GetUserRepo()
+
+		passcode, err := passcodeRepo.GetById(ctx, passcodeId)
+		if err != nil {
+			return fmt.Errorf("failed to get passcode: %w", err)
+		}
+		if passcode == nil {
+			// TODO: audit logger
+			if err != nil {
+				return fmt.Errorf("failed to create audit log: %w", err)
+			}
+			businessError = dto.NewHTTPError(http.StatusUnauthorized, "passcode not found")
+			return nil
+		}
+
+		user, err := userRepo.GetById(ctx, passcode.UserID)
+		if err != nil {
+			return fmt.Errorf("failed to get user: %w", err)
+		}
+
+		lastVerificationTime := passcode.CreatedAt.Add(time.Duration(passcode.TTL) * time.Second)
+		if lastVerificationTime.Before(startTime) {
+			// TODO: audit logger
+			if err != nil {
+				return fmt.Errorf("failed to create audit log: %w", err)
+			}
+			businessError = dto.NewHTTPError(http.StatusRequestTimeout, "passcode request timed out").SetInternal(errors.New(fmt.Sprintf("createdAt: %s -> lastVerificationTime: %s", passcode.CreatedAt, lastVerificationTime))) // TODO: maybe we should use BadRequest, because RequestTimeout might be to technical and can refer to different error
+			return nil
+		}
+
+		err = bcrypt.CompareHashAndPassword([]byte(passcode.Code), []byte(reqCode))
+		if err != nil {
+			passcode.TryCount = passcode.TryCount + 1
+
+			if passcode.TryCount >= int32(maxPasscodeTries) {
+				err = passcodeRepo.Delete(ctx, passcode)
+				if err != nil {
+					return fmt.Errorf("failed to delete passcode: %w", err)
+				}
+				// TODO: audit logger
+				if err != nil {
+					return fmt.Errorf("failed to create audit log: %w", err)
+				}
+				businessError = dto.NewHTTPError(http.StatusGone, "max attempts reached")
+				return nil
+			}
+
+			err = passcodeRepo.Update(ctx, passcode)
+			if err != nil {
+				return fmt.Errorf("failed to update passcode: %w", err)
+			}
+
+			// TODO: audit logger
+			if err != nil {
+				return fmt.Errorf("failed to create audit log: %w", err)
+			}
+			businessError = dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("passcode invalid"))
+			return nil
+		}
+
+		err = passcodeRepo.Delete(ctx, passcode)
+		if err != nil {
+			return fmt.Errorf("failed to delete passcode: %w", err)
+		}
+
+		if passcode.Edges.User != nil && passcode.Edges.Email.UserID.String() != user.ID.String() {
+			return dto.NewHTTPError(http.StatusForbidden, "email address has been claimed by another user")
+		}
+		passcode.Edges.Email.UserID = user.ID
+		return nil
+
+	}); err != nil {
+		return nil, err
+	}
+	if businessError != nil {
+		return nil, businessError
+	}
+	return passcode, nil
 }
