@@ -35,22 +35,24 @@ var (
 	shared      *sharedconfig.Shared
 	own         = &struct {
 		// Below envs is loaded by Doppler
-		PostgresUser       appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_LOGIN"`
-		PostgresPass       appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_PASS"`
-		PostgresAddrHost   appcfg.NotEmptyString `env:"AUTH_POSTGRES_ADDR_HOST"`
-		PostgresAddrPort   appcfg.Port           `env:"AUTH_POSTGRES_ADDR_PORT"`
-		PostgresDBName     appcfg.NotEmptyString `env:"AUTH_POSTGRES_DB_NAME"`
-		Secrets            appcfg.NotEmptyString `env:"AUTH_SECRETS"`
-		RpId               appcfg.NotEmptyString `env:"AUTH_RP_ID"`
-		RpOrigin           appcfg.NotEmptyString `env:"AUTH_RP_ORIGIN"`
-		RpOrigins          appcfg.StringSlice    `env:"AUTH_RP_ORIGINS"`
-		IosAssociationSite appcfg.String         `env:"IOS_SITE_ASSOCIATION"`
-		AndroidAssetLinks  appcfg.String         `env:"ANDROID_ASSET_LINKS"`
-		OneSignalAppID     appcfg.String         `env:"ONESIGNAL_APP_ID"`
-		OneSignalAppKey    appcfg.String         `env:"ONESIGNAL_APP_KEY"`
-		FromAddress        appcfg.String         `env:"MAIL_FROM_ADDRESS"`
-		FromName           appcfg.String         `env:"MAIL_FROM_NAME"`
-		TTL                appcfg.Int            `env:"PASSCODE_TTL"`
+		PostgresUser     appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_LOGIN"`
+		PostgresPass     appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_PASS"`
+		PostgresAddrHost appcfg.NotEmptyString `env:"AUTH_POSTGRES_ADDR_HOST"`
+		PostgresAddrPort appcfg.Port           `env:"AUTH_POSTGRES_ADDR_PORT"`
+		PostgresDBName   appcfg.NotEmptyString `env:"AUTH_POSTGRES_DB_NAME"`
+		Secrets          appcfg.NotEmptyString `env:"AUTH_SECRETS"`
+
+		RpId appcfg.NotEmptyString `env:"AUTH_RP_ID"`
+
+		RpOrigins          appcfg.StringSlice `env:"AUTH_RP_ORIGINS"`
+		IosAssociationSite appcfg.String      `env:"IOS_SITE_ASSOCIATION"`
+		AndroidAssetLinks  appcfg.String      `env:"ANDROID_ASSET_LINKS"`
+		OneSignalAppID     appcfg.String      `env:"ONESIGNAL_APP_ID"`
+		OneSignalAppKey    appcfg.String      `env:"ONESIGNAL_APP_KEY"`
+		FromAddress        appcfg.String      `env:"MAIL_FROM_ADDRESS"`
+		FromName           appcfg.String      `env:"MAIL_FROM_NAME"`
+
+		TTL appcfg.Int `env:"PASSCODE_TTL"`
 	}{
 		PostgresUser:     appcfg.MustNotEmptyString(ServiceName),
 		PostgresAddrPort: appcfg.MustPort("5432"),
@@ -58,7 +60,7 @@ var (
 		PostgresDBName:   appcfg.MustNotEmptyString("postgres"),
 		Secrets:          appcfg.MustNotEmptyString("needsToBeAtLeast16"),
 		RpId:             appcfg.MustNotEmptyString("localhost"),
-		RpOrigin:         appcfg.MustNotEmptyString("localhost:17000"),
+		TTL:              appcfg.MustInt("300"),
 	}
 )
 
@@ -120,16 +122,15 @@ func Init(sharedCfg *sharedconfig.Shared, flagsets FlagSets) error {
 		return err
 	}
 
-	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrHost, "host", "host to serve")
-	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrHostInt, "host-int", "internal host to serve")
-	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrPort, "port", "port to serve monolith introspection")
+	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrHost, "auth.host", "host to serve")
+	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrHostInt, "auth.host-int", "internal host to serve")
+	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrPort, "auth.port", "port to serve monolith introspection")
 	appcfg.AddPFlag(fs.Serve, &own.PostgresAddrHost, "postgres.host", "host to connect to PostgreSQL")
 	appcfg.AddPFlag(fs.Serve, &own.PostgresAddrPort, "postgres.port", "port to connect to PostgreSQL")
 	appcfg.AddPFlag(fs.Serve, &own.PostgresDBName, "postgres.dbname", "PostgreSQL database name")
 	appcfg.AddPFlag(fs.Serve, &own.PostgresUser, "postgres.user", "PostgreSQL username")
 	appcfg.AddPFlag(fs.Serve, &own.PostgresPass, "postgres.pass", "PostgreSQL password")
 	appcfg.AddPFlag(fs.Serve, &own.RpId, "wa.id", "Webauthn id")
-	appcfg.AddPFlag(fs.Serve, &own.RpOrigin, "wa.origin", "Webauthn origin")
 	appcfg.AddPFlag(fs.Serve, &own.RpOrigins, "wa.origins", "Webauthn origin")
 	appcfg.AddPFlag(fs.Serve, &own.FromAddress, "from.mail", "sender email address")
 	appcfg.AddPFlag(fs.Serve, &own.FromName, "from.name", "sender email name")
@@ -144,7 +145,8 @@ func GetServe() (c *Config, err error) {
 	defer cleanup()
 	c = &Config{
 		Server: Server{
-			BindAddr: netx.NewAddr(shared.AuthAddrHost.Value(&err), shared.AuthAddrPort.Value(&err)),
+			BindAddr:    netx.NewAddr(shared.AuthAddrHost.Value(&err), shared.AuthAddrPort.Value(&err)),
+			BindAddrInt: netx.NewAddr(shared.AuthAddrHostInt.Value(&err), shared.AuthAddrPort.Value(&err)),
 			Cors: Cors{
 				ExposeHeaders: []string{
 					httplimit.HeaderRateLimitLimit,
