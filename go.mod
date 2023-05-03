@@ -11,7 +11,7 @@ require (
 	github.com/powerman/must v0.1.1
 	github.com/powerman/sensitive v0.0.7
 	github.com/powerman/structlog v0.7.3
-	github.com/prometheus/client_golang v1.14.0
+	github.com/prometheus/client_golang v1.15.1
 	github.com/smartystreets/goconvey v1.7.2
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
@@ -61,7 +61,6 @@ require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/hashicorp/hcl/v2 v2.13.0 // indirect
 	github.com/jmoiron/sqlx v1.3.5 // indirect
-	github.com/kr/pretty v0.3.1 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.1 // indirect
@@ -87,7 +86,7 @@ require (
 	github.com/zclconf/go-cty v1.8.0 // indirect
 	go.uber.org/goleak v1.1.12 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	google.golang.org/protobuf v1.29.0 // indirect
+	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
@@ -225,7 +224,7 @@ require (
 	github.com/powerman/narada4d v1.7.1 // indirect
 	github.com/powerman/tail v0.1.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
-	github.com/prometheus/common v0.39.0 // indirect
+	github.com/prometheus/common v0.42.0 // indirect
 	github.com/prometheus/procfs v0.9.0 // indirect
 	github.com/quasilyte/go-ruleguard v0.3.18 // indirect
 	github.com/quasilyte/gogrep v0.0.0-20221002170852-631b4cfd0c04 // indirect
