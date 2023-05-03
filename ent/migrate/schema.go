@@ -97,28 +97,6 @@ var (
 			},
 		},
 	}
-	// PasswordCredentialsColumns holds the columns for the "password_credentials" table.
-	PasswordCredentialsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "password", Type: field.TypeString},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "user_id", Type: field.TypeUUID, Unique: true, Nullable: true},
-	}
-	// PasswordCredentialsTable holds the schema information for the "password_credentials" table.
-	PasswordCredentialsTable = &schema.Table{
-		Name:       "password_credentials",
-		Columns:    PasswordCredentialsColumns,
-		PrimaryKey: []*schema.Column{PasswordCredentialsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "password_credentials_users_password_credential",
-				Columns:    []*schema.Column{PasswordCredentialsColumns[4]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
 	// PrimaryEmailsColumns holds the columns for the "primary_emails" table.
 	PrimaryEmailsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -252,7 +230,6 @@ var (
 		IdentitiesTable,
 		JwksTable,
 		PasscodesTable,
-		PasswordCredentialsTable,
 		PrimaryEmailsTable,
 		UsersTable,
 		WebauthnCredentialsTable,
@@ -267,7 +244,6 @@ func init() {
 	IdentitiesTable.ForeignKeys[0].RefTable = EmailsTable
 	PasscodesTable.ForeignKeys[0].RefTable = EmailsTable
 	PasscodesTable.ForeignKeys[1].RefTable = UsersTable
-	PasswordCredentialsTable.ForeignKeys[0].RefTable = UsersTable
 	PrimaryEmailsTable.ForeignKeys[0].RefTable = EmailsTable
 	PrimaryEmailsTable.ForeignKeys[1].RefTable = UsersTable
 	WebauthnCredentialsTable.ForeignKeys[0].RefTable = UsersTable

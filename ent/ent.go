@@ -15,7 +15,6 @@ import (
 	"github.com/hellohq/hqservice/ent/identity"
 	"github.com/hellohq/hqservice/ent/jwk"
 	"github.com/hellohq/hqservice/ent/passcode"
-	"github.com/hellohq/hqservice/ent/passwordcredential"
 	"github.com/hellohq/hqservice/ent/primaryemail"
 	"github.com/hellohq/hqservice/ent/user"
 	"github.com/hellohq/hqservice/ent/webauthncredential"
@@ -79,7 +78,6 @@ func columnChecker(table string) func(string) error {
 		identity.Table:                    identity.ValidColumn,
 		jwk.Table:                         jwk.ValidColumn,
 		passcode.Table:                    passcode.ValidColumn,
-		passwordcredential.Table:          passwordcredential.ValidColumn,
 		primaryemail.Table:                primaryemail.ValidColumn,
 		user.Table:                        user.ValidColumn,
 		webauthncredential.Table:          webauthncredential.ValidColumn,

@@ -9,7 +9,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/ent/passwordcredential"
 	"github.com/hellohq/hqservice/ent/primaryemail"
 	"github.com/hellohq/hqservice/ent/user"
 )
@@ -34,15 +33,13 @@ type UserEdges struct {
 	Emails []*Email `json:"emails,omitempty"`
 	// Passcodes holds the value of the passcodes edge.
 	Passcodes []*Passcode `json:"passcodes,omitempty"`
-	// PasswordCredential holds the value of the password_credential edge.
-	PasswordCredential *PasswordCredential `json:"password_credential,omitempty"`
 	// PrimaryEmail holds the value of the primary_email edge.
 	PrimaryEmail *PrimaryEmail `json:"primary_email,omitempty"`
 	// WebauthnCredentials holds the value of the webauthn_credentials edge.
 	WebauthnCredentials []*WebauthnCredential `json:"webauthn_credentials,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [4]bool
 }
 
 // EmailsOrErr returns the Emails value or an error if the edge
@@ -63,23 +60,10 @@ func (e UserEdges) PasscodesOrErr() ([]*Passcode, error) {
 	return nil, &NotLoadedError{edge: "passcodes"}
 }
 
-// PasswordCredentialOrErr returns the PasswordCredential value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) PasswordCredentialOrErr() (*PasswordCredential, error) {
-	if e.loadedTypes[2] {
-		if e.PasswordCredential == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: passwordcredential.Label}
-		}
-		return e.PasswordCredential, nil
-	}
-	return nil, &NotLoadedError{edge: "password_credential"}
-}
-
 // PrimaryEmailOrErr returns the PrimaryEmail value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e UserEdges) PrimaryEmailOrErr() (*PrimaryEmail, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[2] {
 		if e.PrimaryEmail == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: primaryemail.Label}
@@ -92,7 +76,7 @@ func (e UserEdges) PrimaryEmailOrErr() (*PrimaryEmail, error) {
 // WebauthnCredentialsOrErr returns the WebauthnCredentials value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) WebauthnCredentialsOrErr() ([]*WebauthnCredential, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[3] {
 		return e.WebauthnCredentials, nil
 	}
 	return nil, &NotLoadedError{edge: "webauthn_credentials"}
@@ -153,11 +137,6 @@ func (u *User) QueryEmails() *EmailQuery {
 // QueryPasscodes queries the "passcodes" edge of the User entity.
 func (u *User) QueryPasscodes() *PasscodeQuery {
 	return NewUserClient(u.config).QueryPasscodes(u)
-}
-
-// QueryPasswordCredential queries the "password_credential" edge of the User entity.
-func (u *User) QueryPasswordCredential() *PasswordCredentialQuery {
-	return NewUserClient(u.config).QueryPasswordCredential(u)
 }
 
 // QueryPrimaryEmail queries the "primary_email" edge of the User entity.

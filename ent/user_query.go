@@ -14,7 +14,6 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/passcode"
-	"github.com/hellohq/hqservice/ent/passwordcredential"
 	"github.com/hellohq/hqservice/ent/predicate"
 	"github.com/hellohq/hqservice/ent/primaryemail"
 	"github.com/hellohq/hqservice/ent/user"
@@ -30,7 +29,6 @@ type UserQuery struct {
 	predicates              []predicate.User
 	withEmails              *EmailQuery
 	withPasscodes           *PasscodeQuery
-	withPasswordCredential  *PasswordCredentialQuery
 	withPrimaryEmail        *PrimaryEmailQuery
 	withWebauthnCredentials *WebauthnCredentialQuery
 	// intermediate query (i.e. traversal path).
@@ -106,28 +104,6 @@ func (uq *UserQuery) QueryPasscodes() *PasscodeQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(passcode.Table, passcode.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.PasscodesTable, user.PasscodesColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryPasswordCredential chains the current query on the "password_credential" edge.
-func (uq *UserQuery) QueryPasswordCredential() *PasswordCredentialQuery {
-	query := (&PasswordCredentialClient{config: uq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := uq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := uq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(passwordcredential.Table, passwordcredential.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, user.PasswordCredentialTable, user.PasswordCredentialColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -373,7 +349,6 @@ func (uq *UserQuery) Clone() *UserQuery {
 		predicates:              append([]predicate.User{}, uq.predicates...),
 		withEmails:              uq.withEmails.Clone(),
 		withPasscodes:           uq.withPasscodes.Clone(),
-		withPasswordCredential:  uq.withPasswordCredential.Clone(),
 		withPrimaryEmail:        uq.withPrimaryEmail.Clone(),
 		withWebauthnCredentials: uq.withWebauthnCredentials.Clone(),
 		// clone intermediate query.
@@ -401,17 +376,6 @@ func (uq *UserQuery) WithPasscodes(opts ...func(*PasscodeQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withPasscodes = query
-	return uq
-}
-
-// WithPasswordCredential tells the query-builder to eager-load the nodes that are connected to
-// the "password_credential" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithPasswordCredential(opts ...func(*PasswordCredentialQuery)) *UserQuery {
-	query := (&PasswordCredentialClient{config: uq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	uq.withPasswordCredential = query
 	return uq
 }
 
@@ -515,10 +479,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [5]bool{
+		loadedTypes = [4]bool{
 			uq.withEmails != nil,
 			uq.withPasscodes != nil,
-			uq.withPasswordCredential != nil,
 			uq.withPrimaryEmail != nil,
 			uq.withWebauthnCredentials != nil,
 		}
@@ -552,12 +515,6 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := uq.loadPasscodes(ctx, query, nodes,
 			func(n *User) { n.Edges.Passcodes = []*Passcode{} },
 			func(n *User, e *Passcode) { n.Edges.Passcodes = append(n.Edges.Passcodes, e) }); err != nil {
-			return nil, err
-		}
-	}
-	if query := uq.withPasswordCredential; query != nil {
-		if err := uq.loadPasswordCredential(ctx, query, nodes, nil,
-			func(n *User, e *PasswordCredential) { n.Edges.PasswordCredential = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -618,30 +575,6 @@ func (uq *UserQuery) loadPasscodes(ctx context.Context, query *PasscodeQuery, no
 	}
 	query.Where(predicate.Passcode(func(s *sql.Selector) {
 		s.Where(sql.InValues(user.PasscodesColumn, fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.UserID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
-func (uq *UserQuery) loadPasswordCredential(ctx context.Context, query *PasswordCredentialQuery, nodes []*User, init func(*User), assign func(*User, *PasswordCredential)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	query.Where(predicate.PasswordCredential(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.PasswordCredentialColumn, fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

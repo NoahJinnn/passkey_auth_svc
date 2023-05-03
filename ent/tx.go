@@ -20,8 +20,6 @@ type Tx struct {
 	Jwk *JwkClient
 	// Passcode is the client for interacting with the Passcode builders.
 	Passcode *PasscodeClient
-	// PasswordCredential is the client for interacting with the PasswordCredential builders.
-	PasswordCredential *PasswordCredentialClient
 	// PrimaryEmail is the client for interacting with the PrimaryEmail builders.
 	PrimaryEmail *PrimaryEmailClient
 	// User is the client for interacting with the User builders.
@@ -169,7 +167,6 @@ func (tx *Tx) init() {
 	tx.Identity = NewIdentityClient(tx.config)
 	tx.Jwk = NewJwkClient(tx.config)
 	tx.Passcode = NewPasscodeClient(tx.config)
-	tx.PasswordCredential = NewPasswordCredentialClient(tx.config)
 	tx.PrimaryEmail = NewPrimaryEmailClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.WebauthnCredential = NewWebauthnCredentialClient(tx.config)

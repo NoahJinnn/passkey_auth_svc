@@ -19,7 +19,6 @@ import (
 	"github.com/hellohq/hqservice/ent/identity"
 	"github.com/hellohq/hqservice/ent/jwk"
 	"github.com/hellohq/hqservice/ent/passcode"
-	"github.com/hellohq/hqservice/ent/passwordcredential"
 	"github.com/hellohq/hqservice/ent/primaryemail"
 	"github.com/hellohq/hqservice/ent/user"
 	"github.com/hellohq/hqservice/ent/webauthncredential"
@@ -41,8 +40,6 @@ type Client struct {
 	Jwk *JwkClient
 	// Passcode is the client for interacting with the Passcode builders.
 	Passcode *PasscodeClient
-	// PasswordCredential is the client for interacting with the PasswordCredential builders.
-	PasswordCredential *PasswordCredentialClient
 	// PrimaryEmail is the client for interacting with the PrimaryEmail builders.
 	PrimaryEmail *PrimaryEmailClient
 	// User is the client for interacting with the User builders.
@@ -72,7 +69,6 @@ func (c *Client) init() {
 	c.Identity = NewIdentityClient(c.config)
 	c.Jwk = NewJwkClient(c.config)
 	c.Passcode = NewPasscodeClient(c.config)
-	c.PasswordCredential = NewPasswordCredentialClient(c.config)
 	c.PrimaryEmail = NewPrimaryEmailClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.WebauthnCredential = NewWebauthnCredentialClient(c.config)
@@ -165,7 +161,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Identity:                             NewIdentityClient(cfg),
 		Jwk:                                  NewJwkClient(cfg),
 		Passcode:                             NewPasscodeClient(cfg),
-		PasswordCredential:                   NewPasswordCredentialClient(cfg),
 		PrimaryEmail:                         NewPrimaryEmailClient(cfg),
 		User:                                 NewUserClient(cfg),
 		WebauthnCredential:                   NewWebauthnCredentialClient(cfg),
@@ -195,7 +190,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Identity:                             NewIdentityClient(cfg),
 		Jwk:                                  NewJwkClient(cfg),
 		Passcode:                             NewPasscodeClient(cfg),
-		PasswordCredential:                   NewPasswordCredentialClient(cfg),
 		PrimaryEmail:                         NewPrimaryEmailClient(cfg),
 		User:                                 NewUserClient(cfg),
 		WebauthnCredential:                   NewWebauthnCredentialClient(cfg),
@@ -231,9 +225,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Email, c.Identity, c.Jwk, c.Passcode, c.PasswordCredential, c.PrimaryEmail,
-		c.User, c.WebauthnCredential, c.WebauthnCredentialTransport,
-		c.WebauthnSessionData, c.WebauthnSessionDataAllowedCredential,
+		c.Email, c.Identity, c.Jwk, c.Passcode, c.PrimaryEmail, c.User,
+		c.WebauthnCredential, c.WebauthnCredentialTransport, c.WebauthnSessionData,
+		c.WebauthnSessionDataAllowedCredential,
 	} {
 		n.Use(hooks...)
 	}
@@ -243,9 +237,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Email, c.Identity, c.Jwk, c.Passcode, c.PasswordCredential, c.PrimaryEmail,
-		c.User, c.WebauthnCredential, c.WebauthnCredentialTransport,
-		c.WebauthnSessionData, c.WebauthnSessionDataAllowedCredential,
+		c.Email, c.Identity, c.Jwk, c.Passcode, c.PrimaryEmail, c.User,
+		c.WebauthnCredential, c.WebauthnCredentialTransport, c.WebauthnSessionData,
+		c.WebauthnSessionDataAllowedCredential,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -262,8 +256,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Jwk.mutate(ctx, m)
 	case *PasscodeMutation:
 		return c.Passcode.mutate(ctx, m)
-	case *PasswordCredentialMutation:
-		return c.PasswordCredential.mutate(ctx, m)
 	case *PrimaryEmailMutation:
 		return c.PrimaryEmail.mutate(ctx, m)
 	case *UserMutation:
@@ -865,140 +857,6 @@ func (c *PasscodeClient) mutate(ctx context.Context, m *PasscodeMutation) (Value
 	}
 }
 
-// PasswordCredentialClient is a client for the PasswordCredential schema.
-type PasswordCredentialClient struct {
-	config
-}
-
-// NewPasswordCredentialClient returns a client for the PasswordCredential from the given config.
-func NewPasswordCredentialClient(c config) *PasswordCredentialClient {
-	return &PasswordCredentialClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `passwordcredential.Hooks(f(g(h())))`.
-func (c *PasswordCredentialClient) Use(hooks ...Hook) {
-	c.hooks.PasswordCredential = append(c.hooks.PasswordCredential, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `passwordcredential.Intercept(f(g(h())))`.
-func (c *PasswordCredentialClient) Intercept(interceptors ...Interceptor) {
-	c.inters.PasswordCredential = append(c.inters.PasswordCredential, interceptors...)
-}
-
-// Create returns a builder for creating a PasswordCredential entity.
-func (c *PasswordCredentialClient) Create() *PasswordCredentialCreate {
-	mutation := newPasswordCredentialMutation(c.config, OpCreate)
-	return &PasswordCredentialCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of PasswordCredential entities.
-func (c *PasswordCredentialClient) CreateBulk(builders ...*PasswordCredentialCreate) *PasswordCredentialCreateBulk {
-	return &PasswordCredentialCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for PasswordCredential.
-func (c *PasswordCredentialClient) Update() *PasswordCredentialUpdate {
-	mutation := newPasswordCredentialMutation(c.config, OpUpdate)
-	return &PasswordCredentialUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *PasswordCredentialClient) UpdateOne(pc *PasswordCredential) *PasswordCredentialUpdateOne {
-	mutation := newPasswordCredentialMutation(c.config, OpUpdateOne, withPasswordCredential(pc))
-	return &PasswordCredentialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *PasswordCredentialClient) UpdateOneID(id uuid.UUID) *PasswordCredentialUpdateOne {
-	mutation := newPasswordCredentialMutation(c.config, OpUpdateOne, withPasswordCredentialID(id))
-	return &PasswordCredentialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for PasswordCredential.
-func (c *PasswordCredentialClient) Delete() *PasswordCredentialDelete {
-	mutation := newPasswordCredentialMutation(c.config, OpDelete)
-	return &PasswordCredentialDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *PasswordCredentialClient) DeleteOne(pc *PasswordCredential) *PasswordCredentialDeleteOne {
-	return c.DeleteOneID(pc.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *PasswordCredentialClient) DeleteOneID(id uuid.UUID) *PasswordCredentialDeleteOne {
-	builder := c.Delete().Where(passwordcredential.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &PasswordCredentialDeleteOne{builder}
-}
-
-// Query returns a query builder for PasswordCredential.
-func (c *PasswordCredentialClient) Query() *PasswordCredentialQuery {
-	return &PasswordCredentialQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypePasswordCredential},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a PasswordCredential entity by its id.
-func (c *PasswordCredentialClient) Get(ctx context.Context, id uuid.UUID) (*PasswordCredential, error) {
-	return c.Query().Where(passwordcredential.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *PasswordCredentialClient) GetX(ctx context.Context, id uuid.UUID) *PasswordCredential {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryUser queries the user edge of a PasswordCredential.
-func (c *PasswordCredentialClient) QueryUser(pc *PasswordCredential) *UserQuery {
-	query := (&UserClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pc.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(passwordcredential.Table, passwordcredential.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, passwordcredential.UserTable, passwordcredential.UserColumn),
-		)
-		fromV = sqlgraph.Neighbors(pc.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *PasswordCredentialClient) Hooks() []Hook {
-	return c.hooks.PasswordCredential
-}
-
-// Interceptors returns the client interceptors.
-func (c *PasswordCredentialClient) Interceptors() []Interceptor {
-	return c.inters.PasswordCredential
-}
-
-func (c *PasswordCredentialClient) mutate(ctx context.Context, m *PasswordCredentialMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&PasswordCredentialCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&PasswordCredentialUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&PasswordCredentialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&PasswordCredentialDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown PasswordCredential mutation op: %q", m.Op())
-	}
-}
-
 // PrimaryEmailClient is a client for the PrimaryEmail schema.
 type PrimaryEmailClient struct {
 	config
@@ -1267,22 +1125,6 @@ func (c *UserClient) QueryPasscodes(u *User) *PasscodeQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(passcode.Table, passcode.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.PasscodesTable, user.PasscodesColumn),
-		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryPasswordCredential queries the password_credential edge of a User.
-func (c *UserClient) QueryPasswordCredential(u *User) *PasswordCredentialQuery {
-	query := (&PasswordCredentialClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(passwordcredential.Table, passwordcredential.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, user.PasswordCredentialTable, user.PasswordCredentialColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -1902,13 +1744,13 @@ func (c *WebauthnSessionDataAllowedCredentialClient) mutate(ctx context.Context,
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Email, Identity, Jwk, Passcode, PasswordCredential, PrimaryEmail, User,
-		WebauthnCredential, WebauthnCredentialTransport, WebauthnSessionData,
+		Email, Identity, Jwk, Passcode, PrimaryEmail, User, WebauthnCredential,
+		WebauthnCredentialTransport, WebauthnSessionData,
 		WebauthnSessionDataAllowedCredential []ent.Hook
 	}
 	inters struct {
-		Email, Identity, Jwk, Passcode, PasswordCredential, PrimaryEmail, User,
-		WebauthnCredential, WebauthnCredentialTransport, WebauthnSessionData,
+		Email, Identity, Jwk, Passcode, PrimaryEmail, User, WebauthnCredential,
+		WebauthnCredentialTransport, WebauthnSessionData,
 		WebauthnSessionDataAllowedCredential []ent.Interceptor
 	}
 )

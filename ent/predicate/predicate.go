@@ -18,9 +18,6 @@ type Jwk func(*sql.Selector)
 // Passcode is the predicate function for passcode builders.
 type Passcode func(*sql.Selector)
 
-// PasswordCredential is the predicate function for passwordcredential builders.
-type PasswordCredential func(*sql.Selector)
-
 // PrimaryEmail is the predicate function for primaryemail builders.
 type PrimaryEmail func(*sql.Selector)
 

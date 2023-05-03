@@ -10,7 +10,6 @@ import (
 	"github.com/hellohq/hqservice/ent/identity"
 	"github.com/hellohq/hqservice/ent/jwk"
 	"github.com/hellohq/hqservice/ent/passcode"
-	"github.com/hellohq/hqservice/ent/passwordcredential"
 	"github.com/hellohq/hqservice/ent/primaryemail"
 	"github.com/hellohq/hqservice/ent/schema"
 	"github.com/hellohq/hqservice/ent/user"
@@ -78,22 +77,6 @@ func init() {
 	passcodeDescID := passcodeFields[0].Descriptor()
 	// passcode.DefaultID holds the default value on creation for the id field.
 	passcode.DefaultID = passcodeDescID.Default.(func() uuid.UUID)
-	passwordcredentialFields := schema.PasswordCredential{}.Fields()
-	_ = passwordcredentialFields
-	// passwordcredentialDescCreatedAt is the schema descriptor for created_at field.
-	passwordcredentialDescCreatedAt := passwordcredentialFields[3].Descriptor()
-	// passwordcredential.DefaultCreatedAt holds the default value on creation for the created_at field.
-	passwordcredential.DefaultCreatedAt = passwordcredentialDescCreatedAt.Default.(func() time.Time)
-	// passwordcredentialDescUpdatedAt is the schema descriptor for updated_at field.
-	passwordcredentialDescUpdatedAt := passwordcredentialFields[4].Descriptor()
-	// passwordcredential.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	passwordcredential.DefaultUpdatedAt = passwordcredentialDescUpdatedAt.Default.(func() time.Time)
-	// passwordcredential.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	passwordcredential.UpdateDefaultUpdatedAt = passwordcredentialDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// passwordcredentialDescID is the schema descriptor for id field.
-	passwordcredentialDescID := passwordcredentialFields[0].Descriptor()
-	// passwordcredential.DefaultID holds the default value on creation for the id field.
-	passwordcredential.DefaultID = passwordcredentialDescID.Default.(func() uuid.UUID)
 	primaryemailFields := schema.PrimaryEmail{}.Fields()
 	_ = primaryemailFields
 	// primaryemailDescCreatedAt is the schema descriptor for created_at field.
