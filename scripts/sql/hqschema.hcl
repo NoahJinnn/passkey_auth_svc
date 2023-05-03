@@ -163,42 +163,6 @@ table "passcodes" {
     on_delete   = SET_NULL
   }
 }
-table "password_credentials" {
-  schema = schema.public
-  column "id" {
-    null = false
-    type = uuid
-  }
-  column "password" {
-    null = false
-    type = character_varying
-  }
-  column "created_at" {
-    null = false
-    type = timestamptz
-  }
-  column "updated_at" {
-    null = false
-    type = timestamptz
-  }
-  column "user_id" {
-    null = true
-    type = uuid
-  }
-  primary_key {
-    columns = [column.id]
-  }
-  foreign_key "password_credentials_users_password_credential" {
-    columns     = [column.user_id]
-    ref_columns = [table.users.column.id]
-    on_update   = NO_ACTION
-    on_delete   = SET_NULL
-  }
-  index "password_credentials_user_id_key" {
-    unique  = true
-    columns = [column.user_id]
-  }
-}
 table "primary_emails" {
   schema = schema.public
   column "id" {

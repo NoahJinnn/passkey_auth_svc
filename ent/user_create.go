@@ -13,7 +13,6 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/passcode"
-	"github.com/hellohq/hqservice/ent/passwordcredential"
 	"github.com/hellohq/hqservice/ent/primaryemail"
 	"github.com/hellohq/hqservice/ent/user"
 	"github.com/hellohq/hqservice/ent/webauthncredential"
@@ -96,25 +95,6 @@ func (uc *UserCreate) AddPasscodes(p ...*Passcode) *UserCreate {
 		ids[i] = p[i].ID
 	}
 	return uc.AddPasscodeIDs(ids...)
-}
-
-// SetPasswordCredentialID sets the "password_credential" edge to the PasswordCredential entity by ID.
-func (uc *UserCreate) SetPasswordCredentialID(id uuid.UUID) *UserCreate {
-	uc.mutation.SetPasswordCredentialID(id)
-	return uc
-}
-
-// SetNillablePasswordCredentialID sets the "password_credential" edge to the PasswordCredential entity by ID if the given value is not nil.
-func (uc *UserCreate) SetNillablePasswordCredentialID(id *uuid.UUID) *UserCreate {
-	if id != nil {
-		uc = uc.SetPasswordCredentialID(*id)
-	}
-	return uc
-}
-
-// SetPasswordCredential sets the "password_credential" edge to the PasswordCredential entity.
-func (uc *UserCreate) SetPasswordCredential(p *PasswordCredential) *UserCreate {
-	return uc.SetPasswordCredentialID(p.ID)
 }
 
 // SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID.
@@ -281,25 +261,6 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: passcode.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := uc.mutation.PasswordCredentialIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.PasswordCredentialTable,
-			Columns: []string{user.PasswordCredentialColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: passwordcredential.FieldID,
 				},
 			},
 		}

@@ -200,33 +200,6 @@ func HasPasscodesWith(preds ...predicate.Passcode) predicate.User {
 	})
 }
 
-// HasPasswordCredential applies the HasEdge predicate on the "password_credential" edge.
-func HasPasswordCredential() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, PasswordCredentialTable, PasswordCredentialColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasPasswordCredentialWith applies the HasEdge predicate on the "password_credential" edge with a given conditions (other predicates).
-func HasPasswordCredentialWith(preds ...predicate.PasswordCredential) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PasswordCredentialInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, PasswordCredentialTable, PasswordCredentialColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasPrimaryEmail applies the HasEdge predicate on the "primary_email" edge.
 func HasPrimaryEmail() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

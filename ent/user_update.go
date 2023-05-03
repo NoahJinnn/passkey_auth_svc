@@ -14,7 +14,6 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/passcode"
-	"github.com/hellohq/hqservice/ent/passwordcredential"
 	"github.com/hellohq/hqservice/ent/predicate"
 	"github.com/hellohq/hqservice/ent/primaryemail"
 	"github.com/hellohq/hqservice/ent/user"
@@ -68,25 +67,6 @@ func (uu *UserUpdate) AddPasscodes(p ...*Passcode) *UserUpdate {
 		ids[i] = p[i].ID
 	}
 	return uu.AddPasscodeIDs(ids...)
-}
-
-// SetPasswordCredentialID sets the "password_credential" edge to the PasswordCredential entity by ID.
-func (uu *UserUpdate) SetPasswordCredentialID(id uuid.UUID) *UserUpdate {
-	uu.mutation.SetPasswordCredentialID(id)
-	return uu
-}
-
-// SetNillablePasswordCredentialID sets the "password_credential" edge to the PasswordCredential entity by ID if the given value is not nil.
-func (uu *UserUpdate) SetNillablePasswordCredentialID(id *uuid.UUID) *UserUpdate {
-	if id != nil {
-		uu = uu.SetPasswordCredentialID(*id)
-	}
-	return uu
-}
-
-// SetPasswordCredential sets the "password_credential" edge to the PasswordCredential entity.
-func (uu *UserUpdate) SetPasswordCredential(p *PasswordCredential) *UserUpdate {
-	return uu.SetPasswordCredentialID(p.ID)
 }
 
 // SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID.
@@ -168,12 +148,6 @@ func (uu *UserUpdate) RemovePasscodes(p ...*Passcode) *UserUpdate {
 		ids[i] = p[i].ID
 	}
 	return uu.RemovePasscodeIDs(ids...)
-}
-
-// ClearPasswordCredential clears the "password_credential" edge to the PasswordCredential entity.
-func (uu *UserUpdate) ClearPasswordCredential() *UserUpdate {
-	uu.mutation.ClearPasswordCredential()
-	return uu
 }
 
 // ClearPrimaryEmail clears the "primary_email" edge to the PrimaryEmail entity.
@@ -359,41 +333,6 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.PasswordCredentialCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.PasswordCredentialTable,
-			Columns: []string{user.PasswordCredentialColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: passwordcredential.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.PasswordCredentialIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.PasswordCredentialTable,
-			Columns: []string{user.PasswordCredentialColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: passwordcredential.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if uu.mutation.PrimaryEmailCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -539,25 +478,6 @@ func (uuo *UserUpdateOne) AddPasscodes(p ...*Passcode) *UserUpdateOne {
 	return uuo.AddPasscodeIDs(ids...)
 }
 
-// SetPasswordCredentialID sets the "password_credential" edge to the PasswordCredential entity by ID.
-func (uuo *UserUpdateOne) SetPasswordCredentialID(id uuid.UUID) *UserUpdateOne {
-	uuo.mutation.SetPasswordCredentialID(id)
-	return uuo
-}
-
-// SetNillablePasswordCredentialID sets the "password_credential" edge to the PasswordCredential entity by ID if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillablePasswordCredentialID(id *uuid.UUID) *UserUpdateOne {
-	if id != nil {
-		uuo = uuo.SetPasswordCredentialID(*id)
-	}
-	return uuo
-}
-
-// SetPasswordCredential sets the "password_credential" edge to the PasswordCredential entity.
-func (uuo *UserUpdateOne) SetPasswordCredential(p *PasswordCredential) *UserUpdateOne {
-	return uuo.SetPasswordCredentialID(p.ID)
-}
-
 // SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID.
 func (uuo *UserUpdateOne) SetPrimaryEmailID(id uuid.UUID) *UserUpdateOne {
 	uuo.mutation.SetPrimaryEmailID(id)
@@ -637,12 +557,6 @@ func (uuo *UserUpdateOne) RemovePasscodes(p ...*Passcode) *UserUpdateOne {
 		ids[i] = p[i].ID
 	}
 	return uuo.RemovePasscodeIDs(ids...)
-}
-
-// ClearPasswordCredential clears the "password_credential" edge to the PasswordCredential entity.
-func (uuo *UserUpdateOne) ClearPasswordCredential() *UserUpdateOne {
-	uuo.mutation.ClearPasswordCredential()
-	return uuo
 }
 
 // ClearPrimaryEmail clears the "primary_email" edge to the PrimaryEmail entity.
@@ -850,41 +764,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: passcode.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if uuo.mutation.PasswordCredentialCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.PasswordCredentialTable,
-			Columns: []string{user.PasswordCredentialColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: passwordcredential.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.PasswordCredentialIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.PasswordCredentialTable,
-			Columns: []string{user.PasswordCredentialColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: passwordcredential.FieldID,
 				},
 			},
 		}

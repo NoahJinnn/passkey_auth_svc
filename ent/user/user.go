@@ -21,8 +21,6 @@ const (
 	EdgeEmails = "emails"
 	// EdgePasscodes holds the string denoting the passcodes edge name in mutations.
 	EdgePasscodes = "passcodes"
-	// EdgePasswordCredential holds the string denoting the password_credential edge name in mutations.
-	EdgePasswordCredential = "password_credential"
 	// EdgePrimaryEmail holds the string denoting the primary_email edge name in mutations.
 	EdgePrimaryEmail = "primary_email"
 	// EdgeWebauthnCredentials holds the string denoting the webauthn_credentials edge name in mutations.
@@ -43,13 +41,6 @@ const (
 	PasscodesInverseTable = "passcodes"
 	// PasscodesColumn is the table column denoting the passcodes relation/edge.
 	PasscodesColumn = "user_id"
-	// PasswordCredentialTable is the table that holds the password_credential relation/edge.
-	PasswordCredentialTable = "password_credentials"
-	// PasswordCredentialInverseTable is the table name for the PasswordCredential entity.
-	// It exists in this package in order to avoid circular dependency with the "passwordcredential" package.
-	PasswordCredentialInverseTable = "password_credentials"
-	// PasswordCredentialColumn is the table column denoting the password_credential relation/edge.
-	PasswordCredentialColumn = "user_id"
 	// PrimaryEmailTable is the table that holds the primary_email relation/edge.
 	PrimaryEmailTable = "primary_emails"
 	// PrimaryEmailInverseTable is the table name for the PrimaryEmail entity.
