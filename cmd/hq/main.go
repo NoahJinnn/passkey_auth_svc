@@ -37,32 +37,32 @@ var (
 	log                     = structlog.New(structlog.KeyUnit, "main")
 	logLevel                = appcfg.MustOneOfString("debug", []string{"debug", "info", "warn", "err"})
 	ErrRequireFlagOrCommand = errors.New("require flag or command")
-	rootCmd                 = &cobra.Command{
+	// RequireFlagOrCommand should be used as cobra.Command.RunE for "empty"
+	// commands which are just a containers for subcommands.
+	RequireFlagOrCommand = func(_ *cobra.Command, _ []string) error {
+		return ErrRequireFlagOrCommand
+	}
+	serveStartupTimeout  = appcfg.MustDuration("3s") // must be less than swarm's deploy.update_config.monitor
+	serveShutdownTimeout = appcfg.MustDuration("9s") // `docker stop` use 10s between SIGTERM and SIGKILL
+
+	rootCmd = &cobra.Command{
 		Use:           def.ProgName,
 		Short:         "Example monolith with embedded microservices",
 		Version:       fmt.Sprintf("%s %s", def.Version(), runtime.Version()),
 		SilenceErrors: true,
 		SilenceUsage:  true,
-		RunE: func(_ *cobra.Command, _ []string) error {
-			return ErrRequireFlagOrCommand
-		},
+		RunE:          RequireFlagOrCommand,
 	}
-
-	serveStartupTimeout  = appcfg.MustDuration("3s") // must be less than swarm's deploy.update_config.monitor
-	serveShutdownTimeout = appcfg.MustDuration("9s") // `docker stop` use 10s between SIGTERM and SIGKILL
-	serveCmd             = &cobra.Command{
+	serveCmd = &cobra.Command{
 		Use:   "serve",
 		Short: "Starts embedded microservices",
 		Args:  cobra.NoArgs,
 		RunE:  runServeWithGracefulShutdown,
 	}
-
 	msCmd = &cobra.Command{
 		Use:   "ms",
 		Short: "Run given embedded microservice's command",
-		RunE: func(_ *cobra.Command, _ []string) error {
-			return ErrRequireFlagOrCommand
-		},
+		RunE:  RequireFlagOrCommand,
 	}
 )
 
@@ -88,9 +88,7 @@ func main() {
 		cmd := &cobra.Command{
 			Use:   name,
 			Short: fmt.Sprintf("Run %s microservice's command", name),
-			RunE: func(_ *cobra.Command, _ []string) error {
-				return ErrRequireFlagOrCommand
-			},
+			RunE:  RequireFlagOrCommand,
 		}
 		err := service.Init(cfg, cmd, serveCmd)
 		if err != nil {
