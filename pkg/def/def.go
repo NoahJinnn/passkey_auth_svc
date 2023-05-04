@@ -2,7 +2,6 @@
 package def
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/powerman/getenv"
@@ -25,8 +24,5 @@ func Init() error {
 	must.AbortIf = must.PanicIf
 	sensitive.Redact()
 	setupLog()
-	if hostnameErr != nil {
-		return fmt.Errorf("os.Hostname: %w", hostnameErr)
-	}
 	return getenv.LastErr()
 }

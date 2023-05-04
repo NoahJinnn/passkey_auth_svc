@@ -11,11 +11,9 @@ import (
 	"github.com/hellohq/hqservice/ms/auth/dal"
 	server "github.com/hellohq/hqservice/ms/auth/srv/http"
 	"github.com/hellohq/hqservice/pkg/concurrent"
-	"github.com/hellohq/hqservice/pkg/serve"
 	"github.com/labstack/echo/v4"
 	"github.com/powerman/pqx"
 	"github.com/powerman/structlog"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/cobra"
 )
 
@@ -65,7 +63,6 @@ func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func()) (er
 	}
 
 	err = concurrent.Serve(ctxShutdown, shutdown,
-		s.serveMetrics,
 		s.serveEcho,
 	)
 
@@ -81,12 +78,6 @@ func (s *Service) serveEcho(ctx Ctx) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 	return e.Start(":1323")
-}
-
-var reg = prometheus.NewPedanticRegistry()
-
-func (s *Service) serveMetrics(ctx Ctx) error {
-	return serve.Metrics(ctx, s.cfg.Server.BindMetricsAddr, reg)
 }
 
 func (s *Service) connectRepo(ctx Ctx) (interface{}, error) {

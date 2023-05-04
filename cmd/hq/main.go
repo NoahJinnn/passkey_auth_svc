@@ -3,6 +3,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -12,11 +13,9 @@ import (
 
 	"github.com/hellohq/hqservice/internal/sharedconfig"
 	auth "github.com/hellohq/hqservice/ms/auth"
+	"github.com/hellohq/hqservice/pkg/concurrent"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/powerman/appcfg"
-	"github.com/powerman/go-monolith-example/pkg/cobrax"
-	"github.com/powerman/go-monolith-example/pkg/concurrent"
-
 	"github.com/powerman/structlog"
 	"github.com/spf13/cobra"
 )
@@ -35,17 +34,18 @@ var (
 	embeddedServices = []embeddedService{
 		&auth.Service{},
 	}
-
-	log = structlog.New(structlog.KeyUnit, "main")
-
-	logLevel = appcfg.MustOneOfString("debug", []string{"debug", "info", "warn", "err"})
-	rootCmd  = &cobra.Command{
+	log                     = structlog.New(structlog.KeyUnit, "main")
+	logLevel                = appcfg.MustOneOfString("debug", []string{"debug", "info", "warn", "err"})
+	ErrRequireFlagOrCommand = errors.New("require flag or command")
+	rootCmd                 = &cobra.Command{
 		Use:           def.ProgName,
 		Short:         "Example monolith with embedded microservices",
 		Version:       fmt.Sprintf("%s %s", def.Version(), runtime.Version()),
 		SilenceErrors: true,
 		SilenceUsage:  true,
-		RunE:          cobrax.RequireFlagOrCommand,
+		RunE: func(_ *cobra.Command, _ []string) error {
+			return ErrRequireFlagOrCommand
+		},
 	}
 
 	serveStartupTimeout  = appcfg.MustDuration("3s") // must be less than swarm's deploy.update_config.monitor
@@ -60,7 +60,9 @@ var (
 	msCmd = &cobra.Command{
 		Use:   "ms",
 		Short: "Run given embedded microservice's command",
-		RunE:  cobrax.RequireFlagOrCommand,
+		RunE: func(_ *cobra.Command, _ []string) error {
+			return ErrRequireFlagOrCommand
+		},
 	}
 )
 
@@ -86,7 +88,9 @@ func main() {
 		cmd := &cobra.Command{
 			Use:   name,
 			Short: fmt.Sprintf("Run %s microservice's command", name),
-			RunE:  cobrax.RequireFlagOrCommand,
+			RunE: func(_ *cobra.Command, _ []string) error {
+				return ErrRequireFlagOrCommand
+			},
 		}
 		err := service.Init(cfg, cmd, serveCmd)
 		if err != nil {
