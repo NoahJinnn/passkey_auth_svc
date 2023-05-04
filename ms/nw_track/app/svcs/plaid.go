@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hellohq/hqservice/ms/auth/config"
+	"github.com/hellohq/hqservice/ms/nw_track/config"
 	plaid "github.com/plaid/plaid-go/v3/plaid"
 )
 
