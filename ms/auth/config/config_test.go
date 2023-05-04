@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 	"testing"
 
@@ -150,5 +151,11 @@ func Test(t *testing.T) {
 	t.Run("cleanup", func(tt *testing.T) {
 		t := check.T(tt)
 		t.Panic(func() { GetServe() })
+		err := os.RemoveAll("static")
+		if err != nil {
+			log.Println(err)
+		} else {
+			log.Println("Directory removed successfully")
+		}
 	})
 }

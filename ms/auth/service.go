@@ -1,5 +1,5 @@
-// Package hq provides embedded microservice.
-package hq
+// Package auth provides embedded microservice.
+package auth
 
 import (
 	"context"
