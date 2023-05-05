@@ -3,10 +3,11 @@ package http
 import (
 	"fmt"
 
+	"github.com/hellohq/hqservice/internal/http/sharedDto"
+	"github.com/hellohq/hqservice/internal/http/sharedMiddlewares"
 	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
-	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/handlers"
 	hqMiddlewares "github.com/hellohq/hqservice/ms/auth/srv/http/middlewares"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/session"
@@ -33,9 +34,9 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 	e.HideBanner = true
 
 	// TODO: Turn Debug to "false" in production
-	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: true, Logger: e.Logger})
+	e.HTTPErrorHandler = sharedDto.NewHTTPErrorHandler(sharedDto.HTTPErrorHandlerConfig{Debug: true, Logger: e.Logger})
 	e.Use(middleware.RequestID())
-	e.Use(hqMiddlewares.GetLoggerMiddleware())
+	e.Use(sharedMiddlewares.GetLoggerMiddleware())
 
 	if cfg.Server.Cors.Enabled {
 		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -48,7 +49,7 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 		}))
 	}
 
-	e.Validator = dto.NewCustomValidator()
+	e.Validator = sharedDto.NewCustomValidator()
 	jwkManager, err := session.NewDefaultManager(cfg.Secrets.Keys, repo.GetJwkRepo())
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
