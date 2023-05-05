@@ -71,11 +71,11 @@ func Init(sharedCfg *sharedConfig.Shared, flagsets FlagSets) error {
 	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrHost, "networth.host", "host to serve")
 	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrHostInt, "networth.host-int", "internal host to serve")
 	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrPort, "networth.port", "port to serve monolith introspection")
-	appcfg.AddPFlag(fs.Serve, &own.PostgresAddrHost, "postgres.host", "host to connect to PostgreSQL")
-	appcfg.AddPFlag(fs.Serve, &own.PostgresAddrPort, "postgres.port", "port to connect to PostgreSQL")
-	appcfg.AddPFlag(fs.Serve, &own.PostgresDBName, "postgres.dbname", "PostgreSQL database name")
-	appcfg.AddPFlag(fs.Serve, &own.PostgresUser, "postgres.user", "PostgreSQL username")
-	appcfg.AddPFlag(fs.Serve, &own.PostgresPass, "postgres.pass", "PostgreSQL password")
+	appcfg.AddPFlag(fs.Serve, &own.PostgresAddrHost, "networth.postgres.host", "host to connect to PostgreSQL")
+	appcfg.AddPFlag(fs.Serve, &own.PostgresAddrPort, "networth.postgres.port", "port to connect to PostgreSQL")
+	appcfg.AddPFlag(fs.Serve, &own.PostgresDBName, "networth.postgres.dbname", "PostgreSQL database name")
+	appcfg.AddPFlag(fs.Serve, &own.PostgresUser, "networth.postgres.user", "PostgreSQL username")
+	appcfg.AddPFlag(fs.Serve, &own.PostgresPass, "networth.postgres.pass", "PostgreSQL password")
 
 	return nil
 }
@@ -111,6 +111,9 @@ func GetServe() (c *Config, err error) {
 				Secure:   true,
 			},
 			EnableAuthTokenHeader: true,
+		},
+		Secrets: authCfg.Secrets{
+			Keys: []string{own.Secrets.Value(&err)},
 		},
 	}
 	if err != nil {

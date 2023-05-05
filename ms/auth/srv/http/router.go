@@ -24,7 +24,7 @@ type (
 
 // NewServer returns Echo server configured to listen on the TCP network
 // address cfg.Host:cfg.Port and handle requests on incoming connections.
-func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, error) {
+func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) error {
 	srv := &handlers.HttpDeps{
 		Appl: appl,
 		Cfg:  cfg,
@@ -92,5 +92,5 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 	passcodeLogin.POST("/finalize", passcodeHandler.Finish)
 
 	e.Logger.Fatal(e.Start(cfg.Server.BindAddr.String()))
-	return e, nil
+	return nil
 }
