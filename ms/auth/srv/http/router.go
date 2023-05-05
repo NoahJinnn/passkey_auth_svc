@@ -4,12 +4,13 @@ import (
 	"fmt"
 
 	"github.com/hellohq/hqservice/internal/http/sharedDto"
+	"github.com/hellohq/hqservice/internal/http/sharedHandlers"
 	"github.com/hellohq/hqservice/internal/http/sharedMiddlewares"
 	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/authMiddleware"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/handlers"
-	hqMiddlewares "github.com/hellohq/hqservice/ms/auth/srv/http/middlewares"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -59,17 +60,19 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
 
-	// TODO: Impl user handlers
+	healthHandler := sharedHandlers.NewHealthHandler()
+	e.GET("/ready", healthHandler.Ready)
+	e.GET("/alive", healthHandler.Alive)
+
 	user := e.Group("/users")
 	userHandler := handlers.NewUserHandler(srv, sessionManager)
 	user.POST("", userHandler.Create)
-	user.GET("/:id", userHandler.Get, hqMiddlewares.Session(sessionManager))
-	e.POST("/logout", userHandler.Logout, hqMiddlewares.Session(sessionManager))
-	// e.POST("/user", userHandler.GetUserIdByEmail)
+	user.GET("/:id", userHandler.Get, authMiddleware.Session(sessionManager))
+	e.POST("/logout", userHandler.Logout, authMiddleware.Session(sessionManager))
 
 	webauthnHandler := handlers.NewWebauthnHandler(srv, sessionManager)
 	webauthn := e.Group("/webauthn")
-	webauthnRegistration := webauthn.Group("/registration", hqMiddlewares.Session(sessionManager))
+	webauthnRegistration := webauthn.Group("/registration", authMiddleware.Session(sessionManager))
 	webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
 	webauthnRegistration.POST("/finalize", webauthnHandler.FinishRegistration)
 
@@ -77,7 +80,7 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 	webauthnLogin.POST("/initialize", webauthnHandler.BeginLogin)
 	webauthnLogin.POST("/finalize", webauthnHandler.FinishLogin)
 
-	webauthnCredentials := webauthn.Group("/credentials", hqMiddlewares.Session(sessionManager))
+	webauthnCredentials := webauthn.Group("/credentials", authMiddleware.Session(sessionManager))
 	webauthnCredentials.GET("", webauthnHandler.ListCredentials)
 	webauthnCredentials.PATCH("/:id", webauthnHandler.UpdateCredential)
 	webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)

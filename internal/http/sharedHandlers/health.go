@@ -1,4 +1,4 @@
-package handlers
+package sharedHandlers
 
 import (
 	"net/http"

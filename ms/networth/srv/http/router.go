@@ -4,7 +4,9 @@ import (
 	"fmt"
 
 	"github.com/hellohq/hqservice/internal/http/sharedDto"
+	"github.com/hellohq/hqservice/internal/http/sharedHandlers"
 	"github.com/hellohq/hqservice/internal/http/sharedMiddlewares"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/authMiddleware"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/session"
 	"github.com/hellohq/hqservice/ms/networth/app"
 	"github.com/hellohq/hqservice/ms/networth/config"
@@ -24,10 +26,10 @@ type (
 // NewServer returns Echo server configured to listen on the TCP network
 // address cfg.Host:cfg.Port and handle requests on incoming connections.
 func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, error) {
-	srv := &handlers.HttpDeps{
-		Appl: appl,
-		Cfg:  cfg,
-	}
+	// srv := &handlers.HttpDeps{
+	// 	Appl: appl,
+	// 	Cfg:  cfg,
+	// }
 	e := echo.New()
 	e.HideBanner = true
 
@@ -56,6 +58,15 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 	if err != nil {
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
+
+	healthHandler := sharedHandlers.NewHealthHandler()
+	e.GET("/ready", healthHandler.Ready)
+	e.GET("/alive", healthHandler.Alive)
+
+	nwHandler := handlers.NewNetworthHandler()
+	nw := e.Group("/nw")
+	nw.GET("/:id", nwHandler.Get, authMiddleware.Session(sessionManager))
+
 	e.Logger.Fatal(e.Start(cfg.Server.BindAddr.String()))
 	return e, nil
 }
