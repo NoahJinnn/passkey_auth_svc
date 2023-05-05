@@ -130,13 +130,13 @@ docker volume rm hqservice_postgres
 #### Run directly, without building
 
 ```bash
-# cmd/hq/main.go is the entry point with the `main` function
+# main.go is the entry point with the `main` function
 task scripts:run
 ```
 
 #### Run with command args
 ```bash
-# cmd/hq/main.go is the entry point with the `main` function
+# main.go is the entry point with the `main` function
 task scripts:run -- --port 17002 --wa.id example --wa.origins https://example.com,android:apk-key-hash:your_apk_hash  # Specific auth service running on port `17002` with webauthn ID equals `example`; webauthn origns equals `https://example.com,android:apk-key-hash:your_apk_hash`  
 ```
 #### Build first, then run
