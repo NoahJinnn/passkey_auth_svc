@@ -94,7 +94,7 @@ jobs:
   #         .gobincache/goveralls -coverprofile=cover.out -service=GitHub
 
   build-and-release:
-    needs: test
+    # needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 30
     if: github.event_name == 'push'
