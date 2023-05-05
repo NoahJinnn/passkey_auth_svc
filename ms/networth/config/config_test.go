@@ -48,8 +48,6 @@ var (
 			},
 			EnableAuthTokenHeader: true,
 		},
-
-		ServiceName: ServiceName,
 	}
 	testOwn = own
 )

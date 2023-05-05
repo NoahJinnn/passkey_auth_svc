@@ -30,10 +30,9 @@ type FlagSets struct {
 
 //nolint:gochecknoglobals // Config, flags and metrics are global anyway.
 var (
-	ServiceName = "auth"
-	fs          FlagSets
-	shared      *sharedConfig.Shared
-	own         = &struct {
+	fs     FlagSets
+	shared *sharedConfig.Shared
+	own    = &struct {
 		// Below envs is loaded by Doppler
 		PostgresUser     appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_LOGIN"`
 		PostgresPass     appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_PASS"`
@@ -54,7 +53,7 @@ var (
 
 		TTL appcfg.Int `env:"PASSCODE_TTL"`
 	}{
-		PostgresUser:     appcfg.MustNotEmptyString(ServiceName),
+		PostgresUser:     appcfg.MustNotEmptyString("auth"),
 		PostgresAddrPort: appcfg.MustPort("5432"),
 		PostgresAddrHost: appcfg.MustNotEmptyString("localhost"),
 		PostgresDBName:   appcfg.MustNotEmptyString("postgres"),
@@ -183,7 +182,6 @@ func GetServe() (c *Config, err error) {
 		Secrets: Secrets{
 			Keys: []string{own.Secrets.Value(&err)},
 		},
-		ServiceName: ServiceName,
 		Passcode: Passcode{
 			Email: Email{
 				FromAddress: own.FromAddress.Value(&err),

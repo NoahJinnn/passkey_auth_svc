@@ -58,7 +58,6 @@ var (
 		Secrets: Secrets{
 			Keys: []string{"needsToBeAtLeast16"},
 		},
-		ServiceName: ServiceName,
 		Passcode: Passcode{
 			Email: Email{
 				FromAddress: "test@gmail.com",

@@ -30,10 +30,9 @@ type FlagSets struct {
 
 //nolint:gochecknoglobals // Config, flags and metrics are global anyway.
 var (
-	ServiceName = "networth"
-	fs          FlagSets
-	shared      *sharedConfig.Shared
-	own         = &struct {
+	fs     FlagSets
+	shared *sharedConfig.Shared
+	own    = &struct {
 		// Below envs is loaded by Doppler
 		PostgresUser     appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_LOGIN"`
 		PostgresPass     appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_PASS"`
@@ -42,7 +41,7 @@ var (
 		PostgresDBName   appcfg.NotEmptyString `env:"AUTH_POSTGRES_DB_NAME"`
 		Secrets          appcfg.NotEmptyString `env:"AUTH_SECRETS"`
 	}{
-		PostgresUser:     appcfg.MustNotEmptyString(ServiceName),
+		PostgresUser:     appcfg.MustNotEmptyString("auth"),
 		PostgresAddrPort: appcfg.MustPort("5432"),
 		PostgresAddrHost: appcfg.MustNotEmptyString("localhost"),
 		PostgresDBName:   appcfg.MustNotEmptyString("postgres"),
@@ -51,12 +50,11 @@ var (
 )
 
 type Config struct {
-	Server      Server
-	Session     authCfg.Session
-	Secrets     authCfg.Secrets
-	ServiceName string
-	Postgres    *PostgresConfig
-	Plaid       *PlaidConfig
+	Server   Server
+	Session  authCfg.Session
+	Secrets  authCfg.Secrets
+	Postgres *PostgresConfig
+	Plaid    *PlaidConfig
 }
 
 // Init updates config defaults (from env) and setup subcommands flags.

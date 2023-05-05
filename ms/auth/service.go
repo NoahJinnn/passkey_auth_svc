@@ -29,7 +29,7 @@ type Service struct {
 }
 
 // Name implements main.embeddedService interface.
-func (s *Service) Name() string { return config.ServiceName }
+func (s *Service) Name() string { return "auth" }
 
 // Init implements main.embeddedService interface.
 func (s *Service) Init(sharedCfg *sharedConfig.Shared, _, serveCmd *cobra.Command) error {
