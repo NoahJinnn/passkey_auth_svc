@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/internal/http/sharedDto"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
@@ -57,7 +58,7 @@ func (h *WebauthnHandler) UpdateCredential(c echo.Context) error {
 
 	err = (&echo.DefaultBinder{}).BindBody(c, &body)
 	if err != nil {
-		return dto.ToHttpError(err)
+		return sharedDto.ToHttpError(err)
 	}
 
 	return h.GetWebauthnSvc().UpdateCredential(c.Request().Context(), userId, credentialID, body.Name)

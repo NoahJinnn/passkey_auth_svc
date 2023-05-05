@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/internal/http/sharedDto"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/session"
 	"github.com/labstack/echo/v4"
@@ -32,18 +33,18 @@ type UserCreateBody struct {
 func (h *UserHandler) Create(c echo.Context) error {
 	var body UserCreateBody
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		return dto.ToHttpError(err)
+		return sharedDto.ToHttpError(err)
 	}
 
 	if err := c.Validate(body); err != nil {
-		return dto.ToHttpError(err)
+		return sharedDto.ToHttpError(err)
 	}
 
 	body.Email = strings.ToLower(body.Email)
 
 	newUser, emailId, err := h.GetUserSvc().Create(c.Request().Context(), body.Email)
 	if err != nil {
-		return dto.ToHttpError(err)
+		return sharedDto.ToHttpError(err)
 	}
 
 	token, err := h.sessionManager.GenerateJWT(newUser.ID.String())
@@ -79,7 +80,7 @@ func (h *UserHandler) Get(c echo.Context) error {
 	}
 
 	if sessionToken.Subject() != userId {
-		return dto.NewHTTPError(http.StatusForbidden).SetInternal(fmt.Errorf("user %s tried to get user %s", sessionToken.Subject(), userId))
+		return sharedDto.NewHTTPError(http.StatusForbidden).SetInternal(fmt.Errorf("user %s tried to get user %s", sessionToken.Subject(), userId))
 	}
 
 	user, emailAddress, err := h.GetUserSvc().GetById(c.Request().Context(), uuid.FromStringOrNil(userId))

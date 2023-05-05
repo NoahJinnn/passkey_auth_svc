@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hellohq/hqservice/internal/sharedconfig"
+	"github.com/hellohq/hqservice/internal/sharedConfig"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/check"
 	"github.com/powerman/pqx"
@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	testShared   *sharedconfig.Shared
+	testShared   *sharedConfig.Shared
 	testFlagsets = FlagSets{
 		Serve: pflag.NewFlagSet("", 0),
 	}
@@ -86,7 +86,7 @@ func TestMain(m *testing.M) {
 	os.Setenv("HQ_MAIL_FROM_ADDRESS", "test@gmail.com")
 	os.Setenv("HQ_MAIL_FROM_NAME", "Test Mail")
 
-	testShared, _ = sharedconfig.Get()
+	testShared, _ = sharedConfig.Get()
 	check.TestMain(m)
 }
 

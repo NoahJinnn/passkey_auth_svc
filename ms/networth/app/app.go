@@ -5,8 +5,8 @@
 package app
 
 import (
-	"github.com/hellohq/hqservice/ms/nw_track/config"
-	"github.com/hellohq/hqservice/ms/nw_track/dal"
+	"github.com/hellohq/hqservice/ms/networth/config"
+	"github.com/hellohq/hqservice/ms/networth/dal"
 )
 
 // Appl provides application features (use cases) service.

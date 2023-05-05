@@ -12,10 +12,10 @@ import (
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/internal/http/sharedDto"
 	"github.com/hellohq/hqservice/ms/auth/app/dom"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
-	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
 )
 
 type IWebauthnSvc interface {
@@ -89,12 +89,12 @@ func (svc *webauthnSvc) FinishRegistration(ctx Ctx, request *protocol.ParsedCred
 
 		if sessionData == nil {
 			// TODO: audit logger
-			return dto.NewHTTPError(http.StatusBadRequest, "Stored challenge and received challenge do not match").SetInternal(errors.New("sessionData not found"))
+			return sharedDto.NewHTTPError(http.StatusBadRequest, "Stored challenge and received challenge do not match").SetInternal(errors.New("sessionData not found"))
 		}
 
 		if sessionUserId != sessionData.UserID.String() {
 			// TODO: audit logger
-			return dto.NewHTTPError(http.StatusBadRequest, "Stored challenge and received challenge do not match").SetInternal(errors.New("userId in webauthn.sessionData does not match user session"))
+			return sharedDto.NewHTTPError(http.StatusBadRequest, "Stored challenge and received challenge do not match").SetInternal(errors.New("userId in webauthn.sessionData does not match user session"))
 		}
 
 		webauthnUser, _, err := svc.getWebauthnUser(ctx, sessionData.UserID)
@@ -104,7 +104,7 @@ func (svc *webauthnSvc) FinishRegistration(ctx Ctx, request *protocol.ParsedCred
 
 		if webauthnUser == nil {
 			// TODO: audit logger
-			return dto.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("user not found"))
+			return sharedDto.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("user not found"))
 		}
 
 		credential, err := svc.wa.CreateCredential(webauthnUser, *dom.WebauthnSessionDataFromModel(sessionData), request)
@@ -124,7 +124,7 @@ func (svc *webauthnSvc) FinishRegistration(ctx Ctx, request *protocol.ParsedCred
 			}
 			// TODO: audit logger
 
-			return dto.NewHTTPError(errorStatus, errorMessage).SetInternal(err)
+			return sharedDto.NewHTTPError(errorStatus, errorMessage).SetInternal(err)
 		}
 
 		backupEligible := request.Response.AttestationObject.AuthData.Flags.HasBackupEligible()
@@ -158,16 +158,16 @@ func (svc *webauthnSvc) BeginLogin(ctx Ctx, reqUserId *string) (*protocol.Creden
 		userId, err := uuid.FromString(*reqUserId)
 		if err != nil {
 			// TODO: audit logger
-			return nil, dto.NewHTTPError(http.StatusBadRequest, "failed to parse UserID as uuid").SetInternal(err)
+			return nil, sharedDto.NewHTTPError(http.StatusBadRequest, "failed to parse UserID as uuid").SetInternal(err)
 		}
 		var webauthnUser *dom.WebauthnUser
 		webauthnUser, _, err = svc.getWebauthnUser(ctx, userId)
 		if err != nil {
-			return nil, dto.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to get user: %w", err))
+			return nil, sharedDto.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to get user: %w", err))
 		}
 		if webauthnUser == nil {
 			// TODO: audit logger
-			return nil, dto.NewHTTPError(http.StatusBadRequest, "user not found")
+			return nil, sharedDto.NewHTTPError(http.StatusBadRequest, "user not found")
 		}
 
 		if len(webauthnUser.WebAuthnCredentials()) > 0 {
@@ -214,7 +214,7 @@ func (svc *webauthnSvc) FinishLogin(ctx Ctx, request *protocol.ParsedCredentialA
 
 		if sessionData == nil {
 			// TODO: audit logger
-			return dto.NewHTTPError(http.StatusUnauthorized, "Stored challenge and received challenge do not match").SetInternal(errors.New("sessionData not found"))
+			return sharedDto.NewHTTPError(http.StatusUnauthorized, "Stored challenge and received challenge do not match").SetInternal(errors.New("sessionData not found"))
 		}
 
 		credential, webauthnUser, err := svc.getCredentialFromLoginSession(ctx, request, sessionData)
@@ -274,7 +274,7 @@ func (svc *webauthnSvc) UpdateCredential(ctx Ctx, userId uuid.UUID, id string, n
 	}
 
 	if credential == nil || credential.UserID.String() != user.ID.String() {
-		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("the user does not have a webauthn credential with the specified credentialId"))
+		return sharedDto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("the user does not have a webauthn credential with the specified credentialId"))
 	}
 	if name != nil {
 		credential.Name = *name
@@ -297,7 +297,7 @@ func (svc *webauthnSvc) DeleteCredential(ctx Ctx, userId uuid.UUID, id string) e
 	}
 
 	if credential == nil || credential.UserID.String() != user.ID.String() {
-		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("the user does not have a webauthn credential with the specified credentialId"))
+		return sharedDto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("the user does not have a webauthn credential with the specified credentialId"))
 	}
 
 	return svc.repo.WithTx(ctx, func(ctx Ctx, client *ent.Client) error {
@@ -335,7 +335,7 @@ func (svc *webauthnSvc) getCredentialFromLoginSession(ctx Ctx, request *protocol
 		// Discoverable Login
 		userId, err := uuid.FromBytes(request.Response.UserHandle)
 		if err != nil {
-			return nil, nil, dto.NewHTTPError(http.StatusBadRequest, "failed to parse userHandle as uuid").SetInternal(err)
+			return nil, nil, sharedDto.NewHTTPError(http.StatusBadRequest, "failed to parse userHandle as uuid").SetInternal(err)
 		}
 		webauthnUser, _, err = svc.getWebauthnUser(ctx, userId)
 		if err != nil {
@@ -344,7 +344,7 @@ func (svc *webauthnSvc) getCredentialFromLoginSession(ctx Ctx, request *protocol
 
 		if webauthnUser == nil {
 			// TODO: audit logger
-			return nil, nil, dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
+			return nil, nil, sharedDto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
 		}
 
 		credential, err = svc.wa.ValidateDiscoverableLogin(func(rawID, userHandle []byte) (user webauthn.User, err error) {
@@ -352,7 +352,7 @@ func (svc *webauthnSvc) getCredentialFromLoginSession(ctx Ctx, request *protocol
 		}, *model, request)
 		if err != nil {
 			// TODO: audit logger
-			return nil, nil, dto.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
+			return nil, nil, sharedDto.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
 		}
 	} else {
 		// non discoverable Login
@@ -362,12 +362,12 @@ func (svc *webauthnSvc) getCredentialFromLoginSession(ctx Ctx, request *protocol
 		}
 		if webauthnUser == nil {
 			// TODO: audit logger
-			return nil, nil, dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
+			return nil, nil, sharedDto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
 		}
 		credential, err = svc.wa.ValidateLogin(webauthnUser, *model, request)
 		if err != nil {
 			// TODO: audit logger
-			return nil, nil, dto.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
+			return nil, nil, sharedDto.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
 		}
 	}
 	return credential, webauthnUser, nil

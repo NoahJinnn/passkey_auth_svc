@@ -5,7 +5,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/hellohq/hqservice/internal/sharedconfig"
+	"github.com/hellohq/hqservice/internal/sharedConfig"
 	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
@@ -32,7 +32,7 @@ type Service struct {
 func (s *Service) Name() string { return config.ServiceName }
 
 // Init implements main.embeddedService interface.
-func (s *Service) Init(sharedCfg *sharedconfig.Shared, _, serveCmd *cobra.Command) error {
+func (s *Service) Init(sharedCfg *sharedConfig.Shared, _, serveCmd *cobra.Command) error {
 	return config.Init(sharedCfg, config.FlagSets{
 		Serve: serveCmd.Flags(),
 	})

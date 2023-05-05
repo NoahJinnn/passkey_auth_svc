@@ -3,13 +3,14 @@ package http
 import (
 	"fmt"
 
-	"github.com/hellohq/hqservice/ms/nw_track/app"
-	"github.com/hellohq/hqservice/ms/nw_track/config"
-	"github.com/hellohq/hqservice/ms/nw_track/dal"
-	"github.com/hellohq/hqservice/ms/nw_track/srv/http/dto"
-	"github.com/hellohq/hqservice/ms/nw_track/srv/http/handlers"
-	hqMiddlewares "github.com/hellohq/hqservice/ms/nw_track/srv/http/middlewares"
-	"github.com/hellohq/hqservice/ms/nw_track/srv/http/session"
+	"github.com/hellohq/hqservice/internal/http/sharedDto"
+	"github.com/hellohq/hqservice/internal/http/sharedMiddlewares"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/session"
+	"github.com/hellohq/hqservice/ms/networth/app"
+	"github.com/hellohq/hqservice/ms/networth/config"
+	"github.com/hellohq/hqservice/ms/networth/dal"
+	"github.com/hellohq/hqservice/ms/networth/srv/http/dto"
+	"github.com/hellohq/hqservice/ms/networth/srv/http/handlers"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/powerman/structlog"
@@ -33,7 +34,7 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 	// TODO: Turn Debug to "false" in production
 	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: true, Logger: e.Logger})
 	e.Use(middleware.RequestID())
-	e.Use(hqMiddlewares.GetLoggerMiddleware())
+	e.Use(sharedMiddlewares.GetLoggerMiddleware())
 
 	if cfg.Server.Cors.Enabled {
 		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -46,7 +47,7 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) (*echo.Echo, er
 		}))
 	}
 
-	e.Validator = dto.NewCustomValidator()
+	e.Validator = sharedDto.NewCustomValidator()
 	jwkManager, err := session.NewDefaultManager(cfg.Secrets.Keys, repo.GetJwkRepo())
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))

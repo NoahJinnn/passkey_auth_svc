@@ -5,11 +5,11 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/hellohq/hqservice/internal/sharedconfig"
-	"github.com/hellohq/hqservice/ms/nw_track/app"
-	"github.com/hellohq/hqservice/ms/nw_track/config"
-	"github.com/hellohq/hqservice/ms/nw_track/dal"
-	server "github.com/hellohq/hqservice/ms/nw_track/srv/http"
+	"github.com/hellohq/hqservice/internal/sharedConfig"
+	"github.com/hellohq/hqservice/ms/networth/app"
+	"github.com/hellohq/hqservice/ms/networth/config"
+	"github.com/hellohq/hqservice/ms/networth/dal"
+	server "github.com/hellohq/hqservice/ms/networth/srv/http"
 	"github.com/hellohq/hqservice/pkg/concurrent"
 	"github.com/labstack/echo/v4"
 	"github.com/powerman/pqx"
@@ -32,7 +32,7 @@ type Service struct {
 func (s *Service) Name() string { return config.ServiceName }
 
 // Init implements main.embeddedService interface.
-func (s *Service) Init(sharedCfg *sharedconfig.Shared, _, serveCmd *cobra.Command) error {
+func (s *Service) Init(sharedCfg *sharedConfig.Shared, _, serveCmd *cobra.Command) error {
 	return config.Init(sharedCfg, config.FlagSets{
 		Serve: serveCmd.Flags(),
 	})

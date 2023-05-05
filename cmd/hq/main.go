@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/hellohq/hqservice/internal/sharedconfig"
+	"github.com/hellohq/hqservice/internal/sharedConfig"
 	auth "github.com/hellohq/hqservice/ms/auth"
 	"github.com/hellohq/hqservice/pkg/concurrent"
 	"github.com/hellohq/hqservice/pkg/def"
@@ -25,7 +25,7 @@ type Ctx = context.Context
 
 type embeddedService interface {
 	Name() string
-	Init(cfg *sharedconfig.Shared, cmd, serveCmd *cobra.Command) error
+	Init(cfg *sharedConfig.Shared, cmd, serveCmd *cobra.Command) error
 	RunServe(ctxStartup, ctxShutdown Ctx, shutdown func()) error
 }
 
@@ -72,7 +72,7 @@ func main() {
 		log.Fatalf("failed to get defaults: %s", err)
 	}
 
-	cfg, err := sharedconfig.Get()
+	cfg, err := sharedConfig.Get()
 	if err != nil {
 		log.Fatalf("failed to init config: %s", err)
 	}

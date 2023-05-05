@@ -4,7 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hellohq/hqservice/internal/sharedconfig"
+	"github.com/hellohq/hqservice/internal/sharedConfig"
+	authCfg "github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/check"
 	"github.com/powerman/pqx"
@@ -13,7 +14,7 @@ import (
 )
 
 var (
-	testShared   *sharedconfig.Shared
+	testShared   *sharedConfig.Shared
 	testFlagsets = FlagSets{
 		Serve: pflag.NewFlagSet("", 0),
 	}
@@ -38,9 +39,9 @@ var (
 			Pass:   "authpass",
 		}),
 
-		Session: Session{
+		Session: authCfg.Session{
 			Lifespan: "1h",
-			Cookie: Cookie{
+			Cookie: authCfg.Cookie{
 				HttpOnly: true,
 				SameSite: "strict",
 				Secure:   true,
@@ -67,7 +68,7 @@ func TestMain(m *testing.M) {
 	os.Setenv("HQ_MAIL_FROM_ADDRESS", "test@gmail.com")
 	os.Setenv("HQ_MAIL_FROM_NAME", "Test Mail")
 
-	testShared, _ = sharedconfig.Get()
+	testShared, _ = sharedConfig.Get()
 	check.TestMain(m)
 }
 

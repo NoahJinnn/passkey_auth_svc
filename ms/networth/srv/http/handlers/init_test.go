@@ -9,9 +9,9 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
 	test "github.com/hellohq/hqservice/ms/auth/test/dal"
-	"github.com/hellohq/hqservice/ms/nw_track/app"
-	"github.com/hellohq/hqservice/ms/nw_track/config"
-	"github.com/hellohq/hqservice/ms/nw_track/dal"
+	"github.com/hellohq/hqservice/ms/networth/app"
+	"github.com/hellohq/hqservice/ms/networth/config"
+	"github.com/hellohq/hqservice/ms/networth/dal"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/suite"
 )

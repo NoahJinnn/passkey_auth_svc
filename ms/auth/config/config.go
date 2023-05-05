@@ -15,7 +15,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hellohq/hqservice/internal/sharedconfig"
+	"github.com/hellohq/hqservice/internal/sharedConfig"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/appcfg"
 	"github.com/powerman/pqx"
@@ -32,7 +32,7 @@ type FlagSets struct {
 var (
 	ServiceName = "auth"
 	fs          FlagSets
-	shared      *sharedconfig.Shared
+	shared      *sharedConfig.Shared
 	own         = &struct {
 		// Below envs is loaded by Doppler
 		PostgresUser     appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_LOGIN"`
@@ -72,7 +72,6 @@ type Config struct {
 	Passcode    Passcode
 	ServiceName string
 	Postgres    *PostgresConfig
-	Plaid       *PlaidConfig
 }
 
 // Save apple association site file to static folder
@@ -105,9 +104,9 @@ func saveStaticFileConfig(fileNameContent map[string]string) error {
 // Init updates config defaults (from env) and setup subcommands flags.
 //
 // Init must be called once before using this package.
-func Init(sharedCfg *sharedconfig.Shared, flagsets FlagSets) error {
+func Init(sharedCfg *sharedConfig.Shared, flagsets FlagSets) error {
 	shared, fs = sharedCfg, flagsets
-	fromEnv := appcfg.NewFromEnv(sharedconfig.EnvPrefix)
+	fromEnv := appcfg.NewFromEnv(sharedConfig.EnvPrefix)
 	err := appcfg.ProvideStruct(own, fromEnv)
 	if err != nil {
 		return err
