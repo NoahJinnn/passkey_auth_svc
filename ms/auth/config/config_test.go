@@ -1,10 +1,11 @@
 package config
 
 import (
+	"log"
 	"os"
 	"testing"
 
-	"github.com/hellohq/hqservice/internal/sharedconfig"
+	"github.com/hellohq/hqservice/internal/sharedConfig"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/check"
 	"github.com/powerman/pqx"
@@ -13,7 +14,7 @@ import (
 )
 
 var (
-	testShared   *sharedconfig.Shared
+	testShared   *sharedConfig.Shared
 	testFlagsets = FlagSets{
 		Serve: pflag.NewFlagSet("", 0),
 	}
@@ -57,7 +58,6 @@ var (
 		Secrets: Secrets{
 			Keys: []string{"needsToBeAtLeast16"},
 		},
-		ServiceName: ServiceName,
 		Passcode: Passcode{
 			Email: Email{
 				FromAddress: "test@gmail.com",
@@ -85,7 +85,7 @@ func TestMain(m *testing.M) {
 	os.Setenv("HQ_MAIL_FROM_ADDRESS", "test@gmail.com")
 	os.Setenv("HQ_MAIL_FROM_NAME", "Test Mail")
 
-	testShared, _ = sharedconfig.Get()
+	testShared, _ = sharedConfig.Get()
 	check.TestMain(m)
 }
 
@@ -150,5 +150,11 @@ func Test(t *testing.T) {
 	t.Run("cleanup", func(tt *testing.T) {
 		t := check.T(tt)
 		t.Panic(func() { GetServe() })
+		err := os.RemoveAll("static")
+		if err != nil {
+			log.Println(err)
+		} else {
+			log.Println("Directory removed successfully")
+		}
 	})
 }

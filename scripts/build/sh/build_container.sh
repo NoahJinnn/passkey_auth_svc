@@ -6,6 +6,8 @@ source $( dirname -- "$0"; )/build.sh
 # Build binaries for linux-based Docker container.
 GOOS=linux GOARCH=amd64 build "$@"
 
+cd docker
+
 # Check if Podman is installed
 if command -v podman > /dev/null; then
   echo "Podman is installed, building using Podman"

@@ -5,7 +5,7 @@
 //
 // As configuration is global you can get it only once for safety:
 // you can call only one of Get… functions and call it just once.
-package sharedconfig
+package sharedConfig
 
 import (
 	"strconv"

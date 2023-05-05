@@ -1,17 +1,15 @@
-// Package hq provides embedded microservice.
-package hq
+// Package auth provides auth service.
+package auth
 
 import (
 	"context"
-	"net/http"
 
-	"github.com/hellohq/hqservice/internal/sharedconfig"
+	"github.com/hellohq/hqservice/internal/sharedConfig"
 	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
 	server "github.com/hellohq/hqservice/ms/auth/srv/http"
 	"github.com/hellohq/hqservice/pkg/concurrent"
-	"github.com/labstack/echo/v4"
 	"github.com/powerman/pqx"
 	"github.com/powerman/structlog"
 	"github.com/spf13/cobra"
@@ -23,16 +21,15 @@ type Ctx = context.Context
 // Service implements main.embeddedService interface.
 type Service struct {
 	cfg  *config.Config
-	srv  *echo.Echo
 	appl app.App
 	repo *dal.Repo
 }
 
 // Name implements main.embeddedService interface.
-func (s *Service) Name() string { return config.ServiceName }
+func (s *Service) Name() string { return "auth" }
 
 // Init implements main.embeddedService interface.
-func (s *Service) Init(sharedCfg *sharedconfig.Shared, _, serveCmd *cobra.Command) error {
+func (s *Service) Init(sharedCfg *sharedConfig.Shared, _, serveCmd *cobra.Command) error {
 	return config.Init(sharedCfg, config.FlagSets{
 		Serve: serveCmd.Flags(),
 	})
@@ -57,11 +54,6 @@ func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func()) (er
 	}
 	s.appl = app.New(s.cfg, s.repo)
 
-	s.srv, err = server.NewServer(s.appl, *s.repo, s.cfg)
-	if err != nil {
-		return log.Err("failed to openapi.NewServer", "err", err)
-	}
-
 	err = concurrent.Serve(ctxShutdown, shutdown,
 		s.serveEcho,
 	)
@@ -73,11 +65,7 @@ func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func()) (er
 }
 
 func (s *Service) serveEcho(ctx Ctx) error {
-	e := echo.New()
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
-	return e.Start(":1323")
+	return server.NewServer(s.appl, *s.repo, s.cfg)
 }
 
 func (s *Service) connectRepo(ctx Ctx) (interface{}, error) {

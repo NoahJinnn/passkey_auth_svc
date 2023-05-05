@@ -3,6 +3,7 @@ package session
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -43,6 +44,7 @@ func NewDefaultManager(keys []string, repo dal.IJwkRepo) (*DefaultManager, error
 
 		j, err := repo.GetJwk(ctx, uint(i))
 		if j == nil && err == nil {
+			fmt.Printf("jwk with index %d does not exist, creating one\n", i)
 			_, err := manager.GenerateKey(ctx)
 			if err != nil {
 				return nil, err

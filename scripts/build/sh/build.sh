@@ -6,19 +6,19 @@ export CGO_ENABLED=0
 build() {
 	rm -rf $scriptsdir/../../../bin/
 	mkdir $scriptsdir/../../../bin/
-	go build -a -o $scriptsdir/../../../bin/ "$@" $scriptsdir/../../../cmd/*
+	go build -a -o $scriptsdir/../../../bin/hq "$@" $scriptsdir/../../../main.go
 }
 
 build_debug() {
-	rm -rf $scriptsdir/../../../debugbin/
-	mkdir $scriptsdir/../../../debugbin/
-	go build -gcflags="all=-N -l" -a -o $scriptsdir/../../../debugbin/ "$@" $scriptsdir/../../../cmd/*
+	rm -rf $scriptsdir/../../../bindebug/
+	mkdir $scriptsdir/../../../bindebug/
+	go build -gcflags="all=-N -l" -a -o $scriptsdir/../../../bindebug/hq "$@" $scriptsdir/../../../main.go
 }
 
 if [ "$1" == "debug" ]; then
-  echo "Build debug bin"
+  echo "Build binary for debug"
   build_debug
 else
-  echo "Build normal bin"
+  echo "Build binary for production"
   build
 fi

@@ -12,8 +12,8 @@ import (
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/internal/http/sharedDto"
 	"github.com/hellohq/hqservice/ms/auth/app/svcs"
-	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
 	test "github.com/hellohq/hqservice/ms/auth/test/app"
 	testRepo "github.com/hellohq/hqservice/ms/auth/test/dal"
 	"github.com/labstack/echo/v4"
@@ -161,7 +161,7 @@ func TestWebauthnHandler_FinishRegistration(t *testing.T) {
 
 	err = handler.FinishRegistration(c2)
 	if assert.Error(t, err) {
-		httpError := dto.ToHttpError(err)
+		httpError := sharedDto.ToHttpError(err)
 		assert.Equal(t, http.StatusBadRequest, httpError.Code)
 		assert.Equal(t, "Stored challenge and received challenge do not match: sessionData not found", err.Error())
 	}
@@ -235,7 +235,7 @@ func TestWebauthnHandler_FinishLogin(t *testing.T) {
 
 	err := handler.FinishLogin(c2)
 	if assert.Error(t, err) {
-		httpError := dto.ToHttpError(err)
+		httpError := sharedDto.ToHttpError(err)
 		assert.Equal(t, http.StatusUnauthorized, httpError.Code)
 		assert.Equal(t, "Stored challenge and received challenge do not match: sessionData not found", err.Error())
 	}
