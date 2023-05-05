@@ -10,15 +10,15 @@ build() {
 }
 
 build_debug() {
-	rm -rf $scriptsdir/../../../debugbin/
-	mkdir $scriptsdir/../../../debugbin/
-	go build -gcflags="all=-N -l" -a -o $scriptsdir/../../../debugbin/ "$@" $scriptsdir/../../../cmd/*
+	rm -rf $scriptsdir/../../../bindebug/
+	mkdir $scriptsdir/../../../bindebug/
+	go build -gcflags="all=-N -l" -a -o $scriptsdir/../../../bindebug/ "$@" $scriptsdir/../../../cmd/*
 }
 
 if [ "$1" == "debug" ]; then
-  echo "Build debug bin"
+  echo "Build binary for debug"
   build_debug
 else
-  echo "Build normal bin"
+  echo "Build binary for production"
   build
 fi
