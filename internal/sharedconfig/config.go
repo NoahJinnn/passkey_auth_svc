@@ -22,17 +22,26 @@ type Shared struct {
 	AuthAddrHost    appcfg.NotEmptyString `env:"AUTH_ADDR_HOST"`
 	AuthAddrHostInt appcfg.NotEmptyString `env:"AUTH_ADDR_HOST_INT"`
 	AuthAddrPort    appcfg.Port           `env:"AUTH_ADDR_PORT"`
+
+	NetworthAddrHost    appcfg.NotEmptyString `env:"NETWORTH_ADDR_HOST"`
+	NetworthAddrHostInt appcfg.NotEmptyString `env:"NETWORTH_ADDR_HOST_INT"`
+	NetworthAddrPort    appcfg.Port           `env:"NETWORTH_ADDR_PORT"`
 }
 
 // Default ports.
 const (
 	AuthPort = 17000 + iota
+	NetworthPort
 )
 
 var shared = &Shared{ //nolint:gochecknoglobals // Config is global anyway.
 	AuthAddrHost:    appcfg.MustNotEmptyString(def.Hostname),
 	AuthAddrHostInt: appcfg.MustNotEmptyString(def.Hostname),
 	AuthAddrPort:    appcfg.MustPort(strconv.Itoa(AuthPort)),
+
+	NetworthAddrHost:    appcfg.MustNotEmptyString(def.Hostname),
+	NetworthAddrHostInt: appcfg.MustNotEmptyString(def.Hostname),
+	NetworthAddrPort:    appcfg.MustPort(strconv.Itoa(AuthPort)),
 }
 
 // Get updates config defaults (from env) and returns shared config.

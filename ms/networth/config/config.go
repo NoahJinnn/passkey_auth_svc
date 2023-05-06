@@ -68,9 +68,9 @@ func Init(sharedCfg *sharedConfig.Shared, flagsets FlagSets) error {
 		return err
 	}
 
-	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrHost, "networth.host", "host to serve")
-	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrHostInt, "networth.host-int", "internal host to serve")
-	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrPort, "networth.port", "port to serve monolith introspection")
+	appcfg.AddPFlag(fs.Serve, &shared.NetworthAddrHost, "networth.host", "host to serve")
+	appcfg.AddPFlag(fs.Serve, &shared.NetworthAddrHostInt, "networth.host-int", "internal host to serve")
+	appcfg.AddPFlag(fs.Serve, &shared.NetworthAddrPort, "networth.port", "port to serve monolith introspection")
 	appcfg.AddPFlag(fs.Serve, &own.PostgresAddrHost, "networth.postgres.host", "host to connect to PostgreSQL")
 	appcfg.AddPFlag(fs.Serve, &own.PostgresAddrPort, "networth.postgres.port", "port to connect to PostgreSQL")
 	appcfg.AddPFlag(fs.Serve, &own.PostgresDBName, "networth.postgres.dbname", "PostgreSQL database name")
@@ -85,8 +85,8 @@ func GetServe() (c *Config, err error) {
 	defer cleanup()
 	c = &Config{
 		Server: Server{
-			BindAddr:    netx.NewAddr(shared.AuthAddrHost.Value(&err), shared.AuthAddrPort.Value(&err)),
-			BindAddrInt: netx.NewAddr(shared.AuthAddrHostInt.Value(&err), shared.AuthAddrPort.Value(&err)),
+			BindAddr:    netx.NewAddr(shared.NetworthAddrHost.Value(&err), shared.NetworthAddrPort.Value(&err)),
+			BindAddrInt: netx.NewAddr(shared.NetworthAddrHostInt.Value(&err), shared.NetworthAddrPort.Value(&err)),
 			Cors: Cors{
 				ExposeHeaders: []string{
 					httplimit.HeaderRateLimitLimit,
