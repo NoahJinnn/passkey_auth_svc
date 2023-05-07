@@ -8,7 +8,6 @@ import (
 	"github.com/hellohq/hqservice/internal/sharedConfig"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/check"
-	"github.com/powerman/pqx"
 	"github.com/sethvargo/go-limiter/httplimit"
 	"github.com/spf13/pflag"
 )
@@ -31,13 +30,6 @@ var (
 				},
 			},
 		},
-		Postgres: NewPostgresConfig(pqx.Config{
-			Host:   "localhost",
-			Port:   5432,
-			DBName: "postgres",
-			User:   "auth",
-			Pass:   "authpass",
-		}),
 		Webauthn: WebauthnSettings{
 			RelyingParty: RelyingParty{
 				Id:          "localhost",
@@ -77,8 +69,8 @@ func TestMain(m *testing.M) {
 	os.Setenv("HQ_AUTH_ADDR_HOST", "localhost")
 	os.Setenv("HQ_AUTH_ADDR_HOST_INT", "127.0.0.1")
 	os.Setenv("HQ_AUTH_ADDR_PORT", "17000")
+	os.Setenv("HQ_POSTGRES_AUTH_PASS", "authpass")
 	// Auth env
-	os.Setenv("HQ_AUTH_POSTGRES_AUTH_PASS", "authpass")
 	os.Setenv("HQ_AUTH_RP_ORIGINS", "http://localhost:17000,http://localhost:17001")
 	os.Setenv("HQ_ONESIGNAL_APP_ID", "oneSignalAppID")
 	os.Setenv("HQ_ONESIGNAL_APP_KEY", "oneSignalAppKey")
@@ -113,11 +105,6 @@ func Test(t *testing.T) {
 	t.Run("flag", func(tt *testing.T) {
 		t := check.T(tt)
 		c, err := testGetServe(
-			"--postgres.host=localhost4",
-			"--postgres.port=4200",
-			"--postgres.dbname=postgres4",
-			"--postgres.user=auth4",
-			"--postgres.pass=authpass4",
 			"--auth.host=authhost4",
 			"--auth.host-int=authhostint4",
 			"--auth.port=4102",
@@ -131,11 +118,6 @@ func Test(t *testing.T) {
 		)
 		t.Nil(err)
 
-		want.Postgres.Host = "localhost4"
-		want.Postgres.Port = 4200
-		want.Postgres.DBName = "postgres4"
-		want.Postgres.User = "auth4"
-		want.Postgres.Pass = "authpass4"
 		want.Server.BindAddr = netx.NewAddr("authhost4", 4102)
 		want.Server.BindAddrInt = netx.NewAddr("authhostint4", 4102)
 		want.Webauthn.RelyingParty.Id = "flagrpid"

@@ -14,12 +14,13 @@ import (
 
 // Constants.
 var (
-	ver                   string // Set by ./build script.
-	ProgName              = strings.TrimSuffix(path.Base(os.Args[0]), ".test")
-	Hostname, hostnameErr = os.Hostname()
-	testTimeFactor        = getenv.Float("GO_TEST_TIME_FACTOR", 1.0)
-	TestSecond            = time.Duration(float64(time.Second) * testTimeFactor)
-	TestTimeout           = 7 * TestSecond
+	ver            string // Set by ./build script.
+	ProgName       = strings.TrimSuffix(path.Base(os.Args[0]), ".test")
+	Hostname       = "localhost"
+	HostnameInt    = "127.0.0.1"
+	testTimeFactor = getenv.Float("GO_TEST_TIME_FACTOR", 1.0)
+	TestSecond     = time.Duration(float64(time.Second) * testTimeFactor)
+	TestTimeout    = 7 * TestSecond
 )
 
 // Version returns application version based on build info.

@@ -18,7 +18,6 @@ import (
 	authCfg "github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/appcfg"
-	"github.com/powerman/pqx"
 	"github.com/sethvargo/go-limiter/httplimit"
 	"github.com/spf13/pflag"
 )
@@ -34,18 +33,10 @@ var (
 	shared *sharedConfig.Shared
 	own    = &struct {
 		// Below envs is loaded by Doppler
-		PostgresUser     appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_LOGIN"`
-		PostgresPass     appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_PASS"`
-		PostgresAddrHost appcfg.NotEmptyString `env:"AUTH_POSTGRES_ADDR_HOST"`
-		PostgresAddrPort appcfg.Port           `env:"AUTH_POSTGRES_ADDR_PORT"`
-		PostgresDBName   appcfg.NotEmptyString `env:"AUTH_POSTGRES_DB_NAME"`
-		Secrets          appcfg.NotEmptyString `env:"AUTH_SECRETS"`
+		Secrets appcfg.NotEmptyString `env:"AUTH_SECRETS"`
 	}{
-		PostgresUser:     appcfg.MustNotEmptyString("auth"),
-		PostgresAddrPort: appcfg.MustPort("5432"),
-		PostgresAddrHost: appcfg.MustNotEmptyString("localhost"),
-		PostgresDBName:   appcfg.MustNotEmptyString("postgres"),
-		Secrets:          appcfg.MustNotEmptyString("needsToBeAtLeast16"),
+
+		Secrets: appcfg.MustNotEmptyString("needsToBeAtLeast16"),
 	}
 )
 
@@ -68,14 +59,9 @@ func Init(sharedCfg *sharedConfig.Shared, flagsets FlagSets) error {
 		return err
 	}
 
-	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrHost, "networth.host", "host to serve")
-	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrHostInt, "networth.host-int", "internal host to serve")
-	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrPort, "networth.port", "port to serve monolith introspection")
-	appcfg.AddPFlag(fs.Serve, &own.PostgresAddrHost, "networth.postgres.host", "host to connect to PostgreSQL")
-	appcfg.AddPFlag(fs.Serve, &own.PostgresAddrPort, "networth.postgres.port", "port to connect to PostgreSQL")
-	appcfg.AddPFlag(fs.Serve, &own.PostgresDBName, "networth.postgres.dbname", "PostgreSQL database name")
-	appcfg.AddPFlag(fs.Serve, &own.PostgresUser, "networth.postgres.user", "PostgreSQL username")
-	appcfg.AddPFlag(fs.Serve, &own.PostgresPass, "networth.postgres.pass", "PostgreSQL password")
+	appcfg.AddPFlag(fs.Serve, &shared.NetworthAddrHost, "networth.host", "host to serve")
+	appcfg.AddPFlag(fs.Serve, &shared.NetworthAddrHostInt, "networth.host-int", "internal host to serve")
+	appcfg.AddPFlag(fs.Serve, &shared.NetworthAddrPort, "networth.port", "port to serve monolith introspection")
 
 	return nil
 }
@@ -85,8 +71,8 @@ func GetServe() (c *Config, err error) {
 	defer cleanup()
 	c = &Config{
 		Server: Server{
-			BindAddr:    netx.NewAddr(shared.AuthAddrHost.Value(&err), shared.AuthAddrPort.Value(&err)),
-			BindAddrInt: netx.NewAddr(shared.AuthAddrHostInt.Value(&err), shared.AuthAddrPort.Value(&err)),
+			BindAddr:    netx.NewAddr(shared.NetworthAddrHost.Value(&err), shared.NetworthAddrPort.Value(&err)),
+			BindAddrInt: netx.NewAddr(shared.NetworthAddrHostInt.Value(&err), shared.NetworthAddrPort.Value(&err)),
 			Cors: Cors{
 				ExposeHeaders: []string{
 					httplimit.HeaderRateLimitLimit,
@@ -96,13 +82,6 @@ func GetServe() (c *Config, err error) {
 				},
 			},
 		},
-		Postgres: NewPostgresConfig(pqx.Config{
-			Host:   own.PostgresAddrHost.Value(&err),
-			Port:   own.PostgresAddrPort.Value(&err),
-			DBName: own.PostgresDBName.Value(&err),
-			User:   own.PostgresUser.Value(&err),
-			Pass:   own.PostgresPass.Value(&err),
-		}),
 		Session: authCfg.Session{
 			Lifespan: "1h",
 			Cookie: authCfg.Cookie{
@@ -117,7 +96,7 @@ func GetServe() (c *Config, err error) {
 		},
 	}
 	if err != nil {
-		return nil, appcfg.WrapPErr(err, fs.Serve, own, shared)
+		return nil, appcfg.WrapPErr(err, fs.Serve, own)
 	}
 
 	err = c.Validate()
