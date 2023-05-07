@@ -3,10 +3,10 @@ package dal
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ent/migrate"
+	"github.com/hellohq/hqservice/internal/sharedDal"
 	"github.com/powerman/structlog"
 )
 
@@ -37,6 +37,7 @@ type Repo struct {
 type Ctx = context.Context
 
 func New(ctx Ctx, dateSourceName string) (_ *Repo, err error) {
+	// TODO: Move ent client initialization to main.go
 	log := structlog.FromContext(ctx, nil)
 	client, err := ent.Open("postgres", dateSourceName)
 	if err != nil {
@@ -58,35 +59,8 @@ func New(ctx Ctx, dateSourceName string) (_ *Repo, err error) {
 	}, nil
 }
 
-func (r Repo) Close() {
-	r.Db.Close()
-}
-
 func (r Repo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error {
-	txForw := func(db *ent.Client) error {
-		return exec(ctx, db)
-	}
-
-	tx, err := r.Db.Tx(ctx)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if v := recover(); v != nil {
-			tx.Rollback()
-			panic(v)
-		}
-	}()
-	if err := txForw(tx.Client()); err != nil {
-		if rerr := tx.Rollback(); rerr != nil {
-			err = fmt.Errorf("%w: rolling back transaction: %v", err, rerr)
-		}
-		return err
-	}
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("committing transaction: %w", err)
-	}
-	return nil
+	return sharedDal.WithTx(ctx, r.Db, exec)
 }
 
 func (r Repo) GetJwkRepo() IJwkRepo {

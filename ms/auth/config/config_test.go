@@ -113,11 +113,11 @@ func Test(t *testing.T) {
 	t.Run("flag", func(tt *testing.T) {
 		t := check.T(tt)
 		c, err := testGetServe(
-			"--postgres.host=localhost4",
-			"--postgres.port=4200",
-			"--postgres.dbname=postgres4",
-			"--postgres.user=auth4",
-			"--postgres.pass=authpass4",
+			"--auth.postgres.host=localhost4",
+			"--auth.postgres.port=4200",
+			"--auth.postgres.dbname=postgres4",
+			"--auth.postgres.user=auth4",
+			"--auth.postgres.pass=authpass4",
 			"--auth.host=authhost4",
 			"--auth.host-int=authhostint4",
 			"--auth.port=4102",

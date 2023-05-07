@@ -3,9 +3,9 @@ package dal
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/internal/sharedDal"
 	"github.com/powerman/structlog"
 )
 
@@ -38,15 +38,6 @@ func New(ctx Ctx, dateSourceName string) (_ *Repo, err error) {
 		log.Fatalf("failed opening connection to postgres: %v", err)
 	}
 
-	// Run the auto migration tool.
-	// if err := client.Schema.Create(ctx,
-	// 	migrate.WithDropIndex(true),
-	// 	migrate.WithDropColumn(true),
-	// 	migrate.WithGlobalUniqueID(true),
-	// ); err != nil {
-	// 	log.Fatalf("failed creating schema resources: %v", err)
-	// }
-
 	return &Repo{
 		Db:  client,
 		log: log,
@@ -58,30 +49,7 @@ func (r Repo) Close() {
 }
 
 func (r Repo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error {
-	txForw := func(db *ent.Client) error {
-		return exec(ctx, db)
-	}
-
-	tx, err := r.Db.Tx(ctx)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if v := recover(); v != nil {
-			tx.Rollback()
-			panic(v)
-		}
-	}()
-	if err := txForw(tx.Client()); err != nil {
-		if rerr := tx.Rollback(); rerr != nil {
-			err = fmt.Errorf("%w: rolling back transaction: %v", err, rerr)
-		}
-		return err
-	}
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("committing transaction: %w", err)
-	}
-	return nil
+	return sharedDal.WithTx(ctx, r.Db, exec)
 }
 
 func (r Repo) GetJwkRepo() IJwkRepo {
