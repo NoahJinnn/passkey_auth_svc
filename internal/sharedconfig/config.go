@@ -12,6 +12,7 @@ import (
 
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/powerman/appcfg"
+	"github.com/powerman/pqx"
 )
 
 // EnvPrefix defines common prefix for environment variables.
@@ -19,13 +20,15 @@ const EnvPrefix = "HQ_"
 
 // Shared contains configurable values shared by microservices.
 type Shared struct {
-	AuthAddrHost    appcfg.NotEmptyString `env:"AUTH_ADDR_HOST"`
-	AuthAddrHostInt appcfg.NotEmptyString `env:"AUTH_ADDR_HOST_INT"`
-	AuthAddrPort    appcfg.Port           `env:"AUTH_ADDR_PORT"`
+	AuthAddrHost    appcfg.NotEmptyString
+	AuthAddrHostInt appcfg.NotEmptyString
+	AuthAddrPort    appcfg.Port
 
-	NetworthAddrHost    appcfg.NotEmptyString `env:"NETWORTH_ADDR_HOST"`
-	NetworthAddrHostInt appcfg.NotEmptyString `env:"NETWORTH_ADDR_HOST_INT"`
-	NetworthAddrPort    appcfg.Port           `env:"NETWORTH_ADDR_PORT"`
+	NetworthAddrHost    appcfg.NotEmptyString
+	NetworthAddrHostInt appcfg.NotEmptyString
+	NetworthAddrPort    appcfg.Port
+
+	Postgres *PostgresConfig
 }
 
 // Default ports.
@@ -34,14 +37,25 @@ const (
 	NetworthPort
 )
 
-var shared = &Shared{ //nolint:gochecknoglobals // Config is global anyway.
-	AuthAddrHost:    appcfg.MustNotEmptyString(def.Hostname),
-	AuthAddrHostInt: appcfg.MustNotEmptyString(def.Hostname),
-	AuthAddrPort:    appcfg.MustPort(strconv.Itoa(AuthPort)),
+var shared = &struct {
+	AuthAddrHost    appcfg.NotEmptyString `env:"AUTH_ADDR_HOST"`
+	AuthAddrHostInt appcfg.NotEmptyString `env:"AUTH_ADDR_HOST_INT"`
+	AuthAddrPort    appcfg.Port           `env:"AUTH_ADDR_PORT"`
 
-	NetworthAddrHost:    appcfg.MustNotEmptyString(def.Hostname),
-	NetworthAddrHostInt: appcfg.MustNotEmptyString(def.Hostname),
-	NetworthAddrPort:    appcfg.MustPort(strconv.Itoa(AuthPort)),
+	NetworthAddrHost    appcfg.NotEmptyString `env:"NETWORTH_ADDR_HOST"`
+	NetworthAddrHostInt appcfg.NotEmptyString `env:"NETWORTH_ADDR_HOST_INT"`
+	NetworthAddrPort    appcfg.Port           `env:"NETWORTH_ADDR_PORT"`
+
+	PostgresUser     appcfg.NotEmptyString `env:"POSTGRES_AUTH_LOGIN"`
+	PostgresPass     appcfg.NotEmptyString `env:"POSTGRES_AUTH_PASS"`
+	PostgresAddrHost appcfg.NotEmptyString `env:"POSTGRES_ADDR_HOST"`
+	PostgresAddrPort appcfg.Port           `env:"POSTGRES_ADDR_PORT"`
+	PostgresDBName   appcfg.NotEmptyString `env:"POSTGRES_DB_NAME"`
+}{ //nolint:gochecknoglobals // Config is global anyway.
+	PostgresUser:     appcfg.MustNotEmptyString("auth"),
+	PostgresAddrPort: appcfg.MustPort("5432"),
+	PostgresAddrHost: appcfg.MustNotEmptyString("localhost"),
+	PostgresDBName:   appcfg.MustNotEmptyString("postgres"),
 }
 
 // Get updates config defaults (from env) and returns shared config.
@@ -53,7 +67,25 @@ func Get() (*Shared, error) {
 	if err != nil {
 		return nil, err
 	}
-	return shared, nil
+
+	sharedCfg := &Shared{
+		AuthAddrHost:    appcfg.MustNotEmptyString(def.Hostname),
+		AuthAddrHostInt: appcfg.MustNotEmptyString(def.HostnameInt),
+		AuthAddrPort:    appcfg.MustPort(strconv.Itoa(AuthPort)),
+
+		NetworthAddrHost:    appcfg.MustNotEmptyString(def.Hostname),
+		NetworthAddrHostInt: appcfg.MustNotEmptyString(def.Hostname),
+		NetworthAddrPort:    appcfg.MustPort(strconv.Itoa(AuthPort)),
+		Postgres: NewPostgresConfig(pqx.Config{
+			Host:   shared.PostgresAddrHost.Value(&err),
+			Port:   shared.PostgresAddrPort.Value(&err),
+			DBName: shared.PostgresDBName.Value(&err),
+			User:   shared.PostgresUser.Value(&err),
+			Pass:   shared.PostgresPass.Value(&err),
+		}),
+	}
+
+	return sharedCfg, nil
 }
 
 // Cleanup must be called by all Get* functions to ensure second call to

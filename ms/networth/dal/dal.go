@@ -31,21 +31,10 @@ type Repo struct {
 }
 type Ctx = context.Context
 
-func New(ctx Ctx, dateSourceName string) (_ *Repo, err error) {
-	log := structlog.FromContext(ctx, nil)
-	client, err := ent.Open("postgres", dateSourceName)
-	if err != nil {
-		log.Fatalf("failed opening connection to postgres: %v", err)
-	}
-
+func New(client *ent.Client) *Repo {
 	return &Repo{
-		Db:  client,
-		log: log,
-	}, nil
-}
-
-func (r Repo) Close() {
-	r.Db.Close()
+		Db: client,
+	}
 }
 
 func (r Repo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error {

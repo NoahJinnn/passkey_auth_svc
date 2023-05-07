@@ -5,9 +5,7 @@ import (
 	"context"
 
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/ent/migrate"
 	"github.com/hellohq/hqservice/internal/sharedDal"
-	"github.com/powerman/structlog"
 )
 
 // Error names.
@@ -31,32 +29,14 @@ type IRepo interface {
 }
 
 type Repo struct {
-	Db  *ent.Client
-	log *structlog.Logger
+	Db *ent.Client
 }
 type Ctx = context.Context
 
-func New(ctx Ctx, dateSourceName string) (_ *Repo, err error) {
-	// TODO: Move ent client initialization to main.go
-	log := structlog.FromContext(ctx, nil)
-	client, err := ent.Open("postgres", dateSourceName)
-	if err != nil {
-		log.Fatalf("failed opening connection to postgres: %v", err)
-	}
-
-	// Run the auto migration tool.
-	if err := client.Schema.Create(ctx,
-		migrate.WithDropIndex(true),
-		migrate.WithDropColumn(true),
-		migrate.WithGlobalUniqueID(true),
-	); err != nil {
-		log.Fatalf("failed creating schema resources: %v", err)
-	}
-
+func New(client *ent.Client) *Repo {
 	return &Repo{
-		Db:  client,
-		log: log,
-	}, nil
+		Db: client,
+	}
 }
 
 func (r Repo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error {

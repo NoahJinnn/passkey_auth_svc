@@ -18,14 +18,13 @@ import (
 	"github.com/hellohq/hqservice/internal/sharedConfig"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/appcfg"
-	"github.com/powerman/pqx"
 	"github.com/sethvargo/go-limiter/httplimit"
 	"github.com/spf13/pflag"
 )
 
 // FlagSets for all CLI subcommands which use flags to set config values.
 type FlagSets struct {
-	Serve *pflag.FlagSet
+	Serve *pflag.FlagSet // "hq serve" flags
 }
 
 //nolint:gochecknoglobals // Config, flags and metrics are global anyway.
@@ -34,12 +33,8 @@ var (
 	shared *sharedConfig.Shared
 	own    = &struct {
 		// Below envs is loaded by Doppler
-		PostgresUser     appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_LOGIN"`
-		PostgresPass     appcfg.NotEmptyString `env:"AUTH_POSTGRES_AUTH_PASS"`
-		PostgresAddrHost appcfg.NotEmptyString `env:"AUTH_POSTGRES_ADDR_HOST"`
-		PostgresAddrPort appcfg.Port           `env:"AUTH_POSTGRES_ADDR_PORT"`
-		PostgresDBName   appcfg.NotEmptyString `env:"AUTH_POSTGRES_DB_NAME"`
-		Secrets          appcfg.NotEmptyString `env:"AUTH_SECRETS"`
+
+		Secrets appcfg.NotEmptyString `env:"AUTH_SECRETS"`
 
 		RpId appcfg.NotEmptyString `env:"AUTH_RP_ID"`
 
@@ -53,13 +48,9 @@ var (
 
 		TTL appcfg.Int `env:"PASSCODE_TTL"`
 	}{
-		PostgresUser:     appcfg.MustNotEmptyString("auth"),
-		PostgresAddrPort: appcfg.MustPort("5432"),
-		PostgresAddrHost: appcfg.MustNotEmptyString("localhost"),
-		PostgresDBName:   appcfg.MustNotEmptyString("postgres"),
-		Secrets:          appcfg.MustNotEmptyString("needsToBeAtLeast16"),
-		RpId:             appcfg.MustNotEmptyString("localhost"),
-		TTL:              appcfg.MustInt("300"),
+		Secrets: appcfg.MustNotEmptyString("needsToBeAtLeast16"),
+		RpId:    appcfg.MustNotEmptyString("localhost"),
+		TTL:     appcfg.MustInt("300"),
 	}
 )
 
@@ -70,7 +61,6 @@ type Config struct {
 	Secrets     Secrets
 	Passcode    Passcode
 	ServiceName string
-	Postgres    *PostgresConfig
 }
 
 // Save apple association site file to static folder
@@ -123,11 +113,7 @@ func Init(sharedCfg *sharedConfig.Shared, flagsets FlagSets) error {
 	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrHost, "auth.host", "host to serve")
 	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrHostInt, "auth.host-int", "internal host to serve")
 	appcfg.AddPFlag(fs.Serve, &shared.AuthAddrPort, "auth.port", "port to serve monolith introspection")
-	appcfg.AddPFlag(fs.Serve, &own.PostgresAddrHost, "auth.postgres.host", "host to connect to PostgreSQL")
-	appcfg.AddPFlag(fs.Serve, &own.PostgresAddrPort, "auth.postgres.port", "port to connect to PostgreSQL")
-	appcfg.AddPFlag(fs.Serve, &own.PostgresDBName, "auth.postgres.dbname", "PostgreSQL database name")
-	appcfg.AddPFlag(fs.Serve, &own.PostgresUser, "auth.postgres.user", "PostgreSQL username")
-	appcfg.AddPFlag(fs.Serve, &own.PostgresPass, "auth.postgres.pass", "PostgreSQL password")
+
 	appcfg.AddPFlag(fs.Serve, &own.RpId, "wa.id", "Webauthn id")
 	appcfg.AddPFlag(fs.Serve, &own.RpOrigins, "wa.origins", "Webauthn origin")
 	appcfg.AddPFlag(fs.Serve, &own.FromAddress, "from.mail", "sender email address")
@@ -154,13 +140,6 @@ func GetServe() (c *Config, err error) {
 				},
 			},
 		},
-		Postgres: NewPostgresConfig(pqx.Config{
-			Host:   own.PostgresAddrHost.Value(&err),
-			Port:   own.PostgresAddrPort.Value(&err),
-			DBName: own.PostgresDBName.Value(&err),
-			User:   own.PostgresUser.Value(&err),
-			Pass:   own.PostgresPass.Value(&err),
-		}),
 		// TODO: Add env vars for below config fields
 		Webauthn: WebauthnSettings{
 			RelyingParty: RelyingParty{
@@ -193,7 +172,7 @@ func GetServe() (c *Config, err error) {
 		},
 	}
 	if err != nil {
-		return nil, appcfg.WrapPErr(err, fs.Serve, own, shared)
+		return nil, appcfg.WrapPErr(err, fs.Serve, own)
 	}
 
 	err = c.Validate()

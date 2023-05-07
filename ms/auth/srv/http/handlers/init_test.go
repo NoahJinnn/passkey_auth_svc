@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/internal/sharedDal"
 	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
@@ -106,8 +107,8 @@ func (s *integrationSuite) SetupSuite() {
 	dialect := "postgres"
 	db, err := test.StartDB("integration_test", dialect)
 	s.NoError(err)
-	repo, err := dal.New(ctx, db.DatabaseUrl)
-	s.NoError(err)
+	entClient := sharedDal.CreateEntClient(ctx, db.DatabaseUrl)
+	repo := dal.New(entClient)
 
 	s.repo = repo
 	s.db = db
