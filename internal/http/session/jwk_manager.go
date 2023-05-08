@@ -3,7 +3,6 @@ package session
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -26,7 +25,6 @@ type JwkManager interface {
 type DefaultManager struct {
 	encrypter *aes_gcm.AESGCM
 	repo      sharedDal.IJwkRepo
-	keys      []string
 }
 
 // Returns a DefaultManager that reads and persists the jwks to database and generates jwks if a new secret gets added to the config.
@@ -38,29 +36,23 @@ func NewDefaultManager(keys []string, repo sharedDal.IJwkRepo) (*DefaultManager,
 	manager := &DefaultManager{
 		encrypter: encrypter,
 		repo:      repo,
-		keys:      keys,
+	}
+	// for every key we should check if a jwk with index exists and create one if not.
+	ctx := context.Background()
+	for i := range keys {
+
+		j, err := repo.GetJwk(ctx, uint(i))
+		if j == nil && err == nil {
+			_, err := manager.GenerateKey(ctx)
+			if err != nil {
+				return nil, err
+			}
+		} else if err != nil {
+			return nil, err
+		}
 	}
 
 	return manager, nil
-}
-
-func (m *DefaultManager) InitJwk() error {
-	// for every key we should check if a jwk with index exists and create one if not.
-	ctx := context.Background()
-	for i := range m.keys {
-
-		j, err := m.repo.GetJwk(ctx, uint(i))
-		if j == nil && err == nil {
-			fmt.Printf("jwk with index %d does not exist, creating one\n", i)
-			_, err := m.GenerateKey(ctx)
-			if err != nil {
-				return err
-			}
-		} else if err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func (m *DefaultManager) GenerateKey(ctx context.Context) (jwk.Key, error) {

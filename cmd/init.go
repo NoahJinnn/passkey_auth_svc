@@ -23,10 +23,6 @@ func InitSessionManager(ctxStartupCmdServe context.Context, cfg *sharedConfig.Sh
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
 	}
-	err = jwkManager.InitJwk()
-	if err != nil {
-		panic(fmt.Errorf("failed to create jwks: %w", err))
-	}
 	sessionManager, err := session.NewManager(jwkManager, cfg.Session)
 	if err != nil {
 		panic(fmt.Errorf("failed to create session generator: %w", err))
