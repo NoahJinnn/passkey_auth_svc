@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/internal/http/session"
 	"github.com/hellohq/hqservice/internal/sharedConfig"
 	"github.com/hellohq/hqservice/internal/sharedDal"
 	"github.com/hellohq/hqservice/ms/auth"
@@ -16,7 +17,6 @@ import (
 	"github.com/hellohq/hqservice/pkg/concurrent"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/powerman/appcfg"
-	"github.com/powerman/pqx"
 	"github.com/powerman/structlog"
 	"github.com/spf13/cobra"
 )
@@ -25,7 +25,7 @@ type Ctx = context.Context
 type embeddedService interface {
 	Name() string
 	Init(cfg *sharedConfig.Shared, serveCmd *cobra.Command) error
-	RunServe(ctxStartup, ctxShutdown Ctx, shutdown func(), dbClient *ent.Client) error
+	RunServe(ctxStartup, ctxShutdown Ctx, shutdown func(), dbClient *ent.Client, sessionManage session.Manager) error
 }
 
 var (
@@ -49,11 +49,11 @@ func NewServeCmd(cfg *sharedConfig.Shared) *cobra.Command {
 			ctxStartupCmdServe, cancel := context.WithTimeout(context.Background(), serveStartupTimeout.Value(nil))
 			defer cancel()
 
-			// Init ent client
-			cfg.Postgres.SSLMode = pqx.SSLRequire
-			dateSourceName := cfg.Postgres.FormatDSN()
-			entClient := sharedDal.CreateEntClient(ctxStartupCmdServe, dateSourceName)
+			entClient := InitEntClient(ctxStartupCmdServe, cfg)
 			defer entClient.Close()
+
+			jwkRepo := sharedDal.NewJwkRepo(entClient)
+			sessionManager := InitSessionManager(ctxStartupCmdServe, cfg, jwkRepo)
 
 			ctxShutdownCmdServe, shutdown := context.WithCancel(context.Background())
 			ctxShutdownCmdServe, _ = signal.NotifyContext(ctxShutdownCmdServe, syscall.SIGHUP, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGABRT, syscall.SIGTERM)
@@ -72,7 +72,7 @@ func NewServeCmd(cfg *sharedConfig.Shared) *cobra.Command {
 				ctxStartupCmdMs := structlog.NewContext(ctxStartupCmdServe, log)
 				services[i] = func(ctxShutdown Ctx) error {
 					ctxShutdowCmdMs := structlog.NewContext(ctxShutdownCmdServe, log)
-					return runServe(ctxStartupCmdMs, ctxShutdowCmdMs, shutdown, entClient)
+					return runServe(ctxStartupCmdMs, ctxShutdowCmdMs, shutdown, entClient, sessionManager)
 				}
 			}
 

@@ -1,16 +1,13 @@
 package http
 
 import (
-	"fmt"
-
+	"github.com/hellohq/hqservice/internal/http/session"
 	"github.com/hellohq/hqservice/internal/http/sharedDto"
 	"github.com/hellohq/hqservice/internal/http/sharedHandlers"
 	"github.com/hellohq/hqservice/internal/http/sharedMiddlewares"
-	"github.com/hellohq/hqservice/ms/auth/srv/http/authMiddleware"
-	"github.com/hellohq/hqservice/ms/auth/srv/http/session"
+	"github.com/hellohq/hqservice/internal/sharedConfig"
 	"github.com/hellohq/hqservice/ms/networth/app"
 	"github.com/hellohq/hqservice/ms/networth/config"
-	"github.com/hellohq/hqservice/ms/networth/dal"
 	"github.com/hellohq/hqservice/ms/networth/srv/http/dto"
 	"github.com/hellohq/hqservice/ms/networth/srv/http/handlers"
 	"github.com/labstack/echo/v4"
@@ -25,7 +22,7 @@ type (
 
 // NewServer returns Echo server configured to listen on the TCP network
 // address cfg.Host:cfg.Port and handle requests on incoming connections.
-func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) error {
+func NewServer(appl app.Appl, sessionManager session.Manager, sharedCfg *sharedConfig.Shared, cfg *config.Config) error {
 	// srv := &handlers.HttpDeps{
 	// 	Appl: appl,
 	// 	Cfg:  cfg,
@@ -50,14 +47,6 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) error {
 	}
 
 	e.Validator = sharedDto.NewCustomValidator()
-	jwkManager, err := session.NewDefaultManager(cfg.Secrets.Keys, repo.GetJwkRepo())
-	if err != nil {
-		panic(fmt.Errorf("failed to create jwk manager: %w", err))
-	}
-	sessionManager, err := session.NewManager(jwkManager, cfg.Session)
-	if err != nil {
-		panic(fmt.Errorf("failed to create session generator: %w", err))
-	}
 
 	healthHandler := sharedHandlers.NewHealthHandler()
 	e.GET("/ready", healthHandler.Ready)
@@ -65,7 +54,7 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) error {
 
 	nwHandler := handlers.NewNetworthHandler()
 	nw := e.Group("/nw")
-	nw.GET("/:id", nwHandler.Get, authMiddleware.Session(sessionManager))
+	nw.GET("/:id", nwHandler.Get, sharedMiddlewares.Session(sessionManager))
 
 	e.Logger.Fatal(e.Start(cfg.Server.BindAddr.String()))
 	return nil
