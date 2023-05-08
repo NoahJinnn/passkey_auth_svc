@@ -29,7 +29,7 @@ type IWebauthnSvc interface {
 }
 
 type webauthnSvc struct {
-	repo dal.IRepo
+	repo dal.IAuthRepo
 	wa   *webauthn.WebAuthn
 }
 
@@ -38,7 +38,7 @@ var (
 	WebauthnOperationAuthentication string = "authentication"
 )
 
-func NewWebAuthn(cfg *config.Config, repo dal.IRepo, wa *webauthn.WebAuthn) IWebauthnSvc {
+func NewWebAuthn(cfg *config.Config, repo dal.IAuthRepo, wa *webauthn.WebAuthn) IWebauthnSvc {
 	return &webauthnSvc{
 		repo: repo,
 		wa:   wa,

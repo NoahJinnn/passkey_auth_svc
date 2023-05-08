@@ -35,3 +35,16 @@ func (r *emailRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.Email, error) {
 
 	return nil, nil
 }
+
+func (r *emailRepo) ListByUser(ctx Ctx, userID uuid.UUID) ([]*ent.Email, error) {
+
+	var emails []*ent.Email // TODO: mock this email list by user
+
+	for _, m := range r.emails {
+		if m.UserID == userID {
+			emails = append(emails, m)
+		}
+	}
+
+	return emails, nil
+}

@@ -24,7 +24,7 @@ func NewEmailHandler(srv *HttpDeps, sessionManager session.Manager) *EmailHandle
 	}
 }
 
-func (h *EmailHandler) List(c echo.Context) error {
+func (h *EmailHandler) ListByUser(c echo.Context) error {
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("failed to cast session object")
@@ -35,7 +35,7 @@ func (h *EmailHandler) List(c echo.Context) error {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	emails, err := h.persister.GetEmailPersister().FindByUserId(userId)
+	emails, err := h.GetEmailSvc().ListByUser(c.Request().Context(), userId)
 	if err != nil {
 		return fmt.Errorf("failed to fetch emails from db: %w", err)
 	}
@@ -43,7 +43,7 @@ func (h *EmailHandler) List(c echo.Context) error {
 	response := make([]*dto.EmailResponse, len(emails))
 
 	for i := range emails {
-		response[i] = dto.FromEmailModel(&emails[i])
+		response[i] = dto.FromEmailModel(emails[i])
 	}
 
 	return c.JSON(http.StatusOK, response)

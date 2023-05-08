@@ -15,7 +15,7 @@ func NewRepo(
 	waCredential []*ent.WebauthnCredential,
 	waSessionData []*ent.WebauthnSessionData,
 	email []*ent.Email,
-) dal.IRepo {
+) dal.IAuthRepo {
 	return &repo{
 		Db:                     db,
 		userRepo:               NewUserRepo(user),

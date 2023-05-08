@@ -9,6 +9,7 @@ import (
 type IEmailRepo interface {
 	GetByAddress(ctx Ctx, address string) (*ent.Email, error)
 	GetById(ctx Ctx, id uuid.UUID) (*ent.Email, error)
+	ListByUser(ctx Ctx, userID uuid.UUID) ([]*ent.Email, error)
 }
 
 type emailRepo struct {
@@ -43,4 +44,17 @@ func (r *emailRepo) GetByAddress(ctx Ctx, address string) (*ent.Email, error) {
 	}
 
 	return e, nil
+}
+
+func (r *emailRepo) ListByUser(ctx Ctx, userID uuid.UUID) ([]*ent.Email, error) {
+	emails, err := r.db.Email.
+		Query().
+		Where(email.UserID(userID)).
+		All(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return emails, nil
 }

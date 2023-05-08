@@ -18,7 +18,7 @@ const (
 )
 
 // Repo provides data storage.
-type IRepo interface {
+type IAuthRepo interface {
 	WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error
 	GetUserRepo() IUserRepo
 	GetWebauthnCredentialRepo() IWebauthnCredentialRepo
@@ -27,37 +27,37 @@ type IRepo interface {
 	GetPasscodeRepo() IPasscodeRepo
 }
 
-type Repo struct {
+type AuthRepo struct {
 	Db *ent.Client
 }
 type Ctx = context.Context
 
-func New(client *ent.Client) *Repo {
-	return &Repo{
+func New(client *ent.Client) *AuthRepo {
+	return &AuthRepo{
 		Db: client,
 	}
 }
 
-func (r Repo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error {
+func (r AuthRepo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error {
 	return sharedDal.WithTx(ctx, r.Db, exec)
 }
 
-func (r Repo) GetUserRepo() IUserRepo {
+func (r AuthRepo) GetUserRepo() IUserRepo {
 	return NewUserRepo(r.Db)
 }
 
-func (r Repo) GetWebauthnCredentialRepo() IWebauthnCredentialRepo {
+func (r AuthRepo) GetWebauthnCredentialRepo() IWebauthnCredentialRepo {
 	return NewWebauthnCredentialRepo(r.Db)
 }
 
-func (r Repo) GetWebauthnSessionRepo() IWebauthnSessionRepo {
+func (r AuthRepo) GetWebauthnSessionRepo() IWebauthnSessionRepo {
 	return NewWebauthnSessionRepo(r.Db)
 }
 
-func (r Repo) GetEmailRepo() IEmailRepo {
+func (r AuthRepo) GetEmailRepo() IEmailRepo {
 	return NewEmailRepo(r.Db)
 }
 
-func (r Repo) GetPasscodeRepo() IPasscodeRepo {
+func (r AuthRepo) GetPasscodeRepo() IPasscodeRepo {
 	return NewPasscodeRepo(r.Db)
 }

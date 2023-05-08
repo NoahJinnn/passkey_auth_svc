@@ -6,28 +6,14 @@ import (
 )
 
 type EmailResponse struct {
-	ID         uuid.UUID `json:"id"`
-	Address    string    `json:"address"`
-	IsVerified bool      `json:"is_verified"`
-	IsPrimary  bool      `json:"is_primary"`
-	Identity   *Identity `json:"identity"`
-}
-
-type EmailCreateRequest struct {
-	Address string `json:"address"`
-}
-
-type EmailUpdateRequest struct {
-	IsPrimary *bool `json:"is_primary"`
+	ID      uuid.UUID `json:"id"`
+	Address string    `json:"address"`
 }
 
 // FromEmailModel Converts the DB model to a DTO object
 func FromEmailModel(email *ent.Email) *EmailResponse {
 	return &EmailResponse{
-		ID:         email.ID,
-		Address:    email.Address,
-		IsVerified: email.Verified,
-		IsPrimary:  email.IsPrimary(),
-		Identity:   FromIdentityModel(email.Identity),
+		ID:      email.ID,
+		Address: email.Address,
 	}
 }

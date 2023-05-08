@@ -19,11 +19,11 @@ type IUserSvc interface {
 }
 
 type userSvc struct {
-	repo dal.IRepo
+	repo dal.IAuthRepo
 	cfg  *config.Config
 }
 
-func NewUserSvc(cfg *config.Config, repo dal.IRepo) IUserSvc {
+func NewUserSvc(cfg *config.Config, repo dal.IAuthRepo) IUserSvc {
 	return &userSvc{
 		repo: repo,
 		cfg:  cfg,
