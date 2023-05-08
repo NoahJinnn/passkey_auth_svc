@@ -49,7 +49,7 @@ func (c *Shared) Validate() error {
 
 // Default ports.
 const (
-	AuthPort = 17000 + iota
+	AuthPort = 17000 + iota*2
 	NetworthPort
 )
 
@@ -70,6 +70,14 @@ var shared = &struct {
 
 	Secrets appcfg.NotEmptyString `env:"AUTH_SECRETS"`
 }{ //nolint:gochecknoglobals // Config is global anyway.
+	AuthAddrHost:    appcfg.MustNotEmptyString(def.Hostname),
+	AuthAddrHostInt: appcfg.MustNotEmptyString(def.HostnameInt),
+	AuthAddrPort:    appcfg.MustPort(strconv.Itoa(AuthPort)),
+
+	NetworthAddrHost:    appcfg.MustNotEmptyString(def.Hostname),
+	NetworthAddrHostInt: appcfg.MustNotEmptyString(def.Hostname),
+	NetworthAddrPort:    appcfg.MustPort(strconv.Itoa(NetworthPort)),
+
 	PostgresUser:     appcfg.MustNotEmptyString("auth"),
 	PostgresAddrPort: appcfg.MustPort("5432"),
 	PostgresAddrHost: appcfg.MustNotEmptyString("localhost"),
@@ -89,13 +97,13 @@ func Get() (*Shared, error) {
 	}
 
 	sharedCfg := &Shared{
-		AuthAddrHost:    appcfg.MustNotEmptyString(def.Hostname),
-		AuthAddrHostInt: appcfg.MustNotEmptyString(def.HostnameInt),
-		AuthAddrPort:    appcfg.MustPort(strconv.Itoa(AuthPort)),
+		AuthAddrHost:    shared.AuthAddrHost,
+		AuthAddrHostInt: shared.AuthAddrHostInt,
+		AuthAddrPort:    shared.AuthAddrPort,
 
-		NetworthAddrHost:    appcfg.MustNotEmptyString(def.Hostname),
-		NetworthAddrHostInt: appcfg.MustNotEmptyString(def.Hostname),
-		NetworthAddrPort:    appcfg.MustPort(strconv.Itoa(NetworthPort)),
+		NetworthAddrHost:    shared.NetworthAddrHost,
+		NetworthAddrHostInt: shared.NetworthAddrHostInt,
+		NetworthAddrPort:    shared.NetworthAddrPort,
 		Postgres: NewPostgresConfig(pqx.Config{
 			Host:   shared.PostgresAddrHost.Value(&err),
 			Port:   shared.PostgresAddrPort.Value(&err),
