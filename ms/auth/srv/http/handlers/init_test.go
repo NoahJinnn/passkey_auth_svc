@@ -19,7 +19,7 @@ import (
 )
 
 var ctx = context.Background()
-var defaultConfig = config.Config{
+var defaultCfg = config.Config{
 	Webauthn: config.WebauthnSettings{
 		RelyingParty: config.RelyingParty{
 			Id:          "localhost",
@@ -30,7 +30,20 @@ var defaultConfig = config.Config{
 		Timeout: 60000,
 	},
 }
-var sharedCfg = sharedConfig.Shared{}
+var sharedCfg = sharedConfig.Shared{
+	Session: sharedConfig.Session{
+		Lifespan: "1h",
+		Cookie: sharedConfig.Cookie{
+			HttpOnly: true,
+			SameSite: "strict",
+			Secure:   true,
+		},
+		EnableAuthTokenHeader: true,
+	},
+	Secrets: sharedConfig.Secrets{
+		Keys: []string{"needsToBeAtLeast16Test"},
+	},
+}
 
 type sessionManager struct {
 }
@@ -114,10 +127,10 @@ func (s *integrationSuite) SetupSuite() {
 
 	s.repo = repo
 	s.db = db
-	s.app = app.New(&defaultConfig, repo)
+	s.app = app.New(&defaultCfg, repo)
 	s.srv = &HttpDeps{
 		s.app,
-		&defaultConfig,
+		&defaultCfg,
 		&sharedCfg,
 	}
 }
