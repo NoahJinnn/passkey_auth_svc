@@ -17,7 +17,7 @@ func main() {
 		cmd.Log.Fatalf("failed to init config: %s", err)
 	}
 
-	rootCmd := cmd.NewRootCmd(cfg)
+	rootCmd := cmd.NewRootCmd()
 	serveCmd := cmd.NewServeCmd(cfg)
 	msCmd := cmd.NewMsCmd(cfg, serveCmd)
 	rootCmd.AddCommand(serveCmd, msCmd)

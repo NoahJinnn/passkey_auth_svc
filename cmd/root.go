@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/hellohq/hqservice/internal/sharedConfig"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/powerman/appcfg"
 	"github.com/powerman/structlog"
@@ -23,7 +22,7 @@ var (
 	}
 )
 
-func NewRootCmd(cfg *sharedConfig.Shared) *cobra.Command {
+func NewRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:           def.ProgName,
 		Short:         "Monolith with embedded microservices",
