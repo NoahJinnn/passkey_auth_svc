@@ -8,6 +8,7 @@
 package sharedConfig
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/hellohq/hqservice/pkg/def"
@@ -29,6 +30,21 @@ type Shared struct {
 	NetworthAddrPort    appcfg.Port
 
 	Postgres *PostgresConfig
+	Session  Session
+	Secrets  Secrets
+}
+
+func (c *Shared) Validate() error {
+	err := c.Session.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate session settings: %w", err)
+	}
+	err = c.Secrets.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate secrets settings: %w", err)
+	}
+
+	return nil
 }
 
 // Default ports.
@@ -51,11 +67,15 @@ var shared = &struct {
 	PostgresAddrHost appcfg.NotEmptyString `env:"POSTGRES_ADDR_HOST"`
 	PostgresAddrPort appcfg.Port           `env:"POSTGRES_ADDR_PORT"`
 	PostgresDBName   appcfg.NotEmptyString `env:"POSTGRES_DB_NAME"`
+
+	Secrets appcfg.NotEmptyString `env:"AUTH_SECRETS"`
 }{ //nolint:gochecknoglobals // Config is global anyway.
 	PostgresUser:     appcfg.MustNotEmptyString("auth"),
 	PostgresAddrPort: appcfg.MustPort("5432"),
 	PostgresAddrHost: appcfg.MustNotEmptyString("localhost"),
 	PostgresDBName:   appcfg.MustNotEmptyString("postgres"),
+
+	Secrets: appcfg.MustNotEmptyString("needsToBeAtLeast16"),
 }
 
 // Get updates config defaults (from env) and returns shared config.
@@ -75,7 +95,7 @@ func Get() (*Shared, error) {
 
 		NetworthAddrHost:    appcfg.MustNotEmptyString(def.Hostname),
 		NetworthAddrHostInt: appcfg.MustNotEmptyString(def.Hostname),
-		NetworthAddrPort:    appcfg.MustPort(strconv.Itoa(AuthPort)),
+		NetworthAddrPort:    appcfg.MustPort(strconv.Itoa(NetworthPort)),
 		Postgres: NewPostgresConfig(pqx.Config{
 			Host:   shared.PostgresAddrHost.Value(&err),
 			Port:   shared.PostgresAddrPort.Value(&err),
@@ -83,6 +103,23 @@ func Get() (*Shared, error) {
 			User:   shared.PostgresUser.Value(&err),
 			Pass:   shared.PostgresPass.Value(&err),
 		}),
+
+		Session: Session{
+			Lifespan: "1h",
+			Cookie: Cookie{
+				HttpOnly: true,
+				SameSite: "strict",
+				Secure:   true,
+			},
+			EnableAuthTokenHeader: true,
+		},
+		Secrets: Secrets{
+			Keys: []string{shared.Secrets.Value(&err)},
+		},
+	}
+	err = sharedCfg.Validate()
+	if err != nil {
+		return nil, err
 	}
 
 	return sharedCfg, nil

@@ -48,17 +48,14 @@ var (
 
 		TTL appcfg.Int `env:"PASSCODE_TTL"`
 	}{
-		Secrets: appcfg.MustNotEmptyString("needsToBeAtLeast16"),
-		RpId:    appcfg.MustNotEmptyString("localhost"),
-		TTL:     appcfg.MustInt("300"),
+		RpId: appcfg.MustNotEmptyString("localhost"),
+		TTL:  appcfg.MustInt("300"),
 	}
 )
 
 type Config struct {
 	Server      Server
 	Webauthn    WebauthnSettings
-	Session     Session
-	Secrets     Secrets
 	Passcode    Passcode
 	ServiceName string
 }
@@ -149,18 +146,6 @@ func GetServe() (c *Config, err error) {
 			},
 			Timeout: 60000,
 		},
-		Session: Session{
-			Lifespan: "1h",
-			Cookie: Cookie{
-				HttpOnly: true,
-				SameSite: "strict",
-				Secure:   true,
-			},
-			EnableAuthTokenHeader: true,
-		},
-		Secrets: Secrets{
-			Keys: []string{own.Secrets.Value(&err)},
-		},
 		Passcode: Passcode{
 			Email: Email{
 				FromAddress: own.FromAddress.Value(&err),
@@ -199,14 +184,5 @@ func (c *Config) Validate() error {
 	if err != nil {
 		return fmt.Errorf("failed to validate passcode settings: %w", err)
 	}
-	err = c.Session.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate session settings: %w", err)
-	}
-	err = c.Secrets.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate secrets settings: %w", err)
-	}
-
 	return nil
 }

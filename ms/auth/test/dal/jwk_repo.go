@@ -2,10 +2,10 @@ package test
 
 import (
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/ms/auth/dal"
+	"github.com/hellohq/hqservice/internal/sharedDal"
 )
 
-func NewJwkRepo(init []*ent.Jwk) dal.IJwkRepo {
+func NewJwkRepo(init []*ent.Jwk) sharedDal.IJwkRepo {
 	if init == nil {
 		return &jwkPersister{[]*ent.Jwk{}}
 	}

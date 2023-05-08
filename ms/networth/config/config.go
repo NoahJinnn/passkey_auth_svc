@@ -12,10 +12,7 @@
 package config
 
 import (
-	"fmt"
-
 	"github.com/hellohq/hqservice/internal/sharedConfig"
-	authCfg "github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/appcfg"
 	"github.com/sethvargo/go-limiter/httplimit"
@@ -33,18 +30,13 @@ var (
 	shared *sharedConfig.Shared
 	own    = &struct {
 		// Below envs is loaded by Doppler
-		Secrets appcfg.NotEmptyString `env:"AUTH_SECRETS"`
-	}{
 
-		Secrets: appcfg.MustNotEmptyString("needsToBeAtLeast16"),
-	}
+	}{}
 )
 
 type Config struct {
-	Server  Server
-	Session authCfg.Session
-	Secrets authCfg.Secrets
-	Plaid   *PlaidConfig
+	Server Server
+	Plaid  *PlaidConfig
 }
 
 // Init updates config defaults (from env) and setup subcommands flags.
@@ -81,18 +73,6 @@ func GetServe() (c *Config, err error) {
 				},
 			},
 		},
-		Session: authCfg.Session{
-			Lifespan: "1h",
-			Cookie: authCfg.Cookie{
-				HttpOnly: true,
-				SameSite: "strict",
-				Secure:   true,
-			},
-			EnableAuthTokenHeader: true,
-		},
-		Secrets: authCfg.Secrets{
-			Keys: []string{own.Secrets.Value(&err)},
-		},
 	}
 	if err != nil {
 		return nil, appcfg.WrapPErr(err, fs.Serve, own)
@@ -114,10 +94,6 @@ func cleanup() {
 }
 
 func (c *Config) Validate() error {
-	err := c.Session.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate session settings: %w", err)
-	}
 
 	return nil
 }

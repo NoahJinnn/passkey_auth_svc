@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/hellohq/hqservice/internal/sharedConfig"
-	authCfg "github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/check"
 	"github.com/sethvargo/go-limiter/httplimit"
@@ -29,15 +28,6 @@ var (
 					httplimit.HeaderRetryAfter,
 				},
 			},
-		},
-		Session: authCfg.Session{
-			Lifespan: "1h",
-			Cookie: authCfg.Cookie{
-				HttpOnly: true,
-				SameSite: "strict",
-				Secure:   true,
-			},
-			EnableAuthTokenHeader: true,
 		},
 	}
 	testOwn = own
