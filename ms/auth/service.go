@@ -5,6 +5,7 @@ import (
 	"context"
 
 	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/internal/http/session"
 	"github.com/hellohq/hqservice/internal/sharedConfig"
 	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/config"
@@ -20,9 +21,11 @@ type Ctx = context.Context
 
 // Service implements main.embeddedService interface.
 type Service struct {
-	cfg  *config.Config
-	appl app.App
-	repo *dal.Repo
+	cfg            *config.Config
+	sharedCfg      *sharedConfig.Shared
+	sessionManager session.Manager
+	appl           app.App
+	repo           *dal.Repo
 }
 
 // Name implements main.embeddedService interface.
@@ -30,13 +33,14 @@ func (s *Service) Name() string { return "auth" }
 
 // Init implements main.embeddedService interface.
 func (s *Service) Init(sharedCfg *sharedConfig.Shared, serveCmd *cobra.Command) error {
+	s.sharedCfg = sharedCfg
 	return config.Init(sharedCfg, config.FlagSets{
 		Serve: serveCmd.Flags(),
 	})
 }
 
 // RunServe implements main.embeddedService interface.
-func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func(), entClient *ent.Client) (err error) {
+func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func(), entClient *ent.Client, sessionManager session.Manager) (err error) {
 	log := structlog.FromContext(ctxShutdown, nil)
 
 	if s.cfg == nil {
@@ -45,6 +49,7 @@ func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func(), ent
 	if err != nil {
 		return log.Err("failed to get config", "err", err)
 	}
+	s.sessionManager = sessionManager
 	s.repo = dal.New(entClient)
 	s.appl = app.New(s.cfg, s.repo)
 
@@ -59,5 +64,5 @@ func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func(), ent
 }
 
 func (s *Service) serveEcho(ctx Ctx) error {
-	return server.NewServer(s.appl, *s.repo, s.cfg)
+	return server.NewServer(s.appl, s.sessionManager, s.sharedCfg, s.cfg)
 }

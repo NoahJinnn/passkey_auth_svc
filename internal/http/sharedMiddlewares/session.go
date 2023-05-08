@@ -1,10 +1,10 @@
-package authMiddleware
+package sharedMiddlewares
 
 import (
 	"net/http"
 
+	"github.com/hellohq/hqservice/internal/http/session"
 	"github.com/hellohq/hqservice/internal/http/sharedDto"
-	"github.com/hellohq/hqservice/ms/auth/srv/http/session"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 )

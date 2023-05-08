@@ -10,14 +10,14 @@ services:
     restart: "always"
     shm_size: "256m"
     ports:
-      - "${HQ_AUTH_POSTGRES_ADDR_PORT:-0}:5432"
+      - "${HQ_POSTGRES_ADDR_PORT:-0}:5432"
     volumes:
       - "postgres:/var/lib/postgresql/data"
       - "${POSTGRES_TLS_CERT_PATH}:/dev.crt"
       - "${POSTGRES_TLS_KEY_PATH}:/dev.key"
     environment:
-      POSTGRES_USER: "${HQ_AUTH_POSTGRES_AUTH_LOGIN}"
-      POSTGRES_PASSWORD: "${HQ_AUTH_POSTGRES_AUTH_PASS}"
+      POSTGRES_USER: "${HQ_POSTGRES_AUTH_LOGIN}"
+      POSTGRES_PASSWORD: "${HQ_POSTGRES_AUTH_PASS}"
     entrypoint:
       - bash
       - -c
@@ -45,6 +45,6 @@ networks:
   #     HQ_ADDR_HOST: "${HQ_ADDR_HOST}"
   #     HQ_ADDR_HOST_INT: "${HQ_ADDR_HOST_INT}"
   #     HQ_X_POSTGRES_ADDR_HOST: "postgres"
-  #     HQ_AUTH_POSTGRES_AUTH_LOGIN: "${HQ_AUTH_POSTGRES_AUTH_LOGIN}"
-  #     HQ_AUTH_POSTGRES_AUTH_PASS: "${HQ_AUTH_POSTGRES_AUTH_PASS}"
+  #     HQ_POSTGRES_AUTH_LOGIN: "${HQ_POSTGRES_AUTH_LOGIN}"
+  #     HQ_POSTGRES_AUTH_PASS: "${HQ_POSTGRES_AUTH_PASS}"
 

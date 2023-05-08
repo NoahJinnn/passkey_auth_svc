@@ -1,6 +1,7 @@
-package dal
+package sharedDal
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hellohq/hqservice/ent"
@@ -8,10 +9,10 @@ import (
 )
 
 type IJwkRepo interface {
-	GetJwk(ctx Ctx, id uint) (*ent.Jwk, error)
-	GetAllJwk(ctx Ctx) ([]*ent.Jwk, error)
-	GetLastJwk(ctx Ctx) (*ent.Jwk, error)
-	Create(ctx Ctx, jwk ent.Jwk) error
+	GetJwk(ctx context.Context, id uint) (*ent.Jwk, error)
+	GetAllJwk(ctx context.Context) ([]*ent.Jwk, error)
+	GetLastJwk(ctx context.Context) (*ent.Jwk, error)
+	Create(ctx context.Context, jwk ent.Jwk) error
 }
 
 type jwkRepo struct {
@@ -22,7 +23,7 @@ func NewJwkRepo(db *ent.Client) IJwkRepo {
 	return &jwkRepo{db: db}
 }
 
-func (r *jwkRepo) GetJwk(ctx Ctx, id uint) (*ent.Jwk, error) {
+func (r *jwkRepo) GetJwk(ctx context.Context, id uint) (*ent.Jwk, error) {
 	jwk, err := r.db.Jwk.
 		Query().
 		Where(jwk.ID(id)).
@@ -39,7 +40,7 @@ func (r *jwkRepo) GetJwk(ctx Ctx, id uint) (*ent.Jwk, error) {
 
 }
 
-func (r *jwkRepo) GetAllJwk(ctx Ctx) ([]*ent.Jwk, error) {
+func (r *jwkRepo) GetAllJwk(ctx context.Context) ([]*ent.Jwk, error) {
 	jwks, err := r.db.Jwk.
 		Query().
 		All(ctx)
@@ -51,7 +52,7 @@ func (r *jwkRepo) GetAllJwk(ctx Ctx) ([]*ent.Jwk, error) {
 	return jwks, nil
 }
 
-func (r *jwkRepo) GetLastJwk(ctx Ctx) (*ent.Jwk, error) {
+func (r *jwkRepo) GetLastJwk(ctx context.Context) (*ent.Jwk, error) {
 	jwk, err := r.db.Jwk.
 		Query().
 		Order(ent.Desc(jwk.FieldCreatedAt, jwk.FieldID)).
@@ -65,7 +66,7 @@ func (r *jwkRepo) GetLastJwk(ctx Ctx) (*ent.Jwk, error) {
 	return jwk, nil
 }
 
-func (r *jwkRepo) Create(ctx Ctx, jwk ent.Jwk) error {
+func (r *jwkRepo) Create(ctx context.Context, jwk ent.Jwk) error {
 	_, err := r.db.Jwk.
 		Create().
 		SetID(jwk.ID).

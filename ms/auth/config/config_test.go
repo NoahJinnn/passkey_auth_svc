@@ -38,18 +38,6 @@ var (
 			},
 			Timeout: 60000,
 		},
-		Session: Session{
-			Lifespan: "1h",
-			Cookie: Cookie{
-				HttpOnly: true,
-				SameSite: "strict",
-				Secure:   true,
-			},
-			EnableAuthTokenHeader: true,
-		},
-		Secrets: Secrets{
-			Keys: []string{"needsToBeAtLeast16"},
-		},
 		Passcode: Passcode{
 			Email: Email{
 				FromAddress: "test@gmail.com",

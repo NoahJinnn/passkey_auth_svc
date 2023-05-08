@@ -94,10 +94,11 @@ func TestWebauthnHandler_BeginRegistration(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	appl := test.NewApp(&defaultConfig, testRepo.NewRepo(nil, users, nil, credentials, sessionData, nil))
+	appl := test.NewApp(&defaultCfg, testRepo.NewRepo(nil, users, credentials, sessionData, nil))
 	handler := NewWebauthnHandler(&HttpDeps{
-		Appl: appl,
-		Cfg:  &defaultConfig,
+		Appl:      appl,
+		Cfg:       &defaultCfg,
+		SharedCfg: &sharedCfg,
 	}, &sessionManager{})
 	err = handler.BeginRegistration(c)
 	require.NoError(t, err)
@@ -114,7 +115,7 @@ func TestWebauthnHandler_BeginRegistration(t *testing.T) {
 		assert.Equal(t, userIdBytes, []byte(respUserId))
 
 		assert.NotEmpty(t, creationOptions.Response.Challenge)
-		assert.Equal(t, defaultConfig.Webauthn.RelyingParty.Id, creationOptions.Response.RelyingParty.ID)
+		assert.Equal(t, defaultCfg.Webauthn.RelyingParty.Id, creationOptions.Response.RelyingParty.ID)
 		assert.Equal(t, creationOptions.Response.AuthenticatorSelection.ResidentKey, protocol.ResidentKeyRequirementRequired)
 		assert.Equal(t, creationOptions.Response.AuthenticatorSelection.UserVerification, protocol.VerificationRequired)
 		assert.True(t, *creationOptions.Response.AuthenticatorSelection.RequireResidentKey)
@@ -140,10 +141,11 @@ func TestWebauthnHandler_FinishRegistration(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	appl := test.NewApp(&defaultConfig, testRepo.NewRepo(nil, users, nil, nil, sessionData, nil))
+	appl := test.NewApp(&defaultCfg, testRepo.NewRepo(nil, users, nil, sessionData, nil))
 	handler := NewWebauthnHandler(&HttpDeps{
-		Appl: appl,
-		Cfg:  &defaultConfig,
+		Appl:      appl,
+		Cfg:       &defaultCfg,
+		SharedCfg: &sharedCfg,
 	}, &sessionManager{})
 
 	if assert.NoError(t, handler.FinishRegistration(c)) {
@@ -177,10 +179,11 @@ func TestWebauthnHandler_BeginLogin(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	appl := test.NewApp(&defaultConfig, testRepo.NewRepo(nil, users, nil, nil, sessionData, nil))
+	appl := test.NewApp(&defaultCfg, testRepo.NewRepo(nil, users, nil, sessionData, nil))
 	handler := NewWebauthnHandler(&HttpDeps{
-		Appl: appl,
-		Cfg:  &defaultConfig,
+		Appl:      appl,
+		Cfg:       &defaultCfg,
+		SharedCfg: &sharedCfg,
 	}, &sessionManager{})
 	require.NoError(t, err)
 
@@ -191,7 +194,7 @@ func TestWebauthnHandler_BeginLogin(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotEmpty(t, assertionOptions.Response.Challenge)
 		assert.Equal(t, assertionOptions.Response.UserVerification, protocol.VerificationRequired)
-		assert.Equal(t, defaultConfig.Webauthn.RelyingParty.Id, assertionOptions.Response.RelyingPartyID)
+		assert.Equal(t, defaultCfg.Webauthn.RelyingParty.Id, assertionOptions.Response.RelyingPartyID)
 	}
 }
 
@@ -212,10 +215,11 @@ func TestWebauthnHandler_FinishLogin(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	appl := test.NewApp(&defaultConfig, testRepo.NewRepo(nil, users, nil, credentials, sessionData, nil))
+	appl := test.NewApp(&defaultCfg, testRepo.NewRepo(nil, users, credentials, sessionData, nil))
 	handler := NewWebauthnHandler(&HttpDeps{
-		Appl: appl,
-		Cfg:  &defaultConfig,
+		Appl:      appl,
+		Cfg:       &defaultCfg,
+		SharedCfg: &sharedCfg,
 	}, &sessionManager{})
 	if assert.NoError(t, handler.FinishLogin(c)) {
 		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)

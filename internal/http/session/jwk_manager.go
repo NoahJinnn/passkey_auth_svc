@@ -3,12 +3,11 @@ package session
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/ms/auth/dal"
+	"github.com/hellohq/hqservice/internal/sharedDal"
 	"github.com/hellohq/hqservice/pkg/crypto/aes_gcm"
 	hqJwk "github.com/hellohq/hqservice/pkg/crypto/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwk"
@@ -25,11 +24,11 @@ type JwkManager interface {
 
 type DefaultManager struct {
 	encrypter *aes_gcm.AESGCM
-	repo      dal.IJwkRepo
+	repo      sharedDal.IJwkRepo
 }
 
 // Returns a DefaultManager that reads and persists the jwks to database and generates jwks if a new secret gets added to the config.
-func NewDefaultManager(keys []string, repo dal.IJwkRepo) (*DefaultManager, error) {
+func NewDefaultManager(keys []string, repo sharedDal.IJwkRepo) (*DefaultManager, error) {
 	encrypter, err := aes_gcm.NewAESGCM(keys)
 	if err != nil {
 		return nil, err
@@ -44,7 +43,6 @@ func NewDefaultManager(keys []string, repo dal.IJwkRepo) (*DefaultManager, error
 
 		j, err := repo.GetJwk(ctx, uint(i))
 		if j == nil && err == nil {
-			fmt.Printf("jwk with index %d does not exist, creating one\n", i)
 			_, err := manager.GenerateKey(ctx)
 			if err != nil {
 				return nil, err

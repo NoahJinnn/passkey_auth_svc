@@ -5,15 +5,15 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/ms/auth/config"
-	"github.com/hellohq/hqservice/ms/auth/srv/http/session"
+	"github.com/hellohq/hqservice/internal/http/session"
+	"github.com/hellohq/hqservice/internal/sharedConfig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNewGenerator(t *testing.T) {
 	manager := JwkManager{}
-	cfg := config.Session{}
+	cfg := sharedConfig.Session{}
 	sessionGenerator, err := session.NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
@@ -21,7 +21,7 @@ func TestNewGenerator(t *testing.T) {
 
 func TestGenerator_Generate(t *testing.T) {
 	manager := JwkManager{}
-	cfg := config.Session{}
+	cfg := sharedConfig.Session{}
 	sessionGenerator, err := session.NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
@@ -37,7 +37,7 @@ func TestGenerator_Generate(t *testing.T) {
 func TestGenerator_Verify(t *testing.T) {
 	sessionLifespan := "5m"
 	manager := JwkManager{}
-	cfg := config.Session{Lifespan: sessionLifespan}
+	cfg := sharedConfig.Session{Lifespan: sessionLifespan}
 	sessionGenerator, err := session.NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
@@ -62,7 +62,7 @@ func TestGenerator_Verify(t *testing.T) {
 
 func TestGenerator_Verify_Error(t *testing.T) {
 	manager := JwkManager{}
-	cfg := config.Session{}
+	cfg := sharedConfig.Session{}
 	sessionGenerator, err := session.NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
@@ -92,7 +92,7 @@ func TestGenerator_Verify_Error(t *testing.T) {
 
 func TestGenerator_DeleteCookie(t *testing.T) {
 	manager := JwkManager{}
-	cfg := config.Session{}
+	cfg := sharedConfig.Session{}
 	sessionGenerator, err := session.NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)

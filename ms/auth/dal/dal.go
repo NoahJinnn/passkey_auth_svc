@@ -20,7 +20,6 @@ const (
 // Repo provides data storage.
 type IRepo interface {
 	WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error
-	GetJwkRepo() IJwkRepo
 	GetUserRepo() IUserRepo
 	GetWebauthnCredentialRepo() IWebauthnCredentialRepo
 	GetWebauthnSessionRepo() IWebauthnSessionRepo
@@ -41,10 +40,6 @@ func New(client *ent.Client) *Repo {
 
 func (r Repo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error {
 	return sharedDal.WithTx(ctx, r.Db, exec)
-}
-
-func (r Repo) GetJwkRepo() IJwkRepo {
-	return NewJwkRepo(r.Db)
 }
 
 func (r Repo) GetUserRepo() IUserRepo {

@@ -12,7 +12,6 @@ type Ctx = context.Context
 func NewRepo(
 	db *ent.Client,
 	user []*ent.User,
-	jwk []*ent.Jwk,
 	waCredential []*ent.WebauthnCredential,
 	waSessionData []*ent.WebauthnSessionData,
 	email []*ent.Email,
@@ -20,7 +19,6 @@ func NewRepo(
 	return &repo{
 		Db:                     db,
 		userRepo:               NewUserRepo(user),
-		jwkRepo:                NewJwkRepo(jwk),
 		webAuthnCredentialRepo: NewWebauthnCredentialRepo(waCredential),
 		webAuthnSessionRepo:    NewWebauthnSessionRepo(waSessionData),
 		emailRepo:              NewEmailRepo(email),
@@ -30,7 +28,6 @@ func NewRepo(
 type repo struct {
 	Db                     *ent.Client
 	userRepo               dal.IUserRepo
-	jwkRepo                dal.IJwkRepo
 	webAuthnCredentialRepo dal.IWebauthnCredentialRepo
 	webAuthnSessionRepo    dal.IWebauthnSessionRepo
 	emailRepo              dal.IEmailRepo
@@ -43,10 +40,6 @@ func (r repo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client)
 		return exec(ctx, db)
 	}
 	return txForw(nil)
-}
-
-func (r repo) GetJwkRepo() dal.IJwkRepo {
-	return r.jwkRepo
 }
 
 func (r repo) GetUserRepo() dal.IUserRepo {

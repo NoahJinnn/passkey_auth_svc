@@ -4,8 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/hellohq/hqservice/ms/auth/srv/http/session"
-	test "github.com/hellohq/hqservice/ms/auth/test/dal"
+	"github.com/hellohq/hqservice/internal/http/session"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
@@ -15,7 +14,7 @@ import (
 func TestDefaultManager(t *testing.T) {
 	keys := []string{"asfnoadnfoaegnq3094intoaegjnoadjgnoadng", "apdisfoaiegnoaiegnbouaebgn982"}
 	ctx := context.Background()
-	repo := test.NewJwkRepo(nil)
+	repo := NewJwkRepo(nil)
 
 	dm, err := session.NewDefaultManager(keys, repo)
 	require.NoError(t, err)

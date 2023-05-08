@@ -5,9 +5,10 @@ import (
 	"net/http"
 
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/internal/http/session"
 	"github.com/hellohq/hqservice/internal/http/sharedDto"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
-	"github.com/hellohq/hqservice/ms/auth/srv/http/session"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -89,7 +90,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 
 	c.SetCookie(cookie)
 
-	if h.Cfg.Session.EnableAuthTokenHeader {
+	if h.SharedCfg.Session.EnableAuthTokenHeader {
 		c.Response().Header().Set("X-Auth-Token", token)
 		c.Response().Header().Set("Access-Control-Expose-Headers", "X-Auth-Token")
 	}

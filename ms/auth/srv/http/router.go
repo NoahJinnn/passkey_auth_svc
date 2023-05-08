@@ -1,17 +1,14 @@
 package http
 
 import (
-	"fmt"
-
+	"github.com/hellohq/hqservice/internal/http/session"
 	"github.com/hellohq/hqservice/internal/http/sharedDto"
 	"github.com/hellohq/hqservice/internal/http/sharedHandlers"
 	"github.com/hellohq/hqservice/internal/http/sharedMiddlewares"
+	"github.com/hellohq/hqservice/internal/sharedConfig"
 	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/config"
-	"github.com/hellohq/hqservice/ms/auth/dal"
-	"github.com/hellohq/hqservice/ms/auth/srv/http/authMiddleware"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/handlers"
-	"github.com/hellohq/hqservice/ms/auth/srv/http/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/powerman/structlog"
@@ -24,10 +21,11 @@ type (
 
 // NewServer returns Echo server configured to listen on the TCP network
 // address cfg.Host:cfg.Port and handle requests on incoming connections.
-func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) error {
+func NewServer(appl app.Appl, sessionManager session.Manager, sharedCfg *sharedConfig.Shared, cfg *config.Config) error {
 	srv := &handlers.HttpDeps{
-		Appl: appl,
-		Cfg:  cfg,
+		Appl:      appl,
+		Cfg:       cfg,
+		SharedCfg: sharedCfg,
 	}
 	e := echo.New()
 	e.File("/.well-known/apple-app-site-association", "static/apple-app-site-association")
@@ -51,14 +49,18 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) error {
 	}
 
 	e.Validator = sharedDto.NewCustomValidator()
-	jwkManager, err := session.NewDefaultManager(cfg.Secrets.Keys, repo.GetJwkRepo())
-	if err != nil {
-		panic(fmt.Errorf("failed to create jwk manager: %w", err))
-	}
-	sessionManager, err := session.NewManager(jwkManager, cfg.Session)
-	if err != nil {
-		panic(fmt.Errorf("failed to create session generator: %w", err))
-	}
+	// jwkManager, err := session.NewDefaultManager(cfg.Secrets.Keys, repo.GetJwkRepo())
+	// if err != nil {
+	// 	panic(fmt.Errorf("failed to create jwk manager: %w", err))
+	// }
+	// err = jwkManager.InitJwk()
+	// if err != nil {
+	// 	panic(fmt.Errorf("failed to create jwks: %w", err))
+	// }
+	// sessionManager, err := session.NewManager(jwkManager, cfg.Session)
+	// if err != nil {
+	// 	panic(fmt.Errorf("failed to create session generator: %w", err))
+	// }
 
 	healthHandler := sharedHandlers.NewHealthHandler()
 	e.GET("/ready", healthHandler.Ready)
@@ -67,12 +69,12 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) error {
 	user := e.Group("/users")
 	userHandler := handlers.NewUserHandler(srv, sessionManager)
 	user.POST("", userHandler.Create)
-	user.GET("/:id", userHandler.Get, authMiddleware.Session(sessionManager))
-	e.POST("/logout", userHandler.Logout, authMiddleware.Session(sessionManager))
+	user.GET("/:id", userHandler.Get, sharedMiddlewares.Session(sessionManager))
+	e.POST("/logout", userHandler.Logout, sharedMiddlewares.Session(sessionManager))
 
 	webauthnHandler := handlers.NewWebauthnHandler(srv, sessionManager)
 	webauthn := e.Group("/webauthn")
-	webauthnRegistration := webauthn.Group("/registration", authMiddleware.Session(sessionManager))
+	webauthnRegistration := webauthn.Group("/registration", sharedMiddlewares.Session(sessionManager))
 	webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
 	webauthnRegistration.POST("/finalize", webauthnHandler.FinishRegistration)
 
@@ -80,7 +82,7 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) error {
 	webauthnLogin.POST("/initialize", webauthnHandler.BeginLogin)
 	webauthnLogin.POST("/finalize", webauthnHandler.FinishLogin)
 
-	webauthnCredentials := webauthn.Group("/credentials", authMiddleware.Session(sessionManager))
+	webauthnCredentials := webauthn.Group("/credentials", sharedMiddlewares.Session(sessionManager))
 	webauthnCredentials.GET("", webauthnHandler.ListCredentials)
 	webauthnCredentials.PATCH("/:id", webauthnHandler.UpdateCredential)
 	webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)

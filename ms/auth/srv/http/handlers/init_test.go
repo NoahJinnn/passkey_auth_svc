@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/internal/sharedConfig"
 	"github.com/hellohq/hqservice/internal/sharedDal"
 	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/config"
@@ -18,7 +19,7 @@ import (
 )
 
 var ctx = context.Background()
-var defaultConfig = config.Config{
+var defaultCfg = config.Config{
 	Webauthn: config.WebauthnSettings{
 		RelyingParty: config.RelyingParty{
 			Id:          "localhost",
@@ -27,6 +28,20 @@ var defaultConfig = config.Config{
 			Origin:      "http://localhost:8080",
 		},
 		Timeout: 60000,
+	},
+}
+var sharedCfg = sharedConfig.Shared{
+	Session: sharedConfig.Session{
+		Lifespan: "1h",
+		Cookie: sharedConfig.Cookie{
+			HttpOnly: true,
+			SameSite: "strict",
+			Secure:   true,
+		},
+		EnableAuthTokenHeader: true,
+	},
+	Secrets: sharedConfig.Secrets{
+		Keys: []string{"needsToBeAtLeast16Test"},
 	},
 }
 
@@ -112,10 +127,11 @@ func (s *integrationSuite) SetupSuite() {
 
 	s.repo = repo
 	s.db = db
-	s.app = app.New(&defaultConfig, repo)
+	s.app = app.New(&defaultCfg, repo)
 	s.srv = &HttpDeps{
 		s.app,
-		&defaultConfig,
+		&defaultCfg,
+		&sharedCfg,
 	}
 }
 
