@@ -41,11 +41,10 @@ var (
 )
 
 type Config struct {
-	Server   Server
-	Session  authCfg.Session
-	Secrets  authCfg.Secrets
-	Postgres *PostgresConfig
-	Plaid    *PlaidConfig
+	Server  Server
+	Session authCfg.Session
+	Secrets authCfg.Secrets
+	Plaid   *PlaidConfig
 }
 
 // Init updates config defaults (from env) and setup subcommands flags.

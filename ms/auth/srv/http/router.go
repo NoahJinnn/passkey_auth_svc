@@ -55,6 +55,10 @@ func NewServer(appl app.Appl, repo dal.Repo, cfg *config.Config) error {
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
 	}
+	err = jwkManager.InitJwk()
+	if err != nil {
+		panic(fmt.Errorf("failed to create jwks: %w", err))
+	}
 	sessionManager, err := session.NewManager(jwkManager, cfg.Session)
 	if err != nil {
 		panic(fmt.Errorf("failed to create session generator: %w", err))
