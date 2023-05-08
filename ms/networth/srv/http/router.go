@@ -54,7 +54,7 @@ func NewServer(appl app.Appl, sessionManager session.Manager, sharedCfg *sharedC
 
 	nwHandler := handlers.NewNetworthHandler()
 	nw := e.Group("/nw")
-	nw.GET("/:id", nwHandler.Get, sharedMiddlewares.Session(sessionManager))
+	nw.GET("", nwHandler.Get, sharedMiddlewares.Session(sessionManager))
 
 	e.Logger.Fatal(e.Start(cfg.Server.BindAddr.String()))
 	return nil
