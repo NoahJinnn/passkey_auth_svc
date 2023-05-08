@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/internal/sharedConfig"
 	"github.com/hellohq/hqservice/internal/sharedDal"
 	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/config"
@@ -29,6 +30,7 @@ var defaultConfig = config.Config{
 		Timeout: 60000,
 	},
 }
+var sharedCfg = sharedConfig.Shared{}
 
 type sessionManager struct {
 }
@@ -116,6 +118,7 @@ func (s *integrationSuite) SetupSuite() {
 	s.srv = &HttpDeps{
 		s.app,
 		&defaultConfig,
+		&sharedCfg,
 	}
 }
 

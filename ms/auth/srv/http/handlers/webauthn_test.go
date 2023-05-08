@@ -94,7 +94,7 @@ func TestWebauthnHandler_BeginRegistration(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	appl := test.NewApp(&defaultConfig, testRepo.NewRepo(nil, users, nil, credentials, sessionData, nil))
+	appl := test.NewApp(&defaultConfig, testRepo.NewRepo(nil, users, credentials, sessionData, nil))
 	handler := NewWebauthnHandler(&HttpDeps{
 		Appl: appl,
 		Cfg:  &defaultConfig,
@@ -140,7 +140,7 @@ func TestWebauthnHandler_FinishRegistration(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	appl := test.NewApp(&defaultConfig, testRepo.NewRepo(nil, users, nil, nil, sessionData, nil))
+	appl := test.NewApp(&defaultConfig, testRepo.NewRepo(nil, users, nil, sessionData, nil))
 	handler := NewWebauthnHandler(&HttpDeps{
 		Appl: appl,
 		Cfg:  &defaultConfig,
@@ -177,7 +177,7 @@ func TestWebauthnHandler_BeginLogin(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	appl := test.NewApp(&defaultConfig, testRepo.NewRepo(nil, users, nil, nil, sessionData, nil))
+	appl := test.NewApp(&defaultConfig, testRepo.NewRepo(nil, users, nil, sessionData, nil))
 	handler := NewWebauthnHandler(&HttpDeps{
 		Appl: appl,
 		Cfg:  &defaultConfig,
@@ -212,7 +212,7 @@ func TestWebauthnHandler_FinishLogin(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	appl := test.NewApp(&defaultConfig, testRepo.NewRepo(nil, users, nil, credentials, sessionData, nil))
+	appl := test.NewApp(&defaultConfig, testRepo.NewRepo(nil, users, credentials, sessionData, nil))
 	handler := NewWebauthnHandler(&HttpDeps{
 		Appl: appl,
 		Cfg:  &defaultConfig,
