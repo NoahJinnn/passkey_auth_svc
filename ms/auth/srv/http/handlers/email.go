@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/http/session"
+	"github.com/hellohq/hqservice/internal/http/sharedDto"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
@@ -37,7 +38,7 @@ func (h *EmailHandler) ListByUser(c echo.Context) error {
 
 	emails, err := h.GetEmailSvc().ListByUser(c.Request().Context(), userId)
 	if err != nil {
-		return fmt.Errorf("failed to fetch emails from db: %w", err)
+		return err
 	}
 
 	response := make([]*dto.EmailResponse, len(emails))
@@ -47,4 +48,26 @@ func (h *EmailHandler) ListByUser(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, response)
+}
+
+func (h *EmailHandler) Delete(c echo.Context) error {
+	sessionToken, ok := c.Get("session").(jwt.Token)
+	if !ok {
+		return errors.New("failed to cast session object")
+	}
+
+	userId, err := uuid.FromString(sessionToken.Subject())
+	if err != nil {
+		return fmt.Errorf("failed to parse subject as uuid: %w", err)
+	}
+	emailId, err := uuid.FromString(c.Param("id"))
+	if err != nil {
+		return sharedDto.NewHTTPError(http.StatusBadRequest).SetInternal(err)
+	}
+
+	err = h.GetEmailSvc().Delete(c.Request().Context(), userId, emailId)
+	if err != nil {
+		return err
+	}
+	return c.NoContent(http.StatusNoContent)
 }

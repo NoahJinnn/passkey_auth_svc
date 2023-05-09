@@ -10,6 +10,7 @@ type IEmailRepo interface {
 	GetByAddress(ctx Ctx, address string) (*ent.Email, error)
 	GetById(ctx Ctx, id uuid.UUID) (*ent.Email, error)
 	ListByUser(ctx Ctx, userID uuid.UUID) ([]*ent.Email, error)
+	Delete(ctx Ctx, email *ent.Email) error
 }
 
 type emailRepo struct {
@@ -57,4 +58,8 @@ func (r *emailRepo) ListByUser(ctx Ctx, userID uuid.UUID) ([]*ent.Email, error) 
 	}
 
 	return emails, nil
+}
+
+func (r *emailRepo) Delete(ctx Ctx, email *ent.Email) error {
+	return r.db.Email.DeleteOne(email).Exec(ctx)
 }
