@@ -35,8 +35,9 @@ var (
 )
 
 type Config struct {
-	Server Server
-	Plaid  *PlaidConfig
+	Server         Server
+	Plaid          *PlaidConfig
+	SaltEdgeConfig *SaltEdgeConfig
 }
 
 // Init updates config defaults (from env) and setup subcommands flags.
