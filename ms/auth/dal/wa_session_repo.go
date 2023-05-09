@@ -1,8 +1,6 @@
 package dal
 
 import (
-	"fmt"
-
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ent/webauthnsessiondata"
 )
@@ -29,7 +27,7 @@ func (r *webauthnSessionRepo) GetByChallenge(ctx Ctx, challenge string) (*ent.We
 		return nil, nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to get sessionData: %w", err)
+		return nil, err
 	}
 
 	if len(sessionData) <= 0 {
@@ -48,7 +46,7 @@ func (r *webauthnSessionRepo) Create(ctx Ctx, sessionData ent.WebauthnSessionDat
 		Save(ctx)
 
 	if err != nil {
-		return fmt.Errorf("failed to store sessionData: %w", err)
+		return err
 	}
 
 	return nil
@@ -58,7 +56,7 @@ func (r *webauthnSessionRepo) Delete(ctx Ctx, session ent.WebauthnSessionData) e
 	err := r.db.WebauthnSessionData.DeleteOne(&session).Exec(ctx)
 
 	if err != nil {
-		return fmt.Errorf("failed to delete sessionData: %w", err)
+		return err
 	}
 
 	return nil

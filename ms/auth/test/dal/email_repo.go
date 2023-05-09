@@ -35,3 +35,25 @@ func (r *emailRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.Email, error) {
 
 	return nil, nil
 }
+
+func (r *emailRepo) ListByUser(ctx Ctx, userID uuid.UUID) ([]*ent.Email, error) {
+
+	var emails []*ent.Email
+
+	for _, m := range r.emails {
+		if m.UserID == userID {
+			emails = append(emails, m)
+		}
+	}
+
+	return emails, nil
+}
+
+func (r *emailRepo) Delete(ctx Ctx, email *ent.Email) error {
+	for i, m := range r.emails {
+		if email.ID == m.ID {
+			r.emails = append(r.emails[:i], r.emails[i+1:]...)
+		}
+	}
+	return nil
+}

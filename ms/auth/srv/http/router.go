@@ -93,6 +93,12 @@ func NewServer(appl app.Appl, sessionManager session.Manager, sharedCfg *sharedC
 	passcodeLogin.POST("/initialize", passcodeHandler.Init)
 	passcodeLogin.POST("/finalize", passcodeHandler.Finish)
 
+	emailHandler := handlers.NewEmailHandler(srv, sessionManager)
+	email := e.Group("/emails", sharedMiddlewares.Session(sessionManager))
+	email.GET("", emailHandler.ListByUser)
+	// email.POST("", emailHandler.Create)
+	email.DELETE("/:id", emailHandler.Delete)
+
 	e.Logger.Fatal(e.Start(cfg.Server.BindAddr.String()))
 	return nil
 }

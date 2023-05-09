@@ -25,7 +25,7 @@ type Service struct {
 	sharedCfg      *sharedConfig.Shared
 	sessionManager session.Manager
 	appl           app.App
-	repo           *dal.Repo
+	repo           *dal.NwRepo
 }
 
 // Name implements main.embeddedService interface.

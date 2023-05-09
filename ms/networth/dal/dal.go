@@ -6,7 +6,6 @@ import (
 
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/sharedDal"
-	"github.com/powerman/structlog"
 )
 
 // Error names.
@@ -19,32 +18,21 @@ const (
 )
 
 // Repo provides data storage.
-type IRepo interface {
+type INwRepo interface {
 	WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error
-	GetJwkRepo() IJwkRepo
-	GetEmailRepo() IEmailRepo
 }
 
-type Repo struct {
-	Db  *ent.Client
-	log *structlog.Logger
+type NwRepo struct {
+	Db *ent.Client
 }
 type Ctx = context.Context
 
-func New(client *ent.Client) *Repo {
-	return &Repo{
+func New(client *ent.Client) *NwRepo {
+	return &NwRepo{
 		Db: client,
 	}
 }
 
-func (r Repo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error {
+func (r NwRepo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error {
 	return sharedDal.WithTx(ctx, r.Db, exec)
-}
-
-func (r Repo) GetJwkRepo() IJwkRepo {
-	return NewJwkRepo(r.Db)
-}
-
-func (r Repo) GetEmailRepo() IEmailRepo {
-	return NewEmailRepo(r.Db)
 }

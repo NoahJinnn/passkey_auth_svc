@@ -21,7 +21,7 @@ type IPasscodeSvc interface {
 }
 
 type passcodeSvc struct {
-	repo              dal.IRepo
+	repo              dal.IAuthRepo
 	cfg               *config.Config
 	passcodeGenerator PasscodeGenerator
 	mailer            *mail.Mailer
@@ -30,7 +30,7 @@ type passcodeSvc struct {
 
 var maxPasscodeTries = 3
 
-func NewPasscodeSvc(cfg *config.Config, repo dal.IRepo) IPasscodeSvc {
+func NewPasscodeSvc(cfg *config.Config, repo dal.IAuthRepo) IPasscodeSvc {
 	mailer := mail.NewMailer(&cfg.Passcode)
 	renderer, err := mail.NewRenderer()
 	if err != nil {

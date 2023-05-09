@@ -13,12 +13,12 @@ import (
 // App implements interface Appl.
 type app struct {
 	cfg  *config.Config
-	repo dal.IRepo
+	repo dal.IAuthRepo
 	wa   *webauthn.WebAuthn
 }
 
 // New creates and returns new App.
-func NewApp(cfg *config.Config, repo dal.IRepo) app {
+func NewApp(cfg *config.Config, repo dal.IAuthRepo) app {
 	f := false
 	wa, err := webauthn.New(&webauthn.Config{
 		RPDisplayName:         cfg.Webauthn.RelyingParty.DisplayName,
@@ -55,4 +55,8 @@ func (a app) GetUserSvc() svcs.IUserSvc {
 
 func (a app) GetPasscodeSvc() svcs.IPasscodeSvc {
 	return svcs.NewPasscodeSvc(a.cfg, a.repo)
+}
+
+func (a app) GetEmailSvc() svcs.IEmailSvc {
+	return svcs.NewEmailSvc(a.repo)
 }

@@ -1,8 +1,6 @@
 package dal
 
 import (
-	"fmt"
-
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ent/user"
@@ -29,7 +27,7 @@ func (r *userRepo) GetAll(ctx Ctx) ([]*ent.User, error) {
 		All(ctx)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed querying all users: %w", err)
+		return nil, err
 	}
 
 	return us, nil
@@ -45,7 +43,7 @@ func (r *userRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.User, error) {
 		Only(ctx)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed querying user by id: %w", err)
+		return nil, err
 	}
 
 	return u, nil
@@ -57,7 +55,7 @@ func (r *userRepo) Create(ctx Ctx, u *ent.User) (*ent.User, error) {
 		Save(ctx)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed creating user by id: %w", err)
+		return nil, err
 	}
 
 	return newu, nil
@@ -70,7 +68,7 @@ func (r *userRepo) Count(ctx Ctx, id uuid.UUID) (int, error) {
 		Count(ctx)
 
 	if err != nil {
-		return 0, fmt.Errorf("failed counting users: %w", err)
+		return 0, err
 	}
 
 	return count, nil

@@ -19,17 +19,18 @@ type Appl interface {
 	GetWebauthnSvc() svcs.IWebauthnSvc
 	GetUserSvc() svcs.IUserSvc
 	GetPasscodeSvc() svcs.IPasscodeSvc
+	GetEmailSvc() svcs.IEmailSvc
 }
 
 // App implements interface Appl.
 type App struct {
 	cfg  *config.Config
-	repo *dal.Repo
+	repo *dal.AuthRepo
 	wa   *webauthn.WebAuthn
 }
 
 // New creates and returns new App.
-func New(cfg *config.Config, repo *dal.Repo) App {
+func New(cfg *config.Config, repo *dal.AuthRepo) App {
 	f := false
 	wa, err := webauthn.New(&webauthn.Config{
 		RPDisplayName:         cfg.Webauthn.RelyingParty.DisplayName,
@@ -66,4 +67,8 @@ func (a App) GetUserSvc() svcs.IUserSvc {
 
 func (a App) GetPasscodeSvc() svcs.IPasscodeSvc {
 	return svcs.NewPasscodeSvc(a.cfg, a.repo)
+}
+
+func (a App) GetEmailSvc() svcs.IEmailSvc {
+	return svcs.NewEmailSvc(a.repo)
 }
