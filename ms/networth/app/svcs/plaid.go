@@ -58,9 +58,9 @@ type plaidSvc struct {
 func NewPlaidClient(cfg *config.Config) *plaidSvc {
 	// create Plaid client
 	configuration := plaid.NewConfiguration()
-	configuration.AddDefaultHeader("PLAID-CLIENT-ID", cfg.Plaid.ClientId.String())
-	configuration.AddDefaultHeader("PLAID-SECRET", cfg.Plaid.Secret.String())
-	configuration.UseEnvironment(environments[cfg.Plaid.Env.String()])
+	configuration.AddDefaultHeader("PLAID-CLIENT-ID", cfg.Plaid.ClientId)
+	configuration.AddDefaultHeader("PLAID-SECRET", cfg.Plaid.Secret)
+	configuration.UseEnvironment(environments[cfg.Plaid.Env])
 	return &plaidSvc{
 		plaidClient: plaid.NewAPIClient(configuration),
 		cfg:         cfg,
@@ -71,7 +71,7 @@ func (svc *plaidSvc) Info() *GetInfoResp {
 	return &GetInfoResp{
 		AccessToken: accessToken,
 		ItemId:      itemID,
-		Products:    svc.cfg.Plaid.Products.String(),
+		Products:    svc.cfg.Plaid.Products,
 	}
 }
 
@@ -97,7 +97,7 @@ func convertProducts(productStrs []string) []plaid.Products {
 
 // For sandbox testing
 func (svc *plaidSvc) GetSandboxAccessToken(ctx Ctx, institutionID string) (*GetAccessTokenResp, error) {
-	products := convertProducts(strings.Split(svc.cfg.Plaid.Products.String(), ","))
+	products := convertProducts(strings.Split(svc.cfg.Plaid.Products, ","))
 	// Create a one-time use public_token for the Item.
 	// This public_token can be used to initialize Link in update mode for a user
 	options := plaid.NewSandboxPublicTokenCreateRequestOptions()
@@ -148,7 +148,7 @@ func (svc *plaidSvc) GetAccessToken(ctx Ctx, publicToken string) (*GetAccessToke
 
 	accessToken = exchangePublicTokenResp.GetAccessToken()
 	itemID = exchangePublicTokenResp.GetItemId()
-	if itemExists(strings.Split(svc.cfg.Plaid.Products.String(), ","), "transfer") {
+	if itemExists(strings.Split(svc.cfg.Plaid.Products, ","), "transfer") {
 		transferID, err = authorizeAndCreateTransfer(ctx, svc.plaidClient, accessToken)
 		if err != nil {
 			return nil, err
@@ -170,9 +170,9 @@ func (svc *plaidSvc) GetAccessToken(ctx Ctx, publicToken string) (*GetAccessToke
 func (svc *plaidSvc) LinkTokenCreate(
 	ctx Ctx, paymentInitiation *plaid.LinkTokenCreateRequestPaymentInitiation,
 ) (*LinkTokenCreateResp, error) {
-	countryCodes := convertCountryCodes(strings.Split(svc.cfg.Plaid.CountryCodes.String(), ","))
-	products := convertProducts(strings.Split(svc.cfg.Plaid.Products.String(), ","))
-	redirectURI := svc.cfg.Plaid.RedirectUri.String()
+	countryCodes := convertCountryCodes(strings.Split(svc.cfg.Plaid.CountryCodes, ","))
+	products := convertProducts(strings.Split(svc.cfg.Plaid.Products, ","))
+	redirectURI := svc.cfg.Plaid.RedirectUri
 
 	user := plaid.LinkTokenCreateRequestUser{
 		ClientUserId: time.Now().String(),
