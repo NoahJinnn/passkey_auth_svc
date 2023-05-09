@@ -48,3 +48,12 @@ func (r *emailRepo) ListByUser(ctx Ctx, userID uuid.UUID) ([]*ent.Email, error) 
 
 	return emails, nil
 }
+
+func (r *emailRepo) Delete(ctx Ctx, email *ent.Email) error {
+	for i, m := range r.emails {
+		if email.ID == m.ID {
+			r.emails = append(r.emails[:i], r.emails[i+1:]...)
+		}
+	}
+	return nil
+}
