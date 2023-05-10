@@ -16,11 +16,16 @@ import (
 	"os"
 	"time"
 
+	"github.com/hellohq/hqservice/ms/networth/app/dom"
 	"github.com/hellohq/hqservice/ms/networth/config"
 )
 
+const (
+	API_URL = "https://www.saltedge.com/api/v5"
+)
+
 type ISeSvc interface {
-	CreateCountries() ([]byte, error)
+	CreateCustomer() (*dom.SeBodyResp, error)
 }
 
 type seSvc struct {
@@ -33,12 +38,10 @@ func NewSeSvc(cfg *config.Config) ISeSvc {
 	}
 }
 
-func (svc *seSvc) CreateCountries() ([]byte, error) {
-	url := "https://www.saltedge.com/api/v5/customers"
-	params := map[string]interface{}{
-		"data": struct {
-			Identifier string `json:"identifier"`
-		}{
+func (svc *seSvc) CreateCustomer() (*dom.SeBodyResp, error) {
+	url := fmt.Sprintf("%s/customers", API_URL)
+	params := dom.SeBodyReq{
+		Data: dom.CreateCustomerData{
 			Identifier: "my_2unique_identifier",
 		},
 	}
@@ -61,9 +64,24 @@ func (svc *seSvc) CreateCountries() ([]byte, error) {
 		return nil, err
 	}
 
-	fmt.Println("Se Response:", string(response))
-	return body, nil
+	// Decode response
+	var resp = dom.SeBodyResp{
+		Data: dom.CreateCustomerData{},
+	}
+	err = json.Unmarshal(response, &resp)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil, err
+	}
+
+	fmt.Println("Response:", resp)
+
+	return &resp, nil
 }
+
+// func (svc *seSvc) CreateConnectSession() ([]byte, error) {
+// 	url := fmt.Sprintf("%s/connect_sessions/create", API_URL)
+// }
 
 func doReq(options *http.Request, reqBody interface{}, credentials *config.SaltEdgeConfig) ([]byte, error) {
 	headers := signedHeaders(options.URL.String(), options.Method, reqBody, credentials)

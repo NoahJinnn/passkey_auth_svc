@@ -15,9 +15,9 @@ func NewNetworthHandler(srv *HttpDeps) *NetworthHandler {
 }
 
 func (h *NetworthHandler) Get(c echo.Context) error {
-	resp, err := h.GetSeSvc().CreateCountries()
+	resp, err := h.GetSeSvc().CreateCustomer()
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, map[string]interface{}{"nw": resp})
+	return c.JSON(http.StatusOK, resp)
 }
