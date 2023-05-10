@@ -23,10 +23,11 @@ type (
 // NewServer returns Echo server configured to listen on the TCP network
 // address cfg.Host:cfg.Port and handle requests on incoming connections.
 func NewServer(appl app.Appl, sessionManager session.Manager, sharedCfg *sharedConfig.Shared, cfg *config.Config) error {
-	// srv := &handlers.HttpDeps{
-	// 	Appl: appl,
-	// 	Cfg:  cfg,
-	// }
+	srv := &handlers.HttpDeps{
+		Appl:      appl,
+		Cfg:       cfg,
+		SharedCfg: sharedCfg,
+	}
 	e := echo.New()
 	e.HideBanner = true
 
@@ -52,7 +53,7 @@ func NewServer(appl app.Appl, sessionManager session.Manager, sharedCfg *sharedC
 	e.GET("/ready", healthHandler.Ready)
 	e.GET("/alive", healthHandler.Alive)
 
-	nwHandler := handlers.NewNetworthHandler()
+	nwHandler := handlers.NewNetworthHandler(srv)
 	nw := e.Group("/nw")
 	nw.GET("", nwHandler.Get, sharedMiddlewares.Session(sessionManager))
 

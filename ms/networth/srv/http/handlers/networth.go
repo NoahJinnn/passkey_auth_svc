@@ -6,12 +6,15 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type NetworthHandler struct{}
-
-func NewNetworthHandler() *NetworthHandler {
-	return &NetworthHandler{}
+type NetworthHandler struct {
+	*HttpDeps
 }
 
-func (handler *NetworthHandler) Get(c echo.Context) error {
+func NewNetworthHandler(srv *HttpDeps) *NetworthHandler {
+	return &NetworthHandler{srv}
+}
+
+func (h *NetworthHandler) Get(c echo.Context) error {
+	h.GetSeSvc()
 	return c.JSON(http.StatusOK, map[string]string{"nw": "success"})
 }

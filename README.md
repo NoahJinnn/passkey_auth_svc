@@ -33,7 +33,23 @@
 - [Docker Compose](https://docs.docker.com/compose/install/) 1.25+
 
 ### Setup
-#### Environment management
+
+#### Salt Edge
+
+```bash
+cd configs
+mkdir saltedge-pki
+
+# For macOS or Linux
+openssl genrsa -out private.pem 2048
+openssl rsa -pubout -in private.pem -out public.pem
+
+# For Windows
+cd C:\OpenSSL-Win32\bin
+openssl genrsa -out private.pem 2048
+openssl rsa -pubout -in private.pem -out public.pem
+```
+#### Doppler
 
 Setup Doppler:
 
@@ -41,13 +57,9 @@ Setup Doppler:
 task scripts:install:doppler
 ```
 
-#### Naming convention
-
-Variables required to run and test project.
-Should be kept in sorted order.
-Naming convention:
-
 ```
+Naming convention of environment vars required to run and test project:
+
 <PROJECT>_<VAR>         - global vars, not specific for some embedded microservice (e.g. domain)
 <PROJECT>_X_<SVC>_<VAR> - vars related to external services (e.g. databases)
 <PROJECT>_<MS>_<VAR>    - vars related to embedded microservice (e.g. addr)

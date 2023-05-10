@@ -5,6 +5,7 @@
 package app
 
 import (
+	"github.com/hellohq/hqservice/ms/networth/app/svcs"
 	"github.com/hellohq/hqservice/ms/networth/config"
 	"github.com/hellohq/hqservice/ms/networth/dal"
 )
@@ -12,7 +13,7 @@ import (
 // Appl provides application features (use cases) service.
 type Appl interface {
 	// GetUserSvc() svcs.IUserSvc
-	// GetPasscodeSvc() svcs.IPasscodeSvc
+	GetSeSvc() svcs.ISeSvc
 }
 
 // App implements interface Appl.
@@ -34,6 +35,6 @@ func New(cfg *config.Config, repo *dal.NwRepo) App {
 // 	return svcs.NewUserSvc(a.cfg, a.repo)
 // }
 
-// func (a App) GetPasscodeSvc() svcs.IPasscodeSvc {
-// 	return svcs.NewPasscodeSvc(a.cfg, a.repo)
-// }
+func (a App) GetSeSvc() svcs.ISeSvc {
+	return svcs.NewSeSvc(a.cfg)
+}
