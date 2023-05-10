@@ -53,10 +53,11 @@ func NewServer(appl app.Appl, sessionManager session.Manager, sharedCfg *sharedC
 	e.GET("/ready", healthHandler.Ready)
 	e.GET("/alive", healthHandler.Alive)
 
-	nwHandler := handlers.NewNetworthHandler(srv)
 	nw := e.Group("/nw")
-	nw.GET("",
-		nwHandler.Get,
+	nwHandler := handlers.NewSeHandler(srv)
+	se := nw.Group("/se")
+	se.POST("/customers",
+		nwHandler.CreateCustomer,
 		// sharedMiddlewares.Session(sessionManager), TODO: Enable back when finish nw service
 	)
 

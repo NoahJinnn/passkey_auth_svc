@@ -2,6 +2,7 @@ package svcs
 
 import (
 	"bytes"
+	"context"
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
@@ -25,7 +26,7 @@ const (
 )
 
 type ISeSvc interface {
-	CreateCustomer() (*dom.SeBodyResp, error)
+	CreateCustomer(ctx context.Context, reqBody dom.CreateCustomerData) (*dom.SeBodyResp, error)
 }
 
 type seSvc struct {
@@ -38,27 +39,13 @@ func NewSeSvc(cfg *config.Config) ISeSvc {
 	}
 }
 
-func (svc *seSvc) CreateCustomer() (*dom.SeBodyResp, error) {
+func (svc *seSvc) CreateCustomer(ctx context.Context, reqBody dom.CreateCustomerData) (*dom.SeBodyResp, error) {
 	url := fmt.Sprintf("%s/customers", API_URL)
 	params := dom.SeBodyReq{
-		Data: dom.CreateCustomerData{
-			Identifier: "my_2unique_identifier",
-		},
+		Data: reqBody,
 	}
 
-	body, err := json.Marshal(params)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return nil, err
-	}
-
-	request, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
-	if err != nil {
-		fmt.Println("Error:", err)
-		return nil, err
-	}
-
-	response, err := doReq(request, params, svc.cfg.SaltEdgeConfig)
+	response, err := doReq("POST", url, params, svc.cfg.SaltEdgeConfig)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
@@ -79,32 +66,48 @@ func (svc *seSvc) CreateCustomer() (*dom.SeBodyResp, error) {
 	return &resp, nil
 }
 
-// func (svc *seSvc) CreateConnectSession() ([]byte, error) {
+// func (svc *seSvc) CreateConnectSession(ctx context.Context, reqBody dom.CreateConnectSessionData) (*dom.SeBodyResp, error) {
 // 	url := fmt.Sprintf("%s/connect_sessions/create", API_URL)
+// 	params := dom.SeBodyReq{
+// 		Data: dom.CreateConnectSessionData{
+// 			Identifier: "my_2unique_identifier",
+// 		},
+// 	}
 // }
 
-func doReq(options *http.Request, reqBody interface{}, credentials *config.SaltEdgeConfig) ([]byte, error) {
-	headers := signedHeaders(options.URL.String(), options.Method, reqBody, credentials)
+func doReq(method string, url string, reqBody interface{}, credentials *config.SaltEdgeConfig) ([]byte, error) {
+	body, err := json.Marshal(reqBody)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil, err
+	}
 
-	options.Header = make(http.Header)
+	request, err := http.NewRequest(method, url, bytes.NewBuffer(body))
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil, err
+	}
+
+	headers := signedHeaders(request.URL.String(), request.Method, reqBody, credentials)
+	request.Header = make(http.Header)
 	for key, value := range headers {
-		options.Header.Set(key, value)
+		request.Header.Set(key, value)
 	}
 
 	client := &http.Client{}
-	response, err := client.Do(options)
+	response, err := client.Do(request)
 	if err != nil {
 		return nil, err
 	}
 	defer response.Body.Close()
 
-	body, err := io.ReadAll(response.Body)
+	respBody, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
 
 	if response.StatusCode == http.StatusOK {
-		return body, nil
+		return respBody, nil
 	} else {
 		return nil, fmt.Errorf("request failed with status code: %d", response.StatusCode)
 	}
