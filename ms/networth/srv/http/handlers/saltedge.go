@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/hellohq/hqservice/internal/http/sharedDto"
-	"github.com/hellohq/hqservice/ms/networth/app/dom"
 	"github.com/labstack/echo/v4"
 )
 
@@ -17,7 +16,7 @@ func NewSeHandler(srv *HttpDeps) *NetworthHandler {
 }
 
 func (h *NetworthHandler) CreateCustomer(c echo.Context) error {
-	var body dom.CreateCustomerData
+	var body interface{}
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
 		return sharedDto.ToHttpError(err)
 	}

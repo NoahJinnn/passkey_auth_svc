@@ -26,7 +26,7 @@ const (
 )
 
 type ISeSvc interface {
-	CreateCustomer(ctx context.Context, reqBody dom.CreateCustomerData) (*dom.SeBodyResp, error)
+	CreateCustomer(ctx context.Context, reqBody interface{}) (*dom.SeBodyResp, error)
 }
 
 type seSvc struct {
@@ -39,7 +39,7 @@ func NewSeSvc(cfg *config.Config) ISeSvc {
 	}
 }
 
-func (svc *seSvc) CreateCustomer(ctx context.Context, reqBody dom.CreateCustomerData) (*dom.SeBodyResp, error) {
+func (svc *seSvc) CreateCustomer(ctx context.Context, reqBody interface{}) (*dom.SeBodyResp, error) {
 	url := fmt.Sprintf("%s/customers", API_URL)
 	params := dom.SeBodyReq{
 		Data: reqBody,
@@ -54,7 +54,7 @@ func (svc *seSvc) CreateCustomer(ctx context.Context, reqBody dom.CreateCustomer
 	return response, nil
 }
 
-func (svc *seSvc) CreateConnectSession(ctx context.Context, reqBody dom.CreateConnectSessionData) (*dom.SeBodyResp, error) {
+func (svc *seSvc) CreateConnectSession(ctx context.Context, reqBody interface{}) (*dom.SeBodyResp, error) {
 	url := fmt.Sprintf("%s/connect_sessions/create", API_URL)
 	params := dom.SeBodyReq{
 		Data: reqBody,
