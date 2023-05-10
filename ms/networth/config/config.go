@@ -87,6 +87,10 @@ func GetServe() (c *Config, err error) {
 				},
 			},
 		},
+		SaltEdgeConfig: &SaltEdgeConfig{
+			AppId:  own.SeAppId.Value(&err),
+			Secret: own.SeSecret.Value(&err),
+		},
 	}
 	if err != nil {
 		return nil, appcfg.WrapPErr(err, fs.Serve, own)

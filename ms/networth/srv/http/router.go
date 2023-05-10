@@ -55,7 +55,10 @@ func NewServer(appl app.Appl, sessionManager session.Manager, sharedCfg *sharedC
 
 	nwHandler := handlers.NewNetworthHandler(srv)
 	nw := e.Group("/nw")
-	nw.GET("", nwHandler.Get, sharedMiddlewares.Session(sessionManager))
+	nw.GET("",
+		nwHandler.Get,
+		// sharedMiddlewares.Session(sessionManager), TODO: Enable back when finish nw service
+	)
 
 	e.Logger.Fatal(e.Start(cfg.Server.BindAddr.String()))
 	return nil

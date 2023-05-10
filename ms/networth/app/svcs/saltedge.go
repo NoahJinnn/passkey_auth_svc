@@ -11,14 +11,16 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/hellohq/hqservice/ms/networth/config"
 )
 
 type ISeSvc interface {
+	CreateCountries() ([]byte, error)
 }
 
 type seSvc struct {
@@ -37,7 +39,7 @@ func (svc *seSvc) CreateCountries() ([]byte, error) {
 		"data": struct {
 			Identifier string `json:"identifier"`
 		}{
-			Identifier: "my_unique_identifier",
+			Identifier: "my_2unique_identifier",
 		},
 	}
 
@@ -53,18 +55,18 @@ func (svc *seSvc) CreateCountries() ([]byte, error) {
 		return nil, err
 	}
 
-	response, err := doReq(request, svc.cfg.SaltEdgeConfig)
+	response, err := doReq(request, params, svc.cfg.SaltEdgeConfig)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
 	}
 
-	fmt.Println("Response:", string(response))
+	fmt.Println("Se Response:", string(response))
 	return body, nil
 }
 
-func doReq(options *http.Request, credentials *config.SaltEdgeConfig) ([]byte, error) {
-	headers := signedHeaders(options.URL.String(), options.Method, options.Body, credentials)
+func doReq(options *http.Request, reqBody interface{}, credentials *config.SaltEdgeConfig) ([]byte, error) {
+	headers := signedHeaders(options.URL.String(), options.Method, reqBody, credentials)
 
 	options.Header = make(http.Header)
 	for key, value := range headers {
@@ -78,7 +80,7 @@ func doReq(options *http.Request, credentials *config.SaltEdgeConfig) ([]byte, e
 	}
 	defer response.Body.Close()
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +93,7 @@ func doReq(options *http.Request, credentials *config.SaltEdgeConfig) ([]byte, e
 }
 
 func signedHeaders(url, method string, params interface{}, credentials *config.SaltEdgeConfig) map[string]string {
-	privateKeyBytes, err := ioutil.ReadFile("private.pem")
+	privateKeyBytes, err := os.ReadFile("configs/saltedge-pki/private.pem")
 	if err != nil {
 		panic(err)
 	}
