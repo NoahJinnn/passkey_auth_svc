@@ -12,14 +12,6 @@ type CreateCustomerData struct {
 	Identifier string `json:"identifier"`
 }
 
-type CreateCustomerResp struct {
-	Id         string `json:"id"`
-	Identifier string `json:"identifier"`
-	Secret     string `json:"secret"`
-	CreatedAt  string `json:"created_at"`
-	UpdatedAt  string `json:"updated_at"`
-}
-
 type CreateConnectSessionData struct {
 	CustomerId string  `json:"customer_id"`
 	Consent    Consent `json:"consent"`
@@ -35,9 +27,4 @@ type Consent struct {
 type Attempt struct {
 	FromDate    string   `json:"from_date"`
 	FetchScopes []string `json:"fetch_scopes"`
-}
-
-type CreateCustomerSessionResp struct {
-	ExpiresAt  string `json:"expires_at"`
-	ConnectUrl string `json:"connect_url"`
 }

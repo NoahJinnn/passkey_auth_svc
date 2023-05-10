@@ -51,31 +51,25 @@ func (svc *seSvc) CreateCustomer(ctx context.Context, reqBody dom.CreateCustomer
 		return nil, err
 	}
 
-	// Decode response
-	var resp = dom.SeBodyResp{
-		Data: dom.CreateCustomerData{},
+	return response, nil
+}
+
+func (svc *seSvc) CreateConnectSession(ctx context.Context, reqBody dom.CreateConnectSessionData) (*dom.SeBodyResp, error) {
+	url := fmt.Sprintf("%s/connect_sessions/create", API_URL)
+	params := dom.SeBodyReq{
+		Data: reqBody,
 	}
-	err = json.Unmarshal(response, &resp)
+
+	response, err := doReq("POST", url, params, svc.cfg.SaltEdgeConfig)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
 	}
 
-	fmt.Println("Response:", resp)
-
-	return &resp, nil
+	return response, nil
 }
 
-// func (svc *seSvc) CreateConnectSession(ctx context.Context, reqBody dom.CreateConnectSessionData) (*dom.SeBodyResp, error) {
-// 	url := fmt.Sprintf("%s/connect_sessions/create", API_URL)
-// 	params := dom.SeBodyReq{
-// 		Data: dom.CreateConnectSessionData{
-// 			Identifier: "my_2unique_identifier",
-// 		},
-// 	}
-// }
-
-func doReq(method string, url string, reqBody interface{}, credentials *config.SaltEdgeConfig) ([]byte, error) {
+func doReq(method string, url string, reqBody interface{}, credentials *config.SaltEdgeConfig) (*dom.SeBodyResp, error) {
 	body, err := json.Marshal(reqBody)
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -107,7 +101,13 @@ func doReq(method string, url string, reqBody interface{}, credentials *config.S
 	}
 
 	if response.StatusCode == http.StatusOK {
-		return respBody, nil
+		var result dom.SeBodyResp
+		err = json.Unmarshal(respBody, &result)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return nil, err
+		}
+		return &result, nil
 	} else {
 		return nil, fmt.Errorf("request failed with status code: %d", response.StatusCode)
 	}
