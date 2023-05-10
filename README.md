@@ -3,7 +3,7 @@
 **Table of Contents**
 
 - [HQ Service modulith](#hq-service-modulith)
-  - [Overview](#overview)
+  - [Local development](#local-development)
     - [Requirements](#requirements)
     - [Setup](#setup)
       - [Environment management](#environment-management)
@@ -25,7 +25,7 @@
 
 # HQ Service modulith
 
-## Overview
+## Local development
 ### Requirements
 
 - Go 1.19
@@ -45,8 +45,6 @@ task scripts:install:doppler
 
 Variables required to run and test project.
 Should be kept in sorted order.
-Avoid referencing one variable from another if their order may change,
-use lower-case variables defined above for such a shared values.
 Naming convention:
 
 ```
@@ -59,10 +57,8 @@ Naming convention:
 #### HTTPS
 
 1. This project requires https:// and will send HSTS and CSP HTTP headers,
-   and also it uses gRPC with authentication which also require TLS certs,
-   so you'll need to create certificate to run it on localhost - follow
-   instructions in [Create local CA to issue localhost HTTPS
-   certificates](https://gist.github.com/powerman/2fc4b1a5aee62dd9491cee7f75ead0b4).
+  [Create local CA to issue localhost HTTPS 
+  certificates](https://gist.github.com/powerman/2fc4b1a5aee62dd9491cee7f75ead0b4).
 2. Or you can just use certificates in `configs/dev-pki`, which
    was created this way:
 
@@ -83,31 +79,22 @@ To develop this project you'll need only standard tools: `go generate`,
   to auto-generated code
 - `doppler run -- go test ./...` - test project (excluding integration tests), fast
 - `./scripts/test` - thoroughly test project, slow
-- `./scripts/test-ci-circle` - run tests locally like CircleCI will do
 - `./scripts/cover` - analyse and show coverage
 - `./scripts/build` - build docker image and binaries in `bin/`
-  - Then use mentioned above `dc` (or `docker-compose`) to run and control
-    the project.
   - Access project at host/port(s) defined in `doppler`.
 
 #### Cheatsheet
 
 ```sh
-doppler run -- dc up -d --remove-orphans               # (re)start all project's services
-dc logs -f -t                           # view logs of all services
-dc logs -f SERVICENAME                  # view logs of some service
-dc ps                                   # status of all services
-dc restart SERVICENAME
-dc exec SERVICENAME COMMAND             # run command in given container
-dc stop && dc rm -f                     # stop the project
+doppler run -- docker-compose up -d --remove-orphans               # (re)start all project's services
+docker-compose logs -f -t                           # view logs of all services
+docker-compose logs -f SERVICENAME                  # view logs of some service
+docker-compose ps                                   # status of all services
+docker-compose restart SERVICENAME
+docker-compose exec SERVICENAME COMMAND             # run command in given container
+docker-compose stop && docker-compose rm -f                     # stop the project
 docker volume rm PROJECT_SERVICENAME    # remove some service's data
 ```
-
-It's recommended to avoid `docker-compose down` - this command will also
-remove docker's network for the project, and next `dc up -d` will create a
-new network… repeat this many enough times and docker will exhaust
-available networks, then you'll have to restart docker service or reboot.
-
 ## Run
 
 ### Docker
@@ -127,21 +114,20 @@ docker volume rm hqservice_postgres
 
 ### Source
 
-#### Run directly, without building
-
+#### Run without build
 ```bash
 # main.go is the entry point with the `main` function
 task scripts:run
 ```
 
-#### Run with command args
 ```bash
-# main.go is the entry point with the `main` function
+# Run with cmd arguments to override configurations
 task scripts:run -- --port 17002 --wa.id example --wa.origins https://example.com,android:apk-key-hash:your_apk_hash  # Specific auth service running on port `17002` with webauthn ID equals `example`; webauthn origns equals `https://example.com,android:apk-key-hash:your_apk_hash`  
 ```
+
 #### Build first, then run
 
-In this example below, we demonstrate using the `Taskfile` command to build our binary, then, run our built `hq` binary.
+We use the `Taskfile` command to build our binary, then, run our built `hq` binary.
 
 ```bash
 # build binary only
@@ -201,10 +187,10 @@ Functionality Group 1: add/connect assets and debts
 - [ ] Implement [Lago](https://www.getlago.com/resources/compare/lago-vs-stripe) for billing service
 - [ ] Implement authorization with `casbin`
 - [x] Create `User` table
-- [ ] Create CRUD REST API for `User` model
+- [x] Create CRUD REST API for `User` model
 - [ ] Create asset tables based on Kubera features
 - [ ] Create CRUD REST API for asset models
-- [ ] Integration test for `auth` svc APIs
+- [x] Integration test for `auth` svc APIs
 
 Functionality Group 2: Recap feature (‘reflections’)
 
