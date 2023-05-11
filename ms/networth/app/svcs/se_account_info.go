@@ -42,14 +42,14 @@ func NewSeAccountInfoSvc(cfg *config.Config) ISeAccountInfoSvc {
 func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *dom.CreateCustomerReq) (*dom.CreateCustomerResp, error) {
 	url := fmt.Sprintf("%s/customers", API_URL)
 
-	response, err := doReq("POST", url, ccr, svc.cfg.SaltEdgeConfig)
+	resp, err := doReq("POST", url, ccr, svc.cfg.SaltEdgeConfig)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
 	}
 
 	var result dom.CreateCustomerResp
-	err = json.Unmarshal(response, &dom.HttpBody{
+	err = json.Unmarshal(resp, &dom.HttpBody{
 		Data: &result,
 	})
 	if err != nil {
@@ -63,14 +63,14 @@ func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *dom.CreateCustomerReq
 func (svc *seSvc) CreateConnectSession(ctx context.Context, ccsr *dom.CreateConnectSessionReq) (*dom.CreateConnectSessionResp, error) {
 	url := fmt.Sprintf("%s/connect_sessions/create", API_URL)
 
-	response, err := doReq("POST", url, ccsr, svc.cfg.SaltEdgeConfig)
+	resp, err := doReq("POST", url, ccsr, svc.cfg.SaltEdgeConfig)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
 	}
 
 	var result dom.CreateConnectSessionResp
-	err = json.Unmarshal(response, &dom.HttpBody{
+	err = json.Unmarshal(resp, &dom.HttpBody{
 		Data: &result,
 	})
 	if err != nil {
@@ -81,65 +81,63 @@ func (svc *seSvc) CreateConnectSession(ctx context.Context, ccsr *dom.CreateConn
 	return &result, nil
 }
 
-func doReq(method string, url string, reqBody interface{}, credentials *config.SaltEdgeConfig) ([]byte, error) {
-	seBody := dom.HttpBody{
+func doReq(method string, url string, reqBody interface{}, cred *config.SaltEdgeConfig) ([]byte, error) {
+	b, err := json.Marshal(dom.HttpBody{
 		Data: reqBody,
-	}
-
-	body, err := json.Marshal(seBody)
+	})
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
 	}
 
-	request, err := http.NewRequest(method, url, bytes.NewBuffer(body))
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(b))
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
 	}
 
-	headers := signedHeaders(request.URL.String(), request.Method, body, credentials)
-	request.Header = make(http.Header)
+	headers := signedHeaders(req.URL.String(), req.Method, b, cred)
+	req.Header = make(http.Header)
 	for key, value := range headers {
-		request.Header.Set(key, value)
+		req.Header.Set(key, value)
 	}
 
 	client := &http.Client{}
-	response, err := client.Do(request)
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer resp.Body.Close()
 
-	respBody, err := io.ReadAll(response.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	if response.StatusCode == http.StatusOK {
-		return respBody, nil
+	if resp.StatusCode == http.StatusOK {
+		return body, nil
 	} else {
-		fmt.Println("Error Response:", string(respBody))
-		return nil, fmt.Errorf("request failed with status code: %d", response.StatusCode)
+		fmt.Println("Error Response:", string(body))
+		return nil, fmt.Errorf("request failed with status code: %d", resp.StatusCode)
 	}
 }
 
-func signedHeaders(url, method string, params []byte, credentials *config.SaltEdgeConfig) map[string]string {
+func signedHeaders(url, method string, body []byte, cred *config.SaltEdgeConfig) map[string]string {
 	var signature string
 	expiresAt := time.Now().Add(60 * time.Second).Unix()
 
-	if credentials.PK != "" {
-		privateKey, err := parsePrivateKey([]byte((credentials.PK)))
+	if cred.PK != "" {
+		pk, err := parsePrivateKey([]byte((cred.PK)))
 		if err != nil {
 			panic(err)
 		}
 
 		payload := fmt.Sprintf("%d|%s|%s|", expiresAt, method, url)
 		if method == "POST" {
-			payload += string(params)
+			payload += string(body)
 		}
 
-		signature, err = sign(payload, privateKey)
+		signature, err = sign(payload, pk)
 		if err != nil {
 			panic(err)
 		}
@@ -148,33 +146,33 @@ func signedHeaders(url, method string, params []byte, credentials *config.SaltEd
 	headers := make(map[string]string)
 	headers["Accept"] = "application/json"
 	headers["Content-Type"] = "application/json"
-	headers["App-id"] = credentials.AppId
-	headers["Secret"] = credentials.Secret
+	headers["App-id"] = cred.AppId
+	headers["Secret"] = cred.Secret
 	headers["Expires-at"] = fmt.Sprintf("%d", expiresAt)
 	headers["Signature"] = signature
 
 	return headers
 }
 
-func parsePrivateKey(privateKeyBytes []byte) (*rsa.PrivateKey, error) {
-	block, _ := pem.Decode(privateKeyBytes)
+func parsePrivateKey(rawKey []byte) (*rsa.PrivateKey, error) {
+	block, _ := pem.Decode(rawKey)
 	if block == nil {
 		return nil, fmt.Errorf("failed to parse PEM block containing the key")
 	}
 
-	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	parsedKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
 		return nil, err
 	}
 
-	return privateKey, nil
+	return parsedKey, nil
 }
 
-func sign(payload string, privateKey *rsa.PrivateKey) (string, error) {
+func sign(payload string, pk *rsa.PrivateKey) (string, error) {
 	hashed := sha256.Sum256([]byte(payload))
-	signatureBytes, err := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA256, hashed[:])
+	signature, err := rsa.SignPKCS1v15(rand.Reader, pk, crypto.SHA256, hashed[:])
 	if err != nil {
 		return "", err
 	}
-	return base64.StdEncoding.EncodeToString(signatureBytes), nil
+	return base64.StdEncoding.EncodeToString(signature), nil
 }

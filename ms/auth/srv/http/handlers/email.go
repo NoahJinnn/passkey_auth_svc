@@ -41,13 +41,13 @@ func (h *EmailHandler) ListByUser(c echo.Context) error {
 		return err
 	}
 
-	response := make([]*dto.EmailResponse, len(emails))
+	resp := make([]*dto.EmailResponse, len(emails))
 
 	for i := range emails {
-		response[i] = dto.FromEmailModel(emails[i])
+		resp[i] = dto.FromEmailModel(emails[i])
 	}
 
-	return c.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, resp)
 }
 
 func (h *EmailHandler) Delete(c echo.Context) error {

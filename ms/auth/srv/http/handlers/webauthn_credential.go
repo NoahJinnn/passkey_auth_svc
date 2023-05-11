@@ -32,13 +32,13 @@ func (h *WebauthnHandler) ListCredentials(c echo.Context) error {
 		return fmt.Errorf("failed to get webauthn credentials: %w", err)
 	}
 
-	response := make([]*dto.WebauthnCredentialResponse, len(credentials))
+	resp := make([]*dto.WebauthnCredentialResponse, len(credentials))
 
 	for i := range credentials {
-		response[i] = dto.FromWebauthnCredentialModel(credentials[i])
+		resp[i] = dto.FromWebauthnCredentialModel(credentials[i])
 	}
 
-	return c.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, resp)
 }
 
 func (h *WebauthnHandler) UpdateCredential(c echo.Context) error {
