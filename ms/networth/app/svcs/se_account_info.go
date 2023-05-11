@@ -26,7 +26,7 @@ const (
 
 type ISeAccountInfoSvc interface {
 	CreateCustomer(ctx context.Context, ccr *dom.CreateCustomerReq) (*dom.CreateCustomerResp, error)
-	CreateConnectSession(ctx context.Context, reqBody interface{}) (interface{}, error)
+	CreateConnectSession(ctx context.Context, ccsr *dom.CreateConnectSessionReq) (*dom.CreateConnectSessionResp, error)
 }
 
 type seSvc struct {
@@ -60,16 +60,25 @@ func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *dom.CreateCustomerReq
 	return &result, nil
 }
 
-func (svc *seSvc) CreateConnectSession(ctx context.Context, reqBody interface{}) (interface{}, error) {
+func (svc *seSvc) CreateConnectSession(ctx context.Context, ccsr *dom.CreateConnectSessionReq) (*dom.CreateConnectSessionResp, error) {
 	url := fmt.Sprintf("%s/connect_sessions/create", API_URL)
 
-	response, err := doReq("POST", url, reqBody, svc.cfg.SaltEdgeConfig)
+	response, err := doReq("POST", url, ccsr, svc.cfg.SaltEdgeConfig)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
 	}
 
-	return response, nil
+	var result dom.CreateConnectSessionResp
+	err = json.Unmarshal(response, &dom.HttpBody{
+		Data: &result,
+	})
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil, err
+	}
+
+	return &result, nil
 }
 
 func doReq(method string, url string, reqBody interface{}, credentials *config.SaltEdgeConfig) ([]byte, error) {

@@ -17,3 +17,23 @@ type CreateCustomerResp struct {
 	CreatedAt  string `json:"created_at"`
 	UpdatedAt  string `json:"updated_at"`
 }
+
+type CreateConnectSessionReq struct {
+	CustomerId           string  `json:"customer_id"`
+	IncludeFakeProviders bool    `json:"include_fake_providers"`
+	Consent              Consent `json:"consent"`
+	Attempt              Attempt `json:"attempt"`
+}
+
+type Consent struct {
+	Scopes []string `json:"scopes"`
+}
+
+type Attempt struct {
+	ReturnTo string `json:"return_to"`
+}
+
+type CreateConnectSessionResp struct {
+	ConnectUrl string `json:"connect_url"`
+	ExpiresAt  string `json:"expires_at"`
+}
