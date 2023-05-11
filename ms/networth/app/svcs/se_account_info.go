@@ -17,7 +17,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/hellohq/hqservice/ms/networth/app/dom"
 	"github.com/hellohq/hqservice/ms/networth/config"
 )
 
@@ -25,27 +24,25 @@ const (
 	API_URL = "https://www.saltedge.com/api/v5"
 )
 
-type ISeSvc interface {
-	CreateCustomer(ctx context.Context, reqBody interface{}) (*dom.SeBodyResp, error)
+type ISeAccountInfoSvc interface {
+	CreateCustomer(ctx context.Context, reqBody interface{}) (interface{}, error)
+	CreateConnectSession(ctx context.Context, reqBody interface{}) (interface{}, error)
 }
 
 type seSvc struct {
 	cfg *config.Config
 }
 
-func NewSeSvc(cfg *config.Config) ISeSvc {
+func NewSeAccountInfoSvc(cfg *config.Config) ISeAccountInfoSvc {
 	return &seSvc{
 		cfg: cfg,
 	}
 }
 
-func (svc *seSvc) CreateCustomer(ctx context.Context, reqBody interface{}) (*dom.SeBodyResp, error) {
+func (svc *seSvc) CreateCustomer(ctx context.Context, reqBody interface{}) (interface{}, error) {
 	url := fmt.Sprintf("%s/customers", API_URL)
-	params := dom.SeBodyReq{
-		Data: reqBody,
-	}
 
-	response, err := doReq("POST", url, params, svc.cfg.SaltEdgeConfig)
+	response, err := doReq("POST", url, reqBody, svc.cfg.SaltEdgeConfig)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
@@ -54,13 +51,10 @@ func (svc *seSvc) CreateCustomer(ctx context.Context, reqBody interface{}) (*dom
 	return response, nil
 }
 
-func (svc *seSvc) CreateConnectSession(ctx context.Context, reqBody interface{}) (*dom.SeBodyResp, error) {
+func (svc *seSvc) CreateConnectSession(ctx context.Context, reqBody interface{}) (interface{}, error) {
 	url := fmt.Sprintf("%s/connect_sessions/create", API_URL)
-	params := dom.SeBodyReq{
-		Data: reqBody,
-	}
 
-	response, err := doReq("POST", url, params, svc.cfg.SaltEdgeConfig)
+	response, err := doReq("POST", url, reqBody, svc.cfg.SaltEdgeConfig)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
@@ -69,7 +63,7 @@ func (svc *seSvc) CreateConnectSession(ctx context.Context, reqBody interface{})
 	return response, nil
 }
 
-func doReq(method string, url string, reqBody interface{}, credentials *config.SaltEdgeConfig) (*dom.SeBodyResp, error) {
+func doReq(method string, url string, reqBody interface{}, credentials *config.SaltEdgeConfig) (interface{}, error) {
 	body, err := json.Marshal(reqBody)
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -100,15 +94,18 @@ func doReq(method string, url string, reqBody interface{}, credentials *config.S
 		return nil, err
 	}
 
+	var result struct {
+		Data interface{} `json:"data"`
+	}
+	err = json.Unmarshal(respBody, &result)
+	if err != nil {
+		return nil, err
+	}
+
 	if response.StatusCode == http.StatusOK {
-		var result dom.SeBodyResp
-		err = json.Unmarshal(respBody, &result)
-		if err != nil {
-			fmt.Println("Error:", err)
-			return nil, err
-		}
 		return &result, nil
 	} else {
+		fmt.Println("Error Response:", string(respBody))
 		return nil, fmt.Errorf("request failed with status code: %d", response.StatusCode)
 	}
 }

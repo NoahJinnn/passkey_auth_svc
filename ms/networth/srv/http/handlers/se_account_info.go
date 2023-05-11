@@ -24,9 +24,27 @@ func (h *NetworthHandler) CreateCustomer(c echo.Context) error {
 	if err := c.Validate(body); err != nil {
 		return sharedDto.ToHttpError(err)
 	}
-	resp, err := h.GetSeSvc().CreateCustomer(c.Request().Context(), body)
+	resp, err := h.GetSeAccountInfoSvc().CreateCustomer(c.Request().Context(), body)
 	if err != nil {
 		return err
 	}
+
+	return c.JSON(http.StatusOK, resp)
+}
+
+func (h *NetworthHandler) CreateConnectSession(c echo.Context) error {
+	var body interface{}
+	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
+		return sharedDto.ToHttpError(err)
+	}
+
+	if err := c.Validate(body); err != nil {
+		return sharedDto.ToHttpError(err)
+	}
+	resp, err := h.GetSeAccountInfoSvc().CreateConnectSession(c.Request().Context(), body)
+	if err != nil {
+		return err
+	}
+
 	return c.JSON(http.StatusOK, resp)
 }

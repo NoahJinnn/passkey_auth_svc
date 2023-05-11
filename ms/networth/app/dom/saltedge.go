@@ -1,9 +1,3 @@
 package dom
 
-type SeBodyReq struct {
-	Data interface{} `json:"data"`
-}
-
-type SeBodyResp struct {
-	Data interface{} `json:"data"`
-}
+// TODO: Create struct for DOM, DTO and swagger docs for client to integrate
