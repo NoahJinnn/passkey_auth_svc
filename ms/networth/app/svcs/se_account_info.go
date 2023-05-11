@@ -14,9 +14,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"time"
 
+	"github.com/hellohq/hqservice/ms/networth/app/dom"
 	"github.com/hellohq/hqservice/ms/networth/config"
 )
 
@@ -25,7 +25,7 @@ const (
 )
 
 type ISeAccountInfoSvc interface {
-	CreateCustomer(ctx context.Context, reqBody interface{}) (interface{}, error)
+	CreateCustomer(ctx context.Context, ccr *dom.CreateCustomerReq) (*dom.CreateCustomerResp, error)
 	CreateConnectSession(ctx context.Context, reqBody interface{}) (interface{}, error)
 }
 
@@ -39,16 +39,25 @@ func NewSeAccountInfoSvc(cfg *config.Config) ISeAccountInfoSvc {
 	}
 }
 
-func (svc *seSvc) CreateCustomer(ctx context.Context, reqBody interface{}) (interface{}, error) {
+func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *dom.CreateCustomerReq) (*dom.CreateCustomerResp, error) {
 	url := fmt.Sprintf("%s/customers", API_URL)
 
-	response, err := doReq("POST", url, reqBody, svc.cfg.SaltEdgeConfig)
+	response, err := doReq("POST", url, ccr, svc.cfg.SaltEdgeConfig)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
 	}
 
-	return response, nil
+	var result dom.CreateCustomerResp
+	err = json.Unmarshal(response, &dom.HttpBody{
+		Data: &result,
+	})
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil, err
+	}
+
+	return &result, nil
 }
 
 func (svc *seSvc) CreateConnectSession(ctx context.Context, reqBody interface{}) (interface{}, error) {
@@ -63,8 +72,12 @@ func (svc *seSvc) CreateConnectSession(ctx context.Context, reqBody interface{})
 	return response, nil
 }
 
-func doReq(method string, url string, reqBody interface{}, credentials *config.SaltEdgeConfig) (interface{}, error) {
-	body, err := json.Marshal(reqBody)
+func doReq(method string, url string, reqBody interface{}, credentials *config.SaltEdgeConfig) ([]byte, error) {
+	seBody := dom.HttpBody{
+		Data: reqBody,
+	}
+
+	body, err := json.Marshal(seBody)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
@@ -76,7 +89,7 @@ func doReq(method string, url string, reqBody interface{}, credentials *config.S
 		return nil, err
 	}
 
-	headers := signedHeaders(request.URL.String(), request.Method, reqBody, credentials)
+	headers := signedHeaders(request.URL.String(), request.Method, body, credentials)
 	request.Header = make(http.Header)
 	for key, value := range headers {
 		request.Header.Set(key, value)
@@ -94,46 +107,33 @@ func doReq(method string, url string, reqBody interface{}, credentials *config.S
 		return nil, err
 	}
 
-	var result struct {
-		Data interface{} `json:"data"`
-	}
-	err = json.Unmarshal(respBody, &result)
-	if err != nil {
-		return nil, err
-	}
-
 	if response.StatusCode == http.StatusOK {
-		return &result, nil
+		return respBody, nil
 	} else {
 		fmt.Println("Error Response:", string(respBody))
 		return nil, fmt.Errorf("request failed with status code: %d", response.StatusCode)
 	}
 }
 
-func signedHeaders(url, method string, params interface{}, credentials *config.SaltEdgeConfig) map[string]string {
-	privateKeyBytes, err := os.ReadFile("configs/saltedge-pki/private.pem")
-	if err != nil {
-		panic(err)
-	}
-
-	privateKey, err := parsePrivateKey(privateKeyBytes)
-	if err != nil {
-		panic(err)
-	}
-
+func signedHeaders(url, method string, params []byte, credentials *config.SaltEdgeConfig) map[string]string {
+	var signature string
 	expiresAt := time.Now().Add(60 * time.Second).Unix()
-	payload := fmt.Sprintf("%d|%s|%s|", expiresAt, method, url)
-	if method == "POST" {
-		payloadBytes, err := json.Marshal(params)
+
+	if credentials.PK != "" {
+		privateKey, err := parsePrivateKey([]byte((credentials.PK)))
 		if err != nil {
 			panic(err)
 		}
-		payload += string(payloadBytes)
-	}
 
-	signature, err := sign(payload, privateKey)
-	if err != nil {
-		panic(err)
+		payload := fmt.Sprintf("%d|%s|%s|", expiresAt, method, url)
+		if method == "POST" {
+			payload += string(params)
+		}
+
+		signature, err = sign(payload, privateKey)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	headers := make(map[string]string)

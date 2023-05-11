@@ -36,10 +36,9 @@
 
 #### Salt Edge
 
-```bash
-cd configs
-mkdir saltedge-pki
+Generate PKI to sign [Signature header](https://docs.saltedge.com/general/#signature_headers)
 
+```bash
 # For macOS or Linux
 openssl genrsa -out private.pem 2048
 openssl rsa -pubout -in private.pem -out public.pem
