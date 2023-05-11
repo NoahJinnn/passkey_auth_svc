@@ -18,8 +18,8 @@ var (
 	}
 	want = &Config{
 		Server: Server{
-			BindAddr:    netx.NewAddr("localhost", 17000),
-			BindAddrInt: netx.NewAddr("127.0.0.1", 17000),
+			BindAddr:    netx.NewAddr("localhost", 17002),
+			BindAddrInt: netx.NewAddr("127.0.0.1", 17002),
 			Cors: Cors{
 				ExposeHeaders: []string{
 					httplimit.HeaderRateLimitLimit,
@@ -28,6 +28,11 @@ var (
 					httplimit.HeaderRetryAfter,
 				},
 			},
+		},
+		SaltEdgeConfig: &SaltEdgeConfig{
+			AppId:  "test",
+			Secret: "test",
+			PK:     "test",
 		},
 	}
 	testOwn = own
@@ -40,6 +45,10 @@ func TestMain(m *testing.M) {
 	os.Setenv("HQ_NETWORTH_ADDR_HOST_INT", "127.0.0.1")
 	os.Setenv("HQ_NETWORTH_ADDR_PORT", "17002")
 	os.Setenv("HQ_POSTGRES_AUTH_PASS", "authpass")
+	// Networth env
+	os.Setenv("HQ_SALTEDGE_APP_ID", "test")
+	os.Setenv("HQ_SALTEDGE_SECRET", "test")
+	os.Setenv("HQ_SALTEDGE_PK", "test")
 
 	testShared, _ = sharedConfig.Get()
 	check.TestMain(m)
@@ -75,8 +84,8 @@ func Test(t *testing.T) {
 		)
 		t.Nil(err)
 
-		want.Server.BindAddr = netx.NewAddr("authhost4", 4102)
-		want.Server.BindAddrInt = netx.NewAddr("authhostint4", 4102)
+		want.Server.BindAddr = netx.NewAddr("networthhost4", 4102)
+		want.Server.BindAddrInt = netx.NewAddr("networthhostint4", 4102)
 
 		t.DeepEqual(c, want)
 	})

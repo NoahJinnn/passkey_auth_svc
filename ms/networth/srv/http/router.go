@@ -53,13 +53,14 @@ func NewServer(appl app.Appl, sessionManager session.Manager, sharedCfg *sharedC
 	e.GET("/ready", healthHandler.Ready)
 	e.GET("/alive", healthHandler.Alive)
 
-	nw := e.Group("/nw")
-	nwHandler := handlers.NewSeHandler(srv)
-	se := nw.Group("/se")
-	se.POST("/customers",
-		nwHandler.CreateCustomer,
+	nw := e.Group(
+		"/nw",
 		// sharedMiddlewares.Session(sessionManager), TODO: Enable back when finish nw service
 	)
+	nwHandler := handlers.NewSeHandler(srv)
+	se := nw.Group("/se")
+	se.POST("/customers", nwHandler.CreateCustomer)
+	se.POST("/connect_session", nwHandler.CreateConnectSession)
 
 	e.Logger.Fatal(e.Start(cfg.Server.BindAddr.String()))
 	return nil

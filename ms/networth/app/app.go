@@ -13,7 +13,7 @@ import (
 // Appl provides application features (use cases) service.
 type Appl interface {
 	// GetUserSvc() svcs.IUserSvc
-	GetSeSvc() svcs.ISeSvc
+	GetSeAccountInfoSvc() svcs.ISeAccountInfoSvc
 }
 
 // App implements interface Appl.
@@ -35,6 +35,6 @@ func New(cfg *config.Config, repo *dal.NwRepo) App {
 // 	return svcs.NewUserSvc(a.cfg, a.repo)
 // }
 
-func (a App) GetSeSvc() svcs.ISeSvc {
-	return svcs.NewSeSvc(a.cfg)
+func (a App) GetSeAccountInfoSvc() svcs.ISeAccountInfoSvc {
+	return svcs.NewSeAccountInfoSvc(a.cfg)
 }

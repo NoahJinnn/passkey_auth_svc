@@ -44,6 +44,7 @@ var (
 
 		SeAppId  appcfg.String `env:"SALTEDGE_APP_ID"`
 		SeSecret appcfg.String `env:"SALTEDGE_SECRET"`
+		SePK     appcfg.String `env:"SALTEDGE_PK"`
 	}{}
 )
 
@@ -90,6 +91,7 @@ func GetServe() (c *Config, err error) {
 		SaltEdgeConfig: &SaltEdgeConfig{
 			AppId:  own.SeAppId.Value(&err),
 			Secret: own.SeSecret.Value(&err),
+			PK:     own.SePK.Value(&err),
 		},
 	}
 	if err != nil {
