@@ -75,11 +75,11 @@ func NewServer(appl app.Appl, sessionManager session.Manager, sharedCfg *sharedC
 	webauthnHandler := handlers.NewWebauthnHandler(srv, sessionManager)
 	webauthn := e.Group("/webauthn")
 	webauthnRegistration := webauthn.Group("/registration", sharedMiddlewares.Session(sessionManager))
-	webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
+	webauthnRegistration.POST("/initialize", webauthnHandler.InitRegistration)
 	webauthnRegistration.POST("/finalize", webauthnHandler.FinishRegistration)
 
 	webauthnLogin := webauthn.Group("/login")
-	webauthnLogin.POST("/initialize", webauthnHandler.BeginLogin)
+	webauthnLogin.POST("/initialize", webauthnHandler.InitLogin)
 	webauthnLogin.POST("/finalize", webauthnHandler.FinishLogin)
 
 	webauthnCredentials := webauthn.Group("/credentials", sharedMiddlewares.Session(sessionManager))

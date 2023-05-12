@@ -14,11 +14,11 @@ import (
 func TestDefaultManager(t *testing.T) {
 	keys := []string{"asfnoadnfoaegnq3094intoaegjnoadjgnoadng", "apdisfoaiegnoaiegnbouaebgn982"}
 	ctx := context.Background()
-	repo := NewJwkRepo(nil)
+	jwkRepo := NewJwkRepo(nil)
 
-	dm, err := session.NewDefaultManager(keys, repo)
+	dm, err := session.NewDefaultManager(keys, jwkRepo)
 	require.NoError(t, err)
-	all, err := repo.GetAllJwk(ctx)
+	all, err := jwkRepo.All(ctx)
 
 	require.NoError(t, err)
 	assert.Equal(t, 2, len(all))

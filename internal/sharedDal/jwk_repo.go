@@ -9,9 +9,9 @@ import (
 )
 
 type IJwkRepo interface {
-	GetJwk(ctx context.Context, id uint) (*ent.Jwk, error)
-	GetAllJwk(ctx context.Context) ([]*ent.Jwk, error)
-	GetLastJwk(ctx context.Context) (*ent.Jwk, error)
+	Jwk(ctx context.Context, id uint) (*ent.Jwk, error)
+	All(ctx context.Context) ([]*ent.Jwk, error)
+	Last(ctx context.Context) (*ent.Jwk, error)
 	Create(ctx context.Context, jwk ent.Jwk) error
 }
 
@@ -23,7 +23,7 @@ func NewJwkRepo(db *ent.Client) IJwkRepo {
 	return &jwkRepo{db: db}
 }
 
-func (r *jwkRepo) GetJwk(ctx context.Context, id uint) (*ent.Jwk, error) {
+func (r *jwkRepo) Jwk(ctx context.Context, id uint) (*ent.Jwk, error) {
 	jwk, err := r.db.Jwk.
 		Query().
 		Where(jwk.ID(id)).
@@ -40,7 +40,7 @@ func (r *jwkRepo) GetJwk(ctx context.Context, id uint) (*ent.Jwk, error) {
 
 }
 
-func (r *jwkRepo) GetAllJwk(ctx context.Context) ([]*ent.Jwk, error) {
+func (r *jwkRepo) All(ctx context.Context) ([]*ent.Jwk, error) {
 	jwks, err := r.db.Jwk.
 		Query().
 		All(ctx)
@@ -52,7 +52,7 @@ func (r *jwkRepo) GetAllJwk(ctx context.Context) ([]*ent.Jwk, error) {
 	return jwks, nil
 }
 
-func (r *jwkRepo) GetLastJwk(ctx context.Context) (*ent.Jwk, error) {
+func (r *jwkRepo) Last(ctx context.Context) (*ent.Jwk, error) {
 	jwk, err := r.db.Jwk.
 		Query().
 		Order(ent.Desc(jwk.FieldCreatedAt, jwk.FieldID)).

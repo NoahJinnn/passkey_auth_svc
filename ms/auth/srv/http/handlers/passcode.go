@@ -47,7 +47,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		}
 	}
 	lang := c.Request().Header.Get("Accept-Language")
-	passcodeEnt, err := h.GetPasscodeSvc().InitPasscode(c.Request().Context(), userId, emailId, lang)
+	passcodeEnt, err := h.GetPasscodeSvc().InitLogin(c.Request().Context(), userId, emailId, lang)
 	if err != nil {
 		return sharedDto.ToHttpError(err)
 	}
@@ -74,7 +74,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 		return sharedDto.NewHTTPError(http.StatusBadRequest, "failed to parse passcodeId as uuid").SetInternal(err)
 	}
 
-	passcode, err := h.GetPasscodeSvc().FinishPasscode(c.Request().Context(), passcodeId, body.Code)
+	passcode, err := h.GetPasscodeSvc().FinishLogin(c.Request().Context(), passcodeId, body.Code)
 	if err != nil {
 		return err
 	}

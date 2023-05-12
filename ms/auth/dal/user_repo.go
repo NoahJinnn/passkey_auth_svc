@@ -7,7 +7,7 @@ import (
 )
 
 type IUserRepo interface {
-	GetAll(ctx Ctx) ([]*ent.User, error)
+	All(ctx Ctx) ([]*ent.User, error)
 	GetById(ctx Ctx, id uuid.UUID) (*ent.User, error)
 	Create(ctx Ctx, u *ent.User) (*ent.User, error)
 	Count(ctx Ctx, id uuid.UUID) (int, error)
@@ -21,7 +21,7 @@ func NewUserRepo(db *ent.Client) IUserRepo {
 	return &userRepo{db: db}
 }
 
-func (r *userRepo) GetAll(ctx Ctx) ([]*ent.User, error) {
+func (r *userRepo) All(ctx Ctx) ([]*ent.User, error) {
 	us, err := r.db.User.
 		Query().
 		All(ctx)

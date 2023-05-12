@@ -25,8 +25,8 @@ func NewWebauthnHandler(srv *HttpDeps, sessionManager session.Manager) *Webauthn
 	}
 }
 
-// BeginRegistration returns credential creation options for the WebAuthnAPI. It expects a valid session JWT in the request.
-func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
+// InitRegistration returns credential creation options for the WebAuthnAPI. It expects a valid session JWT in the request.
+func (h *WebauthnHandler) InitRegistration(c echo.Context) error {
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("failed to cast session object")
@@ -37,7 +37,7 @@ func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
 		return fmt.Errorf("failed to parse userId from JWT subject:%w", err)
 	}
 
-	options, err := h.GetWebauthnSvc().BeginRegistration(c.Request().Context(), uId)
+	options, err := h.GetWebauthnSvc().InitRegistration(c.Request().Context(), uId)
 	if err != nil {
 		return fmt.Errorf("failed to create webauthn creation options: %w", err)
 	}
@@ -77,15 +77,15 @@ type BeginAuthenticationBody struct {
 	UserID *string `json:"user_id" validate:"uuid4"`
 }
 
-// BeginLogin returns credential assertion options for the WebAuthnAPI.
-func (h *WebauthnHandler) BeginLogin(c echo.Context) error {
+// InitLogin returns credential assertion options for the WebAuthnAPI.
+func (h *WebauthnHandler) InitLogin(c echo.Context) error {
 	var request BeginAuthenticationBody
 
 	if err := (&echo.DefaultBinder{}).BindBody(c, &request); err != nil {
 		return sharedDto.ToHttpError(err)
 	}
 
-	options, err := h.GetWebauthnSvc().BeginLogin(c.Request().Context(), request.UserID)
+	options, err := h.GetWebauthnSvc().InitLogin(c.Request().Context(), request.UserID)
 	if err != nil {
 		return sharedDto.ToHttpError(err)
 	}

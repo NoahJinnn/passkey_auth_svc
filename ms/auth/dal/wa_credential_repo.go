@@ -9,7 +9,7 @@ import (
 )
 
 type IWebauthnCredentialRepo interface {
-	GetFromUser(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error)
+	GetByUser(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error)
 	GetById(ctx Ctx, id string) (*ent.WebauthnCredential, error)
 	Create(ctx Ctx, credential ent.WebauthnCredential, transports []protocol.AuthenticatorTransport) error
 	Update(ctx Ctx, credential ent.WebauthnCredential) error
@@ -37,7 +37,7 @@ func (r *webauthnRepo) GetById(ctx Ctx, id string) (credential *ent.WebauthnCred
 	return credential, nil
 }
 
-func (r *webauthnRepo) GetFromUser(ctx Ctx, userId uuid.UUID) (credentials []*ent.WebauthnCredential, err error) {
+func (r *webauthnRepo) GetByUser(ctx Ctx, userId uuid.UUID) (credentials []*ent.WebauthnCredential, err error) {
 	// Query all ent.WebauthnCredential by ent.User id and sort by created at return them
 	credentials, err = r.db.WebauthnCredential.
 		Query().

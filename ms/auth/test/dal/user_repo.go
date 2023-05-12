@@ -14,7 +14,7 @@ type userRepo struct {
 	users []*ent.User
 }
 
-func (r *userRepo) GetAll(ctx Ctx) ([]*ent.User, error) {
+func (r *userRepo) All(ctx Ctx) ([]*ent.User, error) {
 	return r.users, nil
 }
 

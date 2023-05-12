@@ -8,6 +8,8 @@ import (
 	"github.com/hellohq/hqservice/internal/sharedDal"
 )
 
+type Ctx = context.Context
+
 // Error names.
 const (
 	PostgresUniqueViolation     = "unique_violation"
@@ -19,13 +21,12 @@ const (
 
 // Repo provides data storage.
 type INwRepo interface {
-	WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error
+	WithTx(ctx Ctx, exec func(ctx Ctx, client *ent.Client) error) error
 }
 
 type NwRepo struct {
 	Db *ent.Client
 }
-type Ctx = context.Context
 
 func New(client *ent.Client) *NwRepo {
 	return &NwRepo{
@@ -33,6 +34,6 @@ func New(client *ent.Client) *NwRepo {
 	}
 }
 
-func (r NwRepo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error {
+func (r NwRepo) WithTx(ctx Ctx, exec func(ctx Ctx, client *ent.Client) error) error {
 	return sharedDal.WithTx(ctx, r.Db, exec)
 }

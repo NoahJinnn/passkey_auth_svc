@@ -16,8 +16,8 @@ import (
 )
 
 type IPasscodeSvc interface {
-	InitPasscode(ctx Ctx, userId uuid.UUID, emailId uuid.UUID, acceptLang string) (*ent.Passcode, error)
-	FinishPasscode(ctx Ctx, passcodeId uuid.UUID, reqCode string) (*ent.Passcode, error)
+	InitLogin(ctx Ctx, userId uuid.UUID, emailId uuid.UUID, acceptLang string) (*ent.Passcode, error)
+	FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode string) (*ent.Passcode, error)
 }
 
 type passcodeSvc struct {
@@ -45,7 +45,7 @@ func NewPasscodeSvc(cfg *config.Config, repo dal.IAuthRepo) IPasscodeSvc {
 	}
 }
 
-func (svc *passcodeSvc) InitPasscode(ctx Ctx, userId uuid.UUID, emailId uuid.UUID, acceptLang string) (*ent.Passcode, error) {
+func (svc *passcodeSvc) InitLogin(ctx Ctx, userId uuid.UUID, emailId uuid.UUID, acceptLang string) (*ent.Passcode, error) {
 	user, err := svc.repo.GetUserRepo().GetById(ctx, userId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user: %w", err)
@@ -126,7 +126,7 @@ func (svc *passcodeSvc) InitPasscode(ctx Ctx, userId uuid.UUID, emailId uuid.UUI
 	return newPc, nil
 }
 
-func (svc *passcodeSvc) FinishPasscode(ctx Ctx, passcodeId uuid.UUID, reqCode string) (*ent.Passcode, error) {
+func (svc *passcodeSvc) FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode string) (*ent.Passcode, error) {
 	startTime := time.Now().UTC()
 	var entPc *ent.Passcode
 	// only if an internal server error occurs the transaction should be rolled back

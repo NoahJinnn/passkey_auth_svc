@@ -19,9 +19,9 @@ import (
 )
 
 type IWebauthnSvc interface {
-	BeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, error)
+	InitRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, error)
 	FinishRegistration(ctx Ctx, request *protocol.ParsedCredentialCreationData, sessionUserId string) (credentialId string, userId string, err error)
-	BeginLogin(ctx Ctx, reqUserId *string) (*protocol.CredentialAssertion, error)
+	InitLogin(ctx Ctx, reqUserId *string) (*protocol.CredentialAssertion, error)
 	FinishLogin(ctx Ctx, request *protocol.ParsedCredentialAssertionData) (credentialId string, userId string, err error)
 	ListCredentials(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error)
 	UpdateCredential(ctx Ctx, userId uuid.UUID, id string, name *string) error
@@ -45,7 +45,7 @@ func NewWebAuthn(cfg *config.Config, repo dal.IAuthRepo, wa *webauthn.WebAuthn) 
 	}
 }
 
-func (svc *webauthnSvc) BeginRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, error) {
+func (svc *webauthnSvc) InitRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, error) {
 	webauthnUser, _, err := svc.getWebauthnUser(ctx, userId)
 	if webauthnUser == nil {
 		// TODO: audit logger
@@ -150,7 +150,7 @@ func (svc *webauthnSvc) FinishRegistration(ctx Ctx, request *protocol.ParsedCred
 	return credentialId, userId, nil
 }
 
-func (svc *webauthnSvc) BeginLogin(ctx Ctx, reqUserId *string) (*protocol.CredentialAssertion, error) {
+func (svc *webauthnSvc) InitLogin(ctx Ctx, reqUserId *string) (*protocol.CredentialAssertion, error) {
 	var options *protocol.CredentialAssertion
 	var sessionData *webauthn.SessionData
 	if reqUserId != nil {
@@ -258,7 +258,7 @@ func (svc *webauthnSvc) FinishLogin(ctx Ctx, request *protocol.ParsedCredentialA
 }
 
 func (svc *webauthnSvc) ListCredentials(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error) {
-	return svc.repo.GetWebauthnCredentialRepo().GetFromUser(ctx, userId)
+	return svc.repo.GetWebauthnCredentialRepo().GetByUser(ctx, userId)
 }
 
 func (svc *webauthnSvc) UpdateCredential(ctx Ctx, userId uuid.UUID, id string, name *string) error {
@@ -316,7 +316,7 @@ func (svc *webauthnSvc) getWebauthnUser(ctx Ctx, userId uuid.UUID) (*dom.Webauth
 		return nil, nil, nil
 	}
 
-	credentials, err := svc.repo.GetWebauthnCredentialRepo().GetFromUser(ctx, user.ID)
+	credentials, err := svc.repo.GetWebauthnCredentialRepo().GetByUser(ctx, user.ID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get webauthn credentials: %w", err)
 	}

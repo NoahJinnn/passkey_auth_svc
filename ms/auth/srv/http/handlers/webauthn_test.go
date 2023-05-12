@@ -100,9 +100,9 @@ func TestWebauthnHandler_BeginRegistration(t *testing.T) {
 		Cfg:       &defaultCfg,
 		SharedCfg: &sharedCfg,
 	}, &sessionManager{})
-	err = handler.BeginRegistration(c)
+	err = handler.InitRegistration(c)
 	require.NoError(t, err)
-	if assert.NoError(t, handler.BeginRegistration(c)) {
+	if assert.NoError(t, handler.InitRegistration(c)) {
 		creationOptions := protocol.CredentialCreation{}
 
 		b := bytes.NewBuffer(rec.Body.Bytes())
@@ -187,7 +187,7 @@ func TestWebauthnHandler_BeginLogin(t *testing.T) {
 	}, &sessionManager{})
 	require.NoError(t, err)
 
-	if assert.NoError(t, handler.BeginLogin(c)) {
+	if assert.NoError(t, handler.InitLogin(c)) {
 		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
 		assertionOptions := protocol.CredentialAssertion{}
 		err = json.Unmarshal(rec.Body.Bytes(), &assertionOptions)

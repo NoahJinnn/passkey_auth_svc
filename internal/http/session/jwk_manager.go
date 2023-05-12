@@ -24,24 +24,24 @@ type JwkManager interface {
 
 type DefaultManager struct {
 	encrypter *aes_gcm.AESGCM
-	repo      sharedDal.IJwkRepo
+	jwkRepo   sharedDal.IJwkRepo
 }
 
 // Returns a DefaultManager that reads and persists the jwks to database and generates jwks if a new secret gets added to the config.
-func NewDefaultManager(keys []string, repo sharedDal.IJwkRepo) (*DefaultManager, error) {
+func NewDefaultManager(keys []string, jwkRepo sharedDal.IJwkRepo) (*DefaultManager, error) {
 	encrypter, err := aes_gcm.NewAESGCM(keys)
 	if err != nil {
 		return nil, err
 	}
 	manager := &DefaultManager{
 		encrypter: encrypter,
-		repo:      repo,
+		jwkRepo:   jwkRepo,
 	}
 	// for every key we should check if a jwk with index exists and create one if not.
 	ctx := context.Background()
 	for i := range keys {
 
-		j, err := repo.GetJwk(ctx, uint(i))
+		j, err := jwkRepo.Jwk(ctx, uint(i))
 		if j == nil && err == nil {
 			_, err := manager.GenerateKey(ctx)
 			if err != nil {
@@ -74,7 +74,7 @@ func (m *DefaultManager) GenerateKey(ctx context.Context) (jwk.Key, error) {
 		KeyData:   encryptedKey,
 		CreatedAt: time.Now(),
 	}
-	err = m.repo.Create(ctx, model)
+	err = m.jwkRepo.Create(ctx, model)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (m *DefaultManager) GenerateKey(ctx context.Context) (jwk.Key, error) {
 }
 
 func (m *DefaultManager) GetSigningKey(ctx context.Context) (jwk.Key, error) {
-	sigModel, err := m.repo.GetLastJwk(ctx)
+	sigModel, err := m.jwkRepo.Last(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +99,7 @@ func (m *DefaultManager) GetSigningKey(ctx context.Context) (jwk.Key, error) {
 }
 
 func (m *DefaultManager) GetPublicKeys(ctx context.Context) (jwk.Set, error) {
-	modelList, err := m.repo.GetAllJwk(ctx)
+	modelList, err := m.jwkRepo.All(ctx)
 	if err != nil {
 		return nil, err
 	}

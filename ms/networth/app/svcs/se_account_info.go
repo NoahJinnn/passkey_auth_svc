@@ -25,8 +25,8 @@ const (
 )
 
 type ISeAccountInfoSvc interface {
-	CreateCustomer(ctx context.Context, ccr *dom.CreateCustomerReq) (*dom.CreateCustomerResp, error)
-	CreateConnectSession(ctx context.Context, ccsr *dom.CreateConnectSessionReq) (*dom.CreateConnectSessionResp, error)
+	CreateCustomer(ctx Ctx, ccr *dom.CreateCustomerReq) (*dom.CreateCustomerResp, error)
+	CreateConnectSession(ctx Ctx, ccsr *dom.CreateConnectSessionReq) (*dom.CreateConnectSessionResp, error)
 }
 
 type seSvc struct {
