@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hellohq/hqservice/internal/sharedConfig"
+	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/check"
 	"github.com/sethvargo/go-limiter/httplimit"
@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	testShared   *sharedConfig.Shared
+	testShared   *sharedconfig.Shared
 	testFlagsets = FlagSets{
 		Serve: pflag.NewFlagSet("", 0),
 	}
@@ -65,7 +65,7 @@ func TestMain(m *testing.M) {
 	os.Setenv("HQ_MAIL_FROM_ADDRESS", "test@gmail.com")
 	os.Setenv("HQ_MAIL_FROM_NAME", "Test Mail")
 
-	testShared, _ = sharedConfig.Get()
+	testShared, _ = sharedconfig.Get()
 	check.TestMain(m)
 }
 
