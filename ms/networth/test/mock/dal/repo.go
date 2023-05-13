@@ -10,16 +10,16 @@ import (
 func NewRepo(
 	db *ent.Client,
 ) dal.INwRepo {
-	return &repo{
+	return &repoT{
 		Db: db,
 	}
 }
 
-type repo struct {
+type repoT struct {
 	Db *ent.Client
 }
 
-func (r repo) WithTx(ctx context.Context, exec func(ctx context.Context, client *ent.Client) error) error {
+func (r repoT) WithTx(ctx context.Context, exec func(ctx context.Context, client *ent.Client) error) error {
 	txForw := func(db *ent.Client) error {
 		return exec(ctx, db)
 	}

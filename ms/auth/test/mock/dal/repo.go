@@ -16,7 +16,7 @@ func NewRepo(
 	waSessionData []*ent.WebauthnSessionData,
 	email []*ent.Email,
 ) dal.IAuthRepo {
-	return &repo{
+	return &repoT{
 		Db:                     db,
 		userRepo:               NewUserRepo(user),
 		webAuthnCredentialRepo: NewWebauthnCredentialRepo(waCredential),
@@ -25,7 +25,7 @@ func NewRepo(
 	}
 }
 
-type repo struct {
+type repoT struct {
 	Db                     *ent.Client
 	userRepo               dal.IUserRepo
 	webAuthnCredentialRepo dal.IWebauthnCredentialRepo
@@ -34,7 +34,7 @@ type repo struct {
 	passcodeRepo           dal.IPasscodeRepo
 }
 
-func (r repo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error {
+func (r repoT) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error {
 
 	txForw := func(db *ent.Client) error {
 		return exec(ctx, db)
@@ -42,22 +42,22 @@ func (r repo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client)
 	return txForw(nil)
 }
 
-func (r repo) GetUserRepo() dal.IUserRepo {
+func (r repoT) GetUserRepo() dal.IUserRepo {
 	return r.userRepo
 }
 
-func (r repo) GetWebauthnCredentialRepo() dal.IWebauthnCredentialRepo {
+func (r repoT) GetWebauthnCredentialRepo() dal.IWebauthnCredentialRepo {
 	return r.webAuthnCredentialRepo
 }
 
-func (r repo) GetWebauthnSessionRepo() dal.IWebauthnSessionRepo {
+func (r repoT) GetWebauthnSessionRepo() dal.IWebauthnSessionRepo {
 	return r.webAuthnSessionRepo
 }
 
-func (r repo) GetEmailRepo() dal.IEmailRepo {
+func (r repoT) GetEmailRepo() dal.IEmailRepo {
 	return r.emailRepo
 }
 
-func (r repo) GetPasscodeRepo() dal.IPasscodeRepo {
+func (r repoT) GetPasscodeRepo() dal.IPasscodeRepo {
 	return r.passcodeRepo
 }
