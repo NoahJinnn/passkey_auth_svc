@@ -5,8 +5,9 @@ import (
 	"net/http"
 
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/internal/http/errorhandler"
 	"github.com/hellohq/hqservice/internal/http/session"
-	"github.com/hellohq/hqservice/internal/http/sharedDto"
+
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
 
 	"github.com/labstack/echo/v4"
@@ -27,29 +28,29 @@ func NewPasscodeHandler(srv *HttpDeps, sessionManager session.Manager) *Passcode
 func (h *PasscodeHandler) Init(c echo.Context) error {
 	var body dto.PasscodeInitRequest
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		return sharedDto.ToHttpError(err)
+		return errorhandler.ToHttpError(err)
 	}
 
 	if err := c.Validate(body); err != nil {
-		return sharedDto.ToHttpError(err)
+		return errorhandler.ToHttpError(err)
 	}
 
 	userId, err := uuid.FromString(body.UserId)
 	if err != nil {
-		return sharedDto.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
+		return errorhandler.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
 
 	var emailId uuid.UUID
 	if body.EmailId != nil {
 		emailId, err = uuid.FromString(*body.EmailId)
 		if err != nil {
-			return sharedDto.NewHTTPError(http.StatusBadRequest, "failed to parse emailId as uuid").SetInternal(err)
+			return errorhandler.NewHTTPError(http.StatusBadRequest, "failed to parse emailId as uuid").SetInternal(err)
 		}
 	}
 	lang := c.Request().Header.Get("Accept-Language")
 	passcodeEnt, err := h.GetPasscodeSvc().InitLogin(c.Request().Context(), userId, emailId, lang)
 	if err != nil {
-		return sharedDto.ToHttpError(err)
+		return errorhandler.ToHttpError(err)
 	}
 
 	return c.JSON(http.StatusOK, dto.PasscodeReturn{
@@ -62,16 +63,16 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 func (h *PasscodeHandler) Finish(c echo.Context) error {
 	var body dto.PasscodeFinishRequest
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		return sharedDto.ToHttpError(err)
+		return errorhandler.ToHttpError(err)
 	}
 
 	if err := c.Validate(body); err != nil {
-		return sharedDto.ToHttpError(err)
+		return errorhandler.ToHttpError(err)
 	}
 
 	passcodeId, err := uuid.FromString(body.Id)
 	if err != nil {
-		return sharedDto.NewHTTPError(http.StatusBadRequest, "failed to parse passcodeId as uuid").SetInternal(err)
+		return errorhandler.NewHTTPError(http.StatusBadRequest, "failed to parse passcodeId as uuid").SetInternal(err)
 	}
 
 	passcode, err := h.GetPasscodeSvc().FinishLogin(c.Request().Context(), passcodeId, body.Code)

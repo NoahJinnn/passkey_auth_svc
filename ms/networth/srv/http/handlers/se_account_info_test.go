@@ -6,8 +6,8 @@ import (
 
 	"github.com/hellohq/hqservice/ms/networth/app/dom"
 	"github.com/hellohq/hqservice/ms/networth/config"
-	test "github.com/hellohq/hqservice/ms/networth/test/app"
-	testRepo "github.com/hellohq/hqservice/ms/networth/test/dal"
+	test "github.com/hellohq/hqservice/ms/networth/test/mock/app"
+	testRepo "github.com/hellohq/hqservice/ms/networth/test/mock/dal"
 	"github.com/stretchr/testify/assert"
 )
 

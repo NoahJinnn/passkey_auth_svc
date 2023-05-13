@@ -6,12 +6,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/hellohq/hqservice/internal/http/validator"
+
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/internal/http/sharedDto"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
-	test "github.com/hellohq/hqservice/ms/auth/test/app"
-	testRepo "github.com/hellohq/hqservice/ms/auth/test/dal"
+	test "github.com/hellohq/hqservice/ms/auth/test/mock/app"
+	testRepo "github.com/hellohq/hqservice/ms/auth/test/mock/dal"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
@@ -67,7 +68,7 @@ func TestEmailHandler_ListByUser(t *testing.T) {
 	var emails []*dto.EmailResponse
 	for _, currentTest := range tests {
 		e := echo.New()
-		e.Validator = sharedDto.NewCustomValidator()
+		e.Validator = validator.NewCustomValidator()
 		req := httptest.NewRequest(http.MethodGet, "/emails", nil)
 		req.Header.Set("Content-Type", "application/json")
 		rec := httptest.NewRecorder()
@@ -116,7 +117,7 @@ func TestEmailHandler_Delete(t *testing.T) {
 	testUsers[0].Edges.Emails = testEmails
 
 	e := echo.New()
-	e.Validator = sharedDto.NewCustomValidator()
+	e.Validator = validator.NewCustomValidator()
 	req := httptest.NewRequest(http.MethodDelete, "/", nil)
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
