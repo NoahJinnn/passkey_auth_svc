@@ -1,4 +1,4 @@
-package svcs
+package plaid
 
 import (
 	plaid "github.com/plaid/plaid-go/v3/plaid"

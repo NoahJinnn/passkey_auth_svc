@@ -1,4 +1,4 @@
-package svcs
+package plaid
 
 import (
 	// 	"context"
@@ -16,6 +16,8 @@ import (
 	"github.com/hellohq/hqservice/ms/networth/config"
 	plaid "github.com/plaid/plaid-go/v3/plaid"
 )
+
+type Ctx = context.Context
 
 //nolint:gochecknoglobals // Config, flags and metrics are global anyway.
 var (

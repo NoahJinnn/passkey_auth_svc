@@ -1,4 +1,4 @@
-package svcs
+package saltedge
 
 import (
 	"bytes"
@@ -23,6 +23,8 @@ import (
 const (
 	API_URL = "https://www.saltedge.com/api/v5"
 )
+
+type Ctx = context.Context
 
 type ISeAccountInfoSvc interface {
 	CreateCustomer(ctx Ctx, ccr *dom.CreateCustomerReq) (*dom.CreateCustomerResp, error)
