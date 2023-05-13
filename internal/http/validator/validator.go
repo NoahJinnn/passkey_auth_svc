@@ -1,4 +1,4 @@
-package sharedDto
+package validator
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/hellohq/hqservice/internal/http/errorhandler"
 )
 
 type CustomValidator struct {
@@ -51,7 +52,7 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 				}
 			}
 
-			return NewHTTPError(http.StatusBadRequest, strings.Join(vErrs, " and "))
+			return errorhandler.NewHTTPError(http.StatusBadRequest, strings.Join(vErrs, " and "))
 		}
 	}
 

@@ -1,4 +1,4 @@
-package sharedDal
+package pgsql
 
 import (
 	"context"

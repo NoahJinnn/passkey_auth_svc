@@ -1,4 +1,4 @@
-package sharedConfig
+package sharedconfig
 
 import (
 	"context"

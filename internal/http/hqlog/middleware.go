@@ -1,4 +1,4 @@
-package sharedMiddlewares
+package hqlog
 
 import (
 	"github.com/labstack/echo/v4"

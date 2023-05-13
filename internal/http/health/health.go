@@ -1,4 +1,4 @@
-package sharedHandlers
+package health
 
 import (
 	"net/http"

@@ -7,7 +7,6 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/internal/sharedDal"
 	"github.com/hellohq/hqservice/pkg/crypto/aes_gcm"
 	hqJwk "github.com/hellohq/hqservice/pkg/crypto/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwk"
@@ -24,11 +23,11 @@ type JwkManager interface {
 
 type DefaultManager struct {
 	encrypter *aes_gcm.AESGCM
-	jwkRepo   sharedDal.IJwkRepo
+	jwkRepo   IJwkRepo
 }
 
 // Returns a DefaultManager that reads and persists the jwks to database and generates jwks if a new secret gets added to the config.
-func NewDefaultManager(keys []string, jwkRepo sharedDal.IJwkRepo) (*DefaultManager, error) {
+func NewDefaultManager(keys []string, jwkRepo IJwkRepo) (*DefaultManager, error) {
 	encrypter, err := aes_gcm.NewAESGCM(keys)
 	if err != nil {
 		return nil, err

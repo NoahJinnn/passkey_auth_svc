@@ -1,4 +1,4 @@
-package sharedDal
+package session
 
 import (
 	"context"

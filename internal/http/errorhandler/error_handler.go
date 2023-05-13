@@ -1,4 +1,4 @@
-package sharedDto
+package errorhandler
 
 import (
 	"fmt"

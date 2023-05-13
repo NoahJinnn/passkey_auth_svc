@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/internal/sharedDal"
+	"github.com/hellohq/hqservice/internal/http/session"
 )
 
-func NewJwkRepo(init []*ent.Jwk) sharedDal.IJwkRepo {
+func NewJwkRepo(init []*ent.Jwk) session.IJwkRepo {
 	if init == nil {
 		return &jwkPersister{[]*ent.Jwk{}}
 	}
