@@ -1,6 +1,7 @@
-package svcs
+package email
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -8,6 +9,8 @@ import (
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ms/auth/dal"
 )
+
+type Ctx = context.Context
 
 type IEmailSvc interface {
 	ListByUser(ctx Ctx, userId uuid.UUID) ([]*ent.Email, error)

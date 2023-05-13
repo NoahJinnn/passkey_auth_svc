@@ -1,6 +1,7 @@
-package svcs
+package user
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -8,10 +9,12 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ent/email"
-	"github.com/hellohq/hqservice/internal/http/sharedDto"
+	"github.com/hellohq/hqservice/internal/http/errorhandler"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
 )
+
+type Ctx = context.Context
 
 type IUserSvc interface {
 	GetById(ctx Ctx, userID uuid.UUID) (*ent.User, *string, error)
@@ -46,7 +49,7 @@ func (svc *userSvc) Create(ctx Ctx, address string) (newU *ent.User, emailID uui
 		if email != nil {
 			if !email.UserID.IsNil() {
 				// The email already exists and is assigned already.
-				return sharedDto.NewHTTPError(http.StatusConflict).SetInternal(fmt.Errorf("user with email %s already exists", address))
+				return errorhandler.NewHTTPError(http.StatusConflict).SetInternal(fmt.Errorf("user with email %s already exists", address))
 			}
 		} else {
 			email, err = client.Email.Create().
@@ -79,7 +82,7 @@ func (svc *userSvc) GetById(ctx Ctx, userID uuid.UUID) (*ent.User, *string, erro
 	}
 
 	if user == nil {
-		return nil, nil, sharedDto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
+		return nil, nil, errorhandler.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
 	}
 
 	var emailAddress *string

@@ -9,17 +9,20 @@ import (
 
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
-	"github.com/hellohq/hqservice/ms/auth/app/svcs"
+	"github.com/hellohq/hqservice/ms/auth/app/email"
+	"github.com/hellohq/hqservice/ms/auth/app/passcode"
+	"github.com/hellohq/hqservice/ms/auth/app/user"
+	"github.com/hellohq/hqservice/ms/auth/app/wa"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
 )
 
 // Appl provides application features (use cases) service.
 type Appl interface {
-	GetWebauthnSvc() svcs.IWebauthnSvc
-	GetUserSvc() svcs.IUserSvc
-	GetPasscodeSvc() svcs.IPasscodeSvc
-	GetEmailSvc() svcs.IEmailSvc
+	GetWebauthnSvc() wa.IWebauthnSvc
+	GetUserSvc() user.IUserSvc
+	GetPasscodeSvc() passcode.IPasscodeSvc
+	GetEmailSvc() email.IEmailSvc
 }
 
 // App implements interface Appl.
@@ -57,18 +60,18 @@ func New(cfg *config.Config, repo *dal.AuthRepo) App {
 	}
 }
 
-func (a App) GetWebauthnSvc() svcs.IWebauthnSvc {
-	return svcs.NewWebAuthn(a.cfg, a.repo, a.wa)
+func (a App) GetWebauthnSvc() wa.IWebauthnSvc {
+	return wa.NewWebAuthn(a.cfg, a.repo, a.wa)
 }
 
-func (a App) GetUserSvc() svcs.IUserSvc {
-	return svcs.NewUserSvc(a.cfg, a.repo)
+func (a App) GetUserSvc() user.IUserSvc {
+	return user.NewUserSvc(a.cfg, a.repo)
 }
 
-func (a App) GetPasscodeSvc() svcs.IPasscodeSvc {
-	return svcs.NewPasscodeSvc(a.cfg, a.repo)
+func (a App) GetPasscodeSvc() passcode.IPasscodeSvc {
+	return passcode.NewPasscodeSvc(a.cfg, a.repo)
 }
 
-func (a App) GetEmailSvc() svcs.IEmailSvc {
-	return svcs.NewEmailSvc(a.repo)
+func (a App) GetEmailSvc() email.IEmailSvc {
+	return email.NewEmailSvc(a.repo)
 }

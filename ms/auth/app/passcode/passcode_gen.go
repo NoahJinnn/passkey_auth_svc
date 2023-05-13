@@ -1,4 +1,4 @@
-package svcs
+package passcode
 
 import (
 	"crypto/rand"

@@ -1,6 +1,7 @@
-package svcs
+package passcode
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -8,12 +9,14 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/internal/http/sharedDto"
+	"github.com/hellohq/hqservice/internal/http/errorhandler"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
-	"github.com/hellohq/hqservice/ms/auth/srv/http/mail"
+	"github.com/hellohq/hqservice/ms/auth/srv/mail"
 	"golang.org/x/crypto/bcrypt"
 )
+
+type Ctx = context.Context
 
 type IPasscodeSvc interface {
 	InitLogin(ctx Ctx, userId uuid.UUID, emailId uuid.UUID, acceptLang string) (*ent.Passcode, error)
@@ -52,7 +55,7 @@ func (svc *passcodeSvc) InitLogin(ctx Ctx, userId uuid.UUID, emailId uuid.UUID, 
 	}
 	if user == nil {
 		// TODO: audit logger
-		return nil, sharedDto.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("user not found"))
+		return nil, errorhandler.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("user not found"))
 	}
 
 	// if h.rateLimiter != nil {
@@ -71,18 +74,18 @@ func (svc *passcodeSvc) InitLogin(ctx Ctx, userId uuid.UUID, emailId uuid.UUID, 
 			return nil, fmt.Errorf("failed to get email: %w", err)
 		}
 		if email == nil {
-			return nil, sharedDto.NewHTTPError(http.StatusBadRequest, "the specified emailId is not available")
+			return nil, errorhandler.NewHTTPError(http.StatusBadRequest, "the specified emailId is not available")
 		}
 	} else if e := user.Edges.PrimaryEmail; e == nil {
 		// Can't determine email address to which the passcode should be sent to
-		return nil, sharedDto.NewHTTPError(http.StatusBadRequest, "an emailId needs to be specified")
+		return nil, errorhandler.NewHTTPError(http.StatusBadRequest, "an emailId needs to be specified")
 	} else {
 		// Send the passcode to the primary email address
 		email = e.Edges.Email
 	}
 
 	if email.Edges.User != nil && email.Edges.User.ID.String() != user.ID.String() {
-		return nil, sharedDto.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("email address is assigned to another user"))
+		return nil, errorhandler.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("email address is assigned to another user"))
 	}
 
 	passcode, err := svc.passcodeGenerator.Generate()
@@ -145,7 +148,7 @@ func (svc *passcodeSvc) FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode strin
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
-			businessError = sharedDto.NewHTTPError(http.StatusUnauthorized, "passcode not found")
+			businessError = errorhandler.NewHTTPError(http.StatusUnauthorized, "passcode not found")
 			return nil
 		}
 
@@ -159,7 +162,7 @@ func (svc *passcodeSvc) FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode strin
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
-			businessError = sharedDto.NewHTTPError(http.StatusRequestTimeout, "passcode request timed out").SetInternal(fmt.Errorf("createdAt: %s -> lastVerificationTime: %s - current: %s", passcode.CreatedAt, lastVerificationTime, startTime)) // TODO: maybe we should use BadRequest, because RequestTimeout might be to technical and can refer to different error
+			businessError = errorhandler.NewHTTPError(http.StatusRequestTimeout, "passcode request timed out").SetInternal(fmt.Errorf("createdAt: %s -> lastVerificationTime: %s - current: %s", passcode.CreatedAt, lastVerificationTime, startTime)) // TODO: maybe we should use BadRequest, because RequestTimeout might be to technical and can refer to different error
 			return nil
 		}
 
@@ -176,7 +179,7 @@ func (svc *passcodeSvc) FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode strin
 				if err != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}
-				businessError = sharedDto.NewHTTPError(http.StatusGone, "max attempts reached")
+				businessError = errorhandler.NewHTTPError(http.StatusGone, "max attempts reached")
 				return nil
 			}
 
@@ -189,7 +192,7 @@ func (svc *passcodeSvc) FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode strin
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
-			businessError = sharedDto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("passcode invalid"))
+			businessError = errorhandler.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("passcode invalid"))
 			return nil
 		}
 
@@ -199,7 +202,7 @@ func (svc *passcodeSvc) FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode strin
 		}
 
 		if passcode.Edges.User != nil && passcode.Edges.Email.UserID.String() != user.ID.String() {
-			return sharedDto.NewHTTPError(http.StatusForbidden, "email address has been claimed by another user")
+			return errorhandler.NewHTTPError(http.StatusForbidden, "email address has been claimed by another user")
 		}
 		entPc = passcode
 		return nil
