@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/hellohq/hqservice/ms/networth/app/dom"
+	"github.com/hellohq/hqservice/ms/networth/app/saltedge"
 	"github.com/hellohq/hqservice/ms/networth/config"
 	test "github.com/hellohq/hqservice/ms/networth/test/mock/app"
 	testRepo "github.com/hellohq/hqservice/ms/networth/test/mock/dal"
@@ -24,14 +24,14 @@ var (
 
 func TestSeAccountInfoHandler_CreateCustomer(t *testing.T) {
 	tests := []struct {
-		give     *dom.CreateCustomerReq
-		expected *dom.CreateCustomerResp
+		give     *saltedge.CreateCustomerReq
+		expected *saltedge.CreateCustomerResp
 	}{
 		{
-			give: &dom.CreateCustomerReq{
+			give: &saltedge.CreateCustomerReq{
 				Identifier: "Josh",
 			},
-			expected: &dom.CreateCustomerResp{
+			expected: &saltedge.CreateCustomerResp{
 				Identifier: "Josh",
 			},
 		},

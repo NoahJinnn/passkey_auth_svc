@@ -16,7 +16,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hellohq/hqservice/ms/networth/app/dom"
 	"github.com/hellohq/hqservice/ms/networth/config"
 )
 
@@ -27,8 +26,8 @@ const (
 type Ctx = context.Context
 
 type ISeAccountInfoSvc interface {
-	CreateCustomer(ctx Ctx, ccr *dom.CreateCustomerReq) (*dom.CreateCustomerResp, error)
-	CreateConnectSession(ctx Ctx, ccsr *dom.CreateConnectSessionReq) (*dom.CreateConnectSessionResp, error)
+	CreateCustomer(ctx Ctx, ccr *CreateCustomerReq) (*CreateCustomerResp, error)
+	CreateConnectSession(ctx Ctx, ccsr *CreateConnectSessionReq) (*CreateConnectSessionResp, error)
 }
 
 type seSvc struct {
@@ -41,7 +40,7 @@ func NewSeAccountInfoSvc(cfg *config.Config) ISeAccountInfoSvc {
 	}
 }
 
-func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *dom.CreateCustomerReq) (*dom.CreateCustomerResp, error) {
+func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *CreateCustomerReq) (*CreateCustomerResp, error) {
 	url := fmt.Sprintf("%s/customers", API_URL)
 
 	resp, err := doReq("POST", url, ccr, svc.cfg.SaltEdgeConfig)
@@ -50,8 +49,8 @@ func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *dom.CreateCustomerReq
 		return nil, err
 	}
 
-	var result dom.CreateCustomerResp
-	err = json.Unmarshal(resp, &dom.HttpBody{
+	var result CreateCustomerResp
+	err = json.Unmarshal(resp, &HttpBody{
 		Data: &result,
 	})
 	if err != nil {
@@ -62,7 +61,7 @@ func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *dom.CreateCustomerReq
 	return &result, nil
 }
 
-func (svc *seSvc) CreateConnectSession(ctx context.Context, ccsr *dom.CreateConnectSessionReq) (*dom.CreateConnectSessionResp, error) {
+func (svc *seSvc) CreateConnectSession(ctx context.Context, ccsr *CreateConnectSessionReq) (*CreateConnectSessionResp, error) {
 	url := fmt.Sprintf("%s/connect_sessions/create", API_URL)
 
 	resp, err := doReq("POST", url, ccsr, svc.cfg.SaltEdgeConfig)
@@ -71,8 +70,8 @@ func (svc *seSvc) CreateConnectSession(ctx context.Context, ccsr *dom.CreateConn
 		return nil, err
 	}
 
-	var result dom.CreateConnectSessionResp
-	err = json.Unmarshal(resp, &dom.HttpBody{
+	var result CreateConnectSessionResp
+	err = json.Unmarshal(resp, &HttpBody{
 		Data: &result,
 	})
 	if err != nil {
@@ -84,7 +83,7 @@ func (svc *seSvc) CreateConnectSession(ctx context.Context, ccsr *dom.CreateConn
 }
 
 func doReq(method string, url string, reqBody interface{}, cred *config.SaltEdgeConfig) ([]byte, error) {
-	b, err := json.Marshal(dom.HttpBody{
+	b, err := json.Marshal(HttpBody{
 		Data: reqBody,
 	})
 	if err != nil {
