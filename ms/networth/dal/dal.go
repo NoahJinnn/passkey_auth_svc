@@ -5,7 +5,7 @@ import (
 	"context"
 
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/internal/sharedDal"
+	"github.com/hellohq/hqservice/internal/pgsql"
 )
 
 type Ctx = context.Context
@@ -35,5 +35,5 @@ func New(client *ent.Client) *NwRepo {
 }
 
 func (r NwRepo) WithTx(ctx Ctx, exec func(ctx Ctx, client *ent.Client) error) error {
-	return sharedDal.WithTx(ctx, r.Db, exec)
+	return pgsql.WithTx(ctx, r.Db, exec)
 }
