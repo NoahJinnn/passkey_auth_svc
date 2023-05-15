@@ -16,6 +16,17 @@ func NewSeHandler(srv *HttpDeps) *NetworthHandler {
 	return &NetworthHandler{srv}
 }
 
+func (h *NetworthHandler) Customer(c echo.Context) error {
+	cId := c.Param("customer_id")
+
+	resp, err := h.GetSeAccountInfoSvc().GetConnectionByCustomerId(c.Request().Context(), cId)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, resp)
+}
+
 func (h *NetworthHandler) CreateCustomer(c echo.Context) error {
 	var body saltedge.CreateCustomerReq
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {

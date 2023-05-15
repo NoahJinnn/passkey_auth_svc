@@ -59,6 +59,7 @@ func NewServer(appl app.Appl, sessionManager session.Manager, sharedCfg *sharedc
 	)
 	nwHandler := handlers.NewSeHandler(srv)
 	se := nw.Group("/se")
+	se.GET("/customers/:customer_id", nwHandler.Customer)
 	se.POST("/customers", nwHandler.CreateCustomer)
 	se.POST("/connect_session", nwHandler.CreateConnectSession)
 	se.GET("/connections", nwHandler.GetConnectionByCustomerId)
