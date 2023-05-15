@@ -49,3 +49,14 @@ func (h *NetworthHandler) CreateConnectSession(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, resp)
 }
+
+func (h *NetworthHandler) GetConnectionByCustomerId(c echo.Context) error {
+	customerId := c.QueryParam("customer_id")
+
+	resp, err := h.GetSeAccountInfoSvc().GetConnectionByCustomerId(c.Request().Context(), customerId)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, resp)
+}

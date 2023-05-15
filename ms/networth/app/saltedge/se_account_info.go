@@ -28,6 +28,7 @@ type Ctx = context.Context
 type ISeAccountInfoSvc interface {
 	CreateCustomer(ctx Ctx, ccr *CreateCustomerReq) (*CreateCustomerResp, error)
 	CreateConnectSession(ctx Ctx, ccsr *CreateConnectSessionReq) (*CreateConnectSessionResp, error)
+	GetConnectionByCustomerId(ctx Ctx, customerId string) (interface{}, error)
 }
 
 type seSvc struct {
@@ -82,18 +83,41 @@ func (svc *seSvc) CreateConnectSession(ctx context.Context, ccsr *CreateConnectS
 	return &result, nil
 }
 
-func doReq(method string, url string, reqBody interface{}, cred *config.SaltEdgeConfig) ([]byte, error) {
-	b, err := json.Marshal(HttpBody{
-		Data: reqBody,
+func (svc *seSvc) GetConnectionByCustomerId(ctx context.Context, customerId string) (interface{}, error) {
+	url := fmt.Sprintf("%s/connections?customer_id=%s", API_URL, customerId)
+
+	resp, err := doReq("GET", url, nil, svc.cfg.SaltEdgeConfig)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil, err
+	}
+
+	var result interface{}
+	err = json.Unmarshal(resp, &HttpBody{
+		Data: &result,
 	})
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
 	}
 
+	return &result, nil
+}
+
+func doReq(method string, url string, reqBody interface{}, cred *config.SaltEdgeConfig) ([]byte, error) {
+	var b []byte
+	if reqBody != nil {
+		var err error
+		b, err = json.Marshal(HttpBody{
+			Data: reqBody,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(b))
 	if err != nil {
-		fmt.Println("Error:", err)
 		return nil, err
 	}
 
@@ -115,12 +139,11 @@ func doReq(method string, url string, reqBody interface{}, cred *config.SaltEdge
 		return nil, err
 	}
 
-	if resp.StatusCode == http.StatusOK {
-		return body, nil
-	} else {
-		fmt.Println("Error Response:", string(body))
+	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("request failed with status code: %d", resp.StatusCode)
 	}
+
+	return body, nil
 }
 
 func signedHeaders(url, method string, body []byte, cred *config.SaltEdgeConfig) map[string]string {
