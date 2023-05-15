@@ -1,20 +1,9 @@
 package saltedge
 
 import (
-	"bytes"
 	"context"
-	"crypto"
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/sha256"
-	"crypto/x509"
-	"encoding/base64"
 	"encoding/json"
-	"encoding/pem"
 	"fmt"
-	"io"
-	"net/http"
-	"time"
 
 	"github.com/hellohq/hqservice/ms/networth/config"
 )
@@ -36,19 +25,20 @@ type ISeAccountInfoSvc interface {
 }
 
 type seSvc struct {
-	cfg *config.Config
+	client *SeClient
 }
 
 func NewSeAccountInfoSvc(cfg *config.Config) ISeAccountInfoSvc {
+	client := NewSeClient(cfg.SaltEdgeConfig)
 	return &seSvc{
-		cfg: cfg,
+		client: client,
 	}
 }
 
 func (svc *seSvc) Customer(ctx context.Context, customerId string) (*CreateCustomerResp, error) {
 	url := fmt.Sprintf("%s/customers/%s", API_URL, customerId)
 
-	resp, err := doReq("GET", url, nil, svc.cfg.SaltEdgeConfig)
+	resp, err := svc.client.DoReq("GET", url, nil)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
@@ -69,7 +59,7 @@ func (svc *seSvc) Customer(ctx context.Context, customerId string) (*CreateCusto
 func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *CreateCustomerReq) (*CreateCustomerResp, error) {
 	url := fmt.Sprintf("%s/customers", API_URL)
 
-	resp, err := doReq("POST", url, ccr, svc.cfg.SaltEdgeConfig)
+	resp, err := svc.client.DoReq("POST", url, ccr)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
@@ -90,7 +80,7 @@ func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *CreateCustomerReq) (*
 func (svc *seSvc) RemoveCustomer(ctx context.Context, customerId string) (*RemoveCustomerResp, error) {
 	url := fmt.Sprintf("%s/customers/%s", API_URL, customerId)
 
-	resp, err := doReq("DELETE", url, nil, svc.cfg.SaltEdgeConfig)
+	resp, err := svc.client.DoReq("DELETE", url, nil)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
@@ -111,7 +101,7 @@ func (svc *seSvc) RemoveCustomer(ctx context.Context, customerId string) (*Remov
 func (svc *seSvc) CreateConnectSession(ctx context.Context, ccsr *CreateConnectSessionReq) (*CreateConnectSessionResp, error) {
 	url := fmt.Sprintf("%s/connect_sessions/create", API_URL)
 
-	resp, err := doReq("POST", url, ccsr, svc.cfg.SaltEdgeConfig)
+	resp, err := svc.client.DoReq("POST", url, ccsr)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
@@ -132,7 +122,7 @@ func (svc *seSvc) CreateConnectSession(ctx context.Context, ccsr *CreateConnectS
 func (svc *seSvc) GetConnectionByCustomerId(ctx context.Context, customerId string) (interface{}, error) {
 	url := fmt.Sprintf("%s/customers/%s", API_URL, customerId)
 
-	resp, err := doReq("GET", url, nil, svc.cfg.SaltEdgeConfig)
+	resp, err := svc.client.DoReq("GET", url, nil)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
@@ -153,7 +143,7 @@ func (svc *seSvc) GetConnectionByCustomerId(ctx context.Context, customerId stri
 func (svc *seSvc) GetAccountByConnectionId(ctx context.Context, connectionId string) (interface{}, error) {
 	url := fmt.Sprintf("%s/accounts?connection_id=%s", API_URL, connectionId)
 
-	resp, err := doReq("GET", url, nil, svc.cfg.SaltEdgeConfig)
+	resp, err := svc.client.DoReq("GET", url, nil)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
@@ -174,7 +164,7 @@ func (svc *seSvc) GetAccountByConnectionId(ctx context.Context, connectionId str
 func (svc *seSvc) GetTxByConnectionIdAndAccountId(ctx context.Context, connectionId string, accountId string) (interface{}, error) {
 	url := fmt.Sprintf("%s/transactions?connection_id=%s&account_id=%s", API_URL, connectionId, accountId)
 
-	resp, err := doReq("GET", url, nil, svc.cfg.SaltEdgeConfig)
+	resp, err := svc.client.DoReq("GET", url, nil)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
@@ -190,101 +180,4 @@ func (svc *seSvc) GetTxByConnectionIdAndAccountId(ctx context.Context, connectio
 	}
 
 	return &result, nil
-}
-
-func doReq(method string, url string, reqBody interface{}, cred *config.SaltEdgeConfig) ([]byte, error) {
-	var b []byte
-	if reqBody != nil {
-		var err error
-		b, err = json.Marshal(HttpBody{
-			Data: reqBody,
-		})
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	req, err := http.NewRequest(method, url, bytes.NewBuffer(b))
-	if err != nil {
-		return nil, err
-	}
-
-	headers := signedHeaders(req.URL.String(), req.Method, b, cred)
-	req.Header = make(http.Header)
-	for key, value := range headers {
-		req.Header.Set(key, value)
-	}
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("request failed with status code: %d", resp.StatusCode)
-	}
-
-	return body, nil
-}
-
-func signedHeaders(url, method string, body []byte, cred *config.SaltEdgeConfig) map[string]string {
-	var signature string
-	expiresAt := time.Now().Add(60 * time.Second).Unix()
-
-	if cred.PK != "" {
-		pk, err := parsePrivateKey([]byte((cred.PK)))
-		if err != nil {
-			panic(err)
-		}
-
-		payload := fmt.Sprintf("%d|%s|%s|", expiresAt, method, url)
-		if method == "POST" {
-			payload += string(body)
-		}
-
-		signature, err = sign(payload, pk)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	headers := make(map[string]string)
-	headers["Accept"] = "application/json"
-	headers["Content-Type"] = "application/json"
-	headers["App-id"] = cred.AppId
-	headers["Secret"] = cred.Secret
-	headers["Expires-at"] = fmt.Sprintf("%d", expiresAt)
-	headers["Signature"] = signature
-
-	return headers
-}
-
-func parsePrivateKey(rawKey []byte) (*rsa.PrivateKey, error) {
-	block, _ := pem.Decode(rawKey)
-	if block == nil {
-		return nil, fmt.Errorf("failed to parse PEM block containing the key")
-	}
-
-	parsedKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-
-	return parsedKey, nil
-}
-
-func sign(payload string, pk *rsa.PrivateKey) (string, error) {
-	hashed := sha256.Sum256([]byte(payload))
-	signature, err := rsa.SignPKCS1v15(rand.Reader, pk, crypto.SHA256, hashed[:])
-	if err != nil {
-		return "", err
-	}
-	return base64.StdEncoding.EncodeToString(signature), nil
 }
