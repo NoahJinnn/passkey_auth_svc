@@ -60,3 +60,14 @@ func (h *NetworthHandler) GetConnectionByCustomerId(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, resp)
 }
+
+func (h *NetworthHandler) GetAccountByConnectionId(c echo.Context) error {
+	connId := c.QueryParam("connection_id")
+
+	resp, err := h.GetSeAccountInfoSvc().GetAccountByConnectionId(c.Request().Context(), connId)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, resp)
+}

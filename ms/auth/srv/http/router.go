@@ -87,6 +87,7 @@ func NewServer(appl app.Appl, sessionManager session.Manager, sharedCfg *sharedc
 	email.GET("", emailHandler.ListByUser)
 	// email.POST("", emailHandler.Create)
 	email.DELETE("/:id", emailHandler.Delete)
+
 	e.Logger.Fatal(e.Start(cfg.Server.BindAddr.String()))
 	return nil
 }
