@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/hellohq/hqservice/internal/http/sharedDto"
+	"github.com/hellohq/hqservice/internal/http/validator"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
 	"github.com/labstack/echo/v4"
 )
@@ -17,7 +17,7 @@ func (s *integrationSuite) TestUserHandler_Create() {
 		s.T().Skip("skipping test in short mode.")
 	}
 	e := echo.New()
-	e.Validator = sharedDto.NewCustomValidator()
+	e.Validator = validator.NewCustomValidator()
 
 	body := UserCreateBody{Email: "noah.jin@example.com"}
 	bodyJson, err := json.Marshal(body)

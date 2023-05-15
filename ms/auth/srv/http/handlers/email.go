@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/internal/http/errorhandler"
 	"github.com/hellohq/hqservice/internal/http/session"
-	"github.com/hellohq/hqservice/internal/http/sharedDto"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
@@ -41,13 +41,13 @@ func (h *EmailHandler) ListByUser(c echo.Context) error {
 		return err
 	}
 
-	response := make([]*dto.EmailResponse, len(emails))
+	resp := make([]*dto.EmailResponse, len(emails))
 
 	for i := range emails {
-		response[i] = dto.FromEmailModel(emails[i])
+		resp[i] = dto.FromEmailModel(emails[i])
 	}
 
-	return c.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, resp)
 }
 
 func (h *EmailHandler) Delete(c echo.Context) error {
@@ -62,7 +62,7 @@ func (h *EmailHandler) Delete(c echo.Context) error {
 	}
 	emailId, err := uuid.FromString(c.Param("id"))
 	if err != nil {
-		return sharedDto.NewHTTPError(http.StatusBadRequest).SetInternal(err)
+		return errorhandler.NewHTTPError(http.StatusBadRequest).SetInternal(err)
 	}
 
 	err = h.GetEmailSvc().Delete(c.Request().Context(), userId, emailId)

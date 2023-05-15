@@ -52,3 +52,5 @@ Temporary Items
 *.out
 /static/apple-app-site-association
 /static/assetlinks.json
+
+/configs/*

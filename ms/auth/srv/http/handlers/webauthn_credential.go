@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/internal/http/sharedDto"
+	"github.com/hellohq/hqservice/internal/http/errorhandler"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
@@ -32,13 +32,13 @@ func (h *WebauthnHandler) ListCredentials(c echo.Context) error {
 		return fmt.Errorf("failed to get webauthn credentials: %w", err)
 	}
 
-	response := make([]*dto.WebauthnCredentialResponse, len(credentials))
+	resp := make([]*dto.WebauthnCredentialResponse, len(credentials))
 
 	for i := range credentials {
-		response[i] = dto.FromWebauthnCredentialModel(credentials[i])
+		resp[i] = dto.FromWebauthnCredentialModel(credentials[i])
 	}
 
-	return c.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, resp)
 }
 
 func (h *WebauthnHandler) UpdateCredential(c echo.Context) error {
@@ -58,7 +58,7 @@ func (h *WebauthnHandler) UpdateCredential(c echo.Context) error {
 
 	err = (&echo.DefaultBinder{}).BindBody(c, &body)
 	if err != nil {
-		return sharedDto.ToHttpError(err)
+		return errorhandler.ToHttpError(err)
 	}
 
 	return h.GetWebauthnSvc().UpdateCredential(c.Request().Context(), userId, credentialID, body.Name)

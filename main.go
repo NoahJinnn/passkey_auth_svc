@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/hellohq/hqservice/cmd"
-	"github.com/hellohq/hqservice/internal/sharedConfig"
+	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/pkg/def"
 )
 
@@ -12,7 +12,7 @@ func main() {
 		cmd.Log.Fatalf("failed to get defaults: %s", err)
 	}
 
-	cfg, err := sharedConfig.Get()
+	cfg, err := sharedconfig.Get()
 	if err != nil {
 		cmd.Log.Fatalf("failed to init config: %s", err)
 	}

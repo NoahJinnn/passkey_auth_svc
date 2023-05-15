@@ -12,7 +12,7 @@
 package config
 
 import (
-	"github.com/hellohq/hqservice/internal/sharedConfig"
+	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/appcfg"
 	"github.com/sethvargo/go-limiter/httplimit"
@@ -27,24 +27,39 @@ type FlagSets struct {
 //nolint:gochecknoglobals // Config, flags and metrics are global anyway.
 var (
 	fs     FlagSets
-	shared *sharedConfig.Shared
+	shared *sharedconfig.Shared
 	own    = &struct {
 		// Below envs is loaded by Doppler
+		// 	// See https://dashboard.plaid.com/account/keys
+		PlaidClientId appcfg.String `env:"PLAID_CLIENT_ID"`
+		PlaidSecret   appcfg.String `env:"PLAID_SECRET"`
+		// See sandbox, development, product
+		PlaidEnv appcfg.String `env:"PLAID_ENV"`
+		// See https://plaid.com/docs/api/tokens/#link-token-create-request-products
+		PlaidProducts appcfg.String `env:"PLAID_PRODUCTS"`
+		// See https://plaid.com/docs/api/tokens/#link-token-create-request-country-codes
+		PlaidCountryCodes appcfg.String `env:"PLAID_COUNTRY_CODES"`
+		// See https://dashboard.plaid.com/team/api
+		PlaidRedirectUri appcfg.String `env:"PLAID_REDIRECT_URI"`
 
+		SeAppId  appcfg.String `env:"SALTEDGE_APP_ID"`
+		SeSecret appcfg.String `env:"SALTEDGE_SECRET"`
+		SePK     appcfg.String `env:"SALTEDGE_PK"`
 	}{}
 )
 
 type Config struct {
-	Server Server
-	Plaid  *PlaidConfig
+	Server         Server
+	Plaid          *PlaidConfig // TODO: Need to finalize Plaid integration
+	SaltEdgeConfig *SaltEdgeConfig
 }
 
 // Init updates config defaults (from env) and setup subcommands flags.
 //
 // Init must be called once before using this package.
-func Init(sharedCfg *sharedConfig.Shared, flagsets FlagSets) error {
+func Init(sharedCfg *sharedconfig.Shared, flagsets FlagSets) error {
 	shared, fs = sharedCfg, flagsets
-	fromEnv := appcfg.NewFromEnv(sharedConfig.EnvPrefix)
+	fromEnv := appcfg.NewFromEnv(sharedconfig.EnvPrefix)
 	err := appcfg.ProvideStruct(own, fromEnv)
 	if err != nil {
 		return err
@@ -72,6 +87,11 @@ func GetServe() (c *Config, err error) {
 					httplimit.HeaderRetryAfter,
 				},
 			},
+		},
+		SaltEdgeConfig: &SaltEdgeConfig{
+			AppId:  own.SeAppId.Value(&err),
+			Secret: own.SeSecret.Value(&err),
+			PK:     own.SePK.Value(&err),
 		},
 	}
 	if err != nil {

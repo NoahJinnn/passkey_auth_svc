@@ -5,7 +5,7 @@ import (
 	"context"
 
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/internal/sharedDal"
+	"github.com/hellohq/hqservice/internal/pgsql"
 )
 
 // Error names.
@@ -39,7 +39,7 @@ func New(client *ent.Client) *AuthRepo {
 }
 
 func (r AuthRepo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error {
-	return sharedDal.WithTx(ctx, r.Db, exec)
+	return pgsql.WithTx(ctx, r.Db, exec)
 }
 
 func (r AuthRepo) GetUserRepo() IUserRepo {

@@ -10,8 +10,7 @@ import (
 
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/http/session"
-	"github.com/hellohq/hqservice/internal/sharedConfig"
-	"github.com/hellohq/hqservice/internal/sharedDal"
+	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/ms/auth"
 	"github.com/hellohq/hqservice/ms/networth"
 	"github.com/hellohq/hqservice/pkg/concurrent"
@@ -24,7 +23,7 @@ import (
 type Ctx = context.Context
 type embeddedService interface {
 	Name() string
-	Init(cfg *sharedConfig.Shared, serveCmd *cobra.Command) error
+	Init(cfg *sharedconfig.Shared, serveCmd *cobra.Command) error
 	RunServe(ctxStartup, ctxShutdown Ctx, shutdown func(), dbClient *ent.Client, sessionManage session.Manager) error
 }
 
@@ -37,7 +36,7 @@ var (
 	serveShutdownTimeout = appcfg.MustDuration("9s") // `docker stop` use 10s between SIGTERM and SIGKILL
 )
 
-func NewServeCmd(cfg *sharedConfig.Shared) *cobra.Command {
+func NewServeCmd(cfg *sharedconfig.Shared) *cobra.Command {
 	serveCmd := &cobra.Command{
 		Use:   "serve",
 		Short: "Starts ALL embedded microservices",
@@ -52,7 +51,7 @@ func NewServeCmd(cfg *sharedConfig.Shared) *cobra.Command {
 			entClient := InitEntClient(ctxStartupCmdServe, cfg)
 			defer entClient.Close()
 
-			jwkRepo := sharedDal.NewJwkRepo(entClient)
+			jwkRepo := session.NewJwkRepo(entClient)
 			sessionManager := InitSessionManager(ctxStartupCmdServe, cfg, jwkRepo)
 
 			ctxShutdownCmdServe, shutdown := context.WithCancel(context.Background())
@@ -87,7 +86,7 @@ func NewServeCmd(cfg *sharedConfig.Shared) *cobra.Command {
 	return serveCmd
 }
 
-func NewMsCmd(cfg *sharedConfig.Shared, serveCmd *cobra.Command) *cobra.Command {
+func NewMsCmd(cfg *sharedconfig.Shared, serveCmd *cobra.Command) *cobra.Command {
 	msCmd := &cobra.Command{
 		Use:   "ms",
 		Short: "Run given embedded microservice's command",

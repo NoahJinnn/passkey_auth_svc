@@ -8,12 +8,12 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/internal/sharedConfig"
-	"github.com/hellohq/hqservice/internal/sharedDal"
+	"github.com/hellohq/hqservice/internal/pgsql"
+	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
-	test "github.com/hellohq/hqservice/ms/auth/test/dal"
+	test "github.com/hellohq/hqservice/ms/auth/test/mock/dal"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/suite"
 )
@@ -30,17 +30,17 @@ var defaultCfg = config.Config{
 		Timeout: 60000,
 	},
 }
-var sharedCfg = sharedConfig.Shared{
-	Session: sharedConfig.Session{
+var sharedCfg = sharedconfig.Shared{
+	Session: sharedconfig.Session{
 		Lifespan: "1h",
-		Cookie: sharedConfig.Cookie{
+		Cookie: sharedconfig.Cookie{
 			HttpOnly: true,
 			SameSite: "strict",
 			Secure:   true,
 		},
 		EnableAuthTokenHeader: true,
 	},
-	Secrets: sharedConfig.Secrets{
+	Secrets: sharedconfig.Secrets{
 		Keys: []string{"needsToBeAtLeast16Test"},
 	},
 }
@@ -122,7 +122,7 @@ func (s *integrationSuite) SetupSuite() {
 	dialect := "postgres"
 	db, err := test.StartDB("integration_test", dialect)
 	s.NoError(err)
-	entClient := sharedDal.CreateEntClient(ctx, db.DatabaseUrl)
+	entClient := pgsql.CreateEntClient(ctx, db.DatabaseUrl)
 	repo := dal.New(entClient)
 
 	s.repo = repo

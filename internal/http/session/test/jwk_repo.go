@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/internal/sharedDal"
+	"github.com/hellohq/hqservice/internal/http/session"
 )
 
-func NewJwkRepo(init []*ent.Jwk) sharedDal.IJwkRepo {
+func NewJwkRepo(init []*ent.Jwk) session.IJwkRepo {
 	if init == nil {
 		return &jwkPersister{[]*ent.Jwk{}}
 	}
@@ -18,7 +18,7 @@ type jwkPersister struct {
 	keys []*ent.Jwk
 }
 
-func (j *jwkPersister) GetJwk(ctx context.Context, id uint) (*ent.Jwk, error) {
+func (j *jwkPersister) Jwk(ctx context.Context, id uint) (*ent.Jwk, error) {
 	var found *ent.Jwk
 	for _, data := range j.keys {
 		if data.ID == uint(id) {
@@ -29,11 +29,11 @@ func (j *jwkPersister) GetJwk(ctx context.Context, id uint) (*ent.Jwk, error) {
 	return found, nil
 }
 
-func (j *jwkPersister) GetAllJwk(ctx context.Context) ([]*ent.Jwk, error) {
+func (j *jwkPersister) All(ctx context.Context) ([]*ent.Jwk, error) {
 	return j.keys, nil
 }
 
-func (j *jwkPersister) GetLastJwk(ctx context.Context) (*ent.Jwk, error) {
+func (j *jwkPersister) Last(ctx context.Context) (*ent.Jwk, error) {
 	l := len(j.keys)
 	if l == 0 {
 		return nil, nil

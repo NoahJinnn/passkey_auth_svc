@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/hellohq/hqservice/internal/sharedConfig"
+	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/ms/networth/app"
 	"github.com/hellohq/hqservice/ms/networth/config"
 )
@@ -9,5 +9,5 @@ import (
 type HttpDeps struct {
 	app.Appl
 	Cfg       *config.Config
-	SharedCfg *sharedConfig.Shared
+	SharedCfg *sharedconfig.Shared
 }

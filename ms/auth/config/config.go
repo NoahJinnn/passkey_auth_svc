@@ -15,7 +15,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hellohq/hqservice/internal/sharedConfig"
+	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/appcfg"
 	"github.com/sethvargo/go-limiter/httplimit"
@@ -30,7 +30,7 @@ type FlagSets struct {
 //nolint:gochecknoglobals // Config, flags and metrics are global anyway.
 var (
 	fs     FlagSets
-	shared *sharedConfig.Shared
+	shared *sharedconfig.Shared
 	own    = &struct {
 		// Below envs is loaded by Doppler
 
@@ -90,9 +90,9 @@ func saveStaticFileConfig(fileNameContent map[string]string) error {
 // Init updates config defaults (from env) and setup subcommands flags.
 //
 // Init must be called once before using this package.
-func Init(sharedCfg *sharedConfig.Shared, flagsets FlagSets) error {
+func Init(sharedCfg *sharedconfig.Shared, flagsets FlagSets) error {
 	shared, fs = sharedCfg, flagsets
-	fromEnv := appcfg.NewFromEnv(sharedConfig.EnvPrefix)
+	fromEnv := appcfg.NewFromEnv(sharedconfig.EnvPrefix)
 	err := appcfg.ProvideStruct(own, fromEnv)
 	if err != nil {
 		return err
