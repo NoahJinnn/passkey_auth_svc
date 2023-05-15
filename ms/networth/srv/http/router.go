@@ -63,6 +63,7 @@ func NewServer(appl app.Appl, sessionManager session.Manager, sharedCfg *sharedc
 	se.POST("/connect_session", nwHandler.CreateConnectSession)
 	se.GET("/connections", nwHandler.GetConnectionByCustomerId)
 	se.GET("/accounts", nwHandler.GetAccountByConnectionId)
+	se.GET("/transactions", nwHandler.GetTxByConnectionIdAndAccountId)
 
 	e.Logger.Fatal(e.Start(cfg.Server.BindAddr.String()))
 	return nil

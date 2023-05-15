@@ -51,9 +51,9 @@ func (h *NetworthHandler) CreateConnectSession(c echo.Context) error {
 }
 
 func (h *NetworthHandler) GetConnectionByCustomerId(c echo.Context) error {
-	customerId := c.QueryParam("customer_id")
+	cId := c.QueryParam("customer_id")
 
-	resp, err := h.GetSeAccountInfoSvc().GetConnectionByCustomerId(c.Request().Context(), customerId)
+	resp, err := h.GetSeAccountInfoSvc().GetConnectionByCustomerId(c.Request().Context(), cId)
 	if err != nil {
 		return err
 	}
@@ -65,6 +65,18 @@ func (h *NetworthHandler) GetAccountByConnectionId(c echo.Context) error {
 	connId := c.QueryParam("connection_id")
 
 	resp, err := h.GetSeAccountInfoSvc().GetAccountByConnectionId(c.Request().Context(), connId)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, resp)
+}
+
+func (h *NetworthHandler) GetTxByConnectionIdAndAccountId(c echo.Context) error {
+	connId := c.QueryParam("connection_id")
+	aId := c.QueryParam("account_id")
+
+	resp, err := h.GetSeAccountInfoSvc().GetTxByConnectionIdAndAccountId(c.Request().Context(), connId, aId)
 	if err != nil {
 		return err
 	}

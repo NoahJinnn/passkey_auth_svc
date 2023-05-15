@@ -30,6 +30,7 @@ type ISeAccountInfoSvc interface {
 	CreateConnectSession(ctx Ctx, ccsr *CreateConnectSessionReq) (*CreateConnectSessionResp, error)
 	GetConnectionByCustomerId(ctx Ctx, customerId string) (interface{}, error)
 	GetAccountByConnectionId(ctx context.Context, connectionId string) (interface{}, error)
+	GetTxByConnectionIdAndAccountId(ctx context.Context, connectionId string, accountId string) (interface{}, error)
 }
 
 type seSvc struct {
@@ -107,6 +108,27 @@ func (svc *seSvc) GetConnectionByCustomerId(ctx context.Context, customerId stri
 
 func (svc *seSvc) GetAccountByConnectionId(ctx context.Context, connectionId string) (interface{}, error) {
 	url := fmt.Sprintf("%s/accounts?connection_id=%s", API_URL, connectionId)
+
+	resp, err := doReq("GET", url, nil, svc.cfg.SaltEdgeConfig)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil, err
+	}
+
+	var result interface{}
+	err = json.Unmarshal(resp, &HttpBody{
+		Data: &result,
+	})
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+func (svc *seSvc) GetTxByConnectionIdAndAccountId(ctx context.Context, connectionId string, accountId string) (interface{}, error) {
+	url := fmt.Sprintf("%s/transactions?connection_id=%s&account_id=%s", API_URL, connectionId, accountId)
 
 	resp, err := doReq("GET", url, nil, svc.cfg.SaltEdgeConfig)
 	if err != nil {
