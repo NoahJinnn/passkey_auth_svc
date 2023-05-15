@@ -18,6 +18,11 @@ type CreateCustomerResp struct {
 	UpdatedAt  string `json:"updated_at"`
 }
 
+type RemoveCustomerResp struct {
+	Id      string `json:"id"`
+	Deleted bool   `json:"deleted"`
+}
+
 type CreateConnectSessionReq struct {
 	CustomerId           string  `json:"customer_id"`
 	IncludeFakeProviders bool    `json:"include_fake_providers"`

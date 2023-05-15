@@ -14,8 +14,8 @@ import (
 var (
 	defaultCfg = config.Config{
 		SaltEdgeConfig: &config.SaltEdgeConfig{
-			AppId:  "test",
-			Secret: "test",
+			AppId:  "nYOGKlfdJaWf1w3rWvydX4vLjFDq8FBrhFh59yPHYJ0",
+			Secret: "CN7RcowLqx6cPifqaFBEO0xeAvVn-vLf2QicECPwQNM",
 			PK:     "",
 		},
 	}
@@ -24,15 +24,19 @@ var (
 
 func TestSeAccountInfoHandler_CreateCustomer(t *testing.T) {
 	tests := []struct {
-		give     *saltedge.CreateCustomerReq
-		expected *saltedge.CreateCustomerResp
+		give           *saltedge.CreateCustomerReq
+		expectedCreate *saltedge.CreateCustomerResp
+		expectedDelete *saltedge.RemoveCustomerResp
 	}{
 		{
 			give: &saltedge.CreateCustomerReq{
 				Identifier: "Josh",
 			},
-			expected: &saltedge.CreateCustomerResp{
+			expectedCreate: &saltedge.CreateCustomerResp{
 				Identifier: "Josh",
+			},
+			expectedDelete: &saltedge.RemoveCustomerResp{
+				Deleted: true,
 			},
 		},
 	}
@@ -40,11 +44,17 @@ func TestSeAccountInfoHandler_CreateCustomer(t *testing.T) {
 	repo := testRepo.NewRepo(nil)
 	appl := test.NewApp(&defaultCfg, repo)
 	for _, tt := range tests {
-		_, err := appl.GetSeAccountInfoSvc().CreateCustomer(ctx, tt.give)
-		assert.Error(t, err)
+		created, err := appl.GetSeAccountInfoSvc().CreateCustomer(ctx, tt.give)
+		assert.NoError(t, err)
 		// TODO: Need to find a way to pass down test private key
-		// assert.Equal(t, tt.expected.Identifier, actual.Identifier)
+		assert.Equal(t, tt.expectedCreate.Identifier, created.Identifier)
+
+		// Delete customer
+		deleted, err := appl.GetSeAccountInfoSvc().RemoveCustomer(ctx, created.Id)
+		assert.NoError(t, err)
+		assert.Equal(t, tt.expectedDelete.Deleted, deleted.Deleted)
 	}
+
 }
 
 func TestSeAccountInfoHandler_CreateConnectSession(t *testing.T) {
