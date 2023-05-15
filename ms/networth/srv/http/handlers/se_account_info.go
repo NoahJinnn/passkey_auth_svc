@@ -44,6 +44,17 @@ func (h *NetworthHandler) CreateCustomer(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
+func (h *NetworthHandler) DeleteCustomer(c echo.Context) error {
+	cId := c.Param("customer_id")
+
+	resp, err := h.GetSeAccountInfoSvc().RemoveCustomer(c.Request().Context(), cId)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, resp)
+}
+
 func (h *NetworthHandler) CreateConnectSession(c echo.Context) error {
 	var body saltedge.CreateConnectSessionReq
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {

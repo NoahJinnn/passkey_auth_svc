@@ -28,6 +28,7 @@ type Ctx = context.Context
 type ISeAccountInfoSvc interface {
 	Customer(ctx Ctx, customerId string) (*CreateCustomerResp, error)
 	CreateCustomer(ctx Ctx, ccr *CreateCustomerReq) (*CreateCustomerResp, error)
+	RemoveCustomer(ctx context.Context, customerId string) (*RemoveCustomerResp, error)
 	CreateConnectSession(ctx Ctx, ccsr *CreateConnectSessionReq) (*CreateConnectSessionResp, error)
 	GetConnectionByCustomerId(ctx Ctx, customerId string) (interface{}, error)
 	GetAccountByConnectionId(ctx context.Context, connectionId string) (interface{}, error)
@@ -45,7 +46,7 @@ func NewSeAccountInfoSvc(cfg *config.Config) ISeAccountInfoSvc {
 }
 
 func (svc *seSvc) Customer(ctx context.Context, customerId string) (*CreateCustomerResp, error) {
-	url := fmt.Sprintf("%s/connections?customer_id=%s", API_URL, customerId)
+	url := fmt.Sprintf("%s/customers/%s", API_URL, customerId)
 
 	resp, err := doReq("GET", url, nil, svc.cfg.SaltEdgeConfig)
 	if err != nil {
@@ -75,6 +76,27 @@ func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *CreateCustomerReq) (*
 	}
 
 	var result CreateCustomerResp
+	err = json.Unmarshal(resp, &HttpBody{
+		Data: &result,
+	})
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+func (svc *seSvc) RemoveCustomer(ctx context.Context, customerId string) (*RemoveCustomerResp, error) {
+	url := fmt.Sprintf("%s/customers/%s", API_URL, customerId)
+
+	resp, err := doReq("DELETE", url, nil, svc.cfg.SaltEdgeConfig)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil, err
+	}
+
+	var result RemoveCustomerResp
 	err = json.Unmarshal(resp, &HttpBody{
 		Data: &result,
 	})
