@@ -42,7 +42,7 @@ func TestSeAccountInfoHandler_CreateCustomer(t *testing.T) {
 	for _, tt := range tests {
 		_, err := appl.GetSeAccountInfoSvc().CreateCustomer(ctx, tt.give)
 		assert.Error(t, err)
-		// TODO: Need to find a way to pass down test key
+		// TODO: Need to find a way to pass down test private key
 		// assert.Equal(t, tt.expected.Identifier, actual.Identifier)
 	}
 }
