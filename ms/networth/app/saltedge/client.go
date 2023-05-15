@@ -64,6 +64,7 @@ func (cl *SeClient) DoReq(method string, url string, reqBody interface{}) ([]byt
 	}
 
 	if resp.StatusCode != http.StatusOK {
+		fmt.Println("Error:", string(body))
 		return nil, fmt.Errorf("request failed with status code: %d", resp.StatusCode)
 	}
 
@@ -73,6 +74,7 @@ func (cl *SeClient) DoReq(method string, url string, reqBody interface{}) ([]byt
 func (cl *SeClient) SignedHeaders(url, method string, body []byte) map[string]string {
 	var signature string
 	expiresAt := time.Now().Add(60 * time.Second).Unix()
+	headers := make(map[string]string)
 
 	if cl.cred.PK != "" {
 		pk, err := parsePrivateKey([]byte((cl.cred.PK)))
@@ -89,15 +91,14 @@ func (cl *SeClient) SignedHeaders(url, method string, body []byte) map[string]st
 		if err != nil {
 			panic(err)
 		}
+		headers["Signature"] = signature
 	}
 
-	headers := make(map[string]string)
 	headers["Accept"] = "application/json"
 	headers["Content-Type"] = "application/json"
 	headers["App-id"] = cl.cred.AppId
 	headers["Secret"] = cl.cred.Secret
 	headers["Expires-at"] = fmt.Sprintf("%d", expiresAt)
-	headers["Signature"] = signature
 
 	return headers
 }
