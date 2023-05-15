@@ -6,7 +6,7 @@ import (
 
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/http/session"
-	"github.com/hellohq/hqservice/internal/sharedConfig"
+	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/ms/networth/app"
 	"github.com/hellohq/hqservice/ms/networth/config"
 	"github.com/hellohq/hqservice/ms/networth/dal"
@@ -22,7 +22,7 @@ type Ctx = context.Context
 // Service implements main.embeddedService interface.
 type Service struct {
 	cfg            *config.Config
-	sharedCfg      *sharedConfig.Shared
+	sharedCfg      *sharedconfig.Shared
 	sessionManager session.Manager
 	appl           app.App
 	repo           *dal.NwRepo
@@ -32,7 +32,7 @@ type Service struct {
 func (s *Service) Name() string { return "networth" }
 
 // Init implements main.embeddedService interface.
-func (s *Service) Init(sharedCfg *sharedConfig.Shared, serveCmd *cobra.Command) error {
+func (s *Service) Init(sharedCfg *sharedconfig.Shared, serveCmd *cobra.Command) error {
 	s.sharedCfg = sharedCfg
 	return config.Init(sharedCfg, config.FlagSets{
 		Serve: serveCmd.Flags(),

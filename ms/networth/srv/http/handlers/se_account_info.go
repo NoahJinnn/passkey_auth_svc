@@ -3,8 +3,8 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/hellohq/hqservice/internal/http/sharedDto"
-	"github.com/hellohq/hqservice/ms/networth/app/dom"
+	"github.com/hellohq/hqservice/internal/http/errorhandler"
+	"github.com/hellohq/hqservice/ms/networth/app/saltedge"
 	"github.com/labstack/echo/v4"
 )
 
@@ -17,13 +17,13 @@ func NewSeHandler(srv *HttpDeps) *NetworthHandler {
 }
 
 func (h *NetworthHandler) CreateCustomer(c echo.Context) error {
-	var body dom.CreateCustomerReq
+	var body saltedge.CreateCustomerReq
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		return sharedDto.ToHttpError(err)
+		return errorhandler.ToHttpError(err)
 	}
 
 	if err := c.Validate(body); err != nil {
-		return sharedDto.ToHttpError(err)
+		return errorhandler.ToHttpError(err)
 	}
 	resp, err := h.GetSeAccountInfoSvc().CreateCustomer(c.Request().Context(), &body)
 	if err != nil {
@@ -34,13 +34,13 @@ func (h *NetworthHandler) CreateCustomer(c echo.Context) error {
 }
 
 func (h *NetworthHandler) CreateConnectSession(c echo.Context) error {
-	var body dom.CreateConnectSessionReq
+	var body saltedge.CreateConnectSessionReq
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		return sharedDto.ToHttpError(err)
+		return errorhandler.ToHttpError(err)
 	}
 
 	if err := c.Validate(body); err != nil {
-		return sharedDto.ToHttpError(err)
+		return errorhandler.ToHttpError(err)
 	}
 	resp, err := h.GetSeAccountInfoSvc().CreateConnectSession(c.Request().Context(), &body)
 	if err != nil {

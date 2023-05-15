@@ -5,7 +5,7 @@
 package app
 
 import (
-	"github.com/hellohq/hqservice/ms/networth/app/svcs"
+	"github.com/hellohq/hqservice/ms/networth/app/saltedge"
 	"github.com/hellohq/hqservice/ms/networth/config"
 	"github.com/hellohq/hqservice/ms/networth/dal"
 )
@@ -13,7 +13,7 @@ import (
 // Appl provides application features (use cases) service.
 type Appl interface {
 	// GetUserSvc() svcs.IUserSvc
-	GetSeAccountInfoSvc() svcs.ISeAccountInfoSvc
+	GetSeAccountInfoSvc() saltedge.ISeAccountInfoSvc
 }
 
 // App implements interface Appl.
@@ -35,6 +35,6 @@ func New(cfg *config.Config, repo *dal.NwRepo) App {
 // 	return svcs.NewUserSvc(a.cfg, a.repo)
 // }
 
-func (a App) GetSeAccountInfoSvc() svcs.ISeAccountInfoSvc {
-	return svcs.NewSeAccountInfoSvc(a.cfg)
+func (a App) GetSeAccountInfoSvc() saltedge.ISeAccountInfoSvc {
+	return saltedge.NewSeAccountInfoSvc(a.cfg)
 }

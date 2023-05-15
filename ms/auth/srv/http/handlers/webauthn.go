@@ -7,8 +7,8 @@ import (
 
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/internal/http/errorhandler"
 	"github.com/hellohq/hqservice/internal/http/session"
-	"github.com/hellohq/hqservice/internal/http/sharedDto"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
@@ -25,8 +25,8 @@ func NewWebauthnHandler(srv *HttpDeps, sessionManager session.Manager) *Webauthn
 	}
 }
 
-// BeginRegistration returns credential creation options for the WebAuthnAPI. It expects a valid session JWT in the request.
-func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
+// InitRegistration returns credential creation options for the WebAuthnAPI. It expects a valid session JWT in the request.
+func (h *WebauthnHandler) InitRegistration(c echo.Context) error {
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("failed to cast session object")
@@ -37,7 +37,7 @@ func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
 		return fmt.Errorf("failed to parse userId from JWT subject:%w", err)
 	}
 
-	options, err := h.GetWebauthnSvc().BeginRegistration(c.Request().Context(), uId)
+	options, err := h.GetWebauthnSvc().InitRegistration(c.Request().Context(), uId)
 	if err != nil {
 		return fmt.Errorf("failed to create webauthn creation options: %w", err)
 	}
@@ -59,7 +59,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 		if ok {
 			fmt.Printf("ParseCredentialCreationResponse err: %+v\n", errT.DevInfo)
 		}
-		return sharedDto.NewHTTPError(http.StatusBadRequest, err.Error())
+		return errorhandler.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	credentialId, userId, err := h.GetWebauthnSvc().FinishRegistration(
@@ -68,7 +68,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 		sessionToken.Subject(),
 	)
 	if err != nil {
-		return sharedDto.NewHTTPError(http.StatusBadRequest, err.Error())
+		return errorhandler.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]string{"credential_id": credentialId, "user_id": userId})
 }
@@ -77,17 +77,17 @@ type BeginAuthenticationBody struct {
 	UserID *string `json:"user_id" validate:"uuid4"`
 }
 
-// BeginLogin returns credential assertion options for the WebAuthnAPI.
-func (h *WebauthnHandler) BeginLogin(c echo.Context) error {
+// InitLogin returns credential assertion options for the WebAuthnAPI.
+func (h *WebauthnHandler) InitLogin(c echo.Context) error {
 	var request BeginAuthenticationBody
 
 	if err := (&echo.DefaultBinder{}).BindBody(c, &request); err != nil {
-		return sharedDto.ToHttpError(err)
+		return errorhandler.ToHttpError(err)
 	}
 
-	options, err := h.GetWebauthnSvc().BeginLogin(c.Request().Context(), request.UserID)
+	options, err := h.GetWebauthnSvc().InitLogin(c.Request().Context(), request.UserID)
 	if err != nil {
-		return sharedDto.ToHttpError(err)
+		return errorhandler.ToHttpError(err)
 	}
 
 	return c.JSON(http.StatusOK, options)
@@ -101,12 +101,12 @@ func (h *WebauthnHandler) FinishLogin(c echo.Context) error {
 		if ok {
 			fmt.Printf("ParseCredentialRequestResponse err: %+v\n", errT.DevInfo)
 		}
-		return sharedDto.NewHTTPError(http.StatusBadRequest, err.Error())
+		return errorhandler.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	credentialId, userId, err := h.GetWebauthnSvc().FinishLogin(c.Request().Context(), request)
 	if err != nil {
-		return sharedDto.ToHttpError(err)
+		return errorhandler.ToHttpError(err)
 	}
 
 	token, err := h.sessionManager.GenerateJWT(userId)
