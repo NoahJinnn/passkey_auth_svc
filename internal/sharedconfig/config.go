@@ -75,7 +75,7 @@ var shared = &struct {
 	AuthAddrPort:    appcfg.MustPort(strconv.Itoa(AuthPort)),
 
 	NetworthAddrHost:    appcfg.MustNotEmptyString(def.Hostname),
-	NetworthAddrHostInt: appcfg.MustNotEmptyString(def.Hostname),
+	NetworthAddrHostInt: appcfg.MustNotEmptyString(def.HostnameInt),
 	NetworthAddrPort:    appcfg.MustPort(strconv.Itoa(NetworthPort)),
 
 	PostgresUser:     appcfg.MustNotEmptyString("auth"),
@@ -104,6 +104,7 @@ func Get() (*Shared, error) {
 		NetworthAddrHost:    shared.NetworthAddrHost,
 		NetworthAddrHostInt: shared.NetworthAddrHostInt,
 		NetworthAddrPort:    shared.NetworthAddrPort,
+
 		Postgres: NewPostgresConfig(pqx.Config{
 			Host:   shared.PostgresAddrHost.Value(&err),
 			Port:   shared.PostgresAddrPort.Value(&err),

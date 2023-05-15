@@ -30,7 +30,7 @@ func NewServer(appl app.Appl, sessionManager session.Manager, sharedCfg *sharedc
 	}
 	e := echo.New()
 	e.File("/.well-known/apple-app-site-association", "static/apple-app-site-association")
-	e.File("/.well-known/assetlinks.json", "static/assetlinks.json")
+	e.File("/.well-known/assetlinks.jsons", "static/assetlinks.json")
 	e.HideBanner = true
 
 	// TODO: Turn Debug to "false" in production
@@ -50,18 +50,6 @@ func NewServer(appl app.Appl, sessionManager session.Manager, sharedCfg *sharedc
 	}
 
 	e.Validator = validator.NewCustomValidator()
-	// jwkManager, err := session.NewDefaultManager(cfg.Secrets.Keys, repo.GetJwkRepo())
-	// if err != nil {
-	// 	panic(fmt.Errorf("failed to create jwk manager: %w", err))
-	// }
-	// err = jwkManager.InitJwk()
-	// if err != nil {
-	// 	panic(fmt.Errorf("failed to create jwks: %w", err))
-	// }
-	// sessionManager, err := session.NewManager(jwkManager, cfg.Session)
-	// if err != nil {
-	// 	panic(fmt.Errorf("failed to create session generator: %w", err))
-	// }
 
 	healthHandler := health.NewHealthHandler()
 	e.GET("/ready", healthHandler.Ready)
@@ -99,7 +87,6 @@ func NewServer(appl app.Appl, sessionManager session.Manager, sharedCfg *sharedc
 	email.GET("", emailHandler.ListByUser)
 	// email.POST("", emailHandler.Create)
 	email.DELETE("/:id", emailHandler.Delete)
-
 	e.Logger.Fatal(e.Start(cfg.Server.BindAddr.String()))
 	return nil
 }
