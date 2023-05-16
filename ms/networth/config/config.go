@@ -45,13 +45,18 @@ var (
 		SeAppId  appcfg.String `env:"SALTEDGE_APP_ID"`
 		SeSecret appcfg.String `env:"SALTEDGE_SECRET"`
 		SePK     appcfg.String `env:"SALTEDGE_PK"`
+
+		FvAppId    appcfg.String `env:"FINVERSE_APP_ID"`
+		FvClientId appcfg.String `env:"FINVERSE_CLIENT_ID"`
+		FvSecret   appcfg.String `env:"FINVERSE_SECRET"`
 	}{}
 )
 
 type Config struct {
-	Server         Server
-	Plaid          *PlaidConfig // TODO: Need to finalize Plaid integration
-	SaltEdgeConfig *SaltEdgeConfig
+	Server   Server
+	Plaid    *PlaidConfig // TODO: Need to finalize Plaid integration
+	SaltEdge *SaltEdge
+	Finverse *Finverse
 }
 
 // Init updates config defaults (from env) and setup subcommands flags.
@@ -88,10 +93,15 @@ func GetServe() (c *Config, err error) {
 				},
 			},
 		},
-		SaltEdgeConfig: &SaltEdgeConfig{
+		SaltEdge: &SaltEdge{
 			AppId:  own.SeAppId.Value(&err),
 			Secret: own.SeSecret.Value(&err),
 			PK:     own.SePK.Value(&err),
+		},
+		Finverse: &Finverse{
+			AppId:    own.FvAppId.Value(&err),
+			ClientId: own.FvClientId.Value(&err),
+			Secret:   own.FvSecret.Value(&err),
 		},
 	}
 	if err != nil {

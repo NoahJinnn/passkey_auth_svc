@@ -51,6 +51,12 @@ func (r *Req) OverrideQ(q map[string][]string) {
 }
 
 func (r *Req) Send(method string, path string, body []byte) (*Resp, error) {
+	if r.Request == nil {
+		_, err := r.PrepareReq(method, path, body)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to prepare request")
+		}
+	}
 	client := &http.Client{}
 	resp, err := client.Do(r.Request)
 	if err != nil {

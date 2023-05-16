@@ -29,7 +29,7 @@ var (
 				},
 			},
 		},
-		SaltEdgeConfig: &SaltEdgeConfig{
+		SaltEdge: &SaltEdge{
 			AppId:  "test",
 			Secret: "test",
 			PK:     "test",

@@ -5,6 +5,7 @@
 package app
 
 import (
+	"github.com/hellohq/hqservice/ms/networth/app/finverse"
 	"github.com/hellohq/hqservice/ms/networth/app/saltedge"
 	"github.com/hellohq/hqservice/ms/networth/config"
 	"github.com/hellohq/hqservice/ms/networth/dal"
@@ -12,7 +13,7 @@ import (
 
 // Appl provides application features (use cases) service.
 type Appl interface {
-	// GetUserSvc() svcs.IUserSvc
+	GetFvSvc() finverse.IFvAuthSvc
 	GetSeAccountInfoSvc() saltedge.ISeAccountInfoSvc
 }
 
@@ -33,10 +34,6 @@ func New(cfg *config.Config, repo *dal.NwRepo) App {
 		seAccountInfoSvc: seAccountInfoSvc,
 	}
 }
-
-// func (a App) GetUserSvc() svcs.IUserSvc {
-// 	return svcs.NewUserSvc(a.cfg, a.repo)
-// }
 
 func (a App) GetSeAccountInfoSvc() saltedge.ISeAccountInfoSvc {
 	return a.seAccountInfoSvc
