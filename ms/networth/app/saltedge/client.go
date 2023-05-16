@@ -1,7 +1,6 @@
 package saltedge
 
 import (
-	"bytes"
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
@@ -11,24 +10,35 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
-	"io"
-	"net/http"
 	"time"
 
 	"github.com/hellohq/hqservice/ms/networth/config"
+	"github.com/hellohq/hqservice/pkg/httpx"
 )
 
 type SeClient struct {
 	cred *config.SaltEdgeConfig
+	req  *httpx.Req
 }
 
 func NewSeClient(cred *config.SaltEdgeConfig) *SeClient {
+
+	req := httpx.NewReq("https://www.saltedge.com/api/v5")
+	req.SetHeader("Accept", "application/json")
+	req.SetHeader("Content-Type", "application/json")
+	req.SetHeader("App-id", cred.AppId)
+	req.SetHeader("Secret", cred.Secret)
+
 	return &SeClient{
 		cred: cred,
+		req:  req,
 	}
 }
 
-func (cl *SeClient) DoReq(method string, url string, reqBody interface{}) ([]byte, error) {
+func (cl *SeClient) DoReq(method string, url string, query map[string][]string, reqBody interface{}) ([]byte, error) {
+
+	cl.req.OverrideQ(query)
+
 	var b []byte
 	if reqBody != nil {
 		var err error
@@ -40,35 +50,18 @@ func (cl *SeClient) DoReq(method string, url string, reqBody interface{}) ([]byt
 		}
 	}
 
-	req, err := http.NewRequest(method, url, bytes.NewBuffer(b))
+	httpReq, err := cl.req.PrepareReq(method, url, b)
 	if err != nil {
 		return nil, err
 	}
 
-	headers := cl.SignedHeaders(req.URL.String(), req.Method, b)
-	req.Header = make(http.Header)
-	for key, value := range headers {
-		req.Header.Set(key, value)
-	}
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
+	cl.SignedHeaders(httpReq.URL.String(), method, b)
+	resp, err := cl.req.Send(method, url, b)
 	if err != nil {
 		return nil, err
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		fmt.Println("Error:", string(body))
-		return nil, fmt.Errorf("request failed with status code: %d", resp.StatusCode)
-	}
-
-	return body, nil
+	return resp.Body(), nil
 }
 
 func (cl *SeClient) SignedHeaders(url, method string, body []byte) map[string]string {
@@ -94,11 +87,8 @@ func (cl *SeClient) SignedHeaders(url, method string, body []byte) map[string]st
 		headers["Signature"] = signature
 	}
 
-	headers["Accept"] = "application/json"
-	headers["Content-Type"] = "application/json"
-	headers["App-id"] = cl.cred.AppId
-	headers["Secret"] = cl.cred.Secret
-	headers["Expires-at"] = fmt.Sprintf("%d", expiresAt)
+	cl.req.SetHeader("Expires-at", fmt.Sprintf("%d", expiresAt))
+	cl.req.SetHeader("Signature", signature)
 
 	return headers
 }

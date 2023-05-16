@@ -4,12 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/hellohq/hqservice/ms/networth/config"
-)
-
-const (
-	API_URL = "https://www.saltedge.com/api/v5"
 )
 
 type Ctx = context.Context
@@ -36,9 +33,9 @@ func NewSeAccountInfoSvc(cfg *config.Config) ISeAccountInfoSvc {
 }
 
 func (svc *seSvc) Customer(ctx context.Context, customerId string) (*Customer, error) {
-	url := fmt.Sprintf("%s/customers/%s", API_URL, customerId)
+	path := fmt.Sprintf("/customers/%s", customerId)
 
-	resp, err := svc.client.DoReq("GET", url, nil)
+	resp, err := svc.client.DoReq(http.MethodGet, path, nil, nil)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
@@ -57,9 +54,7 @@ func (svc *seSvc) Customer(ctx context.Context, customerId string) (*Customer, e
 }
 
 func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *CreateCustomer) (*Customer, error) {
-	url := fmt.Sprintf("%s/customers", API_URL)
-
-	resp, err := svc.client.DoReq("POST", url, ccr)
+	resp, err := svc.client.DoReq(http.MethodPost, "/customers", nil, ccr)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
@@ -78,9 +73,9 @@ func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *CreateCustomer) (*Cus
 }
 
 func (svc *seSvc) RemoveCustomer(ctx context.Context, customerId string) (*RemoveCustomer, error) {
-	url := fmt.Sprintf("%s/customers/%s", API_URL, customerId)
+	path := fmt.Sprintf("/customers/%s", customerId)
 
-	resp, err := svc.client.DoReq("DELETE", url, nil)
+	resp, err := svc.client.DoReq(http.MethodDelete, path, nil, nil)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
@@ -99,9 +94,7 @@ func (svc *seSvc) RemoveCustomer(ctx context.Context, customerId string) (*Remov
 }
 
 func (svc *seSvc) CreateConnectSession(ctx context.Context, ccsr *CreateConnectSession) (*ConnectSession, error) {
-	url := fmt.Sprintf("%s/connect_sessions/create", API_URL)
-
-	resp, err := svc.client.DoReq("POST", url, ccsr)
+	resp, err := svc.client.DoReq(http.MethodPost, "/connect_sessions/create", nil, ccsr)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
@@ -120,9 +113,9 @@ func (svc *seSvc) CreateConnectSession(ctx context.Context, ccsr *CreateConnectS
 }
 
 func (svc *seSvc) GetConnectionByCustomerId(ctx context.Context, customerId string) (interface{}, error) {
-	url := fmt.Sprintf("%s/customers/%s", API_URL, customerId)
+	path := fmt.Sprintf("/customers/%s", customerId)
 
-	resp, err := svc.client.DoReq("GET", url, nil)
+	resp, err := svc.client.DoReq(http.MethodGet, path, nil, nil)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
@@ -141,9 +134,9 @@ func (svc *seSvc) GetConnectionByCustomerId(ctx context.Context, customerId stri
 }
 
 func (svc *seSvc) GetAccountByConnectionId(ctx context.Context, connectionId string) (interface{}, error) {
-	url := fmt.Sprintf("%s/accounts?connection_id=%s", API_URL, connectionId)
-
-	resp, err := svc.client.DoReq("GET", url, nil)
+	resp, err := svc.client.DoReq(http.MethodGet, "/accounts", map[string][]string{
+		"connection_id": {connectionId},
+	}, nil)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
@@ -162,9 +155,10 @@ func (svc *seSvc) GetAccountByConnectionId(ctx context.Context, connectionId str
 }
 
 func (svc *seSvc) GetTxByConnectionIdAndAccountId(ctx context.Context, connectionId string, accountId string) (interface{}, error) {
-	url := fmt.Sprintf("%s/transactions?connection_id=%s&account_id=%s", API_URL, connectionId, accountId)
-
-	resp, err := svc.client.DoReq("GET", url, nil)
+	resp, err := svc.client.DoReq(http.MethodGet, "/transactions", map[string][]string{
+		"connection_id": {connectionId},
+		"account_id":    {accountId},
+	}, nil)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return nil, err
