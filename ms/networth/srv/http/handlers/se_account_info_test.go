@@ -22,17 +22,17 @@ var (
 	ctx = context.Background()
 )
 
-func TestSeAccountInfoHandler_CreateCustomer(t *testing.T) {
+func TestSeAccountInfoHandler_Create_DeleteCustomer(t *testing.T) {
 	tests := []struct {
 		give           *saltedge.CreateCustomerReq
-		expectedCreate *saltedge.CreateCustomerResp
+		expectedCreate *saltedge.CustomerResp
 		expectedDelete *saltedge.RemoveCustomerResp
 	}{
 		{
 			give: &saltedge.CreateCustomerReq{
 				Identifier: "Josh",
 			},
-			expectedCreate: &saltedge.CreateCustomerResp{
+			expectedCreate: &saltedge.CustomerResp{
 				Identifier: "Josh",
 			},
 			expectedDelete: &saltedge.RemoveCustomerResp{
@@ -46,7 +46,6 @@ func TestSeAccountInfoHandler_CreateCustomer(t *testing.T) {
 	for _, tt := range tests {
 		created, err := appl.GetSeAccountInfoSvc().CreateCustomer(ctx, tt.give)
 		assert.NoError(t, err)
-		// TODO: Need to find a way to pass down test private key
 		assert.Equal(t, tt.expectedCreate.Identifier, created.Identifier)
 
 		// Delete customer
@@ -57,6 +56,30 @@ func TestSeAccountInfoHandler_CreateCustomer(t *testing.T) {
 
 }
 
-func TestSeAccountInfoHandler_CreateConnectSession(t *testing.T) {
+func TestSeAccountInfoHandler_ShowCustomer_CreateConnectSession(t *testing.T) {
+	tests := struct {
+		give *saltedge.CreateConnectSessionReq
+	}{
+		give: &saltedge.CreateConnectSessionReq{
+			CustomerId:           "1012221102530763642",
+			IncludeFakeProviders: true,
+			Consent: saltedge.Consent{
+				Scopes: []string{"account_details", "transactions_details"},
+			},
+			Attempt: saltedge.Attempt{
+				ReturnTo: "http://example.com/",
+			},
+		},
+	}
+	repo := testRepo.NewRepo(nil)
+	appl := test.NewApp(&defaultCfg, repo)
 
+	c, err := appl.GetSeAccountInfoSvc().Customer(ctx, tests.give.CustomerId)
+	assert.NoError(t, err)
+	assert.Equal(t, tests.give.CustomerId, c.Id)
+
+	actual, err := appl.GetSeAccountInfoSvc().CreateConnectSession(ctx, tests.give)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, actual.ConnectUrl)
+	assert.NotEmpty(t, actual.ExpiresAt)
 }
