@@ -18,16 +18,19 @@ type Appl interface {
 
 // App implements interface Appl.
 type App struct {
-	cfg  *config.Config
-	repo *dal.NwRepo
+	cfg              *config.Config
+	repo             *dal.NwRepo
+	seAccountInfoSvc saltedge.ISeAccountInfoSvc
 }
 
 // New creates and returns new App.
 func New(cfg *config.Config, repo *dal.NwRepo) App {
+	seAccountInfoSvc := saltedge.NewSeAccountInfoSvc(cfg)
 
 	return App{
-		cfg:  cfg,
-		repo: repo,
+		cfg:              cfg,
+		repo:             repo,
+		seAccountInfoSvc: seAccountInfoSvc,
 	}
 }
 
@@ -36,5 +39,5 @@ func New(cfg *config.Config, repo *dal.NwRepo) App {
 // }
 
 func (a App) GetSeAccountInfoSvc() saltedge.ISeAccountInfoSvc {
-	return saltedge.NewSeAccountInfoSvc(a.cfg)
+	return a.seAccountInfoSvc
 }

@@ -9,7 +9,7 @@ type CreateCustomerReq struct {
 	Identifier string `json:"identifier"`
 }
 
-type CreateCustomerResp struct {
+type CustomerResp struct {
 	Id         string `json:"id"`
 	Identifier string `json:"identifier"`
 	Secret     string `json:"secret"`
