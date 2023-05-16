@@ -27,15 +27,16 @@ type Appl interface {
 
 // App implements interface Appl.
 type App struct {
-	cfg  *config.Config
-	repo *dal.AuthRepo
-	wa   *webauthn.WebAuthn
+	waSvc       wa.IWebauthnSvc
+	userSvc     user.IUserSvc
+	passcodeSvc passcode.IPasscodeSvc
+	emailSvc    email.IEmailSvc
 }
 
 // New creates and returns new App.
 func New(cfg *config.Config, repo *dal.AuthRepo) App {
 	f := false
-	wa, err := webauthn.New(&webauthn.Config{
+	waClient, err := webauthn.New(&webauthn.Config{
 		RPDisplayName:         cfg.Webauthn.RelyingParty.DisplayName,
 		RPID:                  cfg.Webauthn.RelyingParty.Id,
 		RPOrigin:              cfg.Webauthn.RelyingParty.Origin,
@@ -50,28 +51,34 @@ func New(cfg *config.Config, repo *dal.AuthRepo) App {
 		Debug:   false,
 	})
 
+	waSvc := wa.NewWebAuthn(cfg, repo, waClient)
+	userSvc := user.NewUserSvc(cfg, repo)
+	passcodeSvc := passcode.NewPasscodeSvc(cfg, repo)
+	emailSvc := email.NewEmailSvc(repo)
+
 	if err != nil {
 		panic(fmt.Errorf("failed to create webauthn instance: %w", err))
 	}
 	return App{
-		cfg:  cfg,
-		repo: repo,
-		wa:   wa,
+		waSvc:       waSvc,
+		userSvc:     userSvc,
+		passcodeSvc: passcodeSvc,
+		emailSvc:    emailSvc,
 	}
 }
 
 func (a App) GetWebauthnSvc() wa.IWebauthnSvc {
-	return wa.NewWebAuthn(a.cfg, a.repo, a.wa)
+	return a.waSvc
 }
 
 func (a App) GetUserSvc() user.IUserSvc {
-	return user.NewUserSvc(a.cfg, a.repo)
+	return a.userSvc
 }
 
 func (a App) GetPasscodeSvc() passcode.IPasscodeSvc {
-	return passcode.NewPasscodeSvc(a.cfg, a.repo)
+	return a.passcodeSvc
 }
 
 func (a App) GetEmailSvc() email.IEmailSvc {
-	return email.NewEmailSvc(a.repo)
+	return a.emailSvc
 }

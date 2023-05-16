@@ -31,8 +31,8 @@ type IWebauthnSvc interface {
 }
 
 type webauthnSvc struct {
-	repo dal.IAuthRepo
-	wa   *webauthn.WebAuthn
+	repo     dal.IAuthRepo
+	waClient *webauthn.WebAuthn
 }
 
 var (
@@ -40,10 +40,10 @@ var (
 	WebauthnOperationAuthentication string = "authentication"
 )
 
-func NewWebAuthn(cfg *config.Config, repo dal.IAuthRepo, wa *webauthn.WebAuthn) IWebauthnSvc {
+func NewWebAuthn(cfg *config.Config, repo dal.IAuthRepo, waClient *webauthn.WebAuthn) IWebauthnSvc {
 	return &webauthnSvc{
-		repo: repo,
-		wa:   wa,
+		repo:     repo,
+		waClient: waClient,
 	}
 }
 
@@ -55,7 +55,7 @@ func (svc *webauthnSvc) InitRegistration(ctx Ctx, userId uuid.UUID) (*protocol.C
 	}
 
 	t := true
-	options, sessionData, err := svc.wa.BeginRegistration(
+	options, sessionData, err := svc.waClient.BeginRegistration(
 		webauthnUser,
 		webauthn.WithAuthenticatorSelection(protocol.AuthenticatorSelection{
 			RequireResidentKey: &t,
@@ -109,7 +109,7 @@ func (svc *webauthnSvc) FinishRegistration(ctx Ctx, request *protocol.ParsedCred
 			return errorhandler.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("user not found"))
 		}
 
-		credential, err := svc.wa.CreateCredential(webauthnUser, *WebauthnSessionDataFromModel(sessionData), request)
+		credential, err := svc.waClient.CreateCredential(webauthnUser, *WebauthnSessionDataFromModel(sessionData), request)
 		if err != nil {
 			errorMessage := "failed to validate attestation"
 			errorStatus := http.StatusBadRequest
@@ -173,7 +173,7 @@ func (svc *webauthnSvc) InitLogin(ctx Ctx, reqUserId *string) (*protocol.Credent
 		}
 
 		if len(webauthnUser.WebAuthnCredentials()) > 0 {
-			options, sessionData, err = svc.wa.BeginLogin(webauthnUser, webauthn.WithUserVerification(protocol.VerificationRequired))
+			options, sessionData, err = svc.waClient.BeginLogin(webauthnUser, webauthn.WithUserVerification(protocol.VerificationRequired))
 			if err != nil {
 				return nil, fmt.Errorf("failed to create webauthn assertion options: %w", err)
 			}
@@ -182,7 +182,7 @@ func (svc *webauthnSvc) InitLogin(ctx Ctx, reqUserId *string) (*protocol.Credent
 
 	if options == nil && sessionData == nil {
 		var err error
-		options, sessionData, err = svc.wa.BeginDiscoverableLogin(webauthn.WithUserVerification(protocol.VerificationRequired))
+		options, sessionData, err = svc.waClient.BeginDiscoverableLogin(webauthn.WithUserVerification(protocol.VerificationRequired))
 		if err != nil {
 			return nil, fmt.Errorf("failed to create webauthn assertion options for discoverable login: %w", err)
 		}
@@ -349,7 +349,7 @@ func (svc *webauthnSvc) getCredentialFromLoginSession(ctx Ctx, request *protocol
 			return nil, nil, errorhandler.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
 		}
 
-		credential, err = svc.wa.ValidateDiscoverableLogin(func(rawID, userHandle []byte) (user webauthn.User, err error) {
+		credential, err = svc.waClient.ValidateDiscoverableLogin(func(rawID, userHandle []byte) (user webauthn.User, err error) {
 			return webauthnUser, nil
 		}, *model, request)
 		if err != nil {
@@ -366,7 +366,7 @@ func (svc *webauthnSvc) getCredentialFromLoginSession(ctx Ctx, request *protocol
 			// TODO: audit logger
 			return nil, nil, errorhandler.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
 		}
-		credential, err = svc.wa.ValidateLogin(webauthnUser, *model, request)
+		credential, err = svc.waClient.ValidateLogin(webauthnUser, *model, request)
 		if err != nil {
 			// TODO: audit logger
 			return nil, nil, errorhandler.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
