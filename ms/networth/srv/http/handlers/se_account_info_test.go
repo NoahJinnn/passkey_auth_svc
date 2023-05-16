@@ -24,18 +24,18 @@ var (
 
 func TestSeAccountInfoHandler_Create_DeleteCustomer(t *testing.T) {
 	tests := []struct {
-		give           *saltedge.CreateCustomerReq
-		expectedCreate *saltedge.CustomerResp
-		expectedDelete *saltedge.RemoveCustomerResp
+		give           *saltedge.CreateCustomer
+		expectedCreate *saltedge.Customer
+		expectedDelete *saltedge.RemoveCustomer
 	}{
 		{
-			give: &saltedge.CreateCustomerReq{
+			give: &saltedge.CreateCustomer{
 				Identifier: "Josh",
 			},
-			expectedCreate: &saltedge.CustomerResp{
+			expectedCreate: &saltedge.Customer{
 				Identifier: "Josh",
 			},
-			expectedDelete: &saltedge.RemoveCustomerResp{
+			expectedDelete: &saltedge.RemoveCustomer{
 				Deleted: true,
 			},
 		},
@@ -58,9 +58,9 @@ func TestSeAccountInfoHandler_Create_DeleteCustomer(t *testing.T) {
 
 func TestSeAccountInfoHandler_ShowCustomer_CreateConnectSession(t *testing.T) {
 	tests := struct {
-		give *saltedge.CreateConnectSessionReq
+		give *saltedge.CreateConnectSession
 	}{
-		give: &saltedge.CreateConnectSessionReq{
+		give: &saltedge.CreateConnectSession{
 			CustomerId:           "1012221102530763642",
 			IncludeFakeProviders: true,
 			Consent: saltedge.Consent{

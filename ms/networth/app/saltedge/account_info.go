@@ -15,10 +15,10 @@ const (
 type Ctx = context.Context
 
 type ISeAccountInfoSvc interface {
-	Customer(ctx Ctx, customerId string) (*CustomerResp, error)
-	CreateCustomer(ctx Ctx, ccr *CreateCustomerReq) (*CustomerResp, error)
-	RemoveCustomer(ctx context.Context, customerId string) (*RemoveCustomerResp, error)
-	CreateConnectSession(ctx Ctx, ccsr *CreateConnectSessionReq) (*CreateConnectSessionResp, error)
+	Customer(ctx Ctx, customerId string) (*Customer, error)
+	CreateCustomer(ctx Ctx, ccr *CreateCustomer) (*Customer, error)
+	RemoveCustomer(ctx context.Context, customerId string) (*RemoveCustomer, error)
+	CreateConnectSession(ctx Ctx, ccsr *CreateConnectSession) (*ConnectSession, error)
 	GetConnectionByCustomerId(ctx Ctx, customerId string) (interface{}, error)
 	GetAccountByConnectionId(ctx context.Context, connectionId string) (interface{}, error)
 	GetTxByConnectionIdAndAccountId(ctx context.Context, connectionId string, accountId string) (interface{}, error)
@@ -35,7 +35,7 @@ func NewSeAccountInfoSvc(cfg *config.Config) ISeAccountInfoSvc {
 	}
 }
 
-func (svc *seSvc) Customer(ctx context.Context, customerId string) (*CustomerResp, error) {
+func (svc *seSvc) Customer(ctx context.Context, customerId string) (*Customer, error) {
 	url := fmt.Sprintf("%s/customers/%s", API_URL, customerId)
 
 	resp, err := svc.client.DoReq("GET", url, nil)
@@ -44,7 +44,7 @@ func (svc *seSvc) Customer(ctx context.Context, customerId string) (*CustomerRes
 		return nil, err
 	}
 
-	var result CustomerResp
+	var result Customer
 	err = json.Unmarshal(resp, &HttpBody{
 		Data: &result,
 	})
@@ -56,7 +56,7 @@ func (svc *seSvc) Customer(ctx context.Context, customerId string) (*CustomerRes
 	return &result, nil
 }
 
-func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *CreateCustomerReq) (*CustomerResp, error) {
+func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *CreateCustomer) (*Customer, error) {
 	url := fmt.Sprintf("%s/customers", API_URL)
 
 	resp, err := svc.client.DoReq("POST", url, ccr)
@@ -65,7 +65,7 @@ func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *CreateCustomerReq) (*
 		return nil, err
 	}
 
-	var result CustomerResp
+	var result Customer
 	err = json.Unmarshal(resp, &HttpBody{
 		Data: &result,
 	})
@@ -77,7 +77,7 @@ func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *CreateCustomerReq) (*
 	return &result, nil
 }
 
-func (svc *seSvc) RemoveCustomer(ctx context.Context, customerId string) (*RemoveCustomerResp, error) {
+func (svc *seSvc) RemoveCustomer(ctx context.Context, customerId string) (*RemoveCustomer, error) {
 	url := fmt.Sprintf("%s/customers/%s", API_URL, customerId)
 
 	resp, err := svc.client.DoReq("DELETE", url, nil)
@@ -86,7 +86,7 @@ func (svc *seSvc) RemoveCustomer(ctx context.Context, customerId string) (*Remov
 		return nil, err
 	}
 
-	var result RemoveCustomerResp
+	var result RemoveCustomer
 	err = json.Unmarshal(resp, &HttpBody{
 		Data: &result,
 	})
@@ -98,7 +98,7 @@ func (svc *seSvc) RemoveCustomer(ctx context.Context, customerId string) (*Remov
 	return &result, nil
 }
 
-func (svc *seSvc) CreateConnectSession(ctx context.Context, ccsr *CreateConnectSessionReq) (*CreateConnectSessionResp, error) {
+func (svc *seSvc) CreateConnectSession(ctx context.Context, ccsr *CreateConnectSession) (*ConnectSession, error) {
 	url := fmt.Sprintf("%s/connect_sessions/create", API_URL)
 
 	resp, err := svc.client.DoReq("POST", url, ccsr)
@@ -107,7 +107,7 @@ func (svc *seSvc) CreateConnectSession(ctx context.Context, ccsr *CreateConnectS
 		return nil, err
 	}
 
-	var result CreateConnectSessionResp
+	var result ConnectSession
 	err = json.Unmarshal(resp, &HttpBody{
 		Data: &result,
 	})

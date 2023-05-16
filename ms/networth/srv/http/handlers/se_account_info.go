@@ -28,7 +28,7 @@ func (h *NetworthHandler) Customer(c echo.Context) error {
 }
 
 func (h *NetworthHandler) CreateCustomer(c echo.Context) error {
-	var body saltedge.CreateCustomerReq
+	var body saltedge.CreateCustomer
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
 		return errorhandler.ToHttpError(err)
 	}
@@ -56,7 +56,7 @@ func (h *NetworthHandler) DeleteCustomer(c echo.Context) error {
 }
 
 func (h *NetworthHandler) CreateConnectSession(c echo.Context) error {
-	var body saltedge.CreateConnectSessionReq
+	var body saltedge.CreateConnectSession
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
 		return errorhandler.ToHttpError(err)
 	}
