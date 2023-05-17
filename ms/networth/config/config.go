@@ -42,12 +42,12 @@ var (
 		// See https://dashboard.plaid.com/team/api
 		PlaidRedirectUri appcfg.String `env:"PLAID_REDIRECT_URI"`
 
-		SeAppId  appcfg.String `env:"SALTEDGE_APP_ID"`
+		SeAppID  appcfg.String `env:"SALTEDGE_APP_ID"`
 		SeSecret appcfg.String `env:"SALTEDGE_SECRET"`
 		SePK     appcfg.String `env:"SALTEDGE_PK"`
 
-		FvAppId       appcfg.String `env:"FINVERSE_APP_ID"`
-		FvClientId    appcfg.String `env:"FINVERSE_CLIENT_ID"`
+		FvAppID       appcfg.String `env:"FINVERSE_APP_ID"`
+		FvClientID    appcfg.String `env:"FINVERSE_CLIENT_ID"`
 		FvSecret      appcfg.String `env:"FINVERSE_SECRET"`
 		FvRedirectURI appcfg.String `env:"FINVERSE_REDIRECT_URI"`
 	}{}
@@ -95,13 +95,13 @@ func GetServe() (c *Config, err error) {
 			},
 		},
 		SaltEdge: &SaltEdge{
-			AppId:  own.SeAppId.Value(&err),
+			AppId:  own.SeAppID.Value(&err),
 			Secret: own.SeSecret.Value(&err),
 			PK:     own.SePK.Value(&err),
 		},
 		Finverse: &Finverse{
-			AppId:       own.FvAppId.Value(&err),
-			ClientId:    own.FvClientId.Value(&err),
+			AppId:       own.FvAppID.Value(&err),
+			ClientID:    own.FvClientID.Value(&err),
 			Secret:      own.FvSecret.Value(&err),
 			RedirectURI: own.FvRedirectURI.Value(&err),
 		},

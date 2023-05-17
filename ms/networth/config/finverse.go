@@ -2,7 +2,7 @@ package config
 
 type Finverse struct {
 	AppId       string
-	ClientId    string
+	ClientID    string
 	Secret      string
 	RedirectURI string
 }

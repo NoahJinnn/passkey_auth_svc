@@ -14,7 +14,6 @@ type Req struct {
 	BaseUrl string
 	Headers map[string][]string
 	Query   map[string][]string
-	Request *http.Request
 }
 
 func NewReq(baseUrl string) *Req {
@@ -130,8 +129,6 @@ func (r *Req) PrepareReq(method string, path string, body []byte) (*http.Request
 		}
 	}
 	req.URL.RawQuery = q.Encode()
-	// Update new Request data so it can be used in the future
-	r.Request = req
 
 	return req, err
 }
