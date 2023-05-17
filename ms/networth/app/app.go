@@ -13,7 +13,7 @@ import (
 
 // Appl provides application features (use cases) service.
 type Appl interface {
-	GetFvSvc() finverse.IFvAuthSvc
+	GetFvAuthSvc() finverse.IFvAuthSvc
 	GetSeAccountInfoSvc() saltedge.ISeAccountInfoSvc
 }
 
@@ -22,19 +22,26 @@ type App struct {
 	cfg              *config.Config
 	repo             *dal.NwRepo
 	seAccountInfoSvc saltedge.ISeAccountInfoSvc
+	fvAuthSvc        finverse.IFvAuthSvc
 }
 
 // New creates and returns new App.
 func New(cfg *config.Config, repo *dal.NwRepo) App {
 	seAccountInfoSvc := saltedge.NewSeAccountInfoSvc(cfg)
+	fvAuthSvc := finverse.NewFvAuthSvc(cfg)
 
 	return App{
 		cfg:              cfg,
 		repo:             repo,
 		seAccountInfoSvc: seAccountInfoSvc,
+		fvAuthSvc:        fvAuthSvc,
 	}
 }
 
 func (a App) GetSeAccountInfoSvc() saltedge.ISeAccountInfoSvc {
 	return a.seAccountInfoSvc
+}
+
+func (a App) GetFvAuthSvc() finverse.IFvAuthSvc {
+	return a.fvAuthSvc
 }

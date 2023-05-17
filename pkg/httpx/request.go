@@ -64,14 +64,15 @@ func (r *Req) Send(method string, path string, body []byte) (*Resp, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("request failed: %+v", resp)
+		return nil, fmt.Errorf("request failed with status code: %d", resp.StatusCode)
+	}
+	fmt.Printf("request: %+v\n", resp.Body)
+
 	result, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to read response body")
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		fmt.Println("Error:", string(body))
-		return nil, fmt.Errorf("request failed with status code: %d", resp.StatusCode)
 	}
 
 	return &Resp{

@@ -54,18 +54,22 @@ func NewServer(appl app.Appl, sessionManager session.Manager, sharedCfg *sharedc
 	e.GET("/alive", healthHandler.Alive)
 
 	nw := e.Group(
-		"/nw",
+		"/networth",
 		// session.Session(sessionManager), TODO: Enable back when finish nw service
 	)
-	nwHandler := handlers.NewSeHandler(srv)
+	seAccountInfo := handlers.NewSeAccountInfoHandler(srv)
 	se := nw.Group("/se")
-	se.GET("/customers/:customer_id", nwHandler.Customer)
-	se.POST("/customers", nwHandler.CreateCustomer)
-	se.DELETE("/customers/:customer_id", nwHandler.DeleteCustomer)
-	se.POST("/connect_session", nwHandler.CreateConnectSession)
-	se.GET("/connections", nwHandler.GetConnectionByCustomerId)
-	se.GET("/accounts", nwHandler.GetAccountByConnectionId)
-	se.GET("/transactions", nwHandler.GetTxByConnectionIdAndAccountId)
+	se.GET("/customers/:customer_id", seAccountInfo.Customer)
+	se.POST("/customers", seAccountInfo.CreateCustomer)
+	se.DELETE("/customers/:customer_id", seAccountInfo.DeleteCustomer)
+	se.POST("/connect_session", seAccountInfo.CreateConnectSession)
+	se.GET("/connections", seAccountInfo.GetConnectionByCustomerId)
+	se.GET("/accounts", seAccountInfo.GetAccountByConnectionId)
+	se.GET("/transactions", seAccountInfo.GetTxByConnectionIdAndAccountId)
+
+	fvAuth := handlers.NewFvAuthHandler(srv)
+	fv := nw.Group("/fv")
+	fv.POST("/auth/token", fvAuth.CreateCustomerToken)
 
 	e.Logger.Fatal(e.Start(cfg.Server.BindAddr.String()))
 	return nil

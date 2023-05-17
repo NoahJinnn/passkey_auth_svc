@@ -1,6 +1,7 @@
 package finverse
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/hellohq/hqservice/ms/networth/config"
@@ -8,6 +9,7 @@ import (
 )
 
 type IFvAuthSvc interface {
+	CreateCustomerToken(ctx context.Context) (*CustomerToken, error)
 }
 
 type authSvc struct {
@@ -17,13 +19,13 @@ type authSvc struct {
 
 func NewFvAuthSvc(cfg *config.Config) IFvAuthSvc {
 	req := httpx.NewReq("https://api.sandbox.finverse.net/auth")
-	req.SetHeader("Accept", "application/json")
+	// req.SetHeader("Accept", "application/json")
 	req.SetHeader("Content-Type", "application/json")
 
-	return &authSvc{config: cfg}
+	return &authSvc{config: cfg, req: req}
 }
 
-func (svc *authSvc) CreateCustomerToken() (*string, error) {
+func (svc *authSvc) CreateCustomerToken(ctx context.Context) (*CustomerToken, error) {
 	payload := AuthPayload{
 		ClientId:     svc.config.Finverse.ClientId,
 		ClientSecret: svc.config.Finverse.Secret,
@@ -39,11 +41,11 @@ func (svc *authSvc) CreateCustomerToken() (*string, error) {
 		return nil, err
 	}
 
-	var result *string
-	err = json.Unmarshal(resp.Body(), result)
+	var result CustomerToken
+	err = json.Unmarshal(resp.Body(), &result)
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	return &result, nil
 }
