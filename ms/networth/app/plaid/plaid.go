@@ -21,8 +21,7 @@ type Ctx = context.Context
 
 //nolint:gochecknoglobals // Config, flags and metrics are global anyway.
 var (
-	// We store the access_token in memory - in production, store it in a secure
-	// persistent data store.
+	// We store the access_token in memory - in production, store it in a secure persistent data store.
 	accessToken string
 	itemID      string
 

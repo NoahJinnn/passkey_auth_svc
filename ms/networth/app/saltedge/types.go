@@ -5,6 +5,27 @@ type HttpBody struct {
 	Data interface{} `json:"data"`
 }
 
+// Request payload types
+type CreateCustomer struct {
+	Identifier string `json:"identifier"  validate:"required"`
+}
+
+type CreateConnectSession struct {
+	CustomerId           string  `json:"customer_id" validate:"required"`
+	IncludeFakeProviders bool    `json:"include_fake_providers" validate:"required"`
+	Consent              Consent `json:"consent" validate:"required"`
+	Attempt              Attempt `json:"attempt,omitempty"`
+}
+
+type Consent struct {
+	Scopes []string `json:"scopes" validate:"required"`
+}
+
+type Attempt struct {
+	ReturnTo string `json:"return_to"`
+}
+
+// Response payload types
 type Customer struct {
 	Id         string `json:"id"`
 	Identifier string `json:"identifier"`
@@ -17,14 +38,6 @@ type Customer struct {
 type RemoveCustomer struct {
 	Id      string `json:"id"`
 	Deleted bool   `json:"deleted"`
-}
-
-type Consent struct {
-	Scopes []string `json:"scopes"`
-}
-
-type Attempt struct {
-	ReturnTo string `json:"return_to"`
 }
 
 type ConnectSession struct {
