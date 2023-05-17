@@ -1,5 +1,7 @@
 package finverse
 
+import "time"
+
 // Request payload types
 type CreateCustomerToken struct {
 	ClientId     string `json:"client_id"  validate:"required"`
@@ -8,8 +10,8 @@ type CreateCustomerToken struct {
 }
 
 type CreateLinkToken struct {
-	ClientID             string   `json:"client_id" validate:"required"`
-	UserID               string   `json:"user_id" validate:"required"`
+	ClientId             string   `json:"client_id" validate:"required"`
+	UserId               string   `json:"user_id" validate:"required"`
 	RedirectURI          string   `json:"redirect_uri" validate:"required"`
 	State                string   `json:"state" validate:"required"`
 	GrantType            string   `json:"grant_type" validate:"required"`
@@ -32,4 +34,12 @@ type CustomerToken struct {
 	ExpiresIn   int    `json:"expires_in"`
 	IssuedAt    string `json:"issued_at"`
 	TokenType   string `json:"token_type"`
+}
+
+type LinkToken struct {
+	AccessToken string    `json:"access_token"`
+	ExpiresIn   int       `json:"expires_in"`
+	IssuedAt    time.Time `json:"issued_at"`
+	LinkURL     string    `json:"link_url"`
+	TokenType   string    `json:"token_type"`
 }

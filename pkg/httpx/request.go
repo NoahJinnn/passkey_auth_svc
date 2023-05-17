@@ -51,14 +51,16 @@ func (r *Req) OverrideQ(q map[string][]string) {
 }
 
 func (r *Req) Send(method string, path string, body []byte) (*Resp, error) {
-	if r.Request == nil {
-		_, err := r.PrepareReq(method, path, body)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to prepare request")
-		}
+	httpReq, err := r.PrepareReq(method, path, body)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to prepare request")
 	}
+	return r.SendWithReq(httpReq)
+}
+
+func (r *Req) SendWithReq(httpReq *http.Request) (*Resp, error) {
 	client := &http.Client{}
-	resp, err := client.Do(r.Request)
+	resp, err := client.Do(httpReq)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to send request")
 	}
@@ -68,7 +70,6 @@ func (r *Req) Send(method string, path string, body []byte) (*Resp, error) {
 		fmt.Printf("request failed: %+v", resp)
 		return nil, fmt.Errorf("request failed with status code: %d", resp.StatusCode)
 	}
-	fmt.Printf("request: %+v\n", resp.Body)
 
 	result, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -129,7 +130,7 @@ func (r *Req) PrepareReq(method string, path string, body []byte) (*http.Request
 		}
 	}
 	req.URL.RawQuery = q.Encode()
-
+	// Update new Request data so it can be used in the future
 	r.Request = req
 
 	return req, err

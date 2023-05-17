@@ -14,7 +14,8 @@ var (
 )
 
 type IFvAuthSvc interface {
-	CreateCustomerToken(ctx context.Context) (*CustomerToken, error)
+	CreateCustomerToken(ctx context.Context, cct *CreateCustomerToken) (*CustomerToken, error)
+	CreateLinkToken(ctx context.Context, clt *CreateLinkToken) (*LinkToken, error)
 }
 
 type authSvc struct {
@@ -29,13 +30,8 @@ func NewFvAuthSvc(cfg *config.Config) IFvAuthSvc {
 	return &authSvc{config: cfg, req: req}
 }
 
-func (svc *authSvc) CreateCustomerToken(ctx context.Context) (*CustomerToken, error) {
-	payload := CreateCustomerToken{
-		ClientId:     svc.config.Finverse.ClientId,
-		ClientSecret: svc.config.Finverse.Secret,
-		GrantType:    "client_credentials",
-	}
-	b, err := json.Marshal(payload)
+func (svc *authSvc) CreateCustomerToken(ctx context.Context, cct *CreateCustomerToken) (*CustomerToken, error) {
+	b, err := json.Marshal(cct)
 	if err != nil {
 		return nil, err
 	}
@@ -55,23 +51,19 @@ func (svc *authSvc) CreateCustomerToken(ctx context.Context) (*CustomerToken, er
 	return &result, nil
 }
 
-func (svc *authSvc) CreateLinkToken(ctx context.Context) (*CustomerToken, error) {
-	payload := CreateCustomerToken{
-		ClientId:     svc.config.Finverse.ClientId,
-		ClientSecret: svc.config.Finverse.Secret,
-		GrantType:    "client_credentials",
-	}
-	b, err := json.Marshal(payload)
+func (svc *authSvc) CreateLinkToken(ctx context.Context, clt *CreateLinkToken) (*LinkToken, error) {
+	b, err := json.Marshal(clt)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := svc.req.Post("/customer/token", b)
+	svc.req.SetHeader("Authorization", "Bearer "+accessToken)
+	resp, err := svc.req.Post("/link/token", b)
 	if err != nil {
 		return nil, err
 	}
 
-	var result CustomerToken
+	var result LinkToken
 	err = json.Unmarshal(resp.Body(), &result)
 	if err != nil {
 		return nil, err

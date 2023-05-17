@@ -54,9 +54,9 @@ func (cl *SeClient) DoReq(method string, url string, query map[string][]string, 
 	if err != nil {
 		return nil, err
 	}
-
 	cl.SignedHeaders(httpReq.URL.String(), method, b)
-	resp, err := cl.req.Send(method, url, b)
+
+	resp, err := cl.req.SendWithReq(httpReq)
 	if err != nil {
 		return nil, err
 	}

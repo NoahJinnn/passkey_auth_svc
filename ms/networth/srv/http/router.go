@@ -70,6 +70,7 @@ func NewServer(appl app.Appl, sessionManager session.Manager, sharedCfg *sharedc
 	fvAuth := handlers.NewFvAuthHandler(srv)
 	fv := nw.Group("/fv")
 	fv.POST("/auth/token", fvAuth.CreateCustomerToken)
+	fv.POST("/link/token", fvAuth.CreateLinkToken)
 
 	e.Logger.Fatal(e.Start(cfg.Server.BindAddr.String()))
 	return nil

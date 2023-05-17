@@ -46,9 +46,10 @@ var (
 		SeSecret appcfg.String `env:"SALTEDGE_SECRET"`
 		SePK     appcfg.String `env:"SALTEDGE_PK"`
 
-		FvAppId    appcfg.String `env:"FINVERSE_APP_ID"`
-		FvClientId appcfg.String `env:"FINVERSE_CLIENT_ID"`
-		FvSecret   appcfg.String `env:"FINVERSE_SECRET"`
+		FvAppId       appcfg.String `env:"FINVERSE_APP_ID"`
+		FvClientId    appcfg.String `env:"FINVERSE_CLIENT_ID"`
+		FvSecret      appcfg.String `env:"FINVERSE_SECRET"`
+		FvRedirectURI appcfg.String `env:"FINVERSE_REDIRECT_URI"`
 	}{}
 )
 
@@ -99,9 +100,10 @@ func GetServe() (c *Config, err error) {
 			PK:     own.SePK.Value(&err),
 		},
 		Finverse: &Finverse{
-			AppId:    own.FvAppId.Value(&err),
-			ClientId: own.FvClientId.Value(&err),
-			Secret:   own.FvSecret.Value(&err),
+			AppId:       own.FvAppId.Value(&err),
+			ClientId:    own.FvClientId.Value(&err),
+			Secret:      own.FvSecret.Value(&err),
+			RedirectURI: own.FvRedirectURI.Value(&err),
 		},
 	}
 	if err != nil {

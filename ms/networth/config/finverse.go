@@ -1,7 +1,8 @@
 package config
 
 type Finverse struct {
-	AppId    string
-	ClientId string
-	Secret   string
+	AppId       string
+	ClientId    string
+	Secret      string
+	RedirectURI string
 }
