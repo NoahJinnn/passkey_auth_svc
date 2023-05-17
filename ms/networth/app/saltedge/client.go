@@ -17,11 +17,11 @@ import (
 )
 
 type SeClient struct {
-	cred *config.SaltEdgeConfig
+	cred *config.SaltEdge
 	req  *httpx.Req
 }
 
-func NewSeClient(cred *config.SaltEdgeConfig) *SeClient {
+func NewSeClient(cred *config.SaltEdge) *SeClient {
 
 	req := httpx.NewReq("https://www.saltedge.com/api/v5")
 	req.SetHeader("Accept", "application/json")
@@ -54,9 +54,9 @@ func (cl *SeClient) DoReq(method string, url string, query map[string][]string, 
 	if err != nil {
 		return nil, err
 	}
-
 	cl.SignedHeaders(httpReq.URL.String(), method, b)
-	resp, err := cl.req.Send(method, url, b)
+
+	resp, err := cl.req.SendWithReq(httpReq)
 	if err != nil {
 		return nil, err
 	}

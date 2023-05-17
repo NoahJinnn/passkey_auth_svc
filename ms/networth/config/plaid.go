@@ -3,7 +3,7 @@ package config
 // // Ref: https://github.com/plaid/quickstart/blob/master/.env.example
 type PlaidConfig struct {
 	// 	// See https://dashboard.plaid.com/account/keys
-	ClientId string
+	ClientID string
 	Secret   string
 	// See sandbox, development, product
 	Env string

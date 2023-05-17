@@ -26,7 +26,7 @@ type seSvc struct {
 }
 
 func NewSeAccountInfoSvc(cfg *config.Config) ISeAccountInfoSvc {
-	client := NewSeClient(cfg.SaltEdgeConfig)
+	client := NewSeClient(cfg.SaltEdge)
 	return &seSvc{
 		client: client,
 	}
@@ -37,7 +37,6 @@ func (svc *seSvc) Customer(ctx context.Context, customerId string) (*Customer, e
 
 	resp, err := svc.client.DoReq(http.MethodGet, path, nil, nil)
 	if err != nil {
-		fmt.Println("Error:", err)
 		return nil, err
 	}
 
@@ -46,7 +45,6 @@ func (svc *seSvc) Customer(ctx context.Context, customerId string) (*Customer, e
 		Data: &result,
 	})
 	if err != nil {
-		fmt.Println("Error:", err)
 		return nil, err
 	}
 
@@ -56,7 +54,6 @@ func (svc *seSvc) Customer(ctx context.Context, customerId string) (*Customer, e
 func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *CreateCustomer) (*Customer, error) {
 	resp, err := svc.client.DoReq(http.MethodPost, "/customers", nil, ccr)
 	if err != nil {
-		fmt.Println("Error:", err)
 		return nil, err
 	}
 
@@ -65,7 +62,6 @@ func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *CreateCustomer) (*Cus
 		Data: &result,
 	})
 	if err != nil {
-		fmt.Println("Error:", err)
 		return nil, err
 	}
 
@@ -77,7 +73,6 @@ func (svc *seSvc) RemoveCustomer(ctx context.Context, customerId string) (*Remov
 
 	resp, err := svc.client.DoReq(http.MethodDelete, path, nil, nil)
 	if err != nil {
-		fmt.Println("Error:", err)
 		return nil, err
 	}
 
@@ -86,7 +81,6 @@ func (svc *seSvc) RemoveCustomer(ctx context.Context, customerId string) (*Remov
 		Data: &result,
 	})
 	if err != nil {
-		fmt.Println("Error:", err)
 		return nil, err
 	}
 
@@ -96,7 +90,6 @@ func (svc *seSvc) RemoveCustomer(ctx context.Context, customerId string) (*Remov
 func (svc *seSvc) CreateConnectSession(ctx context.Context, ccsr *CreateConnectSession) (*ConnectSession, error) {
 	resp, err := svc.client.DoReq(http.MethodPost, "/connect_sessions/create", nil, ccsr)
 	if err != nil {
-		fmt.Println("Error:", err)
 		return nil, err
 	}
 
@@ -105,7 +98,6 @@ func (svc *seSvc) CreateConnectSession(ctx context.Context, ccsr *CreateConnectS
 		Data: &result,
 	})
 	if err != nil {
-		fmt.Println("Error:", err)
 		return nil, err
 	}
 
@@ -117,7 +109,6 @@ func (svc *seSvc) GetConnectionByCustomerId(ctx context.Context, customerId stri
 
 	resp, err := svc.client.DoReq(http.MethodGet, path, nil, nil)
 	if err != nil {
-		fmt.Println("Error:", err)
 		return nil, err
 	}
 
@@ -126,7 +117,6 @@ func (svc *seSvc) GetConnectionByCustomerId(ctx context.Context, customerId stri
 		Data: &result,
 	})
 	if err != nil {
-		fmt.Println("Error:", err)
 		return nil, err
 	}
 
@@ -138,7 +128,6 @@ func (svc *seSvc) GetAccountByConnectionId(ctx context.Context, connectionId str
 		"connection_id": {connectionId},
 	}, nil)
 	if err != nil {
-		fmt.Println("Error:", err)
 		return nil, err
 	}
 
@@ -147,7 +136,6 @@ func (svc *seSvc) GetAccountByConnectionId(ctx context.Context, connectionId str
 		Data: &result,
 	})
 	if err != nil {
-		fmt.Println("Error:", err)
 		return nil, err
 	}
 
@@ -160,7 +148,6 @@ func (svc *seSvc) GetTxByConnectionIdAndAccountId(ctx context.Context, connectio
 		"account_id":    {accountId},
 	}, nil)
 	if err != nil {
-		fmt.Println("Error:", err)
 		return nil, err
 	}
 
@@ -169,7 +156,6 @@ func (svc *seSvc) GetTxByConnectionIdAndAccountId(ctx context.Context, connectio
 		Data: &result,
 	})
 	if err != nil {
-		fmt.Println("Error:", err)
 		return nil, err
 	}
 

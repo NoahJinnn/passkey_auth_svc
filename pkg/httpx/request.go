@@ -14,7 +14,6 @@ type Req struct {
 	BaseUrl string
 	Headers map[string][]string
 	Query   map[string][]string
-	Request *http.Request
 }
 
 func NewReq(baseUrl string) *Req {
@@ -51,21 +50,29 @@ func (r *Req) OverrideQ(q map[string][]string) {
 }
 
 func (r *Req) Send(method string, path string, body []byte) (*Resp, error) {
+	httpReq, err := r.PrepareReq(method, path, body)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to prepare request")
+	}
+	return r.SendWithReq(httpReq)
+}
+
+func (r *Req) SendWithReq(httpReq *http.Request) (*Resp, error) {
 	client := &http.Client{}
-	resp, err := client.Do(r.Request)
+	resp, err := client.Do(httpReq)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to send request")
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("request failed: %+v", resp)
+		return nil, fmt.Errorf("request failed with status code: %d", resp.StatusCode)
+	}
+
 	result, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to read response body")
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		fmt.Println("Error:", string(body))
-		return nil, fmt.Errorf("request failed with status code: %d", resp.StatusCode)
 	}
 
 	return &Resp{
@@ -122,8 +129,6 @@ func (r *Req) PrepareReq(method string, path string, body []byte) (*http.Request
 		}
 	}
 	req.URL.RawQuery = q.Encode()
-
-	r.Request = req
 
 	return req, err
 }

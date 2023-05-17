@@ -21,8 +21,7 @@ type Ctx = context.Context
 
 //nolint:gochecknoglobals // Config, flags and metrics are global anyway.
 var (
-	// We store the access_token in memory - in production, store it in a secure
-	// persistent data store.
+	// We store the access_token in memory - in production, store it in a secure persistent data store.
 	accessToken string
 	itemID      string
 
@@ -60,7 +59,7 @@ type plaidSvc struct {
 func NewPlaidClient(cfg *config.Config) *plaidSvc {
 	// create Plaid client
 	configuration := plaid.NewConfiguration()
-	configuration.AddDefaultHeader("PLAID-CLIENT-ID", cfg.Plaid.ClientId)
+	configuration.AddDefaultHeader("PLAID-CLIENT-ID", cfg.Plaid.ClientID)
 	configuration.AddDefaultHeader("PLAID-SECRET", cfg.Plaid.Secret)
 	configuration.UseEnvironment(environments[cfg.Plaid.Env])
 	return &plaidSvc{
@@ -97,8 +96,48 @@ func convertProducts(productStrs []string) []plaid.Products {
 	return products
 }
 
+// linkTokenCreate creates a link token using the specified parameters
+func (svc *plaidSvc) CreateLinkToken(
+	ctx Ctx, paymentInitiation *plaid.LinkTokenCreateRequestPaymentInitiation,
+) (*LinkTokenCreateResp, error) {
+	countryCodes := convertCountryCodes(strings.Split(svc.cfg.Plaid.CountryCodes, ","))
+	products := convertProducts(strings.Split(svc.cfg.Plaid.Products, ","))
+	redirectURI := svc.cfg.Plaid.RedirectUri
+
+	user := plaid.LinkTokenCreateRequestUser{
+		ClientUserId: time.Now().String(),
+	}
+
+	request := plaid.NewLinkTokenCreateRequest(
+		"hellohq connector",
+		"en",
+		countryCodes,
+		user,
+	)
+
+	request.SetProducts(products)
+
+	if redirectURI != "" {
+		request.SetRedirectUri(redirectURI)
+	}
+
+	if paymentInitiation != nil {
+		request.SetPaymentInitiation(*paymentInitiation)
+	}
+
+	linkTokenCreateResp, _, err := svc.plaidClient.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*request).Execute()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &LinkTokenCreateResp{
+		LinkToken: linkTokenCreateResp.GetLinkToken(),
+	}, nil
+}
+
 // For sandbox testing
-func (svc *plaidSvc) GetSandboxAccessToken(ctx Ctx, institutionID string) (*GetAccessTokenResp, error) {
+func (svc *plaidSvc) ExchangeSandboxAccessToken(ctx Ctx, institutionID string) (*GetAccessTokenResp, error) {
 	products := convertProducts(strings.Split(svc.cfg.Plaid.Products, ","))
 	// Create a one-time use public_token for the Item.
 	// This public_token can be used to initialize Link in update mode for a user
@@ -137,7 +176,7 @@ func (svc *plaidSvc) GetSandboxAccessToken(ctx Ctx, institutionID string) (*GetA
 	}, nil
 }
 
-func (svc *plaidSvc) GetAccessToken(ctx Ctx, publicToken string) (*GetAccessTokenResp, error) {
+func (svc *plaidSvc) ExchangeAccessToken(ctx Ctx, publicToken string) (*GetAccessTokenResp, error) {
 
 	// exchange the public_token for an access_token
 	exchangePublicTokenResp, _, err := svc.plaidClient.PlaidApi.ItemPublicTokenExchange(ctx).ItemPublicTokenExchangeRequest(
@@ -165,46 +204,6 @@ func (svc *plaidSvc) GetAccessToken(ctx Ctx, publicToken string) (*GetAccessToke
 	return &GetAccessTokenResp{
 		AccessToken: accessToken,
 		ItemId:      itemID,
-	}, nil
-}
-
-// linkTokenCreate creates a link token using the specified parameters
-func (svc *plaidSvc) LinkTokenCreate(
-	ctx Ctx, paymentInitiation *plaid.LinkTokenCreateRequestPaymentInitiation,
-) (*LinkTokenCreateResp, error) {
-	countryCodes := convertCountryCodes(strings.Split(svc.cfg.Plaid.CountryCodes, ","))
-	products := convertProducts(strings.Split(svc.cfg.Plaid.Products, ","))
-	redirectURI := svc.cfg.Plaid.RedirectUri
-
-	user := plaid.LinkTokenCreateRequestUser{
-		ClientUserId: time.Now().String(),
-	}
-
-	request := plaid.NewLinkTokenCreateRequest(
-		"hellohq connector",
-		"en",
-		countryCodes,
-		user,
-	)
-
-	request.SetProducts(products)
-
-	if redirectURI != "" {
-		request.SetRedirectUri(redirectURI)
-	}
-
-	if paymentInitiation != nil {
-		request.SetPaymentInitiation(*paymentInitiation)
-	}
-
-	linkTokenCreateResp, _, err := svc.plaidClient.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*request).Execute()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &LinkTokenCreateResp{
-		LinkToken: linkTokenCreateResp.GetLinkToken(),
 	}, nil
 }
 

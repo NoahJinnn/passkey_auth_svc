@@ -13,7 +13,7 @@ import (
 
 var (
 	defaultCfg = config.Config{
-		SaltEdgeConfig: &config.SaltEdgeConfig{
+		SaltEdge: &config.SaltEdge{
 			AppId:  "nYOGKlfdJaWf1w3rWvydX4vLjFDq8FBrhFh59yPHYJ0",
 			Secret: "CN7RcowLqx6cPifqaFBEO0xeAvVn-vLf2QicECPwQNM",
 			PK:     "",
