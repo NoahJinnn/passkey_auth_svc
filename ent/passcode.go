@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
@@ -35,7 +36,8 @@ type Passcode struct {
 	EmailID uuid.UUID `json:"email_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PasscodeQuery when eager-loading is set.
-	Edges PasscodeEdges `json:"edges"`
+	Edges        PasscodeEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // PasscodeEdges holds the relations/edges for other nodes in the graph.
@@ -89,7 +91,7 @@ func (*Passcode) scanValues(columns []string) ([]any, error) {
 		case passcode.FieldID, passcode.FieldUserID, passcode.FieldEmailID:
 			values[i] = new(uuid.UUID)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Passcode", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -151,9 +153,17 @@ func (pa *Passcode) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				pa.EmailID = *value
 			}
+		default:
+			pa.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Passcode.
+// This includes values selected through modifiers, order, etc.
+func (pa *Passcode) Value(name string) (ent.Value, error) {
+	return pa.selectValues.Get(name)
 }
 
 // QueryEmail queries the "email" edge of the Passcode entity.

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/webauthncredential"
@@ -23,7 +24,8 @@ type WebauthnCredentialTransport struct {
 	WebauthnCredentialID string `json:"webauthn_credential_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the WebauthnCredentialTransportQuery when eager-loading is set.
-	Edges WebauthnCredentialTransportEdges `json:"edges"`
+	Edges        WebauthnCredentialTransportEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // WebauthnCredentialTransportEdges holds the relations/edges for other nodes in the graph.
@@ -58,7 +60,7 @@ func (*WebauthnCredentialTransport) scanValues(columns []string) ([]any, error) 
 		case webauthncredentialtransport.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type WebauthnCredentialTransport", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -90,9 +92,17 @@ func (wct *WebauthnCredentialTransport) assignValues(columns []string, values []
 			} else if value.Valid {
 				wct.WebauthnCredentialID = value.String
 			}
+		default:
+			wct.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the WebauthnCredentialTransport.
+// This includes values selected through modifiers, order, etc.
+func (wct *WebauthnCredentialTransport) Value(name string) (ent.Value, error) {
+	return wct.selectValues.Get(name)
 }
 
 // QueryWebauthnCredential queries the "webauthn_credential" edge of the WebauthnCredentialTransport entity.

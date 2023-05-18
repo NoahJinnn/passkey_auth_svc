@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
@@ -22,14 +23,15 @@ type PrimaryEmail struct {
 	// EmailID holds the value of the "email_id" field.
 	EmailID uuid.UUID `json:"email_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
-	UserID uuid.UUID `json:"user_id,omitempty"`
+	UserID *uuid.UUID `json:"user_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PrimaryEmailQuery when eager-loading is set.
-	Edges PrimaryEmailEdges `json:"edges"`
+	Edges        PrimaryEmailEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // PrimaryEmailEdges holds the relations/edges for other nodes in the graph.
@@ -74,12 +76,14 @@ func (*PrimaryEmail) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case primaryemail.FieldUserID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case primaryemail.FieldCreatedAt, primaryemail.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case primaryemail.FieldID, primaryemail.FieldEmailID, primaryemail.FieldUserID:
+		case primaryemail.FieldID, primaryemail.FieldEmailID:
 			values[i] = new(uuid.UUID)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type PrimaryEmail", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -106,10 +110,11 @@ func (pe *PrimaryEmail) assignValues(columns []string, values []any) error {
 				pe.EmailID = *value
 			}
 		case primaryemail.FieldUserID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
-			} else if value != nil {
-				pe.UserID = *value
+			} else if value.Valid {
+				pe.UserID = new(uuid.UUID)
+				*pe.UserID = *value.S.(*uuid.UUID)
 			}
 		case primaryemail.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -123,9 +128,17 @@ func (pe *PrimaryEmail) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				pe.UpdatedAt = value.Time
 			}
+		default:
+			pe.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the PrimaryEmail.
+// This includes values selected through modifiers, order, etc.
+func (pe *PrimaryEmail) Value(name string) (ent.Value, error) {
+	return pe.selectValues.Get(name)
 }
 
 // QueryEmail queries the "email" edge of the PrimaryEmail entity.
@@ -164,8 +177,10 @@ func (pe *PrimaryEmail) String() string {
 	builder.WriteString("email_id=")
 	builder.WriteString(fmt.Sprintf("%v", pe.EmailID))
 	builder.WriteString(", ")
-	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", pe.UserID))
+	if v := pe.UserID; v != nil {
+		builder.WriteString("user_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(pe.CreatedAt.Format(time.ANSIC))

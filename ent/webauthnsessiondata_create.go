@@ -111,7 +111,7 @@ func (wsdc *WebauthnSessionDataCreate) Mutation() *WebauthnSessionDataMutation {
 // Save creates the WebauthnSessionData in the database.
 func (wsdc *WebauthnSessionDataCreate) Save(ctx context.Context) (*WebauthnSessionData, error) {
 	wsdc.defaults()
-	return withHooks[*WebauthnSessionData, WebauthnSessionDataMutation](ctx, wsdc.sqlSave, wsdc.mutation, wsdc.hooks)
+	return withHooks(ctx, wsdc.sqlSave, wsdc.mutation, wsdc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -239,10 +239,7 @@ func (wsdc *WebauthnSessionDataCreate) createSpec() (*WebauthnSessionData, *sqlg
 			Columns: []string{webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: webauthnsessiondataallowedcredential.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthnsessiondataallowedcredential.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -277,8 +274,8 @@ func (wsdcb *WebauthnSessionDataCreateBulk) Save(ctx context.Context) ([]*Webaut
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, wsdcb.builders[i+1].mutation)
 				} else {

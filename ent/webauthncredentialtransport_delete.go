@@ -27,7 +27,7 @@ func (wctd *WebauthnCredentialTransportDelete) Where(ps ...predicate.WebauthnCre
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (wctd *WebauthnCredentialTransportDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, WebauthnCredentialTransportMutation](ctx, wctd.sqlExec, wctd.mutation, wctd.hooks)
+	return withHooks(ctx, wctd.sqlExec, wctd.mutation, wctd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

@@ -54,7 +54,7 @@ func (jc *JwkCreate) Mutation() *JwkMutation {
 // Save creates the Jwk in the database.
 func (jc *JwkCreate) Save(ctx context.Context) (*Jwk, error) {
 	jc.defaults()
-	return withHooks[*Jwk, JwkMutation](ctx, jc.sqlSave, jc.mutation, jc.hooks)
+	return withHooks(ctx, jc.sqlSave, jc.mutation, jc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -162,8 +162,8 @@ func (jcb *JwkCreateBulk) Save(ctx context.Context) ([]*Jwk, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, jcb.builders[i+1].mutation)
 				} else {

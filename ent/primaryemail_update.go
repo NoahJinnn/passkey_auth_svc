@@ -107,7 +107,7 @@ func (peu *PrimaryEmailUpdate) ClearUser() *PrimaryEmailUpdate {
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (peu *PrimaryEmailUpdate) Save(ctx context.Context) (int, error) {
 	peu.defaults()
-	return withHooks[int, PrimaryEmailMutation](ctx, peu.sqlSave, peu.mutation, peu.hooks)
+	return withHooks(ctx, peu.sqlSave, peu.mutation, peu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -160,10 +160,7 @@ func (peu *PrimaryEmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{primaryemail.EmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: email.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(email.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -176,10 +173,7 @@ func (peu *PrimaryEmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{primaryemail.EmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: email.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(email.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -195,10 +189,7 @@ func (peu *PrimaryEmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{primaryemail.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -211,10 +202,7 @@ func (peu *PrimaryEmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{primaryemail.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -331,7 +319,7 @@ func (peuo *PrimaryEmailUpdateOne) Select(field string, fields ...string) *Prima
 // Save executes the query and returns the updated PrimaryEmail entity.
 func (peuo *PrimaryEmailUpdateOne) Save(ctx context.Context) (*PrimaryEmail, error) {
 	peuo.defaults()
-	return withHooks[*PrimaryEmail, PrimaryEmailMutation](ctx, peuo.sqlSave, peuo.mutation, peuo.hooks)
+	return withHooks(ctx, peuo.sqlSave, peuo.mutation, peuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -401,10 +389,7 @@ func (peuo *PrimaryEmailUpdateOne) sqlSave(ctx context.Context) (_node *PrimaryE
 			Columns: []string{primaryemail.EmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: email.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(email.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -417,10 +402,7 @@ func (peuo *PrimaryEmailUpdateOne) sqlSave(ctx context.Context) (_node *PrimaryE
 			Columns: []string{primaryemail.EmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: email.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(email.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -436,10 +418,7 @@ func (peuo *PrimaryEmailUpdateOne) sqlSave(ctx context.Context) (_node *PrimaryE
 			Columns: []string{primaryemail.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -452,10 +431,7 @@ func (peuo *PrimaryEmailUpdateOne) sqlSave(ctx context.Context) (_node *PrimaryE
 			Columns: []string{primaryemail.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

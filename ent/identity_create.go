@@ -117,7 +117,7 @@ func (ic *IdentityCreate) Mutation() *IdentityMutation {
 // Save creates the Identity in the database.
 func (ic *IdentityCreate) Save(ctx context.Context) (*Identity, error) {
 	ic.defaults()
-	return withHooks[*Identity, IdentityMutation](ctx, ic.sqlSave, ic.mutation, ic.hooks)
+	return withHooks(ctx, ic.sqlSave, ic.mutation, ic.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -235,10 +235,7 @@ func (ic *IdentityCreate) createSpec() (*Identity, *sqlgraph.CreateSpec) {
 			Columns: []string{identity.EmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: email.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(email.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -274,8 +271,8 @@ func (icb *IdentityCreateBulk) Save(ctx context.Context) ([]*Identity, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, icb.builders[i+1].mutation)
 				} else {

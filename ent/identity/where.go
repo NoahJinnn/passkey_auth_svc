@@ -415,11 +415,7 @@ func HasEmail() predicate.Identity {
 // HasEmailWith applies the HasEdge predicate on the "email" edge with a given conditions (other predicates).
 func HasEmailWith(preds ...predicate.Email) predicate.Identity {
 	return predicate.Identity(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(EmailInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, EmailTable, EmailColumn),
-		)
+		step := newEmailStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

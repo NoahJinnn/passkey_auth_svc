@@ -265,11 +265,7 @@ func HasUser() predicate.Email {
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.Email {
 	return predicate.Email(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UserInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
-		)
+		step := newUserStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -292,11 +288,7 @@ func HasIdentities() predicate.Email {
 // HasIdentitiesWith applies the HasEdge predicate on the "identities" edge with a given conditions (other predicates).
 func HasIdentitiesWith(preds ...predicate.Identity) predicate.Email {
 	return predicate.Email(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(IdentitiesInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, IdentitiesTable, IdentitiesColumn),
-		)
+		step := newIdentitiesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -319,11 +311,7 @@ func HasPasscodes() predicate.Email {
 // HasPasscodesWith applies the HasEdge predicate on the "passcodes" edge with a given conditions (other predicates).
 func HasPasscodesWith(preds ...predicate.Passcode) predicate.Email {
 	return predicate.Email(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PasscodesInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PasscodesTable, PasscodesColumn),
-		)
+		step := newPasscodesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -346,11 +334,7 @@ func HasPrimaryEmail() predicate.Email {
 // HasPrimaryEmailWith applies the HasEdge predicate on the "primary_email" edge with a given conditions (other predicates).
 func HasPrimaryEmailWith(preds ...predicate.PrimaryEmail) predicate.Email {
 	return predicate.Email(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PrimaryEmailInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, PrimaryEmailTable, PrimaryEmailColumn),
-		)
+		step := newPrimaryEmailStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

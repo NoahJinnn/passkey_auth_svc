@@ -139,7 +139,7 @@ func (pu *PasscodeUpdate) ClearUser() *PasscodeUpdate {
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (pu *PasscodeUpdate) Save(ctx context.Context) (int, error) {
 	pu.defaults()
-	return withHooks[int, PasscodeMutation](ctx, pu.sqlSave, pu.mutation, pu.hooks)
+	return withHooks(ctx, pu.sqlSave, pu.mutation, pu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -207,10 +207,7 @@ func (pu *PasscodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{passcode.EmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: email.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(email.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -223,10 +220,7 @@ func (pu *PasscodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{passcode.EmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: email.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(email.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -242,10 +236,7 @@ func (pu *PasscodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{passcode.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -258,10 +249,7 @@ func (pu *PasscodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{passcode.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -410,7 +398,7 @@ func (puo *PasscodeUpdateOne) Select(field string, fields ...string) *PasscodeUp
 // Save executes the query and returns the updated Passcode entity.
 func (puo *PasscodeUpdateOne) Save(ctx context.Context) (*Passcode, error) {
 	puo.defaults()
-	return withHooks[*Passcode, PasscodeMutation](ctx, puo.sqlSave, puo.mutation, puo.hooks)
+	return withHooks(ctx, puo.sqlSave, puo.mutation, puo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -495,10 +483,7 @@ func (puo *PasscodeUpdateOne) sqlSave(ctx context.Context) (_node *Passcode, err
 			Columns: []string{passcode.EmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: email.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(email.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -511,10 +496,7 @@ func (puo *PasscodeUpdateOne) sqlSave(ctx context.Context) (_node *Passcode, err
 			Columns: []string{passcode.EmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: email.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(email.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -530,10 +512,7 @@ func (puo *PasscodeUpdateOne) sqlSave(ctx context.Context) (_node *Passcode, err
 			Columns: []string{passcode.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -546,10 +525,7 @@ func (puo *PasscodeUpdateOne) sqlSave(ctx context.Context) (_node *Passcode, err
 			Columns: []string{passcode.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

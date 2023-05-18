@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/webauthnsessiondata"
@@ -31,7 +32,8 @@ type WebauthnSessionData struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the WebauthnSessionDataQuery when eager-loading is set.
-	Edges WebauthnSessionDataEdges `json:"edges"`
+	Edges        WebauthnSessionDataEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // WebauthnSessionDataEdges holds the relations/edges for other nodes in the graph.
@@ -64,7 +66,7 @@ func (*WebauthnSessionData) scanValues(columns []string) ([]any, error) {
 		case webauthnsessiondata.FieldID, webauthnsessiondata.FieldUserID:
 			values[i] = new(uuid.UUID)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type WebauthnSessionData", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -120,9 +122,17 @@ func (wsd *WebauthnSessionData) assignValues(columns []string, values []any) err
 			} else if value.Valid {
 				wsd.UpdatedAt = value.Time
 			}
+		default:
+			wsd.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the WebauthnSessionData.
+// This includes values selected through modifiers, order, etc.
+func (wsd *WebauthnSessionData) Value(name string) (ent.Value, error) {
+	return wsd.selectValues.Get(name)
 }
 
 // QueryWebauthnSessionDataAllowedCredentials queries the "webauthn_session_data_allowed_credentials" edge of the WebauthnSessionData entity.

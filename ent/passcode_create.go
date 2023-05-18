@@ -129,7 +129,7 @@ func (pc *PasscodeCreate) Mutation() *PasscodeMutation {
 // Save creates the Passcode in the database.
 func (pc *PasscodeCreate) Save(ctx context.Context) (*Passcode, error) {
 	pc.defaults()
-	return withHooks[*Passcode, PasscodeMutation](ctx, pc.sqlSave, pc.mutation, pc.hooks)
+	return withHooks(ctx, pc.sqlSave, pc.mutation, pc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -250,10 +250,7 @@ func (pc *PasscodeCreate) createSpec() (*Passcode, *sqlgraph.CreateSpec) {
 			Columns: []string{passcode.EmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: email.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(email.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -270,10 +267,7 @@ func (pc *PasscodeCreate) createSpec() (*Passcode, *sqlgraph.CreateSpec) {
 			Columns: []string{passcode.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -309,8 +303,8 @@ func (pcb *PasscodeCreateBulk) Save(ctx context.Context) ([]*Passcode, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, pcb.builders[i+1].mutation)
 				} else {

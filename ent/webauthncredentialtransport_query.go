@@ -20,7 +20,7 @@ import (
 type WebauthnCredentialTransportQuery struct {
 	config
 	ctx                    *QueryContext
-	order                  []OrderFunc
+	order                  []webauthncredentialtransport.OrderOption
 	inters                 []Interceptor
 	predicates             []predicate.WebauthnCredentialTransport
 	withWebauthnCredential *WebauthnCredentialQuery
@@ -55,7 +55,7 @@ func (wctq *WebauthnCredentialTransportQuery) Unique(unique bool) *WebauthnCrede
 }
 
 // Order specifies how the records should be ordered.
-func (wctq *WebauthnCredentialTransportQuery) Order(o ...OrderFunc) *WebauthnCredentialTransportQuery {
+func (wctq *WebauthnCredentialTransportQuery) Order(o ...webauthncredentialtransport.OrderOption) *WebauthnCredentialTransportQuery {
 	wctq.order = append(wctq.order, o...)
 	return wctq
 }
@@ -271,7 +271,7 @@ func (wctq *WebauthnCredentialTransportQuery) Clone() *WebauthnCredentialTranspo
 	return &WebauthnCredentialTransportQuery{
 		config:                 wctq.config,
 		ctx:                    wctq.ctx.Clone(),
-		order:                  append([]OrderFunc{}, wctq.order...),
+		order:                  append([]webauthncredentialtransport.OrderOption{}, wctq.order...),
 		inters:                 append([]Interceptor{}, wctq.inters...),
 		predicates:             append([]predicate.WebauthnCredentialTransport{}, wctq.predicates...),
 		withWebauthnCredential: wctq.withWebauthnCredential.Clone(),
@@ -455,6 +455,9 @@ func (wctq *WebauthnCredentialTransportQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != webauthncredentialtransport.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if wctq.withWebauthnCredential != nil {
+			_spec.Node.AddColumnOnce(webauthncredentialtransport.FieldWebauthnCredentialID)
 		}
 	}
 	if ps := wctq.predicates; len(ps) > 0 {

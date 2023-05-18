@@ -20,7 +20,7 @@ func (Email) Fields() []ent.Field {
 			id, _ := uuid.NewV4()
 			return id
 		}).Immutable(),
-		field.UUID("user_id", uuid.UUID{}).Optional(),
+		field.UUID("user_id", uuid.UUID{}).Optional().Nillable(),
 		field.String("address").Unique(),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),

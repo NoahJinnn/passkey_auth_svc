@@ -27,7 +27,7 @@ func (jd *JwkDelete) Where(ps ...predicate.Jwk) *JwkDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (jd *JwkDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, JwkMutation](ctx, jd.sqlExec, jd.mutation, jd.hooks)
+	return withHooks(ctx, jd.sqlExec, jd.mutation, jd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

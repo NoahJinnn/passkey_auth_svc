@@ -18,7 +18,7 @@ import (
 type JwkQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []jwk.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Jwk
 	// intermediate query (i.e. traversal path).
@@ -52,7 +52,7 @@ func (jq *JwkQuery) Unique(unique bool) *JwkQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (jq *JwkQuery) Order(o ...OrderFunc) *JwkQuery {
+func (jq *JwkQuery) Order(o ...jwk.OrderOption) *JwkQuery {
 	jq.order = append(jq.order, o...)
 	return jq
 }
@@ -246,7 +246,7 @@ func (jq *JwkQuery) Clone() *JwkQuery {
 	return &JwkQuery{
 		config:     jq.config,
 		ctx:        jq.ctx.Clone(),
-		order:      append([]OrderFunc{}, jq.order...),
+		order:      append([]jwk.OrderOption{}, jq.order...),
 		inters:     append([]Interceptor{}, jq.inters...),
 		predicates: append([]predicate.Jwk{}, jq.predicates...),
 		// clone intermediate query.

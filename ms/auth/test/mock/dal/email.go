@@ -41,7 +41,7 @@ func (r *emailRepo) ListByUser(ctx Ctx, userID uuid.UUID) ([]*ent.Email, error) 
 	var emails []*ent.Email
 
 	for _, m := range r.emails {
-		if m.UserID == userID {
+		if *m.UserID == userID {
 			emails = append(emails, m)
 		}
 	}

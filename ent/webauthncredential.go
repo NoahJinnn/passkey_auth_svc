@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/user"
@@ -42,7 +43,8 @@ type WebauthnCredential struct {
 	LastUsedAt time.Time `json:"last_used_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the WebauthnCredentialQuery when eager-loading is set.
-	Edges WebauthnCredentialEdges `json:"edges"`
+	Edges        WebauthnCredentialEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // WebauthnCredentialEdges holds the relations/edges for other nodes in the graph.
@@ -94,7 +96,7 @@ func (*WebauthnCredential) scanValues(columns []string) ([]any, error) {
 		case webauthncredential.FieldUserID, webauthncredential.FieldAaguid:
 			values[i] = new(uuid.UUID)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type WebauthnCredential", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -180,9 +182,17 @@ func (wc *WebauthnCredential) assignValues(columns []string, values []any) error
 			} else if value.Valid {
 				wc.LastUsedAt = value.Time
 			}
+		default:
+			wc.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the WebauthnCredential.
+// This includes values selected through modifiers, order, etc.
+func (wc *WebauthnCredential) Value(name string) (ent.Value, error) {
+	return wc.selectValues.Get(name)
 }
 
 // QueryWebauthnCredentialTransports queries the "webauthn_credential_transports" edge of the WebauthnCredential entity.

@@ -21,7 +21,7 @@ func (PrimaryEmail) Fields() []ent.Field {
 			return id
 		}).Immutable(),
 		field.UUID("email_id", uuid.UUID{}).Optional().Unique(),
-		field.UUID("user_id", uuid.UUID{}).Optional().Unique(),
+		field.UUID("user_id", uuid.UUID{}).Optional().Nillable().Unique(),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}

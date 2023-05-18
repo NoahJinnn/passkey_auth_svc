@@ -54,14 +54,14 @@ func (svc *userSvc) Create(ctx Ctx, address string) (newU *ent.User, emailID uui
 		} else {
 			email, err = client.Email.Create().
 				SetAddress(address).
-				SetUserID(newU.ID).
+				// SetUserID(newU.ID).
 				Save(ctx)
 			if err != nil {
 				return fmt.Errorf("failed creating email: %w", err)
 			}
 		}
 		_, err = client.PrimaryEmail.Create().
-			SetUserID(newU.ID).
+			// SetUserID(newU.ID).
 			SetEmailID(email.ID).
 			Save(ctx)
 		if err != nil {

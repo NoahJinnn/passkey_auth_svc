@@ -107,7 +107,7 @@ func (iu *IdentityUpdate) ClearEmail() *IdentityUpdate {
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (iu *IdentityUpdate) Save(ctx context.Context) (int, error) {
 	iu.defaults()
-	return withHooks[int, IdentityMutation](ctx, iu.sqlSave, iu.mutation, iu.hooks)
+	return withHooks(ctx, iu.sqlSave, iu.mutation, iu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -172,10 +172,7 @@ func (iu *IdentityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{identity.EmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: email.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(email.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -188,10 +185,7 @@ func (iu *IdentityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{identity.EmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: email.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(email.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -309,7 +303,7 @@ func (iuo *IdentityUpdateOne) Select(field string, fields ...string) *IdentityUp
 // Save executes the query and returns the updated Identity entity.
 func (iuo *IdentityUpdateOne) Save(ctx context.Context) (*Identity, error) {
 	iuo.defaults()
-	return withHooks[*Identity, IdentityMutation](ctx, iuo.sqlSave, iuo.mutation, iuo.hooks)
+	return withHooks(ctx, iuo.sqlSave, iuo.mutation, iuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -391,10 +385,7 @@ func (iuo *IdentityUpdateOne) sqlSave(ctx context.Context) (_node *Identity, err
 			Columns: []string{identity.EmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: email.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(email.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -407,10 +398,7 @@ func (iuo *IdentityUpdateOne) sqlSave(ctx context.Context) (_node *Identity, err
 			Columns: []string{identity.EmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: email.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(email.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

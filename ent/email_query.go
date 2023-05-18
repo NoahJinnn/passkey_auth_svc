@@ -24,7 +24,7 @@ import (
 type EmailQuery struct {
 	config
 	ctx              *QueryContext
-	order            []OrderFunc
+	order            []email.OrderOption
 	inters           []Interceptor
 	predicates       []predicate.Email
 	withUser         *UserQuery
@@ -62,7 +62,7 @@ func (eq *EmailQuery) Unique(unique bool) *EmailQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (eq *EmailQuery) Order(o ...OrderFunc) *EmailQuery {
+func (eq *EmailQuery) Order(o ...email.OrderOption) *EmailQuery {
 	eq.order = append(eq.order, o...)
 	return eq
 }
@@ -344,7 +344,7 @@ func (eq *EmailQuery) Clone() *EmailQuery {
 	return &EmailQuery{
 		config:           eq.config,
 		ctx:              eq.ctx.Clone(),
-		order:            append([]OrderFunc{}, eq.order...),
+		order:            append([]email.OrderOption{}, eq.order...),
 		inters:           append([]Interceptor{}, eq.inters...),
 		predicates:       append([]predicate.Email{}, eq.predicates...),
 		withUser:         eq.withUser.Clone(),
@@ -537,7 +537,10 @@ func (eq *EmailQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*E
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*Email)
 	for i := range nodes {
-		fk := nodes[i].UserID
+		if nodes[i].UserID == nil {
+			continue
+		}
+		fk := *nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -572,8 +575,11 @@ func (eq *EmailQuery) loadIdentities(ctx context.Context, query *IdentityQuery, 
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(identity.FieldEmailID)
+	}
 	query.Where(predicate.Identity(func(s *sql.Selector) {
-		s.Where(sql.InValues(email.IdentitiesColumn, fks...))
+		s.Where(sql.InValues(s.C(email.IdentitiesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -583,7 +589,7 @@ func (eq *EmailQuery) loadIdentities(ctx context.Context, query *IdentityQuery, 
 		fk := n.EmailID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "email_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "email_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -599,8 +605,11 @@ func (eq *EmailQuery) loadPasscodes(ctx context.Context, query *PasscodeQuery, n
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(passcode.FieldEmailID)
+	}
 	query.Where(predicate.Passcode(func(s *sql.Selector) {
-		s.Where(sql.InValues(email.PasscodesColumn, fks...))
+		s.Where(sql.InValues(s.C(email.PasscodesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -610,7 +619,7 @@ func (eq *EmailQuery) loadPasscodes(ctx context.Context, query *PasscodeQuery, n
 		fk := n.EmailID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "email_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "email_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -623,8 +632,11 @@ func (eq *EmailQuery) loadPrimaryEmail(ctx context.Context, query *PrimaryEmailQ
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(primaryemail.FieldEmailID)
+	}
 	query.Where(predicate.PrimaryEmail(func(s *sql.Selector) {
-		s.Where(sql.InValues(email.PrimaryEmailColumn, fks...))
+		s.Where(sql.InValues(s.C(email.PrimaryEmailColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -634,7 +646,7 @@ func (eq *EmailQuery) loadPrimaryEmail(ctx context.Context, query *PrimaryEmailQ
 		fk := n.EmailID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "email_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "email_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -665,6 +677,9 @@ func (eq *EmailQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != email.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if eq.withUser != nil {
+			_spec.Node.AddColumnOnce(email.FieldUserID)
 		}
 	}
 	if ps := eq.predicates; len(ps) > 0 {

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
@@ -20,7 +21,7 @@ type Email struct {
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
 	// UserID holds the value of the "user_id" field.
-	UserID uuid.UUID `json:"user_id,omitempty"`
+	UserID *uuid.UUID `json:"user_id,omitempty"`
 	// Address holds the value of the "address" field.
 	Address string `json:"address,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -29,7 +30,8 @@ type Email struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the EmailQuery when eager-loading is set.
-	Edges EmailEdges `json:"edges"`
+	Edges        EmailEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // EmailEdges holds the relations/edges for other nodes in the graph.
@@ -96,14 +98,16 @@ func (*Email) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case email.FieldUserID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case email.FieldAddress:
 			values[i] = new(sql.NullString)
 		case email.FieldCreatedAt, email.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case email.FieldID, email.FieldUserID:
+		case email.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Email", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -124,10 +128,11 @@ func (e *Email) assignValues(columns []string, values []any) error {
 				e.ID = *value
 			}
 		case email.FieldUserID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
-			} else if value != nil {
-				e.UserID = *value
+			} else if value.Valid {
+				e.UserID = new(uuid.UUID)
+				*e.UserID = *value.S.(*uuid.UUID)
 			}
 		case email.FieldAddress:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -147,9 +152,17 @@ func (e *Email) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				e.UpdatedAt = value.Time
 			}
+		default:
+			e.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Email.
+// This includes values selected through modifiers, order, etc.
+func (e *Email) Value(name string) (ent.Value, error) {
+	return e.selectValues.Get(name)
 }
 
 // QueryUser queries the "user" edge of the Email entity.
@@ -195,8 +208,10 @@ func (e *Email) String() string {
 	var builder strings.Builder
 	builder.WriteString("Email(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", e.ID))
-	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", e.UserID))
+	if v := e.UserID; v != nil {
+		builder.WriteString("user_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("address=")
 	builder.WriteString(e.Address)

@@ -34,15 +34,15 @@ func TestEmailHandler_ListByUser(t *testing.T) {
 			userId: uId1,
 			data: []*ent.Email{
 				{
-					UserID:  uId1,
+					UserID:  &uId1,
 					Address: "test1@gmail.com",
 				},
 				{
-					UserID:  uId1,
+					UserID:  &uId1,
 					Address: "test2@gmail.com",
 				},
 				{
-					UserID:  uId2,
+					UserID:  &uId2,
 					Address: "test1@gmail.com",
 				},
 			},
@@ -53,11 +53,11 @@ func TestEmailHandler_ListByUser(t *testing.T) {
 			userId: uId2,
 			data: []*ent.Email{
 				{
-					UserID:  uId1,
+					UserID:  &uId1,
 					Address: "test1@gmail.com",
 				},
 				{
-					UserID:  uId1,
+					UserID:  &uId1,
 					Address: "test2@gmail.com",
 				},
 			},

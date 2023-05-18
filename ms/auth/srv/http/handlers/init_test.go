@@ -84,7 +84,7 @@ var uId, _ = uuid.FromString(userId)
 var emails = []*ent.Email{
 	{
 		ID:      uId,
-		UserID:  uId,
+		UserID:  &uId,
 		Address: "john.doe@example.com",
 	},
 }
@@ -97,7 +97,7 @@ var users = []*ent.User{
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
-		user.Edges.PrimaryEmail = &ent.PrimaryEmail{ID: uId, UserID: uId}
+		user.Edges.PrimaryEmail = &ent.PrimaryEmail{ID: uId, UserID: &uId}
 		user.Edges.Emails = emails
 		return user
 	}(),

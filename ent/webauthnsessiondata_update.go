@@ -104,7 +104,7 @@ func (wsdu *WebauthnSessionDataUpdate) RemoveWebauthnSessionDataAllowedCredentia
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (wsdu *WebauthnSessionDataUpdate) Save(ctx context.Context) (int, error) {
 	wsdu.defaults()
-	return withHooks[int, WebauthnSessionDataMutation](ctx, wsdu.sqlSave, wsdu.mutation, wsdu.hooks)
+	return withHooks(ctx, wsdu.sqlSave, wsdu.mutation, wsdu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -169,10 +169,7 @@ func (wsdu *WebauthnSessionDataUpdate) sqlSave(ctx context.Context) (n int, err 
 			Columns: []string{webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: webauthnsessiondataallowedcredential.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthnsessiondataallowedcredential.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -185,10 +182,7 @@ func (wsdu *WebauthnSessionDataUpdate) sqlSave(ctx context.Context) (n int, err 
 			Columns: []string{webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: webauthnsessiondataallowedcredential.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthnsessiondataallowedcredential.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -204,10 +198,7 @@ func (wsdu *WebauthnSessionDataUpdate) sqlSave(ctx context.Context) (n int, err 
 			Columns: []string{webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: webauthnsessiondataallowedcredential.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthnsessiondataallowedcredential.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -322,7 +313,7 @@ func (wsduo *WebauthnSessionDataUpdateOne) Select(field string, fields ...string
 // Save executes the query and returns the updated WebauthnSessionData entity.
 func (wsduo *WebauthnSessionDataUpdateOne) Save(ctx context.Context) (*WebauthnSessionData, error) {
 	wsduo.defaults()
-	return withHooks[*WebauthnSessionData, WebauthnSessionDataMutation](ctx, wsduo.sqlSave, wsduo.mutation, wsduo.hooks)
+	return withHooks(ctx, wsduo.sqlSave, wsduo.mutation, wsduo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -404,10 +395,7 @@ func (wsduo *WebauthnSessionDataUpdateOne) sqlSave(ctx context.Context) (_node *
 			Columns: []string{webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: webauthnsessiondataallowedcredential.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthnsessiondataallowedcredential.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -420,10 +408,7 @@ func (wsduo *WebauthnSessionDataUpdateOne) sqlSave(ctx context.Context) (_node *
 			Columns: []string{webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: webauthnsessiondataallowedcredential.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthnsessiondataallowedcredential.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -439,10 +424,7 @@ func (wsduo *WebauthnSessionDataUpdateOne) sqlSave(ctx context.Context) (_node *
 			Columns: []string{webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: webauthnsessiondataallowedcredential.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthnsessiondataallowedcredential.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

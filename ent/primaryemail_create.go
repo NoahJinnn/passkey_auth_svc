@@ -111,7 +111,7 @@ func (pec *PrimaryEmailCreate) Mutation() *PrimaryEmailMutation {
 // Save creates the PrimaryEmail in the database.
 func (pec *PrimaryEmailCreate) Save(ctx context.Context) (*PrimaryEmail, error) {
 	pec.defaults()
-	return withHooks[*PrimaryEmail, PrimaryEmailMutation](ctx, pec.sqlSave, pec.mutation, pec.hooks)
+	return withHooks(ctx, pec.sqlSave, pec.mutation, pec.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -211,10 +211,7 @@ func (pec *PrimaryEmailCreate) createSpec() (*PrimaryEmail, *sqlgraph.CreateSpec
 			Columns: []string{primaryemail.EmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: email.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(email.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -231,16 +228,13 @@ func (pec *PrimaryEmailCreate) createSpec() (*PrimaryEmail, *sqlgraph.CreateSpec
 			Columns: []string{primaryemail.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.UserID = nodes[0]
+		_node.UserID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -270,8 +264,8 @@ func (pecb *PrimaryEmailCreateBulk) Save(ctx context.Context) ([]*PrimaryEmail, 
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, pecb.builders[i+1].mutation)
 				} else {

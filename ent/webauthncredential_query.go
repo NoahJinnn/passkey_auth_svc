@@ -22,7 +22,7 @@ import (
 type WebauthnCredentialQuery struct {
 	config
 	ctx                              *QueryContext
-	order                            []OrderFunc
+	order                            []webauthncredential.OrderOption
 	inters                           []Interceptor
 	predicates                       []predicate.WebauthnCredential
 	withWebauthnCredentialTransports *WebauthnCredentialTransportQuery
@@ -58,7 +58,7 @@ func (wcq *WebauthnCredentialQuery) Unique(unique bool) *WebauthnCredentialQuery
 }
 
 // Order specifies how the records should be ordered.
-func (wcq *WebauthnCredentialQuery) Order(o ...OrderFunc) *WebauthnCredentialQuery {
+func (wcq *WebauthnCredentialQuery) Order(o ...webauthncredential.OrderOption) *WebauthnCredentialQuery {
 	wcq.order = append(wcq.order, o...)
 	return wcq
 }
@@ -296,7 +296,7 @@ func (wcq *WebauthnCredentialQuery) Clone() *WebauthnCredentialQuery {
 	return &WebauthnCredentialQuery{
 		config:                           wcq.config,
 		ctx:                              wcq.ctx.Clone(),
-		order:                            append([]OrderFunc{}, wcq.order...),
+		order:                            append([]webauthncredential.OrderOption{}, wcq.order...),
 		inters:                           append([]Interceptor{}, wcq.inters...),
 		predicates:                       append([]predicate.WebauthnCredential{}, wcq.predicates...),
 		withWebauthnCredentialTransports: wcq.withWebauthnCredentialTransports.Clone(),
@@ -458,8 +458,11 @@ func (wcq *WebauthnCredentialQuery) loadWebauthnCredentialTransports(ctx context
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(webauthncredentialtransport.FieldWebauthnCredentialID)
+	}
 	query.Where(predicate.WebauthnCredentialTransport(func(s *sql.Selector) {
-		s.Where(sql.InValues(webauthncredential.WebauthnCredentialTransportsColumn, fks...))
+		s.Where(sql.InValues(s.C(webauthncredential.WebauthnCredentialTransportsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -469,7 +472,7 @@ func (wcq *WebauthnCredentialQuery) loadWebauthnCredentialTransports(ctx context
 		fk := n.WebauthnCredentialID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "webauthn_credential_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "webauthn_credential_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -529,6 +532,9 @@ func (wcq *WebauthnCredentialQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != webauthncredential.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if wcq.withUser != nil {
+			_spec.Node.AddColumnOnce(webauthncredential.FieldUserID)
 		}
 	}
 	if ps := wcq.predicates; len(ps) > 0 {

@@ -40,7 +40,7 @@ func (ju *JwkUpdate) Mutation() *JwkMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ju *JwkUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, JwkMutation](ctx, ju.sqlSave, ju.mutation, ju.hooks)
+	return withHooks(ctx, ju.sqlSave, ju.mutation, ju.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -123,7 +123,7 @@ func (juo *JwkUpdateOne) Select(field string, fields ...string) *JwkUpdateOne {
 
 // Save executes the query and returns the updated Jwk entity.
 func (juo *JwkUpdateOne) Save(ctx context.Context) (*Jwk, error) {
-	return withHooks[*Jwk, JwkMutation](ctx, juo.sqlSave, juo.mutation, juo.hooks)
+	return withHooks(ctx, juo.sqlSave, juo.mutation, juo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

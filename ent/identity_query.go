@@ -20,7 +20,7 @@ import (
 type IdentityQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []identity.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Identity
 	withEmail  *EmailQuery
@@ -55,7 +55,7 @@ func (iq *IdentityQuery) Unique(unique bool) *IdentityQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (iq *IdentityQuery) Order(o ...OrderFunc) *IdentityQuery {
+func (iq *IdentityQuery) Order(o ...identity.OrderOption) *IdentityQuery {
 	iq.order = append(iq.order, o...)
 	return iq
 }
@@ -271,7 +271,7 @@ func (iq *IdentityQuery) Clone() *IdentityQuery {
 	return &IdentityQuery{
 		config:     iq.config,
 		ctx:        iq.ctx.Clone(),
-		order:      append([]OrderFunc{}, iq.order...),
+		order:      append([]identity.OrderOption{}, iq.order...),
 		inters:     append([]Interceptor{}, iq.inters...),
 		predicates: append([]predicate.Identity{}, iq.predicates...),
 		withEmail:  iq.withEmail.Clone(),
@@ -455,6 +455,9 @@ func (iq *IdentityQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != identity.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if iq.withEmail != nil {
+			_spec.Node.AddColumnOnce(identity.FieldEmailID)
 		}
 	}
 	if ps := iq.predicates; len(ps) > 0 {

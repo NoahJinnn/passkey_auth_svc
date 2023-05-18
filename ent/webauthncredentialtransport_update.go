@@ -72,7 +72,7 @@ func (wctu *WebauthnCredentialTransportUpdate) ClearWebauthnCredential() *Webaut
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (wctu *WebauthnCredentialTransportUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, WebauthnCredentialTransportMutation](ctx, wctu.sqlSave, wctu.mutation, wctu.hooks)
+	return withHooks(ctx, wctu.sqlSave, wctu.mutation, wctu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -117,10 +117,7 @@ func (wctu *WebauthnCredentialTransportUpdate) sqlSave(ctx context.Context) (n i
 			Columns: []string{webauthncredentialtransport.WebauthnCredentialColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: webauthncredential.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthncredential.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -133,10 +130,7 @@ func (wctu *WebauthnCredentialTransportUpdate) sqlSave(ctx context.Context) (n i
 			Columns: []string{webauthncredentialtransport.WebauthnCredentialColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: webauthncredential.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthncredential.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -221,7 +215,7 @@ func (wctuo *WebauthnCredentialTransportUpdateOne) Select(field string, fields .
 
 // Save executes the query and returns the updated WebauthnCredentialTransport entity.
 func (wctuo *WebauthnCredentialTransportUpdateOne) Save(ctx context.Context) (*WebauthnCredentialTransport, error) {
-	return withHooks[*WebauthnCredentialTransport, WebauthnCredentialTransportMutation](ctx, wctuo.sqlSave, wctuo.mutation, wctuo.hooks)
+	return withHooks(ctx, wctuo.sqlSave, wctuo.mutation, wctuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -283,10 +277,7 @@ func (wctuo *WebauthnCredentialTransportUpdateOne) sqlSave(ctx context.Context) 
 			Columns: []string{webauthncredentialtransport.WebauthnCredentialColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: webauthncredential.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthncredential.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -299,10 +290,7 @@ func (wctuo *WebauthnCredentialTransportUpdateOne) sqlSave(ctx context.Context) 
 			Columns: []string{webauthncredentialtransport.WebauthnCredentialColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: webauthncredential.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthncredential.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
