@@ -59,6 +59,20 @@ func (eu *EmailUpdate) SetAddress(s string) *EmailUpdate {
 	return eu
 }
 
+// SetVerified sets the "verified" field.
+func (eu *EmailUpdate) SetVerified(b bool) *EmailUpdate {
+	eu.mutation.SetVerified(b)
+	return eu
+}
+
+// SetNillableVerified sets the "verified" field if the given value is not nil.
+func (eu *EmailUpdate) SetNillableVerified(b *bool) *EmailUpdate {
+	if b != nil {
+		eu.SetVerified(*b)
+	}
+	return eu
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (eu *EmailUpdate) SetUpdatedAt(t time.Time) *EmailUpdate {
 	eu.mutation.SetUpdatedAt(t)
@@ -225,6 +239,9 @@ func (eu *EmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := eu.mutation.Address(); ok {
 		_spec.SetField(email.FieldAddress, field.TypeString, value)
+	}
+	if value, ok := eu.mutation.Verified(); ok {
+		_spec.SetField(email.FieldVerified, field.TypeBool, value)
 	}
 	if value, ok := eu.mutation.UpdatedAt(); ok {
 		_spec.SetField(email.FieldUpdatedAt, field.TypeTime, value)
@@ -420,6 +437,20 @@ func (euo *EmailUpdateOne) ClearUserID() *EmailUpdateOne {
 // SetAddress sets the "address" field.
 func (euo *EmailUpdateOne) SetAddress(s string) *EmailUpdateOne {
 	euo.mutation.SetAddress(s)
+	return euo
+}
+
+// SetVerified sets the "verified" field.
+func (euo *EmailUpdateOne) SetVerified(b bool) *EmailUpdateOne {
+	euo.mutation.SetVerified(b)
+	return euo
+}
+
+// SetNillableVerified sets the "verified" field if the given value is not nil.
+func (euo *EmailUpdateOne) SetNillableVerified(b *bool) *EmailUpdateOne {
+	if b != nil {
+		euo.SetVerified(*b)
+	}
 	return euo
 }
 
@@ -619,6 +650,9 @@ func (euo *EmailUpdateOne) sqlSave(ctx context.Context) (_node *Email, err error
 	}
 	if value, ok := euo.mutation.Address(); ok {
 		_spec.SetField(email.FieldAddress, field.TypeString, value)
+	}
+	if value, ok := euo.mutation.Verified(); ok {
+		_spec.SetField(email.FieldVerified, field.TypeBool, value)
 	}
 	if value, ok := euo.mutation.UpdatedAt(); ok {
 		_spec.SetField(email.FieldUpdatedAt, field.TypeTime, value)

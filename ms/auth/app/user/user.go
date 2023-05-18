@@ -60,13 +60,7 @@ func (svc *userSvc) Create(ctx Ctx, address string) (newU *ent.User, emailID uui
 				return fmt.Errorf("failed creating email: %w", err)
 			}
 		}
-		_, err = client.PrimaryEmail.Create().
-			// SetUserID(newU.ID).
-			SetEmailID(email.ID).
-			Save(ctx)
-		if err != nil {
-			return fmt.Errorf("failed to store primary email: %w", err)
-		}
+
 		emailID = email.ID
 		return nil
 	}); err != nil {

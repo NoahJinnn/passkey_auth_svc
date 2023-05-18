@@ -24,6 +24,8 @@ type Email struct {
 	UserID *uuid.UUID `json:"user_id,omitempty"`
 	// Address holds the value of the "address" field.
 	Address string `json:"address,omitempty"`
+	// Verified holds the value of the "verified" field.
+	Verified bool `json:"verified,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -100,6 +102,8 @@ func (*Email) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case email.FieldUserID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
+		case email.FieldVerified:
+			values[i] = new(sql.NullBool)
 		case email.FieldAddress:
 			values[i] = new(sql.NullString)
 		case email.FieldCreatedAt, email.FieldUpdatedAt:
@@ -139,6 +143,12 @@ func (e *Email) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field address", values[i])
 			} else if value.Valid {
 				e.Address = value.String
+			}
+		case email.FieldVerified:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field verified", values[i])
+			} else if value.Valid {
+				e.Verified = value.Bool
 			}
 		case email.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -215,6 +225,9 @@ func (e *Email) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("address=")
 	builder.WriteString(e.Address)
+	builder.WriteString(", ")
+	builder.WriteString("verified=")
+	builder.WriteString(fmt.Sprintf("%v", e.Verified))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(e.CreatedAt.Format(time.ANSIC))

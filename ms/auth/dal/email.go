@@ -10,6 +10,7 @@ type IEmailRepo interface {
 	GetByAddress(ctx Ctx, address string) (*ent.Email, error)
 	GetById(ctx Ctx, id uuid.UUID) (*ent.Email, error)
 	ListByUser(ctx Ctx, userID uuid.UUID) ([]*ent.Email, error)
+	Update(ctx Ctx, email *ent.Email) error
 	Delete(ctx Ctx, email *ent.Email) error
 }
 
@@ -58,6 +59,16 @@ func (r *emailRepo) ListByUser(ctx Ctx, userID uuid.UUID) ([]*ent.Email, error) 
 	}
 
 	return emails, nil
+}
+
+func (r *emailRepo) Update(ctx Ctx, email *ent.Email) error {
+	_, err := r.db.Email.
+		UpdateOne(email).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *emailRepo) Delete(ctx Ctx, email *ent.Email) error {

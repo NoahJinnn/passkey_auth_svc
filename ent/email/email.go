@@ -19,6 +19,8 @@ const (
 	FieldUserID = "user_id"
 	// FieldAddress holds the string denoting the address field in the database.
 	FieldAddress = "address"
+	// FieldVerified holds the string denoting the verified field in the database.
+	FieldVerified = "verified"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -68,6 +70,7 @@ var Columns = []string{
 	FieldID,
 	FieldUserID,
 	FieldAddress,
+	FieldVerified,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
@@ -83,6 +86,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultVerified holds the default value on creation for the "verified" field.
+	DefaultVerified bool
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -109,6 +114,11 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 // ByAddress orders the results by the address field.
 func ByAddress(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAddress, opts...).ToFunc()
+}
+
+// ByVerified orders the results by the verified field.
+func ByVerified(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVerified, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.

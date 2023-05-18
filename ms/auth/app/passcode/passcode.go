@@ -139,6 +139,7 @@ func (svc *passcodeSvc) FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode strin
 	if err := svc.repo.WithTx(ctx, func(ctx Ctx, client *ent.Client) error {
 		passcodeRepo := svc.repo.GetPasscodeRepo()
 		userRepo := svc.repo.GetUserRepo()
+		emailRepo := svc.repo.GetEmailRepo()
 
 		passcode, err := passcodeRepo.GetById(ctx, passcodeId)
 		if err != nil {
@@ -209,6 +210,33 @@ func (svc *passcodeSvc) FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode strin
 		if passcode.Edges.User != nil && passcode.Edges.Email.UserID.String() != user.ID.String() {
 			return errorhandler.NewHTTPError(http.StatusForbidden, "email address has been claimed by another user")
 		}
+
+		if !passcode.Edges.Email.Verified {
+			// Update email verified status and assign the email address to the user.
+			passcode.Edges.Email.Verified = true
+			passcode.Edges.Email.UserID = &user.ID
+
+			err = emailRepo.Update(ctx, passcode.Edges.Email)
+			if err != nil {
+				return fmt.Errorf("failed to update the email verified status: %w", err)
+			}
+
+			if user.Edges.PrimaryEmail == nil {
+				_, err = client.PrimaryEmail.Create().
+					SetUserID(user.ID).
+					SetEmailID(passcode.Edges.Email.ID).
+					Save(ctx)
+				if err != nil {
+					return fmt.Errorf("failed to store primary email: %w", err)
+				}
+			}
+
+			// TODO: audit logger
+			if err != nil {
+				return fmt.Errorf("failed to create audit log: %w", err)
+			}
+		}
+
 		entPc = passcode
 		return nil
 	}); err != nil {
