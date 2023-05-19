@@ -50,6 +50,30 @@ func (h *EmailHandler) ListByUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
+func (h *EmailHandler) SetPrimaryEmail(c echo.Context) error {
+	sessionToken, ok := c.Get("session").(jwt.Token)
+	if !ok {
+		return errors.New("failed to cast session object")
+	}
+
+	userId, err := uuid.FromString(sessionToken.Subject())
+	if err != nil {
+		return fmt.Errorf("failed to parse subject as uuid: %w", err)
+	}
+
+	emailId, err := uuid.FromString(c.Param("id"))
+	if err != nil {
+		return errorhandler.NewHTTPError(http.StatusBadRequest).SetInternal(err)
+	}
+
+	err = h.GetEmailSvc().SetPrimaryEmail(c.Request().Context(), userId, emailId)
+	if err != nil {
+		return err
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}
+
 func (h *EmailHandler) Delete(c echo.Context) error {
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
