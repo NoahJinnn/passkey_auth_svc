@@ -54,10 +54,11 @@ var (
 )
 
 type Config struct {
-	Server      Server
-	Webauthn    WebauthnSettings
-	Passcode    Passcode
-	ServiceName string
+	Server            Server
+	Webauthn          WebauthnSettings
+	Passcode          Passcode
+	ServiceName       string
+	MaxEmailAddresses int
 }
 
 // Save apple association site file to static folder
@@ -155,6 +156,7 @@ func GetServe() (c *Config, err error) {
 			OneSignalAppID:  own.OneSignalAppID.Value(&err),
 			TTL:             int32(own.TTL.Value(&err)),
 		},
+		MaxEmailAddresses: 5,
 	}
 	if err != nil {
 		return nil, appcfg.WrapPErr(err, fs.Serve, own)

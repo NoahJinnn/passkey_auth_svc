@@ -56,6 +56,18 @@ func (r *emailRepo) ListByUser(ctx Ctx, userID uuid.UUID) ([]*ent.Email, error) 
 	return emails, nil
 }
 
+func (r *emailRepo) CountByUserId(ctx Ctx, userID uuid.UUID) (int, error) {
+	var count int
+
+	for _, m := range r.emails {
+		if *m.UserID == userID {
+			count++
+		}
+	}
+
+	return count, nil
+}
+
 func (r *emailRepo) Update(ctx Ctx, email *ent.Email) error {
 	for i, m := range r.emails {
 		if email.ID == m.ID {

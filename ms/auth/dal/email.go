@@ -12,6 +12,7 @@ type IEmailRepo interface {
 	GetById(ctx Ctx, id uuid.UUID) (*ent.Email, error)
 	GetPrimary(ctx Ctx, emailId uuid.UUID) (*ent.PrimaryEmail, error)
 	ListByUser(ctx Ctx, userID uuid.UUID) ([]*ent.Email, error)
+	CountByUserId(ctx Ctx, userID uuid.UUID) (int, error)
 	Update(ctx Ctx, email *ent.Email) error
 	UpdatePrimary(ctx Ctx, primary ent.PrimaryEmail) error
 	Delete(ctx Ctx, email *ent.Email) error
@@ -89,6 +90,19 @@ func (r *emailRepo) ListByUser(ctx Ctx, userID uuid.UUID) ([]*ent.Email, error) 
 	}
 
 	return emails, nil
+}
+
+func (r *emailRepo) CountByUserId(ctx Ctx, userID uuid.UUID) (int, error) {
+	cnt, err := r.db.Email.
+		Query().
+		Where(email.UserID(userID)).
+		Count(ctx)
+
+	if err != nil {
+		return -1, err
+	}
+
+	return cnt, nil
 }
 
 func (r *emailRepo) Update(ctx Ctx, email *ent.Email) error {

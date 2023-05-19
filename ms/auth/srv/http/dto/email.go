@@ -17,3 +17,7 @@ func FromEmailModel(email *ent.Email) *EmailResponse {
 		Address: email.Address,
 	}
 }
+
+type EmailCreateRequest struct {
+	Address string `json:"address"`
+}
