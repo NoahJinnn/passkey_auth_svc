@@ -207,7 +207,7 @@ func (svc *passcodeSvc) FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode strin
 			return fmt.Errorf("failed to delete passcode: %w", err)
 		}
 
-		if passcode.Edges.User != nil && passcode.Edges.Email.UserID.String() != user.ID.String() {
+		if passcode.Edges.User != nil && passcode.Edges.Email.UserID != nil && passcode.Edges.Email.UserID.String() != user.ID.String() {
 			return errorhandler.NewHTTPError(http.StatusForbidden, "email address has been claimed by another user")
 		}
 
