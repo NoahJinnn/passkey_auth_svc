@@ -39,7 +39,6 @@ func New(cfg *config.Config, repo *dal.AuthRepo) App {
 	waClient, err := webauthn.New(&webauthn.Config{
 		RPDisplayName:         cfg.Webauthn.RelyingParty.DisplayName,
 		RPID:                  cfg.Webauthn.RelyingParty.Id,
-		RPOrigin:              cfg.Webauthn.RelyingParty.Origin,
 		RPOrigins:             cfg.Webauthn.RelyingParty.Origins,
 		AttestationPreference: protocol.PreferNoAttestation,
 		AuthenticatorSelection: protocol.AuthenticatorSelection{
@@ -54,7 +53,7 @@ func New(cfg *config.Config, repo *dal.AuthRepo) App {
 	waSvc := wa.NewWebAuthn(cfg, repo, waClient)
 	userSvc := user.NewUserSvc(cfg, repo)
 	passcodeSvc := passcode.NewPasscodeSvc(cfg, repo)
-	emailSvc := email.NewEmailSvc(repo)
+	emailSvc := email.NewEmailSvc(cfg, repo)
 
 	if err != nil {
 		panic(fmt.Errorf("failed to create webauthn instance: %w", err))

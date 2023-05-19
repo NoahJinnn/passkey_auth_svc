@@ -16,7 +16,5 @@ type RelyingParty struct {
 	Id          string
 	DisplayName string `split_words:"true"`
 	Icon        string
-	// Deprecated: Use Origins instead
-	Origin  string
-	Origins []string
+	Origins     []string
 }
