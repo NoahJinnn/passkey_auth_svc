@@ -4,6 +4,9 @@ package webauthncredential
 
 import (
 	"time"
+
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -89,3 +92,101 @@ var (
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
 )
+
+// OrderOption defines the ordering options for the WebauthnCredential queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByUserID orders the results by the user_id field.
+func ByUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserID, opts...).ToFunc()
+}
+
+// ByPublicKey orders the results by the public_key field.
+func ByPublicKey(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPublicKey, opts...).ToFunc()
+}
+
+// ByAttestationType orders the results by the attestation_type field.
+func ByAttestationType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAttestationType, opts...).ToFunc()
+}
+
+// ByAaguid orders the results by the aaguid field.
+func ByAaguid(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAaguid, opts...).ToFunc()
+}
+
+// BySignCount orders the results by the sign_count field.
+func BySignCount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSignCount, opts...).ToFunc()
+}
+
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByBackupEligible orders the results by the backup_eligible field.
+func ByBackupEligible(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBackupEligible, opts...).ToFunc()
+}
+
+// ByBackupState orders the results by the backup_state field.
+func ByBackupState(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBackupState, opts...).ToFunc()
+}
+
+// ByLastUsedAt orders the results by the last_used_at field.
+func ByLastUsedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastUsedAt, opts...).ToFunc()
+}
+
+// ByWebauthnCredentialTransportsCount orders the results by webauthn_credential_transports count.
+func ByWebauthnCredentialTransportsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newWebauthnCredentialTransportsStep(), opts...)
+	}
+}
+
+// ByWebauthnCredentialTransports orders the results by webauthn_credential_transports terms.
+func ByWebauthnCredentialTransports(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newWebauthnCredentialTransportsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByUserField orders the results by user field.
+func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newWebauthnCredentialTransportsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(WebauthnCredentialTransportsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, WebauthnCredentialTransportsTable, WebauthnCredentialTransportsColumn),
+	)
+}
+func newUserStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(UserInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+	)
+}

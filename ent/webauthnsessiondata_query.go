@@ -21,7 +21,7 @@ import (
 type WebauthnSessionDataQuery struct {
 	config
 	ctx                                       *QueryContext
-	order                                     []OrderFunc
+	order                                     []webauthnsessiondata.OrderOption
 	inters                                    []Interceptor
 	predicates                                []predicate.WebauthnSessionData
 	withWebauthnSessionDataAllowedCredentials *WebauthnSessionDataAllowedCredentialQuery
@@ -56,7 +56,7 @@ func (wsdq *WebauthnSessionDataQuery) Unique(unique bool) *WebauthnSessionDataQu
 }
 
 // Order specifies how the records should be ordered.
-func (wsdq *WebauthnSessionDataQuery) Order(o ...OrderFunc) *WebauthnSessionDataQuery {
+func (wsdq *WebauthnSessionDataQuery) Order(o ...webauthnsessiondata.OrderOption) *WebauthnSessionDataQuery {
 	wsdq.order = append(wsdq.order, o...)
 	return wsdq
 }
@@ -272,7 +272,7 @@ func (wsdq *WebauthnSessionDataQuery) Clone() *WebauthnSessionDataQuery {
 	return &WebauthnSessionDataQuery{
 		config:     wsdq.config,
 		ctx:        wsdq.ctx.Clone(),
-		order:      append([]OrderFunc{}, wsdq.order...),
+		order:      append([]webauthnsessiondata.OrderOption{}, wsdq.order...),
 		inters:     append([]Interceptor{}, wsdq.inters...),
 		predicates: append([]predicate.WebauthnSessionData{}, wsdq.predicates...),
 		withWebauthnSessionDataAllowedCredentials: wsdq.withWebauthnSessionDataAllowedCredentials.Clone(),
@@ -417,8 +417,11 @@ func (wsdq *WebauthnSessionDataQuery) loadWebauthnSessionDataAllowedCredentials(
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(webauthnsessiondataallowedcredential.FieldWebauthnSessionDataID)
+	}
 	query.Where(predicate.WebauthnSessionDataAllowedCredential(func(s *sql.Selector) {
-		s.Where(sql.InValues(webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn, fks...))
+		s.Where(sql.InValues(s.C(webauthnsessiondata.WebauthnSessionDataAllowedCredentialsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -428,7 +431,7 @@ func (wsdq *WebauthnSessionDataQuery) loadWebauthnSessionDataAllowedCredentials(
 		fk := n.WebauthnSessionDataID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "webauthn_session_data_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "webauthn_session_data_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

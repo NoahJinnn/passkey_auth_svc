@@ -81,7 +81,7 @@ func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) ClearWebauthnSessionDa
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) Save(ctx context.Context) (int, error) {
 	wsdacu.defaults()
-	return withHooks[int, WebauthnSessionDataAllowedCredentialMutation](ctx, wsdacu.sqlSave, wsdacu.mutation, wsdacu.hooks)
+	return withHooks(ctx, wsdacu.sqlSave, wsdacu.mutation, wsdacu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -137,10 +137,7 @@ func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) sqlSave(ctx context.Co
 			Columns: []string{webauthnsessiondataallowedcredential.WebauthnSessionDataColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: webauthnsessiondata.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthnsessiondata.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -153,10 +150,7 @@ func (wsdacu *WebauthnSessionDataAllowedCredentialUpdate) sqlSave(ctx context.Co
 			Columns: []string{webauthnsessiondataallowedcredential.WebauthnSessionDataColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: webauthnsessiondata.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthnsessiondata.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -248,7 +242,7 @@ func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) Select(field strin
 // Save executes the query and returns the updated WebauthnSessionDataAllowedCredential entity.
 func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) Save(ctx context.Context) (*WebauthnSessionDataAllowedCredential, error) {
 	wsdacuo.defaults()
-	return withHooks[*WebauthnSessionDataAllowedCredential, WebauthnSessionDataAllowedCredentialMutation](ctx, wsdacuo.sqlSave, wsdacuo.mutation, wsdacuo.hooks)
+	return withHooks(ctx, wsdacuo.sqlSave, wsdacuo.mutation, wsdacuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -321,10 +315,7 @@ func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) sqlSave(ctx contex
 			Columns: []string{webauthnsessiondataallowedcredential.WebauthnSessionDataColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: webauthnsessiondata.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthnsessiondata.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -337,10 +328,7 @@ func (wsdacuo *WebauthnSessionDataAllowedCredentialUpdateOne) sqlSave(ctx contex
 			Columns: []string{webauthnsessiondataallowedcredential.WebauthnSessionDataColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: webauthnsessiondata.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthnsessiondata.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

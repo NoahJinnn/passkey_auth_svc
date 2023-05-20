@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/http/errorhandler"
@@ -48,6 +49,57 @@ func (h *EmailHandler) ListByUser(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, resp)
+}
+
+func (h *EmailHandler) Create(c echo.Context) error {
+	sessionToken, ok := c.Get("session").(jwt.Token)
+	if !ok {
+		return errors.New("failed to cast session object")
+	}
+
+	userId, err := uuid.FromString(sessionToken.Subject())
+	if err != nil {
+		return fmt.Errorf("failed to parse subject as uuid: %w", err)
+	}
+
+	var body dto.EmailCreateRequest
+	err = (&echo.DefaultBinder{}).BindBody(c, &body)
+	if err != nil {
+		return errorhandler.ToHttpError(err)
+	}
+
+	newEmailAddress := strings.ToLower(body.Address)
+
+	email, err := h.GetEmailSvc().Create(c.Request().Context(), userId, newEmailAddress)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, email)
+}
+
+func (h *EmailHandler) SetPrimaryEmail(c echo.Context) error {
+	sessionToken, ok := c.Get("session").(jwt.Token)
+	if !ok {
+		return errors.New("failed to cast session object")
+	}
+
+	userId, err := uuid.FromString(sessionToken.Subject())
+	if err != nil {
+		return fmt.Errorf("failed to parse subject as uuid: %w", err)
+	}
+
+	emailId, err := uuid.FromString(c.Param("id"))
+	if err != nil {
+		return errorhandler.NewHTTPError(http.StatusBadRequest).SetInternal(err)
+	}
+
+	err = h.GetEmailSvc().SetPrimaryEmail(c.Request().Context(), userId, emailId)
+	if err != nil {
+		return err
+	}
+
+	return c.NoContent(http.StatusNoContent)
 }
 
 func (h *EmailHandler) Delete(c echo.Context) error {

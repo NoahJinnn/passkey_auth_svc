@@ -390,11 +390,7 @@ func HasEmail() predicate.Passcode {
 // HasEmailWith applies the HasEdge predicate on the "email" edge with a given conditions (other predicates).
 func HasEmailWith(preds ...predicate.Email) predicate.Passcode {
 	return predicate.Passcode(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(EmailInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, EmailTable, EmailColumn),
-		)
+		step := newEmailStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -417,11 +413,7 @@ func HasUser() predicate.Passcode {
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.Passcode {
 	return predicate.Passcode(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UserInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
-		)
+		step := newUserStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

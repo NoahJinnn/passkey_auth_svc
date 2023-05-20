@@ -27,7 +27,7 @@ func (pd *PasscodeDelete) Where(ps ...predicate.Passcode) *PasscodeDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (pd *PasscodeDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, PasscodeMutation](ctx, pd.sqlExec, pd.mutation, pd.hooks)
+	return withHooks(ctx, pd.sqlExec, pd.mutation, pd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

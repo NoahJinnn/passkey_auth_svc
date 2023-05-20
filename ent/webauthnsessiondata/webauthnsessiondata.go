@@ -5,6 +5,8 @@ package webauthnsessiondata
 import (
 	"time"
 
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/gofrs/uuid"
 )
 
@@ -69,3 +71,62 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// OrderOption defines the ordering options for the WebauthnSessionData queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByChallenge orders the results by the challenge field.
+func ByChallenge(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldChallenge, opts...).ToFunc()
+}
+
+// ByUserID orders the results by the user_id field.
+func ByUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserID, opts...).ToFunc()
+}
+
+// ByUserVerification orders the results by the user_verification field.
+func ByUserVerification(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserVerification, opts...).ToFunc()
+}
+
+// ByOperation orders the results by the operation field.
+func ByOperation(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOperation, opts...).ToFunc()
+}
+
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByWebauthnSessionDataAllowedCredentialsCount orders the results by webauthn_session_data_allowed_credentials count.
+func ByWebauthnSessionDataAllowedCredentialsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newWebauthnSessionDataAllowedCredentialsStep(), opts...)
+	}
+}
+
+// ByWebauthnSessionDataAllowedCredentials orders the results by webauthn_session_data_allowed_credentials terms.
+func ByWebauthnSessionDataAllowedCredentials(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newWebauthnSessionDataAllowedCredentialsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newWebauthnSessionDataAllowedCredentialsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(WebauthnSessionDataAllowedCredentialsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, WebauthnSessionDataAllowedCredentialsTable, WebauthnSessionDataAllowedCredentialsColumn),
+	)
+}

@@ -24,7 +24,7 @@ import (
 type UserQuery struct {
 	config
 	ctx                     *QueryContext
-	order                   []OrderFunc
+	order                   []user.OrderOption
 	inters                  []Interceptor
 	predicates              []predicate.User
 	withEmails              *EmailQuery
@@ -62,7 +62,7 @@ func (uq *UserQuery) Unique(unique bool) *UserQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (uq *UserQuery) Order(o ...OrderFunc) *UserQuery {
+func (uq *UserQuery) Order(o ...user.OrderOption) *UserQuery {
 	uq.order = append(uq.order, o...)
 	return uq
 }
@@ -344,7 +344,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 	return &UserQuery{
 		config:                  uq.config,
 		ctx:                     uq.ctx.Clone(),
-		order:                   append([]OrderFunc{}, uq.order...),
+		order:                   append([]user.OrderOption{}, uq.order...),
 		inters:                  append([]Interceptor{}, uq.inters...),
 		predicates:              append([]predicate.User{}, uq.predicates...),
 		withEmails:              uq.withEmails.Clone(),
@@ -546,8 +546,11 @@ func (uq *UserQuery) loadEmails(ctx context.Context, query *EmailQuery, nodes []
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(email.FieldUserID)
+	}
 	query.Where(predicate.Email(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.EmailsColumn, fks...))
+		s.Where(sql.InValues(s.C(user.EmailsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -555,9 +558,12 @@ func (uq *UserQuery) loadEmails(ctx context.Context, query *EmailQuery, nodes []
 	}
 	for _, n := range neighbors {
 		fk := n.UserID
-		node, ok := nodeids[fk]
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -573,8 +579,11 @@ func (uq *UserQuery) loadPasscodes(ctx context.Context, query *PasscodeQuery, no
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(passcode.FieldUserID)
+	}
 	query.Where(predicate.Passcode(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.PasscodesColumn, fks...))
+		s.Where(sql.InValues(s.C(user.PasscodesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -584,7 +593,7 @@ func (uq *UserQuery) loadPasscodes(ctx context.Context, query *PasscodeQuery, no
 		fk := n.UserID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -597,8 +606,11 @@ func (uq *UserQuery) loadPrimaryEmail(ctx context.Context, query *PrimaryEmailQu
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(primaryemail.FieldUserID)
+	}
 	query.Where(predicate.PrimaryEmail(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.PrimaryEmailColumn, fks...))
+		s.Where(sql.InValues(s.C(user.PrimaryEmailColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -606,9 +618,12 @@ func (uq *UserQuery) loadPrimaryEmail(ctx context.Context, query *PrimaryEmailQu
 	}
 	for _, n := range neighbors {
 		fk := n.UserID
-		node, ok := nodeids[fk]
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -624,8 +639,11 @@ func (uq *UserQuery) loadWebauthnCredentials(ctx context.Context, query *Webauth
 			init(nodes[i])
 		}
 	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(webauthncredential.FieldUserID)
+	}
 	query.Where(predicate.WebauthnCredential(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.WebauthnCredentialsColumn, fks...))
+		s.Where(sql.InValues(s.C(user.WebauthnCredentialsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -635,7 +653,7 @@ func (uq *UserQuery) loadWebauthnCredentials(ctx context.Context, query *Webauth
 		fk := n.UserID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

@@ -20,7 +20,7 @@ import (
 type WebauthnSessionDataAllowedCredentialQuery struct {
 	config
 	ctx                     *QueryContext
-	order                   []OrderFunc
+	order                   []webauthnsessiondataallowedcredential.OrderOption
 	inters                  []Interceptor
 	predicates              []predicate.WebauthnSessionDataAllowedCredential
 	withWebauthnSessionData *WebauthnSessionDataQuery
@@ -55,7 +55,7 @@ func (wsdacq *WebauthnSessionDataAllowedCredentialQuery) Unique(unique bool) *We
 }
 
 // Order specifies how the records should be ordered.
-func (wsdacq *WebauthnSessionDataAllowedCredentialQuery) Order(o ...OrderFunc) *WebauthnSessionDataAllowedCredentialQuery {
+func (wsdacq *WebauthnSessionDataAllowedCredentialQuery) Order(o ...webauthnsessiondataallowedcredential.OrderOption) *WebauthnSessionDataAllowedCredentialQuery {
 	wsdacq.order = append(wsdacq.order, o...)
 	return wsdacq
 }
@@ -271,7 +271,7 @@ func (wsdacq *WebauthnSessionDataAllowedCredentialQuery) Clone() *WebauthnSessio
 	return &WebauthnSessionDataAllowedCredentialQuery{
 		config:                  wsdacq.config,
 		ctx:                     wsdacq.ctx.Clone(),
-		order:                   append([]OrderFunc{}, wsdacq.order...),
+		order:                   append([]webauthnsessiondataallowedcredential.OrderOption{}, wsdacq.order...),
 		inters:                  append([]Interceptor{}, wsdacq.inters...),
 		predicates:              append([]predicate.WebauthnSessionDataAllowedCredential{}, wsdacq.predicates...),
 		withWebauthnSessionData: wsdacq.withWebauthnSessionData.Clone(),
@@ -455,6 +455,9 @@ func (wsdacq *WebauthnSessionDataAllowedCredentialQuery) querySpec() *sqlgraph.Q
 			if fields[i] != webauthnsessiondataallowedcredential.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if wsdacq.withWebauthnSessionData != nil {
+			_spec.Node.AddColumnOnce(webauthnsessiondataallowedcredential.FieldWebauthnSessionDataID)
 		}
 	}
 	if ps := wsdacq.predicates; len(ps) > 0 {

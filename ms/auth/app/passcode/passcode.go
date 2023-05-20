@@ -78,6 +78,7 @@ func (svc *passcodeSvc) InitLogin(ctx Ctx, userId uuid.UUID, emailId uuid.UUID, 
 		}
 	} else if e := user.Edges.PrimaryEmail; e == nil {
 		// Can't determine email address to which the passcode should be sent to
+		// Primary email is the fallback email address if no emailId is specified
 		return nil, errorhandler.NewHTTPError(http.StatusBadRequest, "an emailId needs to be specified")
 	} else {
 		// Send the passcode to the primary email address
@@ -120,6 +121,7 @@ func (svc *passcodeSvc) InitLogin(ctx Ctx, userId uuid.UUID, emailId uuid.UUID, 
 	if err != nil {
 		return nil, fmt.Errorf("failed to render email template: %w", err)
 	}
+
 	mailSubject := svc.renderer.Translate(acceptLang, "email_subject_login", data)
 	err = svc.mailer.Send([]string{email.Address}, mailSubject, str)
 	if err != nil {
@@ -137,6 +139,7 @@ func (svc *passcodeSvc) FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode strin
 	if err := svc.repo.WithTx(ctx, func(ctx Ctx, client *ent.Client) error {
 		passcodeRepo := svc.repo.GetPasscodeRepo()
 		userRepo := svc.repo.GetUserRepo()
+		emailRepo := svc.repo.GetEmailRepo()
 
 		passcode, err := passcodeRepo.GetById(ctx, passcodeId)
 		if err != nil {
@@ -156,6 +159,7 @@ func (svc *passcodeSvc) FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode strin
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)
 		}
+
 		lastVerificationTime := passcode.CreatedAt.Add(time.Duration(passcode.TTL) * time.Second)
 		if lastVerificationTime.Before(startTime) {
 			// TODO: audit logger
@@ -167,6 +171,8 @@ func (svc *passcodeSvc) FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode strin
 		}
 
 		err = bcrypt.CompareHashAndPassword([]byte(passcode.Code), []byte(reqCode))
+
+		// Retry logic when passcode is not match
 		if err != nil {
 			passcode.TryCount = passcode.TryCount + 1
 
@@ -201,9 +207,36 @@ func (svc *passcodeSvc) FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode strin
 			return fmt.Errorf("failed to delete passcode: %w", err)
 		}
 
-		if passcode.Edges.User != nil && passcode.Edges.Email.UserID.String() != user.ID.String() {
+		if passcode.Edges.User != nil && passcode.Edges.Email.UserID != nil && passcode.Edges.Email.UserID.String() != user.ID.String() {
 			return errorhandler.NewHTTPError(http.StatusForbidden, "email address has been claimed by another user")
 		}
+
+		if !passcode.Edges.Email.Verified {
+			// Update email verified status and assign the email address to the user.
+			passcode.Edges.Email.Verified = true
+			passcode.Edges.Email.UserID = &user.ID
+
+			err = emailRepo.Update(ctx, passcode.Edges.Email)
+			if err != nil {
+				return fmt.Errorf("failed to update the email verified status: %w", err)
+			}
+
+			if user.Edges.PrimaryEmail == nil {
+				_, err = client.PrimaryEmail.Create().
+					SetUserID(user.ID).
+					SetEmailID(passcode.Edges.Email.ID).
+					Save(ctx)
+				if err != nil {
+					return fmt.Errorf("failed to store primary email: %w", err)
+				}
+			}
+
+			// TODO: audit logger
+			if err != nil {
+				return fmt.Errorf("failed to create audit log: %w", err)
+			}
+		}
+
 		entPc = passcode
 		return nil
 	}); err != nil {

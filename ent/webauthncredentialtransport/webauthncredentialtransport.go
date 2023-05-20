@@ -3,6 +3,8 @@
 package webauthncredentialtransport
 
 import (
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/gofrs/uuid"
 )
 
@@ -49,3 +51,35 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// OrderOption defines the ordering options for the WebauthnCredentialTransport queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByWebauthnCredentialID orders the results by the webauthn_credential_id field.
+func ByWebauthnCredentialID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWebauthnCredentialID, opts...).ToFunc()
+}
+
+// ByWebauthnCredentialField orders the results by webauthn_credential field.
+func ByWebauthnCredentialField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newWebauthnCredentialStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newWebauthnCredentialStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(WebauthnCredentialInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, WebauthnCredentialTable, WebauthnCredentialColumn),
+	)
+}

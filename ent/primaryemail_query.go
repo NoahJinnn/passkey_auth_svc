@@ -21,7 +21,7 @@ import (
 type PrimaryEmailQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []primaryemail.OrderOption
 	inters     []Interceptor
 	predicates []predicate.PrimaryEmail
 	withEmail  *EmailQuery
@@ -57,7 +57,7 @@ func (peq *PrimaryEmailQuery) Unique(unique bool) *PrimaryEmailQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (peq *PrimaryEmailQuery) Order(o ...OrderFunc) *PrimaryEmailQuery {
+func (peq *PrimaryEmailQuery) Order(o ...primaryemail.OrderOption) *PrimaryEmailQuery {
 	peq.order = append(peq.order, o...)
 	return peq
 }
@@ -295,7 +295,7 @@ func (peq *PrimaryEmailQuery) Clone() *PrimaryEmailQuery {
 	return &PrimaryEmailQuery{
 		config:     peq.config,
 		ctx:        peq.ctx.Clone(),
-		order:      append([]OrderFunc{}, peq.order...),
+		order:      append([]primaryemail.OrderOption{}, peq.order...),
 		inters:     append([]Interceptor{}, peq.inters...),
 		predicates: append([]predicate.PrimaryEmail{}, peq.predicates...),
 		withEmail:  peq.withEmail.Clone(),
@@ -477,7 +477,10 @@ func (peq *PrimaryEmailQuery) loadUser(ctx context.Context, query *UserQuery, no
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*PrimaryEmail)
 	for i := range nodes {
-		fk := nodes[i].UserID
+		if nodes[i].UserID == nil {
+			continue
+		}
+		fk := *nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -527,6 +530,12 @@ func (peq *PrimaryEmailQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != primaryemail.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if peq.withEmail != nil {
+			_spec.Node.AddColumnOnce(primaryemail.FieldEmailID)
+		}
+		if peq.withUser != nil {
+			_spec.Node.AddColumnOnce(primaryemail.FieldUserID)
 		}
 	}
 	if ps := peq.predicates; len(ps) > 0 {

@@ -21,7 +21,7 @@ import (
 type PasscodeQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []passcode.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Passcode
 	withEmail  *EmailQuery
@@ -57,7 +57,7 @@ func (pq *PasscodeQuery) Unique(unique bool) *PasscodeQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (pq *PasscodeQuery) Order(o ...OrderFunc) *PasscodeQuery {
+func (pq *PasscodeQuery) Order(o ...passcode.OrderOption) *PasscodeQuery {
 	pq.order = append(pq.order, o...)
 	return pq
 }
@@ -295,7 +295,7 @@ func (pq *PasscodeQuery) Clone() *PasscodeQuery {
 	return &PasscodeQuery{
 		config:     pq.config,
 		ctx:        pq.ctx.Clone(),
-		order:      append([]OrderFunc{}, pq.order...),
+		order:      append([]passcode.OrderOption{}, pq.order...),
 		inters:     append([]Interceptor{}, pq.inters...),
 		predicates: append([]predicate.Passcode{}, pq.predicates...),
 		withEmail:  pq.withEmail.Clone(),
@@ -527,6 +527,12 @@ func (pq *PasscodeQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != passcode.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if pq.withEmail != nil {
+			_spec.Node.AddColumnOnce(passcode.FieldEmailID)
+		}
+		if pq.withUser != nil {
+			_spec.Node.AddColumnOnce(passcode.FieldUserID)
 		}
 	}
 	if ps := pq.predicates; len(ps) > 0 {

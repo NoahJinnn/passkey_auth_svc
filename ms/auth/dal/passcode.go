@@ -25,6 +25,8 @@ func (r *passcodeRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.Passcode, error) {
 	pc, err := r.db.Passcode.
 		Query().
 		Where(passcode.ID(id)).
+		WithEmail().
+		WithUser().
 		Only(ctx)
 
 	if err != nil {

@@ -27,7 +27,7 @@ func (ped *PrimaryEmailDelete) Where(ps ...predicate.PrimaryEmail) *PrimaryEmail
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ped *PrimaryEmailDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, PrimaryEmailMutation](ctx, ped.sqlExec, ped.mutation, ped.hooks)
+	return withHooks(ctx, ped.sqlExec, ped.mutation, ped.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

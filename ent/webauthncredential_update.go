@@ -195,7 +195,7 @@ func (wcu *WebauthnCredentialUpdate) ClearUser() *WebauthnCredentialUpdate {
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (wcu *WebauthnCredentialUpdate) Save(ctx context.Context) (int, error) {
 	wcu.defaults()
-	return withHooks[int, WebauthnCredentialMutation](ctx, wcu.sqlSave, wcu.mutation, wcu.hooks)
+	return withHooks(ctx, wcu.sqlSave, wcu.mutation, wcu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -281,10 +281,7 @@ func (wcu *WebauthnCredentialUpdate) sqlSave(ctx context.Context) (n int, err er
 			Columns: []string{webauthncredential.WebauthnCredentialTransportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: webauthncredentialtransport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthncredentialtransport.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -297,10 +294,7 @@ func (wcu *WebauthnCredentialUpdate) sqlSave(ctx context.Context) (n int, err er
 			Columns: []string{webauthncredential.WebauthnCredentialTransportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: webauthncredentialtransport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthncredentialtransport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -316,10 +310,7 @@ func (wcu *WebauthnCredentialUpdate) sqlSave(ctx context.Context) (n int, err er
 			Columns: []string{webauthncredential.WebauthnCredentialTransportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: webauthncredentialtransport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthncredentialtransport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -335,10 +326,7 @@ func (wcu *WebauthnCredentialUpdate) sqlSave(ctx context.Context) (n int, err er
 			Columns: []string{webauthncredential.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -351,10 +339,7 @@ func (wcu *WebauthnCredentialUpdate) sqlSave(ctx context.Context) (n int, err er
 			Columns: []string{webauthncredential.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -559,7 +544,7 @@ func (wcuo *WebauthnCredentialUpdateOne) Select(field string, fields ...string) 
 // Save executes the query and returns the updated WebauthnCredential entity.
 func (wcuo *WebauthnCredentialUpdateOne) Save(ctx context.Context) (*WebauthnCredential, error) {
 	wcuo.defaults()
-	return withHooks[*WebauthnCredential, WebauthnCredentialMutation](ctx, wcuo.sqlSave, wcuo.mutation, wcuo.hooks)
+	return withHooks(ctx, wcuo.sqlSave, wcuo.mutation, wcuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -662,10 +647,7 @@ func (wcuo *WebauthnCredentialUpdateOne) sqlSave(ctx context.Context) (_node *We
 			Columns: []string{webauthncredential.WebauthnCredentialTransportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: webauthncredentialtransport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthncredentialtransport.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -678,10 +660,7 @@ func (wcuo *WebauthnCredentialUpdateOne) sqlSave(ctx context.Context) (_node *We
 			Columns: []string{webauthncredential.WebauthnCredentialTransportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: webauthncredentialtransport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthncredentialtransport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -697,10 +676,7 @@ func (wcuo *WebauthnCredentialUpdateOne) sqlSave(ctx context.Context) (_node *We
 			Columns: []string{webauthncredential.WebauthnCredentialTransportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: webauthncredentialtransport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthncredentialtransport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -716,10 +692,7 @@ func (wcuo *WebauthnCredentialUpdateOne) sqlSave(ctx context.Context) (_node *We
 			Columns: []string{webauthncredential.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -732,10 +705,7 @@ func (wcuo *WebauthnCredentialUpdateOne) sqlSave(ctx context.Context) (_node *We
 			Columns: []string{webauthncredential.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

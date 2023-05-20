@@ -26,7 +26,6 @@ func NewApp(cfg *config.Config, repo dal.IAuthRepo) appT {
 	wa, err := webauthn.New(&webauthn.Config{
 		RPDisplayName:         cfg.Webauthn.RelyingParty.DisplayName,
 		RPID:                  cfg.Webauthn.RelyingParty.Id,
-		RPOrigin:              cfg.Webauthn.RelyingParty.Origin,
 		RPOrigins:             cfg.Webauthn.RelyingParty.Origins,
 		AttestationPreference: protocol.PreferNoAttestation,
 		AuthenticatorSelection: protocol.AuthenticatorSelection{
@@ -61,5 +60,5 @@ func (a appT) GetPasscodeSvc() passcode.IPasscodeSvc {
 }
 
 func (a appT) GetEmailSvc() email.IEmailSvc {
-	return email.NewEmailSvc(a.repo)
+	return email.NewEmailSvc(a.cfg, a.repo)
 }

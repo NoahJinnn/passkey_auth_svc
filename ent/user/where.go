@@ -160,11 +160,7 @@ func HasEmails() predicate.User {
 // HasEmailsWith applies the HasEdge predicate on the "emails" edge with a given conditions (other predicates).
 func HasEmailsWith(preds ...predicate.Email) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(EmailsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, EmailsTable, EmailsColumn),
-		)
+		step := newEmailsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -187,11 +183,7 @@ func HasPasscodes() predicate.User {
 // HasPasscodesWith applies the HasEdge predicate on the "passcodes" edge with a given conditions (other predicates).
 func HasPasscodesWith(preds ...predicate.Passcode) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PasscodesInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PasscodesTable, PasscodesColumn),
-		)
+		step := newPasscodesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -214,11 +206,7 @@ func HasPrimaryEmail() predicate.User {
 // HasPrimaryEmailWith applies the HasEdge predicate on the "primary_email" edge with a given conditions (other predicates).
 func HasPrimaryEmailWith(preds ...predicate.PrimaryEmail) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PrimaryEmailInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, PrimaryEmailTable, PrimaryEmailColumn),
-		)
+		step := newPrimaryEmailStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -241,11 +229,7 @@ func HasWebauthnCredentials() predicate.User {
 // HasWebauthnCredentialsWith applies the HasEdge predicate on the "webauthn_credentials" edge with a given conditions (other predicates).
 func HasWebauthnCredentialsWith(preds ...predicate.WebauthnCredential) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(WebauthnCredentialsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, WebauthnCredentialsTable, WebauthnCredentialsColumn),
-		)
+		step := newWebauthnCredentialsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

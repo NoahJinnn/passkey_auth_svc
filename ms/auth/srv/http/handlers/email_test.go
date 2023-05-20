@@ -34,15 +34,15 @@ func TestEmailHandler_ListByUser(t *testing.T) {
 			userId: uId1,
 			data: []*ent.Email{
 				{
-					UserID:  uId1,
+					UserID:  &uId1,
 					Address: "test1@gmail.com",
 				},
 				{
-					UserID:  uId1,
+					UserID:  &uId1,
 					Address: "test2@gmail.com",
 				},
 				{
-					UserID:  uId2,
+					UserID:  &uId2,
 					Address: "test1@gmail.com",
 				},
 			},
@@ -53,11 +53,11 @@ func TestEmailHandler_ListByUser(t *testing.T) {
 			userId: uId2,
 			data: []*ent.Email{
 				{
-					UserID:  uId1,
+					UserID:  &uId1,
 					Address: "test1@gmail.com",
 				},
 				{
-					UserID:  uId1,
+					UserID:  &uId1,
 					Address: "test2@gmail.com",
 				},
 			},
@@ -78,7 +78,7 @@ func TestEmailHandler_ListByUser(t *testing.T) {
 		err := token.Set(jwt.SubjectKey, currentTest.userId.String())
 		require.NoError(t, err)
 		c.Set("session", token)
-		repo := testRepo.NewRepo(nil, nil, nil, nil, currentTest.data)
+		repo := testRepo.NewRepo(nil, nil, nil, nil, currentTest.data, nil)
 		appl := test.NewApp(&defaultCfg, repo)
 
 		handler := NewEmailHandler(&HttpDeps{
@@ -130,7 +130,7 @@ func TestEmailHandler_Delete(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	repo := testRepo.NewRepo(nil, testUsers, nil, nil, testEmails)
+	repo := testRepo.NewRepo(nil, testUsers, nil, nil, testEmails, nil)
 	appl := test.NewApp(&defaultCfg, repo)
 	handler := NewEmailHandler(&HttpDeps{
 		Appl:      appl,

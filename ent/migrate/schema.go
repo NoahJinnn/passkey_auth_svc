@@ -12,6 +12,7 @@ var (
 	EmailsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "address", Type: field.TypeString, Unique: true},
+		{Name: "verified", Type: field.TypeBool, Default: false},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
@@ -24,7 +25,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "emails_users_emails",
-				Columns:    []*schema.Column{EmailsColumns[4]},
+				Columns:    []*schema.Column{EmailsColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

@@ -163,7 +163,7 @@ func (wcc *WebauthnCredentialCreate) Mutation() *WebauthnCredentialMutation {
 // Save creates the WebauthnCredential in the database.
 func (wcc *WebauthnCredentialCreate) Save(ctx context.Context) (*WebauthnCredential, error) {
 	wcc.defaults()
-	return withHooks[*WebauthnCredential, WebauthnCredentialMutation](ctx, wcc.sqlSave, wcc.mutation, wcc.hooks)
+	return withHooks(ctx, wcc.sqlSave, wcc.mutation, wcc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -309,10 +309,7 @@ func (wcc *WebauthnCredentialCreate) createSpec() (*WebauthnCredential, *sqlgrap
 			Columns: []string{webauthncredential.WebauthnCredentialTransportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: webauthncredentialtransport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthncredentialtransport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -328,10 +325,7 @@ func (wcc *WebauthnCredentialCreate) createSpec() (*WebauthnCredential, *sqlgrap
 			Columns: []string{webauthncredential.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -367,8 +361,8 @@ func (wccb *WebauthnCredentialCreateBulk) Save(ctx context.Context) ([]*Webauthn
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, wccb.builders[i+1].mutation)
 				} else {

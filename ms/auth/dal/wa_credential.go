@@ -86,16 +86,7 @@ func (r *webauthnRepo) Create(ctx Ctx, credential ent.WebauthnCredential, transp
 
 func (r *webauthnRepo) Update(ctx Ctx, credential ent.WebauthnCredential) error {
 	_, err := r.db.WebauthnCredential.
-		UpdateOneID(credential.ID).
-		SetUserID(credential.UserID).
-		SetPublicKey(credential.PublicKey).
-		SetAttestationType(credential.AttestationType).
-		SetAaguid(credential.Aaguid).
-		SetSignCount(credential.SignCount).
-		SetName(credential.Name).
-		SetBackupEligible(credential.BackupEligible).
-		SetBackupState(credential.BackupState).
-		SetLastUsedAt(credential.LastUsedAt).
+		UpdateOne(&credential).
 		Save(ctx)
 	if err != nil {
 		return err

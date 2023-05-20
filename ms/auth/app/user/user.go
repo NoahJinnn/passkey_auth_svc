@@ -41,10 +41,8 @@ func (svc *userSvc) Create(ctx Ctx, address string) (newU *ent.User, emailID uui
 		}
 		// Query email by email address
 		email, err := client.Email.Query().Where(email.Address(address)).Only(ctx)
-		if err != nil {
-			if !ent.IsNotFound(err) {
-				return fmt.Errorf("failed querying email by address: %w", err)
-			}
+		if err != nil && !ent.IsNotFound(err) {
+			return fmt.Errorf("failed querying email by address: %w", err)
 		}
 		if email != nil {
 			if !email.UserID.IsNil() {
@@ -54,19 +52,12 @@ func (svc *userSvc) Create(ctx Ctx, address string) (newU *ent.User, emailID uui
 		} else {
 			email, err = client.Email.Create().
 				SetAddress(address).
-				SetUserID(newU.ID).
 				Save(ctx)
 			if err != nil {
 				return fmt.Errorf("failed creating email: %w", err)
 			}
 		}
-		_, err = client.PrimaryEmail.Create().
-			SetUserID(newU.ID).
-			SetEmailID(email.ID).
-			Save(ctx)
-		if err != nil {
-			return fmt.Errorf("failed to store primary email: %w", err)
-		}
+
 		emailID = email.ID
 		return nil
 	}); err != nil {

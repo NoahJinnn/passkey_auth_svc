@@ -56,6 +56,16 @@ func IDLTE(id string) predicate.WebauthnCredential {
 	return predicate.WebauthnCredential(sql.FieldLTE(FieldID, id))
 }
 
+// IDEqualFold applies the EqualFold predicate on the ID field.
+func IDEqualFold(id string) predicate.WebauthnCredential {
+	return predicate.WebauthnCredential(sql.FieldEqualFold(FieldID, id))
+}
+
+// IDContainsFold applies the ContainsFold predicate on the ID field.
+func IDContainsFold(id string) predicate.WebauthnCredential {
+	return predicate.WebauthnCredential(sql.FieldContainsFold(FieldID, id))
+}
+
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v uuid.UUID) predicate.WebauthnCredential {
 	return predicate.WebauthnCredential(sql.FieldEQ(FieldUserID, v))
@@ -590,11 +600,7 @@ func HasWebauthnCredentialTransports() predicate.WebauthnCredential {
 // HasWebauthnCredentialTransportsWith applies the HasEdge predicate on the "webauthn_credential_transports" edge with a given conditions (other predicates).
 func HasWebauthnCredentialTransportsWith(preds ...predicate.WebauthnCredentialTransport) predicate.WebauthnCredential {
 	return predicate.WebauthnCredential(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(WebauthnCredentialTransportsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, WebauthnCredentialTransportsTable, WebauthnCredentialTransportsColumn),
-		)
+		step := newWebauthnCredentialTransportsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -617,11 +623,7 @@ func HasUser() predicate.WebauthnCredential {
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.WebauthnCredential {
 	return predicate.WebauthnCredential(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UserInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
-		)
+		step := newUserStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

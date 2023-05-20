@@ -47,23 +47,6 @@ func (h *UserHandler) Create(c echo.Context) error {
 		return errorhandler.ToHttpError(err)
 	}
 
-	token, err := h.sessionManager.GenerateJWT(newUser.ID.String())
-	if err != nil {
-		return fmt.Errorf("failed to generate jwt: %w", err)
-	}
-
-	cookie, err := h.sessionManager.GenerateCookie(token)
-	if err != nil {
-		return fmt.Errorf("failed to create session token: %w", err)
-	}
-
-	c.SetCookie(cookie)
-
-	if h.SharedCfg.Session.EnableAuthTokenHeader {
-		c.Response().Header().Set("X-Auth-Token", token)
-		c.Response().Header().Set("Access-Control-Expose-Headers", "X-Auth-Token")
-	}
-
 	return c.JSON(http.StatusOK, dto.CreateUserResponse{
 		ID:      newUser.ID,
 		UserID:  newUser.ID,

@@ -27,7 +27,7 @@ func (id *IdentityDelete) Where(ps ...predicate.Identity) *IdentityDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (id *IdentityDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, IdentityMutation](ctx, id.sqlExec, id.mutation, id.hooks)
+	return withHooks(ctx, id.sqlExec, id.mutation, id.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

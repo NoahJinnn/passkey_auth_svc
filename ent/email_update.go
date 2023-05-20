@@ -59,6 +59,20 @@ func (eu *EmailUpdate) SetAddress(s string) *EmailUpdate {
 	return eu
 }
 
+// SetVerified sets the "verified" field.
+func (eu *EmailUpdate) SetVerified(b bool) *EmailUpdate {
+	eu.mutation.SetVerified(b)
+	return eu
+}
+
+// SetNillableVerified sets the "verified" field if the given value is not nil.
+func (eu *EmailUpdate) SetNillableVerified(b *bool) *EmailUpdate {
+	if b != nil {
+		eu.SetVerified(*b)
+	}
+	return eu
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (eu *EmailUpdate) SetUpdatedAt(t time.Time) *EmailUpdate {
 	eu.mutation.SetUpdatedAt(t)
@@ -181,7 +195,7 @@ func (eu *EmailUpdate) ClearPrimaryEmail() *EmailUpdate {
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (eu *EmailUpdate) Save(ctx context.Context) (int, error) {
 	eu.defaults()
-	return withHooks[int, EmailMutation](ctx, eu.sqlSave, eu.mutation, eu.hooks)
+	return withHooks(ctx, eu.sqlSave, eu.mutation, eu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -226,6 +240,9 @@ func (eu *EmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := eu.mutation.Address(); ok {
 		_spec.SetField(email.FieldAddress, field.TypeString, value)
 	}
+	if value, ok := eu.mutation.Verified(); ok {
+		_spec.SetField(email.FieldVerified, field.TypeBool, value)
+	}
 	if value, ok := eu.mutation.UpdatedAt(); ok {
 		_spec.SetField(email.FieldUpdatedAt, field.TypeTime, value)
 	}
@@ -237,10 +254,7 @@ func (eu *EmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{email.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -253,10 +267,7 @@ func (eu *EmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{email.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -272,10 +283,7 @@ func (eu *EmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{email.IdentitiesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: identity.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(identity.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -288,10 +296,7 @@ func (eu *EmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{email.IdentitiesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: identity.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(identity.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -307,10 +312,7 @@ func (eu *EmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{email.IdentitiesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: identity.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(identity.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -326,10 +328,7 @@ func (eu *EmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{email.PasscodesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: passcode.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(passcode.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -342,10 +341,7 @@ func (eu *EmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{email.PasscodesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: passcode.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(passcode.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -361,10 +357,7 @@ func (eu *EmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{email.PasscodesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: passcode.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(passcode.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -380,10 +373,7 @@ func (eu *EmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{email.PrimaryEmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: primaryemail.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(primaryemail.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -396,10 +386,7 @@ func (eu *EmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{email.PrimaryEmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: primaryemail.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(primaryemail.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -450,6 +437,20 @@ func (euo *EmailUpdateOne) ClearUserID() *EmailUpdateOne {
 // SetAddress sets the "address" field.
 func (euo *EmailUpdateOne) SetAddress(s string) *EmailUpdateOne {
 	euo.mutation.SetAddress(s)
+	return euo
+}
+
+// SetVerified sets the "verified" field.
+func (euo *EmailUpdateOne) SetVerified(b bool) *EmailUpdateOne {
+	euo.mutation.SetVerified(b)
+	return euo
+}
+
+// SetNillableVerified sets the "verified" field if the given value is not nil.
+func (euo *EmailUpdateOne) SetNillableVerified(b *bool) *EmailUpdateOne {
+	if b != nil {
+		euo.SetVerified(*b)
+	}
 	return euo
 }
 
@@ -588,7 +589,7 @@ func (euo *EmailUpdateOne) Select(field string, fields ...string) *EmailUpdateOn
 // Save executes the query and returns the updated Email entity.
 func (euo *EmailUpdateOne) Save(ctx context.Context) (*Email, error) {
 	euo.defaults()
-	return withHooks[*Email, EmailMutation](ctx, euo.sqlSave, euo.mutation, euo.hooks)
+	return withHooks(ctx, euo.sqlSave, euo.mutation, euo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -650,6 +651,9 @@ func (euo *EmailUpdateOne) sqlSave(ctx context.Context) (_node *Email, err error
 	if value, ok := euo.mutation.Address(); ok {
 		_spec.SetField(email.FieldAddress, field.TypeString, value)
 	}
+	if value, ok := euo.mutation.Verified(); ok {
+		_spec.SetField(email.FieldVerified, field.TypeBool, value)
+	}
 	if value, ok := euo.mutation.UpdatedAt(); ok {
 		_spec.SetField(email.FieldUpdatedAt, field.TypeTime, value)
 	}
@@ -661,10 +665,7 @@ func (euo *EmailUpdateOne) sqlSave(ctx context.Context) (_node *Email, err error
 			Columns: []string{email.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -677,10 +678,7 @@ func (euo *EmailUpdateOne) sqlSave(ctx context.Context) (_node *Email, err error
 			Columns: []string{email.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -696,10 +694,7 @@ func (euo *EmailUpdateOne) sqlSave(ctx context.Context) (_node *Email, err error
 			Columns: []string{email.IdentitiesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: identity.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(identity.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -712,10 +707,7 @@ func (euo *EmailUpdateOne) sqlSave(ctx context.Context) (_node *Email, err error
 			Columns: []string{email.IdentitiesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: identity.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(identity.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -731,10 +723,7 @@ func (euo *EmailUpdateOne) sqlSave(ctx context.Context) (_node *Email, err error
 			Columns: []string{email.IdentitiesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: identity.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(identity.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -750,10 +739,7 @@ func (euo *EmailUpdateOne) sqlSave(ctx context.Context) (_node *Email, err error
 			Columns: []string{email.PasscodesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: passcode.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(passcode.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -766,10 +752,7 @@ func (euo *EmailUpdateOne) sqlSave(ctx context.Context) (_node *Email, err error
 			Columns: []string{email.PasscodesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: passcode.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(passcode.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -785,10 +768,7 @@ func (euo *EmailUpdateOne) sqlSave(ctx context.Context) (_node *Email, err error
 			Columns: []string{email.PasscodesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: passcode.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(passcode.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -804,10 +784,7 @@ func (euo *EmailUpdateOne) sqlSave(ctx context.Context) (_node *Email, err error
 			Columns: []string{email.PrimaryEmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: primaryemail.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(primaryemail.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -820,10 +797,7 @@ func (euo *EmailUpdateOne) sqlSave(ctx context.Context) (_node *Email, err error
 			Columns: []string{email.PrimaryEmailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: primaryemail.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(primaryemail.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

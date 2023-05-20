@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/hellohq/hqservice/ent/jwk"
 )
@@ -19,7 +20,8 @@ type Jwk struct {
 	// KeyData holds the value of the "key_data" field.
 	KeyData string `json:"key_data,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
+	CreatedAt    time.Time `json:"created_at,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -34,7 +36,7 @@ func (*Jwk) scanValues(columns []string) ([]any, error) {
 		case jwk.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Jwk", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -66,9 +68,17 @@ func (j *Jwk) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				j.CreatedAt = value.Time
 			}
+		default:
+			j.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Jwk.
+// This includes values selected through modifiers, order, etc.
+func (j *Jwk) Value(name string) (ent.Value, error) {
+	return j.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Jwk.

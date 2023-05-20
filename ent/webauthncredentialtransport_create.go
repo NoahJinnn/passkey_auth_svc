@@ -68,7 +68,7 @@ func (wctc *WebauthnCredentialTransportCreate) Mutation() *WebauthnCredentialTra
 // Save creates the WebauthnCredentialTransport in the database.
 func (wctc *WebauthnCredentialTransportCreate) Save(ctx context.Context) (*WebauthnCredentialTransport, error) {
 	wctc.defaults()
-	return withHooks[*WebauthnCredentialTransport, WebauthnCredentialTransportMutation](ctx, wctc.sqlSave, wctc.mutation, wctc.hooks)
+	return withHooks(ctx, wctc.sqlSave, wctc.mutation, wctc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -153,10 +153,7 @@ func (wctc *WebauthnCredentialTransportCreate) createSpec() (*WebauthnCredential
 			Columns: []string{webauthncredentialtransport.WebauthnCredentialColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeString,
-					Column: webauthncredential.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(webauthncredential.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -192,8 +189,8 @@ func (wctcb *WebauthnCredentialTransportCreateBulk) Save(ctx context.Context) ([
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, wctcb.builders[i+1].mutation)
 				} else {

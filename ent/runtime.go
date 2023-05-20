@@ -25,12 +25,16 @@ import (
 func init() {
 	emailFields := schema.Email{}.Fields()
 	_ = emailFields
+	// emailDescVerified is the schema descriptor for verified field.
+	emailDescVerified := emailFields[3].Descriptor()
+	// email.DefaultVerified holds the default value on creation for the verified field.
+	email.DefaultVerified = emailDescVerified.Default.(bool)
 	// emailDescCreatedAt is the schema descriptor for created_at field.
-	emailDescCreatedAt := emailFields[3].Descriptor()
+	emailDescCreatedAt := emailFields[4].Descriptor()
 	// email.DefaultCreatedAt holds the default value on creation for the created_at field.
 	email.DefaultCreatedAt = emailDescCreatedAt.Default.(func() time.Time)
 	// emailDescUpdatedAt is the schema descriptor for updated_at field.
-	emailDescUpdatedAt := emailFields[4].Descriptor()
+	emailDescUpdatedAt := emailFields[5].Descriptor()
 	// email.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	email.DefaultUpdatedAt = emailDescUpdatedAt.Default.(func() time.Time)
 	// email.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

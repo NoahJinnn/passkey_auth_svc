@@ -218,11 +218,7 @@ func HasWebauthnCredential() predicate.WebauthnCredentialTransport {
 // HasWebauthnCredentialWith applies the HasEdge predicate on the "webauthn_credential" edge with a given conditions (other predicates).
 func HasWebauthnCredentialWith(preds ...predicate.WebauthnCredential) predicate.WebauthnCredentialTransport {
 	return predicate.WebauthnCredentialTransport(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(WebauthnCredentialInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, WebauthnCredentialTable, WebauthnCredentialColumn),
-		)
+		step := newWebauthnCredentialStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

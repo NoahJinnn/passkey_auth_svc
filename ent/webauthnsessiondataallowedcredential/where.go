@@ -265,11 +265,7 @@ func HasWebauthnSessionData() predicate.WebauthnSessionDataAllowedCredential {
 // HasWebauthnSessionDataWith applies the HasEdge predicate on the "webauthn_session_data" edge with a given conditions (other predicates).
 func HasWebauthnSessionDataWith(preds ...predicate.WebauthnSessionData) predicate.WebauthnSessionDataAllowedCredential {
 	return predicate.WebauthnSessionDataAllowedCredential(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(WebauthnSessionDataInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, WebauthnSessionDataTable, WebauthnSessionDataColumn),
-		)
+		step := newWebauthnSessionDataStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
