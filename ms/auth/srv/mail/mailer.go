@@ -9,13 +9,17 @@ import (
 	"github.com/hellohq/hqservice/ms/auth/config"
 )
 
+type IMailer interface {
+	Send(email []string, subject string, body string) error
+}
+
 type Mailer struct {
 	apiClient *onesignal.APIClient
 	authCtx   context.Context
 	cfg       *config.Passcode
 }
 
-func NewMailer(cfg *config.Passcode) *Mailer {
+func NewMailer(cfg *config.Passcode) IMailer {
 	configuration := onesignal.NewConfiguration()
 	apiClient := onesignal.NewAPIClient(configuration)
 	authCtx := context.WithValue(context.Background(), onesignal.AppAuth, cfg.OneSignalAppKey)

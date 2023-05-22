@@ -14,6 +14,7 @@ func NewRepo(
 	user []*ent.User,
 	waCredential []*ent.WebauthnCredential,
 	waSessionData []*ent.WebauthnSessionData,
+	passcode []*ent.Passcode,
 	email []*ent.Email,
 	primaryEmail *ent.PrimaryEmail,
 ) dal.IAuthRepo {
@@ -23,6 +24,7 @@ func NewRepo(
 		webAuthnCredentialRepo: NewWebauthnCredentialRepo(waCredential),
 		webAuthnSessionRepo:    NewWebauthnSessionRepo(waSessionData),
 		emailRepo:              NewEmailRepo(email, primaryEmail),
+		passcodeRepo:           NewPasscodeRepo(passcode),
 	}
 }
 

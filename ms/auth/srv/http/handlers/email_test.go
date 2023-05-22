@@ -78,8 +78,8 @@ func TestEmailHandler_ListByUser(t *testing.T) {
 		err := token.Set(jwt.SubjectKey, currentTest.userId.String())
 		require.NoError(t, err)
 		c.Set("session", token)
-		repo := testRepo.NewRepo(nil, nil, nil, nil, currentTest.data, nil)
-		appl := test.NewApp(&defaultCfg, repo)
+		repo := testRepo.NewRepo(nil, nil, nil, nil, nil, currentTest.data, nil)
+		appl := test.NewApp(nil, nil, &defaultCfg, repo)
 
 		handler := NewEmailHandler(&HttpDeps{
 			Appl:      appl,
@@ -130,8 +130,8 @@ func TestEmailHandler_Delete(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	repo := testRepo.NewRepo(nil, testUsers, nil, nil, testEmails, nil)
-	appl := test.NewApp(&defaultCfg, repo)
+	repo := testRepo.NewRepo(nil, testUsers, nil, nil, nil, testEmails, nil)
+	appl := test.NewApp(nil, nil, &defaultCfg, repo)
 	handler := NewEmailHandler(&HttpDeps{
 		Appl:      appl,
 		Cfg:       &defaultCfg,
