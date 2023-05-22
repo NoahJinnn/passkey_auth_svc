@@ -11,19 +11,21 @@ import (
 	"github.com/hellohq/hqservice/ms/auth/app/wa"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
+	"github.com/hellohq/hqservice/ms/auth/srv/mail"
 )
 
 // App implements interface Appl.
 type appT struct {
-	cfg  *config.Config
-	repo dal.IAuthRepo
-	wa   *webauthn.WebAuthn
+	waSvc       wa.IWebauthnSvc
+	userSvc     user.IUserSvc
+	passcodeSvc passcode.IPasscodeSvc
+	emailSvc    email.IEmailSvc
 }
 
 // New creates and returns new App.
-func NewApp(cfg *config.Config, repo dal.IAuthRepo) appT {
+func NewApp(mailer mail.IMailer, renderer *mail.Renderer, cfg *config.Config, repo dal.IAuthRepo) appT {
 	f := false
-	wa, err := webauthn.New(&webauthn.Config{
+	waClient, err := webauthn.New(&webauthn.Config{
 		RPDisplayName:         cfg.Webauthn.RelyingParty.DisplayName,
 		RPID:                  cfg.Webauthn.RelyingParty.Id,
 		RPOrigins:             cfg.Webauthn.RelyingParty.Origins,
@@ -37,28 +39,34 @@ func NewApp(cfg *config.Config, repo dal.IAuthRepo) appT {
 		Debug:   false,
 	})
 
+	waSvc := wa.NewWebAuthn(cfg, repo, waClient)
+	userSvc := user.NewUserSvc(cfg, repo)
+	passcodeSvc := passcode.NewPasscodeSvc(mailer, renderer, cfg, repo)
+	emailSvc := email.NewEmailSvc(cfg, repo)
+
 	if err != nil {
 		panic(fmt.Errorf("failed to create webauthn instance: %w", err))
 	}
 	return appT{
-		cfg:  cfg,
-		repo: repo,
-		wa:   wa,
+		waSvc:       waSvc,
+		userSvc:     userSvc,
+		passcodeSvc: passcodeSvc,
+		emailSvc:    emailSvc,
 	}
 }
 
 func (a appT) GetWebauthnSvc() wa.IWebauthnSvc {
-	return wa.NewWebAuthn(a.cfg, a.repo, a.wa)
+	return a.waSvc
 }
 
 func (a appT) GetUserSvc() user.IUserSvc {
-	return user.NewUserSvc(a.cfg, a.repo)
+	return a.userSvc
 }
 
 func (a appT) GetPasscodeSvc() passcode.IPasscodeSvc {
-	return passcode.NewPasscodeSvc(a.cfg, a.repo)
+	return a.passcodeSvc
 }
 
 func (a appT) GetEmailSvc() email.IEmailSvc {
-	return email.NewEmailSvc(a.cfg, a.repo)
+	return a.emailSvc
 }

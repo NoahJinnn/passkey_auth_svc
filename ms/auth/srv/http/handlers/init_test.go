@@ -97,7 +97,9 @@ var users = []*ent.User{
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
-		user.Edges.PrimaryEmail = &ent.PrimaryEmail{ID: uId, UserID: &uId}
+		primE := &ent.PrimaryEmail{ID: uId, UserID: &uId}
+		primE.Edges.Email = emails[0]
+		user.Edges.PrimaryEmail = primE
 		user.Edges.Emails = emails
 		return user
 	}(),
@@ -105,7 +107,7 @@ var users = []*ent.User{
 
 type integrationSuite struct {
 	suite.Suite
-	repo *dal.AuthRepo
+	repo dal.IAuthRepo
 	app  app.Appl
 	db   *test.TestDB
 	srv  *HttpDeps
@@ -127,7 +129,7 @@ func (s *integrationSuite) SetupSuite() {
 
 	s.repo = repo
 	s.db = db
-	s.app = app.New(&defaultCfg, repo)
+	s.app = app.New(nil, nil, &defaultCfg, repo)
 	s.srv = &HttpDeps{
 		s.app,
 		&defaultCfg,

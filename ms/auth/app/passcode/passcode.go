@@ -27,18 +27,13 @@ type passcodeSvc struct {
 	repo              dal.IAuthRepo
 	cfg               *config.Config
 	passcodeGenerator PasscodeGenerator
-	mailer            *mail.Mailer
+	mailer            mail.IMailer
 	renderer          *mail.Renderer
 }
 
 var maxPasscodeTries = 3
 
-func NewPasscodeSvc(cfg *config.Config, repo dal.IAuthRepo) IPasscodeSvc {
-	mailer := mail.NewMailer(&cfg.Passcode)
-	renderer, err := mail.NewRenderer()
-	if err != nil {
-		panic(fmt.Errorf("failed to create new renderer: %w", err))
-	}
+func NewPasscodeSvc(mailer mail.IMailer, renderer *mail.Renderer, cfg *config.Config, repo dal.IAuthRepo) IPasscodeSvc {
 	return &passcodeSvc{
 		repo:              repo,
 		cfg:               cfg,
@@ -76,13 +71,16 @@ func (svc *passcodeSvc) InitLogin(ctx Ctx, userId uuid.UUID, emailId uuid.UUID, 
 		if email == nil {
 			return nil, errorhandler.NewHTTPError(http.StatusBadRequest, "the specified emailId is not available")
 		}
-	} else if e := user.Edges.PrimaryEmail; e == nil {
+	} else if primE := user.Edges.PrimaryEmail; primE == nil {
 		// Can't determine email address to which the passcode should be sent to
 		// Primary email is the fallback email address if no emailId is specified
 		return nil, errorhandler.NewHTTPError(http.StatusBadRequest, "an emailId needs to be specified")
 	} else {
+		if primE.Edges.Email == nil {
+			return nil, errorhandler.NewHTTPError(http.StatusBadRequest, "an emailId needs to be specified")
+		}
 		// Send the passcode to the primary email address
-		email = e.Edges.Email
+		email = primE.Edges.Email
 	}
 
 	if email.Edges.User != nil && email.Edges.User.ID.String() != user.ID.String() {
@@ -211,7 +209,7 @@ func (svc *passcodeSvc) FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode strin
 			return errorhandler.NewHTTPError(http.StatusForbidden, "email address has been claimed by another user")
 		}
 
-		if !passcode.Edges.Email.Verified {
+		if passcode.Edges.Email != nil && !passcode.Edges.Email.Verified {
 			// Update email verified status and assign the email address to the user.
 			passcode.Edges.Email.Verified = true
 			passcode.Edges.Email.UserID = &user.ID

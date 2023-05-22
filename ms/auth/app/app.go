@@ -15,6 +15,7 @@ import (
 	"github.com/hellohq/hqservice/ms/auth/app/wa"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
+	"github.com/hellohq/hqservice/ms/auth/srv/mail"
 )
 
 // Appl provides application features (use cases) service.
@@ -34,7 +35,7 @@ type App struct {
 }
 
 // New creates and returns new App.
-func New(cfg *config.Config, repo *dal.AuthRepo) App {
+func New(mailer mail.IMailer, renderer *mail.Renderer, cfg *config.Config, repo dal.IAuthRepo) App {
 	f := false
 	waClient, err := webauthn.New(&webauthn.Config{
 		RPDisplayName:         cfg.Webauthn.RelyingParty.DisplayName,
@@ -52,7 +53,7 @@ func New(cfg *config.Config, repo *dal.AuthRepo) App {
 
 	waSvc := wa.NewWebAuthn(cfg, repo, waClient)
 	userSvc := user.NewUserSvc(cfg, repo)
-	passcodeSvc := passcode.NewPasscodeSvc(cfg, repo)
+	passcodeSvc := passcode.NewPasscodeSvc(mailer, renderer, cfg, repo)
 	emailSvc := email.NewEmailSvc(cfg, repo)
 
 	if err != nil {

@@ -3,6 +3,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/http/session"
@@ -11,6 +12,7 @@ import (
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
 	server "github.com/hellohq/hqservice/ms/auth/srv/http"
+	"github.com/hellohq/hqservice/ms/auth/srv/mail"
 	"github.com/hellohq/hqservice/pkg/concurrent"
 	"github.com/powerman/structlog"
 	"github.com/spf13/cobra"
@@ -25,7 +27,7 @@ type Service struct {
 	sharedCfg      *sharedconfig.Shared
 	sessionManager session.Manager
 	appl           app.App
-	repo           *dal.AuthRepo
+	repo           dal.IAuthRepo
 }
 
 // Name implements main.embeddedService interface.
@@ -49,9 +51,16 @@ func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func(), ent
 	if err != nil {
 		return log.Err("failed to get config", "err", err)
 	}
+
+	mailer := mail.NewMailer(&s.cfg.Passcode)
+	renderer, err := mail.NewRenderer()
+	if err != nil {
+		panic(fmt.Errorf("failed to create new renderer: %w", err))
+	}
+
 	s.sessionManager = sessionManager
 	s.repo = dal.New(entClient)
-	s.appl = app.New(s.cfg, s.repo)
+	s.appl = app.New(mailer, renderer, s.cfg, s.repo)
 
 	err = concurrent.Serve(ctxShutdown, shutdown,
 		s.serveEcho,
