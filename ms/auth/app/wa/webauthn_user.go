@@ -13,7 +13,7 @@ func NewWebauthnUser(ctx context.Context, user ent.User, credentials []*ent.Weba
 	primEmail := user.Edges.PrimaryEmail
 	var email ent.Email
 	for _, m := range emails {
-		if m.UserID == primEmail.UserID {
+		if m.UserID.String() == primEmail.UserID.String() {
 			email = *m
 			break
 		}
