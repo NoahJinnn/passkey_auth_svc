@@ -6,11 +6,6 @@ type WebauthnSettings struct {
 	Timeout      int
 }
 
-// Validate does not need to validate the config, because the library does this already
-func (r *WebauthnSettings) Validate() error {
-	return nil
-}
-
 // RelyingParty webauthn settings for your application.
 type RelyingParty struct {
 	Id          string

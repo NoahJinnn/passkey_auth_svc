@@ -23,20 +23,20 @@ type IEmailSvc interface {
 	SetPrimaryEmail(ctx Ctx, userId uuid.UUID, emailId uuid.UUID) error
 }
 
-type emailSvc struct {
+type EmailSvc struct {
 	cfg  *config.Config
 	repo dal.IAuthRepo
 }
 
-func NewEmailSvc(cfg *config.Config, repo dal.IAuthRepo) IEmailSvc {
-	return emailSvc{cfg: cfg, repo: repo}
+func NewEmailSvc(cfg *config.Config, repo dal.IAuthRepo) *EmailSvc {
+	return &EmailSvc{cfg: cfg, repo: repo}
 }
 
-func (svc emailSvc) ListByUser(ctx Ctx, userId uuid.UUID) ([]*ent.Email, error) {
+func (svc *EmailSvc) ListByUser(ctx Ctx, userId uuid.UUID) ([]*ent.Email, error) {
 	return svc.repo.GetEmailRepo().ListByUser(ctx, userId)
 }
 
-func (svc emailSvc) Create(ctx Ctx, userId uuid.UUID, address string) (*ent.Email, error) {
+func (svc *EmailSvc) Create(ctx Ctx, userId uuid.UUID, address string) (*ent.Email, error) {
 
 	emailCount, err := svc.repo.GetEmailRepo().CountByUserId(ctx, userId)
 	if err != nil {
@@ -77,7 +77,7 @@ func (svc emailSvc) Create(ctx Ctx, userId uuid.UUID, address string) (*ent.Emai
 
 }
 
-func (svc emailSvc) SetPrimaryEmail(ctx Ctx, userId uuid.UUID, emailId uuid.UUID) error {
+func (svc *EmailSvc) SetPrimaryEmail(ctx Ctx, userId uuid.UUID, emailId uuid.UUID) error {
 	user, err := svc.repo.GetUserRepo().GetById(ctx, userId)
 	if err != nil {
 		return fmt.Errorf("failed to fetch user from db: %w", err)
@@ -119,7 +119,7 @@ func (svc emailSvc) SetPrimaryEmail(ctx Ctx, userId uuid.UUID, emailId uuid.UUID
 
 }
 
-func (svc emailSvc) Delete(ctx Ctx, userId uuid.UUID, emailId uuid.UUID) error {
+func (svc *EmailSvc) Delete(ctx Ctx, userId uuid.UUID, emailId uuid.UUID) error {
 	user, err := svc.repo.GetUserRepo().GetById(ctx, userId)
 	if err != nil {
 		return fmt.Errorf("failed to fetch user from db: %w", err)
