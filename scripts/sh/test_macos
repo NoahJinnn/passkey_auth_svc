@@ -9,7 +9,4 @@ cd $scriptsdir/../../
 
 hadolint Dockerfile
 
-# TODO: Set up linting
-golangci-lint run
-
 gotestsum -- -race -tags=integration "$@" ./...

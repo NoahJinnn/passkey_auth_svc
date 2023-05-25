@@ -14,8 +14,8 @@ env:
 jobs:
   # TODO: Update test CI
 
-  # test:
-  #   runs-on: 'ubuntu-latest'
+  test:
+    runs-on: 'ubuntu-latest'
   #   timeout-minutes: 30
   #   env:
   #     MONO_TLS_CA_CERT: 'configs/dev-pki/ca.crt'
@@ -30,12 +30,12 @@ jobs:
   #     PGHOST: 'localhost'
   #     PGUSER: 'postgres'
   #     PGPASSWORD: 'postgres'
-  #   steps:
+    steps:
   #     - uses: actions/setup-go@v4
   #       with:
   #         go-version: ${{ env.GO_VERSION }}
 
-  #     - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
   #     - name: Run PostgreSQL service
   #       run: |
@@ -51,24 +51,19 @@ jobs:
   #                   --ssl_cert_file=/server.crt --ssl_key_file=/server.key
   #           '
 
-  #     - name: Fetch main branch (to compare .proto files)
-  #       run: |
-  #         if ! git show-branch main >/dev/null 2>&1; then
-  #           git fetch --depth=1 origin main && git branch main origin/main
-  #         fi
 
-  #     - uses: actions/cache@v3
-  #       with:
-  #         path: |
-  #           ~/go/bin
-  #           ~/go/pkg
-  #           ~/go/src
-  #           ~/.cache/go-build
-  #           ~/.cache/golangci-lint
-  #           .gobincache
-  #         key: v3-test-${{ runner.os }}-${{ hashFiles('go.mod') }}
-  #         restore-keys: |
-  #           v3-test-${{ runner.os }}-
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/bin
+            ~/go/pkg
+            ~/go/src
+            ~/.cache/go-build
+            ~/.cache/golangci-lint
+            .gobincache
+          key: v3-test-${{ runner.os }}-${{ hashFiles('go.mod') }}
+          restore-keys: |
+            v3-test-${{ runner.os }}-
 
   #     - name: Install tools
   #       run: |
@@ -77,21 +72,17 @@ jobs:
   #         sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
   #         ./bin/task scripts:install:gotools
 
-  #     - name: Run test
-  #       run: ./bin/task scripts:test
+      - name: Run test
+        run: ./bin/task scripts:test
 
-  #     - name: Ensure API spec match auto-generated code
-  #       run: |
-  #         go generate ./api/...
-  #         git add . && git status --short && git diff-index --quiet HEAD
 
-  #     - name: Report code coverage
-  #       env:
-  #         COVERALLS_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
-  #       if: env.COVERALLS_TOKEN
-  #       run: |
-  #         scripts/cover
-  #         .gobincache/goveralls -coverprofile=cover.out -service=GitHub
+      - name: Report code coverage
+        env:
+          COVERALLS_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
+        if: env.COVERALLS_TOKEN
+        run: |
+          scripts/cover
+          .gobincache/goveralls -coverprofile=cover.out -service=GitHub
 
   build-and-release:
     # needs: test
