@@ -8,8 +8,6 @@ gotestsum -- \
 	-coverprofile cover.out \
 	-tags=integration "$@" ./...
 
-sed -i -e '/[/]mock[.]/d' cover.out
-
 go tool cover -func=cover.out | tail -n 1 | xargs echo
 
 test -n "$CI" || go tool cover -html=cover.out

@@ -7,12 +7,11 @@ require (
 	github.com/powerman/appcfg v0.9.0
 	github.com/powerman/check v1.6.0
 	github.com/powerman/getenv v0.1.0
-	github.com/powerman/goose/v2 v2.7.0 // indirect
 	github.com/powerman/must v0.1.1
 	github.com/powerman/sensitive v0.0.7
 	github.com/powerman/structlog v0.7.3
 	github.com/prometheus/client_golang v1.15.1
-	github.com/smartystreets/goconvey v1.7.2
+	github.com/smartystreets/goconvey v1.7.2 // indirect
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 )
@@ -30,11 +29,9 @@ require (
 	github.com/mattn/goveralls v0.0.11
 	github.com/nicksnyder/go-i18n/v2 v2.2.1
 	github.com/ory/dockertest/v3 v3.9.1
-	github.com/powerman/go-monolith-example v0.5.2
 	github.com/powerman/pqx v0.7.0
 	github.com/sethvargo/go-limiter v0.7.2
-	golang.org/x/tools v0.8.1-0.20230428195545-5283a0178901
-	google.golang.org/grpc v1.52.0
+	golang.org/x/tools v0.9.1
 	gotest.tools/gotestsum v1.9.0
 )
 
@@ -52,7 +49,6 @@ require (
 	github.com/go-openapi/inflect v0.19.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/go-webauthn/revoke v0.1.9 // indirect
 	github.com/goccy/go-json v0.9.11 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
@@ -60,7 +56,6 @@ require (
 	github.com/google/go-tpm v0.3.3 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/hashicorp/hcl/v2 v2.13.0 // indirect
-	github.com/jmoiron/sqlx v1.3.5 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.1 // indirect
@@ -68,12 +63,12 @@ require (
 	github.com/lestrrat-go/httprc v1.0.4 // indirect
 	github.com/lestrrat-go/iter v1.0.2 // indirect
 	github.com/lestrrat-go/option v1.0.0 // indirect
+	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
 	github.com/opencontainers/runc v1.1.2 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/powerman/deepequal v0.1.0 // indirect
 	github.com/powerman/dockerize v0.18.1 // indirect
-	github.com/powerman/sqlxx v0.2.0 // indirect
 	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/streadway/amqp v1.0.0 // indirect
 	github.com/t-yuki/gocover-cobertura v0.0.0-20180217150009-aaee18c8195c // indirect
@@ -86,6 +81,7 @@ require (
 	github.com/zclconf/go-cty v1.8.0 // indirect
 	go.uber.org/goleak v1.1.12 // indirect
 	golang.org/x/time v0.3.0 // indirect
+	google.golang.org/grpc v1.52.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
@@ -160,7 +156,6 @@ require (
 	github.com/golangci/unconvert v0.0.0-20180507085042-28b1c447d1f4 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/gordonklaus/ineffassign v0.0.0-20230107090616-13ace0543b28 // indirect
 	github.com/gostaticanalysis/analysisutil v0.7.1 // indirect
 	github.com/gostaticanalysis/comment v1.4.2 // indirect
@@ -177,7 +172,6 @@ require (
 	github.com/jgautheron/goconst v1.5.1 // indirect
 	github.com/jingyugao/rowserrcheck v1.1.1 // indirect
 	github.com/jirfag/go-printf-func-name v0.0.0-20200119135958-7558a9eaa5af // indirect
-	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/julz/importas v0.1.0 // indirect
 	github.com/jwilder/gojq v0.0.0-20161018055142-c550732d4a52 // indirect
 	github.com/kisielk/errcheck v1.6.3 // indirect
@@ -215,13 +209,10 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0-rc2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pkg/errors v0.9.1
 	github.com/plaid/plaid-go/v3 v3.5.0
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/polyfloyd/go-errorlint v1.0.6 // indirect
-	github.com/powerman/goose v2.7.0-rc4.0.20200329145851-5c15923690fa+incompatible // indirect
-	github.com/powerman/mysqlx v0.3.3 // indirect
-	github.com/powerman/narada4d v1.7.1 // indirect
 	github.com/powerman/tail v0.1.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.42.0 // indirect
@@ -242,7 +233,6 @@ require (
 	github.com/sivchari/containedctx v1.0.2 // indirect
 	github.com/sivchari/nosnakecase v1.7.0 // indirect
 	github.com/sivchari/tenv v1.7.1 // indirect
-	github.com/smartystreets/assertions v1.13.0 // indirect
 	github.com/sonatard/noctx v0.0.1 // indirect
 	github.com/sourcegraph/go-diff v0.7.0 // indirect
 	github.com/spf13/afero v1.9.3 // indirect
@@ -273,11 +263,11 @@ require (
 	golang.org/x/exp v0.0.0-20230307190834-24139beb5833 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20230206171751-46f607a40771 // indirect
 	golang.org/x/mod v0.10.0 // indirect
-	golang.org/x/net v0.9.0 // indirect
+	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/oauth2 v0.7.0 // indirect
-	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
-	golang.org/x/term v0.7.0 // indirect
+	golang.org/x/sync v0.2.0 // indirect
+	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/term v0.8.0 // indirect
 	golang.org/x/text v0.9.0
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230202175211-008b39050e57 // indirect

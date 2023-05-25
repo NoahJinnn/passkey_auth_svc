@@ -187,13 +187,21 @@ $ ./bin/hq serve
          hq: inf      main: `started` version f/design-task-command-to-run-hqservice 51adc59-dirty 2023-02-15_09:36:06
 ```
 
+## Test
+
+Run all test
+```sh
+go test -v ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
+go test -count=1 --tags=integration ./... # run integration tests
+```
+
 ## TODO
 
 Functionality Group 1: add/connect assets and debts
 
 - [x] Plaid aggregator with dev env
 - [ ] Plaid aggregator with stg, prd env
-- [ ] Implement [webauthn](https://github.com/go-webauthn/webauthn) API
+- [x] Implement [webauthn](https://github.com/go-webauthn/webauthn) API
 - [ ] Implement [Lago](https://www.getlago.com/resources/compare/lago-vs-stripe) for billing service
 - [ ] Implement authorization with `casbin`
 - [x] Create `User` table

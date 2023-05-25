@@ -107,8 +107,8 @@ var users = []*ent.User{
 
 type integrationSuite struct {
 	suite.Suite
-	repo dal.IAuthRepo
-	app  app.Appl
+	repo *dal.AuthRepo
+	app  *app.App
 	db   *test.TestDB
 	srv  *HttpDeps
 }

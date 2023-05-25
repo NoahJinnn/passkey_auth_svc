@@ -30,9 +30,15 @@ var (
 			},
 		},
 		SaltEdge: &SaltEdge{
-			AppId:  "test",
-			Secret: "test",
-			PK:     "test",
+			AppId:  "se_app_id",
+			Secret: "se_secret",
+			PK:     "se_pk",
+		},
+		Finverse: &Finverse{
+			AppId:       "fv_app_id",
+			ClientID:    "fv_client_id",
+			Secret:      "fv_secret",
+			RedirectURI: "fv_redirect_uri",
 		},
 	}
 	testOwn = own
@@ -46,9 +52,14 @@ func TestMain(m *testing.M) {
 	os.Setenv("HQ_NETWORTH_ADDR_PORT", "17002")
 	os.Setenv("HQ_POSTGRES_AUTH_PASS", "authpass")
 	// Networth env
-	os.Setenv("HQ_SALTEDGE_APP_ID", "test")
-	os.Setenv("HQ_SALTEDGE_SECRET", "test")
-	os.Setenv("HQ_SALTEDGE_PK", "test")
+	os.Setenv("HQ_SALTEDGE_APP_ID", "se_app_id")
+	os.Setenv("HQ_SALTEDGE_SECRET", "se_secret")
+	os.Setenv("HQ_SALTEDGE_PK", "se_pk")
+
+	os.Setenv("HQ_FINVERSE_APP_ID", "fv_app_id")
+	os.Setenv("HQ_FINVERSE_CLIENT_ID", "fv_client_id")
+	os.Setenv("HQ_FINVERSE_SECRET", "fv_secret")
+	os.Setenv("HQ_FINVERSE_REDIRECT_URI", "fv_redirect_uri")
 
 	testShared, _ = sharedconfig.Get()
 	check.TestMain(m)
@@ -60,7 +71,7 @@ func testGetServe(flags ...string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(flags) > 0 {
+	if testFlagsets.Serve != nil && len(flags) > 0 {
 		testFlagsets.Serve.Parse(flags)
 	}
 	return GetServe()
