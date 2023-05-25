@@ -16,10 +16,10 @@ import (
 
 type EmailHandler struct {
 	*HttpDeps
-	sessionManager session.Manager
+	sessionManager session.IManager
 }
 
-func NewEmailHandler(srv *HttpDeps, sessionManager session.Manager) *EmailHandler {
+func NewEmailHandler(srv *HttpDeps, sessionManager session.IManager) *EmailHandler {
 	return &EmailHandler{
 		srv,
 		sessionManager,

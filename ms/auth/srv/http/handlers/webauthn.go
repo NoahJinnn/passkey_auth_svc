@@ -15,10 +15,10 @@ import (
 
 type WebauthnHandler struct {
 	*HttpDeps
-	sessionManager session.Manager
+	sessionManager session.IManager
 }
 
-func NewWebauthnHandler(srv *HttpDeps, sessionManager session.Manager) *WebauthnHandler {
+func NewWebauthnHandler(srv *HttpDeps, sessionManager session.IManager) *WebauthnHandler {
 	return &WebauthnHandler{
 		srv,
 		sessionManager,

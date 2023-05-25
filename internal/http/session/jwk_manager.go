@@ -12,7 +12,7 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwk"
 )
 
-type JwkManager interface {
+type IJwkManager interface {
 	// GenerateKey is used to generate a jwk Key
 	GenerateKey(ctx context.Context) (jwk.Key, error)
 	// GetPublicKeys returns all Public keys that are persisted

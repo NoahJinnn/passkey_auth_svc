@@ -11,7 +11,7 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
-type Manager interface {
+type IManager interface {
 	GenerateJWT(string) (string, error)
 	Verify(string) (jwt.Token, error)
 	GenerateCookie(token string) (*http.Cookie, error)
@@ -33,7 +33,7 @@ type cookieConfig struct {
 }
 
 // NewManager returns a new Manager which will be used to create and verify sessions JWTs
-func NewManager(jwkManager JwkManager, config sharedconfig.Session) (Manager, error) {
+func NewManager(jwkManager IJwkManager, config sharedconfig.Session) (*manager, error) {
 	ctx := context.Background()
 	signatureKey, err := jwkManager.GetSigningKey(ctx)
 	if err != nil {

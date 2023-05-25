@@ -18,7 +18,7 @@ func InitEntClient(ctxStartupCmdServe context.Context, cfg *sharedconfig.Shared)
 	return entClient
 }
 
-func InitSessionManager(ctxStartupCmdServe context.Context, cfg *sharedconfig.Shared, repo session.IJwkRepo) session.Manager {
+func InitSessionManager(ctxStartupCmdServe context.Context, cfg *sharedconfig.Shared, repo session.IJwkRepo) session.IManager {
 	jwkManager, err := session.NewDefaultManager(cfg.Secrets.Keys, repo)
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
