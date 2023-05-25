@@ -18,6 +18,7 @@
     - [Source](#source)
       - [Run without build](#run-without-build)
       - [Build first, then run](#build-first-then-run)
+  - [Test](#test)
   - [TODO](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
