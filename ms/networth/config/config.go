@@ -110,11 +110,6 @@ func GetServe() (c *Config, err error) {
 		return nil, appcfg.WrapPErr(err, fs.Serve, own)
 	}
 
-	err = c.Validate()
-	if err != nil {
-		return nil, err
-	}
-
 	return c, nil
 }
 
@@ -123,9 +118,4 @@ func GetServe() (c *Config, err error) {
 func cleanup() {
 	own = nil
 	shared = nil
-}
-
-func (c *Config) Validate() error {
-
-	return nil
 }

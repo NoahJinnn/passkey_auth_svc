@@ -23,8 +23,8 @@ type Ctx = context.Context
 type Service struct {
 	cfg            *config.Config
 	sharedCfg      *sharedconfig.Shared
-	sessionManager session.IManager
-	appl           app.App
+	sessionManager *session.Manager
+	appl           *app.App
 	repo           *dal.NwRepo
 }
 
