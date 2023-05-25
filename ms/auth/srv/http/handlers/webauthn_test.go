@@ -118,7 +118,11 @@ func TestWebauthnHandler_BeginRegistration(t *testing.T) {
 		assert.Equal(t, defaultCfg.Webauthn.RelyingParty.Id, creationOptions.Response.RelyingParty.ID)
 		assert.Equal(t, creationOptions.Response.AuthenticatorSelection.ResidentKey, protocol.ResidentKeyRequirementRequired)
 		assert.Equal(t, creationOptions.Response.AuthenticatorSelection.UserVerification, protocol.VerificationRequired)
+		assert.Equal(t, creationOptions.Response.User.Name, users[0].Edges.Emails[0].Address)
+		assert.Equal(t, creationOptions.Response.User.DisplayName, users[0].Edges.Emails[0].Address)
+		assert.Equal(t, creationOptions.Response.User.Icon, "")
 		assert.True(t, *creationOptions.Response.AuthenticatorSelection.RequireResidentKey)
+
 	}
 }
 
