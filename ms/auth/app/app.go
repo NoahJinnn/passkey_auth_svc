@@ -35,7 +35,7 @@ type App struct {
 }
 
 // New creates and returns new App.
-func New(mailer mail.IMailer, renderer *mail.Renderer, cfg *config.Config, repo dal.IAuthRepo) App {
+func New(mailer mail.IMailer, renderer *mail.Renderer, cfg *config.Config, repo dal.IAuthRepo) *App {
 	f := false
 	waClient, err := webauthn.New(&webauthn.Config{
 		RPDisplayName:         cfg.Webauthn.RelyingParty.DisplayName,
@@ -59,7 +59,7 @@ func New(mailer mail.IMailer, renderer *mail.Renderer, cfg *config.Config, repo 
 	if err != nil {
 		panic(fmt.Errorf("failed to create webauthn instance: %w", err))
 	}
-	return App{
+	return &App{
 		waSvc:       waSvc,
 		userSvc:     userSvc,
 		passcodeSvc: passcodeSvc,
