@@ -19,9 +19,11 @@ func (Jwk) Fields() []ent.Field {
 		field.Time("created_at").Default(time.Now).Immutable().Default(time.Now).Immutable(),
 	}
 }
+
 func (Jwk) Edges() []ent.Edge {
 	return nil
 }
+
 func (Jwk) Annotations() []schema.Annotation {
 	return nil
 }

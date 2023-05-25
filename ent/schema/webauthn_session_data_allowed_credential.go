@@ -26,9 +26,11 @@ func (WebauthnSessionDataAllowedCredential) Fields() []ent.Field {
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
+
 func (WebauthnSessionDataAllowedCredential) Edges() []ent.Edge {
 	return []ent.Edge{edge.From("webauthn_session_data", WebauthnSessionData.Type).Ref("webauthn_session_data_allowed_credentials").Unique().Field("webauthn_session_data_id")}
 }
+
 func (WebauthnSessionDataAllowedCredential) Annotations() []schema.Annotation {
 	return nil
 }

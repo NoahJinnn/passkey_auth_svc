@@ -85,7 +85,6 @@ func saveStaticFileConfig(fileNameContent map[string]string) error {
 		fmt.Printf("File %s saved successfully\n", filename)
 	}
 	return nil
-
 }
 
 // Init updates config defaults (from env) and setup subcommands flags.

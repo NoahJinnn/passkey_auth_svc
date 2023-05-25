@@ -72,7 +72,7 @@ func TestAESGCM_EncryptDecrypt(t *testing.T) {
 	ciphertext, err := aesgcm.Encrypt([]byte(plaintext))
 	assert.NoError(t, err)
 	assert.NotEmpty(t, ciphertext)
-	//Decrypt
+	// Decrypt
 	plainAgain, err := aesgcm.Decrypt(ciphertext)
 	assert.NoError(t, err)
 	assert.Equal(t, string(plainAgain), plaintext)
@@ -104,7 +104,7 @@ func TestAESGCM_SomeoneModifiedTheCiphertext(t *testing.T) {
 	cipher := []rune(ciphertext)
 	cipher[35] = cipher[35] + 1
 
-	//Try to decrypt
+	// Try to decrypt
 	plainAgain, err := aesgcm.Decrypt(string(cipher))
 	assert.Error(t, err)
 	assert.NotEqual(t, string(plainAgain), plaintext)

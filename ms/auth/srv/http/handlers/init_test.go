@@ -18,18 +18,20 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-var ctx = context.Background()
-var defaultCfg = config.Config{
-	Webauthn: config.WebauthnSettings{
-		RelyingParty: config.RelyingParty{
-			Id:          "localhost",
-			DisplayName: "Test Relying Party",
-			Icon:        "",
-			Origins:     []string{"http://localhost:8080"},
+var (
+	ctx        = context.Background()
+	defaultCfg = config.Config{
+		Webauthn: config.WebauthnSettings{
+			RelyingParty: config.RelyingParty{
+				Id:          "localhost",
+				DisplayName: "Test Relying Party",
+				Icon:        "",
+				Origins:     []string{"http://localhost:8080"},
+			},
+			Timeout: 60000,
 		},
-		Timeout: 60000,
-	},
-}
+	}
+)
 var sharedCfg = sharedconfig.Shared{
 	Session: sharedconfig.Session{
 		Lifespan: "1h",
@@ -45,8 +47,7 @@ var sharedCfg = sharedconfig.Shared{
 	},
 }
 
-type sessionManager struct {
-}
+type sessionManager struct{}
 
 var userId = "ec4ef049-5b88-4321-a173-21b0eff06a04"
 
@@ -91,7 +92,6 @@ var emails = []*ent.Email{
 
 var users = []*ent.User{
 	func() *ent.User {
-
 		user := &ent.User{
 			ID:        uId,
 			CreatedAt: time.Now(),

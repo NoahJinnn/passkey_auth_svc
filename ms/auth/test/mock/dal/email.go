@@ -19,7 +19,6 @@ type emailRepo struct {
 }
 
 func (r *emailRepo) GetByAddress(ctx Ctx, address string) (*ent.Email, error) {
-
 	for _, m := range r.emails {
 		if m.Address == address {
 			return m, nil
@@ -30,7 +29,6 @@ func (r *emailRepo) GetByAddress(ctx Ctx, address string) (*ent.Email, error) {
 }
 
 func (r *emailRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.Email, error) {
-
 	for _, m := range r.emails {
 		if m.ID == id {
 			return m, nil
@@ -44,7 +42,6 @@ func (r *emailRepo) GetPrimary(ctx Ctx, emailId uuid.UUID) (*ent.PrimaryEmail, e
 }
 
 func (r *emailRepo) ListByUser(ctx Ctx, userID uuid.UUID) ([]*ent.Email, error) {
-
 	var emails []*ent.Email
 
 	for _, m := range r.emails {

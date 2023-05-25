@@ -28,7 +28,6 @@ func (r *passcodeRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.Passcode, error) {
 		WithEmail().
 		WithUser().
 		Only(ctx)
-
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +44,6 @@ func (r *passcodeRepo) Create(ctx Ctx, pc *ent.Passcode) (*ent.Passcode, error) 
 		SetTTL(pc.TTL).
 		SetTryCount(0).
 		Save(ctx)
-
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +58,6 @@ func (r *passcodeRepo) Update(ctx Ctx, pc *ent.Passcode) error {
 		SetTTL(pc.TTL).
 		SetTryCount(pc.TryCount).
 		Save(ctx)
-
 	if err != nil {
 		return err
 	}
@@ -72,7 +69,6 @@ func (r *passcodeRepo) Delete(ctx Ctx, pc *ent.Passcode) error {
 	err := r.db.Passcode.
 		DeleteOne(pc).
 		Exec(ctx)
-
 	if err != nil {
 		return err
 	}

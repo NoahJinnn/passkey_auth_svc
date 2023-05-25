@@ -126,7 +126,6 @@ func (svc *plaidSvc) CreateLinkToken(
 	}
 
 	linkTokenCreateResp, _, err := svc.plaidClient.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*request).Execute()
-
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +152,6 @@ func (svc *plaidSvc) ExchangeSandboxAccessToken(ctx Ctx, institutionID string) (
 	sandboxPublicTokenResp, _, err := svc.plaidClient.PlaidApi.SandboxPublicTokenCreate(ctx).SandboxPublicTokenCreateRequest(
 		sbReq,
 	).Execute()
-
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +160,6 @@ func (svc *plaidSvc) ExchangeSandboxAccessToken(ctx Ctx, institutionID string) (
 	exchangePublicTokenResp, _, err := svc.plaidClient.PlaidApi.ItemPublicTokenExchange(ctx).ItemPublicTokenExchangeRequest(
 		*plaid.NewItemPublicTokenExchangeRequest(sandboxPublicTokenResp.GetPublicToken()),
 	).Execute()
-
 	if err != nil {
 		return nil, err
 	}
@@ -177,12 +174,10 @@ func (svc *plaidSvc) ExchangeSandboxAccessToken(ctx Ctx, institutionID string) (
 }
 
 func (svc *plaidSvc) ExchangeAccessToken(ctx Ctx, publicToken string) (*GetAccessTokenResp, error) {
-
 	// exchange the public_token for an access_token
 	exchangePublicTokenResp, _, err := svc.plaidClient.PlaidApi.ItemPublicTokenExchange(ctx).ItemPublicTokenExchangeRequest(
 		*plaid.NewItemPublicTokenExchangeRequest(publicToken),
 	).Execute()
-
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +206,6 @@ func (svc *plaidSvc) GetAuthAccount(ctx Ctx) (*GetAuthAccountResp, error) {
 	authGetResp, _, err := svc.plaidClient.PlaidApi.AuthGet(ctx).AuthGetRequest(
 		*plaid.NewAuthGetRequest(accessToken),
 	).Execute()
-
 	if err != nil {
 		return nil, err
 	}
@@ -256,7 +250,7 @@ func (svc *plaidSvc) GetTransactions(Ctx) (*GetTransactionsResp, error) {
 		cursor = &nextCursor
 	}
 
-	//TODO: Fix logx
+	// TODO: Fix logx
 	// logx.Infof("Added amounts: %v - Modified amounts: %v - Removed amounts: %v\n", len(added), len(modified), len(removed))
 
 	sort.Slice(added, func(i, j int) bool {
@@ -290,7 +284,6 @@ func (svc *plaidSvc) GetBalance(Ctx) (*GetAccountsResp, error) {
 	balancesGetResp, _, err := svc.plaidClient.PlaidApi.AccountsBalanceGet(ctx).AccountsBalanceGetRequest(
 		*plaid.NewAccountsBalanceGetRequest(accessToken),
 	).Execute()
-
 	if err != nil {
 		return nil, err
 	}
@@ -306,7 +299,6 @@ func (svc *plaidSvc) GetAccounts(Ctx) (*GetAccountsResp, error) {
 	accountsGetResp, _, err := svc.plaidClient.PlaidApi.AccountsGet(ctx).AccountsGetRequest(
 		*plaid.NewAccountsGetRequest(accessToken),
 	).Execute()
-
 	if err != nil {
 		return nil, err
 	}

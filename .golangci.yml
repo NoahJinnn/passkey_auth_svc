@@ -1,3 +1,9 @@
+# IMPORTANT!!
+# Before editing this file, please read the related issues of golangci-lint and ent here:
+# https://github.com/golangci/golangci-lint/issues/3711, the fixes was mentioned in the comments.
+# Regarding the error, we need to use golang-lint v1.52.0
+# Other settings is following this gist: https://gist.github.com/maratori/47a4d00457a92aa426dbd48a18776322
+
 run:
   skip-dirs:
     - ent/*
@@ -167,3 +173,24 @@ linters:
     - sqlclosecheck
     - tparallel
     - wastedassign
+
+issues:
+  # Maximum count of issues with the same text.
+  # Set to 0 to disable.
+  # Default: 3
+  max-same-issues: 50
+
+  exclude-rules:
+    - source: "(noinspection|TODO)"
+      linters: [ godot ]
+    - source: "//noinspection"
+      linters: [ gocritic ]
+    - path: "_test\\.go"
+      linters:
+        - bodyclose
+        - dupl
+        - funlen
+        - goconst
+        - gosec
+        - noctx
+        - wrapcheck

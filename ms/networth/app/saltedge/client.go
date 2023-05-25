@@ -22,7 +22,6 @@ type SeClient struct {
 }
 
 func NewSeClient(cred *config.SaltEdge) *SeClient {
-
 	req := httpx.NewReq("https://www.saltedge.com/api/v5")
 	req.SetHeader("Accept", "application/json")
 	req.SetHeader("Content-Type", "application/json")
@@ -36,7 +35,6 @@ func NewSeClient(cred *config.SaltEdge) *SeClient {
 }
 
 func (cl *SeClient) DoReq(method string, url string, query map[string][]string, reqBody interface{}) ([]byte, error) {
-
 	cl.req.OverrideQ(query)
 
 	var b []byte

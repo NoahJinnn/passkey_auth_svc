@@ -83,7 +83,6 @@ func Test(t *testing.T) {
 		c, err := testGetServe()
 		t.Nil(err)
 		t.DeepEqual(c, want)
-
 	})
 
 	t.Run("flag", func(tt *testing.T) {

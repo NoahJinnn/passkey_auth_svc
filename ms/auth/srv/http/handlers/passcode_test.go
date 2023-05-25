@@ -20,8 +20,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type mailer struct {
-}
+type mailer struct{}
 
 var renderer, _ = mail.NewRenderer()
 
@@ -40,6 +39,7 @@ func passcodes() []*ent.Passcode {
 func (m mailer) Send(email []string, subject string, body string) error {
 	return nil
 }
+
 func TestPasscodeHandler_Init(t *testing.T) {
 	appl := test.NewApp(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, nil, emails, nil))
 	srv := &HttpDeps{

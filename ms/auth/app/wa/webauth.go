@@ -264,7 +264,6 @@ func (svc *WebauthnSvc) ListCredentials(ctx Ctx, userId uuid.UUID) ([]*ent.Webau
 }
 
 func (svc *WebauthnSvc) UpdateCredential(ctx Ctx, userId uuid.UUID, id string, name *string) error {
-
 	user, err := svc.repo.GetUserRepo().GetById(ctx, userId)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
@@ -309,7 +308,6 @@ func (svc *WebauthnSvc) DeleteCredential(ctx Ctx, userId uuid.UUID, id string) e
 
 func (svc *WebauthnSvc) getWebauthnUser(ctx Ctx, userId uuid.UUID) (*WebauthnUser, *ent.User, error) {
 	user, err := svc.repo.GetUserRepo().GetById(ctx, userId)
-
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get user: %w", err)
 	}

@@ -9,10 +9,8 @@ import (
 	"github.com/hellohq/hqservice/pkg/httpx"
 )
 
-var (
-	// We store the access_token in memory - in production, store it in a secure persistent data store.
-	accessToken string
-)
+// We store the access_token in memory - in production, store it in a secure persistent data store.
+var accessToken string
 
 type IFvAuthSvc interface {
 	CreateCustomerToken(ctx context.Context, cct *CreateCustomerToken) (*CustomerToken, error)

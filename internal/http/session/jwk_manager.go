@@ -111,7 +111,6 @@ func (m *DefaultManager) GetPublicKeys(ctx context.Context) (jwk.Set, error) {
 		}
 
 		key, err := jwk.ParseKey(k)
-
 		if err != nil {
 			return nil, err
 		}

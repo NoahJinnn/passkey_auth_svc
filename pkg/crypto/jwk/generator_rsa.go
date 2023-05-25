@@ -3,13 +3,13 @@ package jwk
 import (
 	"crypto/rand"
 	"crypto/rsa"
+
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 )
 
 // RSAKeyGenerator
-type RSAKeyGenerator struct {
-}
+type RSAKeyGenerator struct{}
 
 func (g *RSAKeyGenerator) Generate(id string) (jwk.Key, error) {
 	rawKey, err := rsa.GenerateKey(rand.Reader, 4096)

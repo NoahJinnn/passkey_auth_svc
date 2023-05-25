@@ -25,7 +25,6 @@ func (r *userRepo) All(ctx Ctx) ([]*ent.User, error) {
 	us, err := r.db.User.
 		Query().
 		All(ctx)
-
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +40,6 @@ func (r *userRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.User, error) {
 		WithPrimaryEmail().
 		WithWebauthnCredentials().
 		Only(ctx)
-
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +51,6 @@ func (r *userRepo) Create(ctx Ctx, u *ent.User) (*ent.User, error) {
 	newu, err := r.db.User.
 		Create().
 		Save(ctx)
-
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +63,6 @@ func (r *userRepo) Count(ctx Ctx, id uuid.UUID) (int, error) {
 		Query().
 		Where(user.ID(id)).
 		Count(ctx)
-
 	if err != nil {
 		return 0, err
 	}

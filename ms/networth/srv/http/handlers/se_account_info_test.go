@@ -53,7 +53,6 @@ func TestSeAccountInfoHandler_Create_DeleteCustomer(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, tt.expectedDelete.Deleted, deleted.Deleted)
 	}
-
 }
 
 func TestSeAccountInfoHandler_ShowCustomer_CreateConnectSession(t *testing.T) {

@@ -26,12 +26,14 @@ func (PrimaryEmail) Fields() []ent.Field {
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
+
 func (PrimaryEmail) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("email", Email.Type).Ref("primary_email").Unique().Field("email_id"),
 		edge.From("user", User.Type).Ref("primary_email").Unique().Field("user_id"),
 	}
 }
+
 func (PrimaryEmail) Annotations() []schema.Annotation {
 	return nil
 }
