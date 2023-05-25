@@ -1,10 +1,9 @@
 #!/bin/bash
 set -x -e -o pipefail
-
 source $( dirname -- "$0"; )/build.sh
 
 # Build binaries for linux-based Docker container.
-GOOS=linux GOARCH=amd64 build "$@"
+GOOS=$1 GOARCH=$2 build "$@"
 
 cd docker
 
@@ -24,5 +23,4 @@ else
   exit 1
 fi
 
-# # Build binaries for host system.
-test "$(go env GOOS)" = linux -a "$(go env GOARCH)" = amd64 || build "$@"
+
