@@ -25,9 +25,9 @@ type Ctx = context.Context
 type Service struct {
 	cfg            *config.Config
 	sharedCfg      *sharedconfig.Shared
-	sessionManager session.Manager
-	appl           app.App
-	repo           dal.IAuthRepo
+	sessionManager *session.Manager
+	appl           *app.App
+	repo           *dal.AuthRepo
 }
 
 // Name implements main.embeddedService interface.
@@ -42,7 +42,7 @@ func (s *Service) Init(sharedCfg *sharedconfig.Shared, serveCmd *cobra.Command) 
 }
 
 // RunServe implements main.embeddedService interface.
-func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func(), entClient *ent.Client, sessionManager session.Manager) (err error) {
+func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func(), entClient *ent.Client, sessionManager *session.Manager) (err error) {
 	log := structlog.FromContext(ctxShutdown, nil)
 
 	if s.cfg == nil {

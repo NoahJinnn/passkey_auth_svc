@@ -20,22 +20,22 @@ import (
 
 // Appl provides application features (use cases) service.
 type Appl interface {
-	GetWebauthnSvc() wa.IWebauthnSvc
-	GetUserSvc() user.IUserSvc
-	GetPasscodeSvc() passcode.IPasscodeSvc
-	GetEmailSvc() email.IEmailSvc
+	GetWebauthnSvc() *wa.WebauthnSvc
+	GetUserSvc() *user.UserSvc
+	GetPasscodeSvc() *passcode.PasscodeSvc
+	GetEmailSvc() *email.EmailSvc
 }
 
 // App implements interface Appl.
 type App struct {
-	waSvc       wa.IWebauthnSvc
-	userSvc     user.IUserSvc
-	passcodeSvc passcode.IPasscodeSvc
-	emailSvc    email.IEmailSvc
+	waSvc       *wa.WebauthnSvc
+	userSvc     *user.UserSvc
+	passcodeSvc *passcode.PasscodeSvc
+	emailSvc    *email.EmailSvc
 }
 
 // New creates and returns new App.
-func New(mailer mail.IMailer, renderer *mail.Renderer, cfg *config.Config, repo dal.IAuthRepo) App {
+func New(mailer mail.IMailer, renderer *mail.Renderer, cfg *config.Config, repo dal.IAuthRepo) *App {
 	f := false
 	waClient, err := webauthn.New(&webauthn.Config{
 		RPDisplayName:         cfg.Webauthn.RelyingParty.DisplayName,
@@ -59,7 +59,7 @@ func New(mailer mail.IMailer, renderer *mail.Renderer, cfg *config.Config, repo 
 	if err != nil {
 		panic(fmt.Errorf("failed to create webauthn instance: %w", err))
 	}
-	return App{
+	return &App{
 		waSvc:       waSvc,
 		userSvc:     userSvc,
 		passcodeSvc: passcodeSvc,
@@ -67,18 +67,18 @@ func New(mailer mail.IMailer, renderer *mail.Renderer, cfg *config.Config, repo 
 	}
 }
 
-func (a App) GetWebauthnSvc() wa.IWebauthnSvc {
+func (a App) GetWebauthnSvc() *wa.WebauthnSvc {
 	return a.waSvc
 }
 
-func (a App) GetUserSvc() user.IUserSvc {
+func (a App) GetUserSvc() *user.UserSvc {
 	return a.userSvc
 }
 
-func (a App) GetPasscodeSvc() passcode.IPasscodeSvc {
+func (a App) GetPasscodeSvc() *passcode.PasscodeSvc {
 	return a.passcodeSvc
 }
 
-func (a App) GetEmailSvc() email.IEmailSvc {
+func (a App) GetEmailSvc() *email.EmailSvc {
 	return a.emailSvc
 }

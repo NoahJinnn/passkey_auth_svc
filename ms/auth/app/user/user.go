@@ -21,19 +21,19 @@ type IUserSvc interface {
 	Create(ctx Ctx, email string) (newU *ent.User, emailID uuid.UUID, err error)
 }
 
-type userSvc struct {
+type UserSvc struct {
 	repo dal.IAuthRepo
 	cfg  *config.Config
 }
 
-func NewUserSvc(cfg *config.Config, repo dal.IAuthRepo) IUserSvc {
-	return &userSvc{
+func NewUserSvc(cfg *config.Config, repo dal.IAuthRepo) *UserSvc {
+	return &UserSvc{
 		repo: repo,
 		cfg:  cfg,
 	}
 }
 
-func (svc *userSvc) Create(ctx Ctx, address string) (newU *ent.User, emailID uuid.UUID, err error) {
+func (svc *UserSvc) Create(ctx Ctx, address string) (newU *ent.User, emailID uuid.UUID, err error) {
 	if err := svc.repo.WithTx(ctx, func(ctx Ctx, client *ent.Client) error {
 		newU, err = client.User.Create().Save(ctx)
 		if err != nil {
@@ -66,7 +66,7 @@ func (svc *userSvc) Create(ctx Ctx, address string) (newU *ent.User, emailID uui
 	return newU, emailID, nil
 }
 
-func (svc *userSvc) GetById(ctx Ctx, userID uuid.UUID) (*ent.User, *string, error) {
+func (svc *UserSvc) GetById(ctx Ctx, userID uuid.UUID) (*ent.User, *string, error) {
 	user, err := svc.repo.GetUserRepo().GetById(ctx, userID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get user: %w", err)

@@ -22,7 +22,7 @@ type (
 
 // NewServer returns Echo server configured to listen on the TCP network
 // address cfg.Host:cfg.Port and handle requests on incoming connections.
-func NewServer(appl app.Appl, sessionManager session.Manager, sharedCfg *sharedconfig.Shared, cfg *config.Config) error {
+func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *sharedconfig.Shared, cfg *config.Config) error {
 	srv := &handlers.HttpDeps{
 		Appl:      appl,
 		Cfg:       cfg,

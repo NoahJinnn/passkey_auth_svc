@@ -11,7 +11,7 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
-type Manager interface {
+type IManager interface {
 	GenerateJWT(string) (string, error)
 	Verify(string) (jwt.Token, error)
 	GenerateCookie(token string) (*http.Cookie, error)
@@ -19,7 +19,7 @@ type Manager interface {
 }
 
 // Manager is used to create and verify session JWTs
-type manager struct {
+type Manager struct {
 	jwtGenerator  hqJwt.Generator
 	sessionLength time.Duration
 	cookieConfig  cookieConfig
@@ -33,7 +33,7 @@ type cookieConfig struct {
 }
 
 // NewManager returns a new Manager which will be used to create and verify sessions JWTs
-func NewManager(jwkManager JwkManager, config sharedconfig.Session) (Manager, error) {
+func NewManager(jwkManager IJwkManager, config sharedconfig.Session) (*Manager, error) {
 	ctx := context.Background()
 	signatureKey, err := jwkManager.GetSigningKey(ctx)
 	if err != nil {
@@ -60,7 +60,7 @@ func NewManager(jwkManager JwkManager, config sharedconfig.Session) (Manager, er
 	default:
 		sameSite = http.SameSiteDefaultMode
 	}
-	return &manager{
+	return &Manager{
 		jwtGenerator:  g,
 		sessionLength: duration,
 		cookieConfig: cookieConfig{
@@ -73,7 +73,7 @@ func NewManager(jwkManager JwkManager, config sharedconfig.Session) (Manager, er
 }
 
 // GenerateJWT creates a new session JWT for the given user
-func (g *manager) GenerateJWT(userId string) (string, error) {
+func (g *Manager) GenerateJWT(userId string) (string, error) {
 	issuedAt := time.Now()
 	expiration := issuedAt.Add(g.sessionLength)
 
@@ -92,7 +92,7 @@ func (g *manager) GenerateJWT(userId string) (string, error) {
 }
 
 // Verify verifies the given JWT and returns a parsed one if verification was successful
-func (g *manager) Verify(token string) (jwt.Token, error) {
+func (g *Manager) Verify(token string) (jwt.Token, error) {
 	parsedToken, err := g.jwtGenerator.Verify([]byte(token))
 	if err != nil {
 		return nil, fmt.Errorf("failed to verify session token: %w", err)
@@ -102,7 +102,7 @@ func (g *manager) Verify(token string) (jwt.Token, error) {
 }
 
 // GenerateCookie creates a new session cookie for the given user
-func (g *manager) GenerateCookie(token string) (*http.Cookie, error) {
+func (g *Manager) GenerateCookie(token string) (*http.Cookie, error) {
 	return &http.Cookie{
 		Name:     "hqservice",
 		Value:    token,
@@ -115,7 +115,7 @@ func (g *manager) GenerateCookie(token string) (*http.Cookie, error) {
 }
 
 // DeleteCookie returns a cookie that will expire the cookie on the frontend
-func (g *manager) DeleteCookie() (*http.Cookie, error) {
+func (g *Manager) DeleteCookie() (*http.Cookie, error) {
 	return &http.Cookie{
 		Name:     "hqservice",
 		Value:    "",

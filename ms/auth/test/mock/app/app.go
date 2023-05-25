@@ -16,10 +16,10 @@ import (
 
 // App implements interface Appl.
 type appT struct {
-	waSvc       wa.IWebauthnSvc
-	userSvc     user.IUserSvc
-	passcodeSvc passcode.IPasscodeSvc
-	emailSvc    email.IEmailSvc
+	waSvc       *wa.WebauthnSvc
+	userSvc     *user.UserSvc
+	passcodeSvc *passcode.PasscodeSvc
+	emailSvc    *email.EmailSvc
 }
 
 // New creates and returns new App.
@@ -55,18 +55,18 @@ func NewApp(mailer mail.IMailer, renderer *mail.Renderer, cfg *config.Config, re
 	}
 }
 
-func (a appT) GetWebauthnSvc() wa.IWebauthnSvc {
+func (a appT) GetWebauthnSvc() *wa.WebauthnSvc {
 	return a.waSvc
 }
 
-func (a appT) GetUserSvc() user.IUserSvc {
+func (a appT) GetUserSvc() *user.UserSvc {
 	return a.userSvc
 }
 
-func (a appT) GetPasscodeSvc() passcode.IPasscodeSvc {
+func (a appT) GetPasscodeSvc() *passcode.PasscodeSvc {
 	return a.passcodeSvc
 }
 
-func (a appT) GetEmailSvc() email.IEmailSvc {
+func (a appT) GetEmailSvc() *email.EmailSvc {
 	return a.emailSvc
 }

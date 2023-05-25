@@ -38,18 +38,19 @@ var (
 
 		RpId appcfg.NotEmptyString `env:"AUTH_RP_ID"`
 
-		RpOrigins          appcfg.StringSlice `env:"AUTH_RP_ORIGINS"`
-		IosAssociationSite appcfg.String      `env:"IOS_SITE_ASSOCIATION"`
-		AndroidAssetLinks  appcfg.String      `env:"ANDROID_ASSET_LINKS"`
-		OneSignalAppID     appcfg.String      `env:"ONESIGNAL_APP_ID"`
-		OneSignalAppKey    appcfg.String      `env:"ONESIGNAL_APP_KEY"`
-		FromAddress        appcfg.String      `env:"MAIL_FROM_ADDRESS"`
-		FromName           appcfg.String      `env:"MAIL_FROM_NAME"`
+		RpOrigins          appcfg.StringSlice    `env:"AUTH_RP_ORIGINS"`
+		IosAssociationSite appcfg.String         `env:"IOS_SITE_ASSOCIATION"`
+		AndroidAssetLinks  appcfg.String         `env:"ANDROID_ASSET_LINKS"`
+		OneSignalAppID     appcfg.String         `env:"ONESIGNAL_APP_ID"`
+		OneSignalAppKey    appcfg.String         `env:"ONESIGNAL_APP_KEY"`
+		FromAddress        appcfg.NotEmptyString `env:"MAIL_FROM_ADDRESS"`
+		FromName           appcfg.String         `env:"MAIL_FROM_NAME"`
 
 		TTL appcfg.Int `env:"PASSCODE_TTL"`
 	}{
-		RpId: appcfg.MustNotEmptyString("localhost"),
-		TTL:  appcfg.MustInt("300"),
+		RpId:        appcfg.MustNotEmptyString("localhost"),
+		TTL:         appcfg.MustInt("300"),
+		FromAddress: appcfg.MustNotEmptyString("noah@hellohq.com"),
 	}
 )
 
@@ -61,7 +62,6 @@ type Config struct {
 	MaxEmailAddresses int
 }
 
-// Save apple association site file to static folder
 func saveStaticFileConfig(fileNameContent map[string]string) error {
 	for filename, content := range fileNameContent {
 		_, err := os.Stat("static")
@@ -99,6 +99,7 @@ func Init(sharedCfg *sharedconfig.Shared, flagsets FlagSets) error {
 		return err
 	}
 
+	// Save required setting file of fido2 for mobile platforms
 	filenameContent := map[string]string{
 		"apple-app-site-association": own.IosAssociationSite.Value(&err),
 		"assetlinks.json":            own.AndroidAssetLinks.Value(&err),
@@ -162,11 +163,6 @@ func GetServe() (c *Config, err error) {
 		return nil, appcfg.WrapPErr(err, fs.Serve, own)
 	}
 
-	err = c.Validate()
-	if err != nil {
-		return nil, err
-	}
-
 	return c, nil
 }
 
@@ -175,16 +171,4 @@ func GetServe() (c *Config, err error) {
 func cleanup() {
 	own = nil
 	shared = nil
-}
-
-func (c *Config) Validate() error {
-	err := c.Webauthn.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate webauthn settings: %w", err)
-	}
-	err = c.Passcode.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate passcode settings: %w", err)
-	}
-	return nil
 }

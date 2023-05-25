@@ -15,10 +15,10 @@ import (
 
 type PasscodeHandler struct {
 	*HttpDeps
-	sessionManager session.Manager
+	sessionManager session.IManager
 }
 
-func NewPasscodeHandler(srv *HttpDeps, sessionManager session.Manager) *PasscodeHandler {
+func NewPasscodeHandler(srv *HttpDeps, sessionManager session.IManager) *PasscodeHandler {
 	return &PasscodeHandler{
 		srv,
 		sessionManager,

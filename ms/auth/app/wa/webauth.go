@@ -30,7 +30,7 @@ type IWebauthnSvc interface {
 	DeleteCredential(ctx Ctx, userId uuid.UUID, id string) error
 }
 
-type webauthnSvc struct {
+type WebauthnSvc struct {
 	repo     dal.IAuthRepo
 	waClient *webauthn.WebAuthn
 }
@@ -40,14 +40,14 @@ var (
 	WebauthnOperationAuthentication string = "authentication"
 )
 
-func NewWebAuthn(cfg *config.Config, repo dal.IAuthRepo, waClient *webauthn.WebAuthn) IWebauthnSvc {
-	return &webauthnSvc{
+func NewWebAuthn(cfg *config.Config, repo dal.IAuthRepo, waClient *webauthn.WebAuthn) *WebauthnSvc {
+	return &WebauthnSvc{
 		repo:     repo,
 		waClient: waClient,
 	}
 }
 
-func (svc *webauthnSvc) InitRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, error) {
+func (svc *WebauthnSvc) InitRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, error) {
 	webauthnUser, _, err := svc.getWebauthnUser(ctx, userId)
 	if webauthnUser == nil {
 		// TODO: audit logger
@@ -77,7 +77,7 @@ func (svc *webauthnSvc) InitRegistration(ctx Ctx, userId uuid.UUID) (*protocol.C
 	return options, nil
 }
 
-func (svc *webauthnSvc) FinishRegistration(ctx Ctx, request *protocol.ParsedCredentialCreationData, sessionUserId string) (credentialId string, userId string, err error) {
+func (svc *WebauthnSvc) FinishRegistration(ctx Ctx, request *protocol.ParsedCredentialCreationData, sessionUserId string) (credentialId string, userId string, err error) {
 	if err := svc.repo.WithTx(ctx, func(ctx Ctx, client *ent.Client) error {
 		sessionDataRepo := svc.repo.GetWebauthnSessionRepo()
 		sessionData, err := sessionDataRepo.GetByChallenge(ctx, request.Response.CollectedClientData.Challenge)
@@ -152,7 +152,7 @@ func (svc *webauthnSvc) FinishRegistration(ctx Ctx, request *protocol.ParsedCred
 	return credentialId, userId, nil
 }
 
-func (svc *webauthnSvc) InitLogin(ctx Ctx, reqUserId *string) (*protocol.CredentialAssertion, error) {
+func (svc *WebauthnSvc) InitLogin(ctx Ctx, reqUserId *string) (*protocol.CredentialAssertion, error) {
 	var options *protocol.CredentialAssertion
 	var sessionData *webauthn.SessionData
 	if reqUserId != nil {
@@ -202,7 +202,7 @@ func (svc *webauthnSvc) InitLogin(ctx Ctx, reqUserId *string) (*protocol.Credent
 	return options, nil
 }
 
-func (svc *webauthnSvc) FinishLogin(ctx Ctx, request *protocol.ParsedCredentialAssertionData) (credentialId string, userId string, err error) {
+func (svc *WebauthnSvc) FinishLogin(ctx Ctx, request *protocol.ParsedCredentialAssertionData) (credentialId string, userId string, err error) {
 	if err := svc.repo.WithTx(ctx, func(ctx Ctx, client *ent.Client) error {
 		sessionDataRepo := svc.repo.GetWebauthnSessionRepo()
 		sessionData, err := sessionDataRepo.GetByChallenge(ctx, request.Response.CollectedClientData.Challenge)
@@ -259,11 +259,11 @@ func (svc *webauthnSvc) FinishLogin(ctx Ctx, request *protocol.ParsedCredentialA
 	return credentialId, userId, nil
 }
 
-func (svc *webauthnSvc) ListCredentials(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error) {
+func (svc *WebauthnSvc) ListCredentials(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error) {
 	return svc.repo.GetWebauthnCredentialRepo().GetByUser(ctx, userId)
 }
 
-func (svc *webauthnSvc) UpdateCredential(ctx Ctx, userId uuid.UUID, id string, name *string) error {
+func (svc *WebauthnSvc) UpdateCredential(ctx Ctx, userId uuid.UUID, id string, name *string) error {
 
 	user, err := svc.repo.GetUserRepo().GetById(ctx, userId)
 	if err != nil {
@@ -287,7 +287,7 @@ func (svc *webauthnSvc) UpdateCredential(ctx Ctx, userId uuid.UUID, id string, n
 	})
 }
 
-func (svc *webauthnSvc) DeleteCredential(ctx Ctx, userId uuid.UUID, id string) error {
+func (svc *WebauthnSvc) DeleteCredential(ctx Ctx, userId uuid.UUID, id string) error {
 	user, err := svc.repo.GetUserRepo().GetById(ctx, userId)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
@@ -307,7 +307,7 @@ func (svc *webauthnSvc) DeleteCredential(ctx Ctx, userId uuid.UUID, id string) e
 	})
 }
 
-func (svc *webauthnSvc) getWebauthnUser(ctx Ctx, userId uuid.UUID) (*WebauthnUser, *ent.User, error) {
+func (svc *WebauthnSvc) getWebauthnUser(ctx Ctx, userId uuid.UUID) (*WebauthnUser, *ent.User, error) {
 	user, err := svc.repo.GetUserRepo().GetById(ctx, userId)
 
 	if err != nil {
@@ -331,7 +331,7 @@ func (svc *webauthnSvc) getWebauthnUser(ctx Ctx, userId uuid.UUID) (*WebauthnUse
 	return webauthnUser, user, nil
 }
 
-func (svc *webauthnSvc) getCredentialFromLoginSession(ctx Ctx, request *protocol.ParsedCredentialAssertionData, sessionData *ent.WebauthnSessionData) (credential *webauthn.Credential, webauthnUser *WebauthnUser, err error) {
+func (svc *WebauthnSvc) getCredentialFromLoginSession(ctx Ctx, request *protocol.ParsedCredentialAssertionData, sessionData *ent.WebauthnSessionData) (credential *webauthn.Credential, webauthnUser *WebauthnUser, err error) {
 	model := WebauthnSessionDataFromModel(sessionData)
 	if sessionData.UserID.IsNil() {
 		// Discoverable Login

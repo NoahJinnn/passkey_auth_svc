@@ -21,18 +21,18 @@ type ISeAccountInfoSvc interface {
 	GetTxByConnectionIdAndAccountId(ctx context.Context, connectionId string, accountId string) (interface{}, error)
 }
 
-type seSvc struct {
+type SeAccountInfoSvc struct {
 	client *SeClient
 }
 
-func NewSeAccountInfoSvc(cfg *config.Config) ISeAccountInfoSvc {
+func NewSeAccountInfoSvc(cfg *config.Config) *SeAccountInfoSvc {
 	client := NewSeClient(cfg.SaltEdge)
-	return &seSvc{
+	return &SeAccountInfoSvc{
 		client: client,
 	}
 }
 
-func (svc *seSvc) Customer(ctx context.Context, customerId string) (*Customer, error) {
+func (svc *SeAccountInfoSvc) Customer(ctx context.Context, customerId string) (*Customer, error) {
 	path := fmt.Sprintf("/customers/%s", customerId)
 
 	resp, err := svc.client.DoReq(http.MethodGet, path, nil, nil)
@@ -51,7 +51,7 @@ func (svc *seSvc) Customer(ctx context.Context, customerId string) (*Customer, e
 	return &result, nil
 }
 
-func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *CreateCustomer) (*Customer, error) {
+func (svc *SeAccountInfoSvc) CreateCustomer(ctx context.Context, ccr *CreateCustomer) (*Customer, error) {
 	resp, err := svc.client.DoReq(http.MethodPost, "/customers", nil, ccr)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func (svc *seSvc) CreateCustomer(ctx context.Context, ccr *CreateCustomer) (*Cus
 	return &result, nil
 }
 
-func (svc *seSvc) RemoveCustomer(ctx context.Context, customerId string) (*RemoveCustomer, error) {
+func (svc *SeAccountInfoSvc) RemoveCustomer(ctx context.Context, customerId string) (*RemoveCustomer, error) {
 	path := fmt.Sprintf("/customers/%s", customerId)
 
 	resp, err := svc.client.DoReq(http.MethodDelete, path, nil, nil)
@@ -87,7 +87,7 @@ func (svc *seSvc) RemoveCustomer(ctx context.Context, customerId string) (*Remov
 	return &result, nil
 }
 
-func (svc *seSvc) CreateConnectSession(ctx context.Context, ccsr *CreateConnectSession) (*ConnectSession, error) {
+func (svc *SeAccountInfoSvc) CreateConnectSession(ctx context.Context, ccsr *CreateConnectSession) (*ConnectSession, error) {
 	resp, err := svc.client.DoReq(http.MethodPost, "/connect_sessions/create", nil, ccsr)
 	if err != nil {
 		return nil, err
@@ -104,7 +104,7 @@ func (svc *seSvc) CreateConnectSession(ctx context.Context, ccsr *CreateConnectS
 	return &result, nil
 }
 
-func (svc *seSvc) GetConnectionByCustomerId(ctx context.Context, customerId string) (interface{}, error) {
+func (svc *SeAccountInfoSvc) GetConnectionByCustomerId(ctx context.Context, customerId string) (interface{}, error) {
 	path := fmt.Sprintf("/customers/%s", customerId)
 
 	resp, err := svc.client.DoReq(http.MethodGet, path, nil, nil)
@@ -123,7 +123,7 @@ func (svc *seSvc) GetConnectionByCustomerId(ctx context.Context, customerId stri
 	return &result, nil
 }
 
-func (svc *seSvc) GetAccountByConnectionId(ctx context.Context, connectionId string) (interface{}, error) {
+func (svc *SeAccountInfoSvc) GetAccountByConnectionId(ctx context.Context, connectionId string) (interface{}, error) {
 	resp, err := svc.client.DoReq(http.MethodGet, "/accounts", map[string][]string{
 		"connection_id": {connectionId},
 	}, nil)
@@ -142,7 +142,7 @@ func (svc *seSvc) GetAccountByConnectionId(ctx context.Context, connectionId str
 	return &result, nil
 }
 
-func (svc *seSvc) GetTxByConnectionIdAndAccountId(ctx context.Context, connectionId string, accountId string) (interface{}, error) {
+func (svc *SeAccountInfoSvc) GetTxByConnectionIdAndAccountId(ctx context.Context, connectionId string, accountId string) (interface{}, error) {
 	resp, err := svc.client.DoReq(http.MethodGet, "/transactions", map[string][]string{
 		"connection_id": {connectionId},
 		"account_id":    {accountId},

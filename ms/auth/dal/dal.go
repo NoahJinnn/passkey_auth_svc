@@ -32,7 +32,7 @@ type AuthRepo struct {
 }
 type Ctx = context.Context
 
-func New(client *ent.Client) IAuthRepo {
+func New(client *ent.Client) *AuthRepo {
 	return &AuthRepo{
 		Db: client,
 	}

@@ -16,10 +16,10 @@ import (
 
 type UserHandler struct {
 	*HttpDeps
-	sessionManager session.Manager
+	sessionManager session.IManager
 }
 
-func NewUserHandler(srv *HttpDeps, sessionManager session.Manager) *UserHandler {
+func NewUserHandler(srv *HttpDeps, sessionManager session.IManager) *UserHandler {
 	return &UserHandler{
 		srv,
 		sessionManager,

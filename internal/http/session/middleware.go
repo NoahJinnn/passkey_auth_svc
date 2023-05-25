@@ -9,7 +9,7 @@ import (
 )
 
 // Session is a convenience function to create a middleware.JWT with custom JWT verification
-func Session(generator Manager) echo.MiddlewareFunc {
+func Session(generator IManager) echo.MiddlewareFunc {
 	c := echojwt.Config{
 		ContextKey:     "session",
 		TokenLookup:    "header:Authorization:Bearer,cookie:hqservice",
@@ -23,7 +23,7 @@ func Session(generator Manager) echo.MiddlewareFunc {
 
 type ParseTokenFunc = func(c echo.Context, auth string) (interface{}, error)
 
-func parseToken(generator Manager) ParseTokenFunc {
+func parseToken(generator IManager) ParseTokenFunc {
 	return func(c echo.Context, auth string) (interface{}, error) {
 		return generator.Verify(auth)
 	}
