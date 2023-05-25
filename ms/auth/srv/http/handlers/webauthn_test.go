@@ -122,7 +122,7 @@ func TestWebauthnHandler_BeginRegistration(t *testing.T) {
 		assert.Equal(t, creationOptions.Response.AuthenticatorSelection.UserVerification, protocol.VerificationRequired)
 		assert.Equal(t, creationOptions.Response.User.Name, users[0].Edges.Emails[0].Address)
 		assert.Equal(t, creationOptions.Response.User.DisplayName, users[0].Edges.Emails[0].Address)
-		assert.Equal(t, creationOptions.Response.User.Icon, "")
+		assert.Equal(t, creationOptions.Response.User.Icon, "") //nolint:staticcheck
 		assert.True(t, *creationOptions.Response.AuthenticatorSelection.RequireResidentKey)
 
 	}

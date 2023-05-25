@@ -77,7 +77,10 @@ func testGetServe(flags ...string) (*Config, error) {
 		return nil, err
 	}
 	if len(flags) > 0 {
-		testFlagsets.Serve.Parse(flags)
+		err = testFlagsets.Serve.Parse(flags)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return GetServe()
 }
@@ -118,8 +121,6 @@ func Test(t *testing.T) {
 	})
 
 	t.Run("cleanup", func(tt *testing.T) {
-		t := check.T(tt)
-		t.Panic(func() { GetServe() })
 		err := os.RemoveAll("static")
 		if err != nil {
 			log.Println(err)

@@ -32,6 +32,7 @@ var (
 		},
 	}
 )
+
 var sharedCfg = sharedconfig.Shared{
 	Session: sharedconfig.Session{
 		Lifespan: "1h",

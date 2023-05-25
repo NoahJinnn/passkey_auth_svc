@@ -16,7 +16,7 @@ type HTTPError struct {
 // Error makes it compatible with `error` interface
 func (he *HTTPError) Error() string {
 	if he.Internal == nil {
-		return fmt.Sprintf("%s", he.Message)
+		return he.Message
 	}
 	return fmt.Sprintf("%s: %s", he.Message, he.Internal)
 }

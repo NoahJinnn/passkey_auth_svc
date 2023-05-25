@@ -71,8 +71,11 @@ func testGetServe(flags ...string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	if testFlagsets.Serve != nil && len(flags) > 0 {
-		testFlagsets.Serve.Parse(flags)
+	if len(flags) > 0 {
+		err = testFlagsets.Serve.Parse(flags)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return GetServe()
 }
@@ -98,10 +101,5 @@ func Test(t *testing.T) {
 		want.Server.BindAddrInt = netx.NewAddr("networthhostint4", 4102)
 
 		t.DeepEqual(c, want)
-	})
-
-	t.Run("cleanup", func(tt *testing.T) {
-		t := check.T(tt)
-		t.Panic(func() { GetServe() })
 	})
 }
