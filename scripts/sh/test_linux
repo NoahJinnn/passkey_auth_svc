@@ -7,6 +7,6 @@ set -x
 scriptsdir=$( dirname -- "$0"; )
 cd $scriptsdir/../../
 
-hadolint Dockerfile
+hadolint docker/Dockerfile
 
-gotestsum -- -race -tags=integration "$@" ./...
+go test -race -covermode atomic -coverprofile=coverage.out ./...

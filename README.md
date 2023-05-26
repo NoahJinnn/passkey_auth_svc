@@ -192,7 +192,7 @@ $ ./bin/hq serve
 
 Run all test
 ```sh
-go test -v ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
+go test -race -covermode atomic -coverprofile=coverage.out ./... && go tool cover -html=coverage.out
 go test -count=1 --tags=integration ./... # run integration tests
 ```
 
