@@ -31,7 +31,8 @@ func TestDefaultManager(t *testing.T) {
 	require.NoError(t, err)
 
 	token := jwt.New()
-	token.Set("Payload", "isJustFine")
+	err = token.Set("Payload", "isJustFine")
+	require.NoError(t, err)
 	signed, err := jwt.Sign(token, jwt.WithKey(jwa.RS256, sk))
 	require.NoError(t, err)
 

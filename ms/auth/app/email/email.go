@@ -37,7 +37,6 @@ func (svc *EmailSvc) ListByUser(ctx Ctx, userId uuid.UUID) ([]*ent.Email, error)
 }
 
 func (svc *EmailSvc) Create(ctx Ctx, userId uuid.UUID, address string) (*ent.Email, error) {
-
 	emailCount, err := svc.repo.GetEmailRepo().CountByUserId(ctx, userId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to count user emails: %w", err)
@@ -74,7 +73,6 @@ func (svc *EmailSvc) Create(ctx Ctx, userId uuid.UUID, address string) (*ent.Ema
 		return nil, err
 	}
 	return newMail, nil
-
 }
 
 func (svc *EmailSvc) SetPrimaryEmail(ctx Ctx, userId uuid.UUID, emailId uuid.UUID) error {
@@ -116,7 +114,6 @@ func (svc *EmailSvc) SetPrimaryEmail(ctx Ctx, userId uuid.UUID, emailId uuid.UUI
 
 		return nil
 	})
-
 }
 
 func (svc *EmailSvc) Delete(ctx Ctx, userId uuid.UUID, emailId uuid.UUID) error {

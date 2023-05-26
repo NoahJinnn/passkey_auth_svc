@@ -10,8 +10,7 @@ type PasscodeGenerator interface {
 	Generate() (string, error)
 }
 
-type passcodeGenerator struct {
-}
+type passcodeGenerator struct{}
 
 func NewPasscodeGenerator() PasscodeGenerator {
 	return &passcodeGenerator{}

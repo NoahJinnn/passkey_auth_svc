@@ -28,9 +28,11 @@ func (WebauthnSessionData) Fields() []ent.Field {
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now).Default(time.Now).UpdateDefault(time.Now),
 	}
 }
+
 func (WebauthnSessionData) Edges() []ent.Edge {
 	return []ent.Edge{edge.To("webauthn_session_data_allowed_credentials", WebauthnSessionDataAllowedCredential.Type)}
 }
+
 func (WebauthnSessionData) Annotations() []schema.Annotation {
 	return nil
 }

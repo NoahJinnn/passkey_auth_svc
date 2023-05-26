@@ -20,7 +20,10 @@ func WithTx(ctx context.Context, conn *ent.Client, exec func(ctx context.Context
 	}
 	defer func() {
 		if v := recover(); v != nil {
-			tx.Rollback()
+			err = tx.Rollback()
+			if err != nil {
+				panic(fmt.Errorf("%w: rolling back transaction: %v", err, v))
+			}
 			panic(v)
 		}
 	}()

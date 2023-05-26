@@ -31,7 +31,6 @@ func (r *emailRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.Email, error) {
 		Query().
 		Where(email.ID(id)).
 		Only(ctx)
-
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +43,6 @@ func (r *emailRepo) GetByAddress(ctx Ctx, address string) (*ent.Email, error) {
 		Query().
 		Where(email.Address(address)).
 		Only(ctx)
-
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +69,6 @@ func (r *emailRepo) UpdatePrimary(ctx Ctx, primary ent.PrimaryEmail) error {
 		SetUserID(*primary.UserID).
 		SetEmailID(primary.EmailID).
 		Save(ctx)
-
 	if err != nil {
 		return err
 	}
@@ -84,7 +81,6 @@ func (r *emailRepo) ListByUser(ctx Ctx, userID uuid.UUID) ([]*ent.Email, error) 
 		Query().
 		Where(email.UserID(userID)).
 		All(ctx)
-
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +93,6 @@ func (r *emailRepo) CountByUserId(ctx Ctx, userID uuid.UUID) (int, error) {
 		Query().
 		Where(email.UserID(userID)).
 		Count(ctx)
-
 	if err != nil {
 		return -1, err
 	}

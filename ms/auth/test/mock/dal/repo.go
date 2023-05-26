@@ -38,7 +38,6 @@ type repoT struct {
 }
 
 func (r repoT) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error {
-
 	txForw := func(db *ent.Client) error {
 		return exec(ctx, db)
 	}

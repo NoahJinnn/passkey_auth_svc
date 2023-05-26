@@ -4,7 +4,7 @@ tasks:
   binary:
     desc: "Build binary"
     cmds:
-      - ./build/sh/build.sh {{.CLI_ARGS}}
+      - ./build/sh/build.sh {{OS}} {{ARCH}} {{.CLI_ARGS}}
 
   container:
     desc: "Build binary and container"

@@ -98,7 +98,6 @@ func (a *AESGCM) decrypt(ciphertext string, key [32]byte) ([]byte, error) {
 		raw[gcm.NonceSize():],
 		nil,
 	)
-
 	if err != nil {
 		return nil, err
 	}

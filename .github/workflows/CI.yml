@@ -1,0 +1,116 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+    tags: [v*]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+env:
+  GO_VERSION: "^1.19"
+  GOFLAGS: "-mod=readonly"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: false
+      - uses: actions/checkout@v3
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.52.0
+          args: --timeout=3m --issues-exit-code=0 ./...
+
+  test:
+    runs-on: "ubuntu-latest"
+    timeout-minutes: 30
+    steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - uses: actions/checkout@v3
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/bin
+            ~/go/pkg
+            ~/go/src
+            ~/.cache/go-build
+            ~/.cache/golangci-lint
+            .gobincache
+          key: v3-test-${{ runner.os }}-${{ hashFiles('go.mod') }}
+          restore-keys: |
+            v3-test-${{ runner.os }}-
+
+      - name: Install tools
+        run: |
+          sudo apt update
+          sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
+          ./bin/task scripts:install:gotools
+
+      - name: Run test
+        run: ./bin/task scripts:test
+
+      - name: Report code coverage
+        env:
+          COVERALLS_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
+        if: env.COVERALLS_TOKEN
+        run: |
+          scripts/cover
+          .gobincache/goveralls -coverprofile=cover.out -service=GitHub
+
+  build-and-release:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - uses: actions/checkout@v3
+
+      - name: Turnstyle
+        uses: softprops/turnstyle@v1
+        with:
+          poll-interval-seconds: 3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg
+            ~/.cache/go-build
+          key: v1-build-${{ runner.os }}-${{ hashFiles('go.mod') }}
+          restore-keys: |
+            v1-build-${{ runner.os }}-
+
+      - name: task scripts:build:binary
+        run: |
+          sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
+          ./bin/task scripts:build:binary
+
+      # - name: Upload to GitHub Container Registry
+      #   run: |
+      #     docker login ghcr.io -u '${{ secrets.CR_USER }}' -p '${{ secrets.CR_PAT }}'
+      #     if echo "$GITHUB_REF" | grep -q '^refs/tags/v'; then
+      #       TAGS="${GITHUB_REF/refs\/tags\/v}"
+      #     else
+      #       #TAGS="$GITHUB_SHA latest"
+      #       TAGS="latest"
+      #     fi
+      #     for TAG in $TAGS; do
+      #       IMAGE_TAG="ghcr.io/${GITHUB_REPOSITORY,,*}:$TAG"
+      #       docker tag "$(basename $(go list -m))" "$IMAGE_TAG"
+      #       docker push "$IMAGE_TAG"
+      #     done

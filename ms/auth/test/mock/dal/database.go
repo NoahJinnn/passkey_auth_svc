@@ -10,9 +10,11 @@ import (
 	"github.com/ory/dockertest/v3/docker"
 )
 
-var database_user = "testuser"
-var database_password = "testpassword"
-var database_name = "hqservice_test"
+var (
+	database_user     = "testuser"
+	database_password = "testpassword"
+	database_name     = "hqservice_test"
+)
 
 type TestDB struct {
 	pool        *dockertest.Pool

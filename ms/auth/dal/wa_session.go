@@ -44,7 +44,6 @@ func (r *webauthnSessionRepo) Create(ctx Ctx, sessionData ent.WebauthnSessionDat
 		SetOperation(sessionData.Operation).
 		SetUserVerification(sessionData.UserVerification).
 		Save(ctx)
-
 	if err != nil {
 		return err
 	}
@@ -54,7 +53,6 @@ func (r *webauthnSessionRepo) Create(ctx Ctx, sessionData ent.WebauthnSessionDat
 
 func (r *webauthnSessionRepo) Delete(ctx Ctx, session ent.WebauthnSessionData) error {
 	err := r.db.WebauthnSessionData.DeleteOne(&session).Exec(ctx)
-
 	if err != nil {
 		return err
 	}

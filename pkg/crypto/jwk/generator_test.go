@@ -3,24 +3,25 @@ package jwk
 import (
 	"encoding/json"
 	"fmt"
+	"testing"
+
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestGenerator(t *testing.T) {
 	for k, c := range []struct {
-		g    KeyGenerator
-		name string
+		g     KeyGenerator
+		name  string
 		check func(ks jwk.Key)
 	}{
 		{
 			g:    &RSAKeyGenerator{},
 			name: "generate_rsa_jwk",
 			check: func(ks jwk.Key) {
-				//assert.Len(t, ks, 2)
+				// assert.Len(t, ks, 2)
 				rsaKey, ok := (ks).(jwk.RSAPrivateKey)
 				if !ok {
 					t.Fail()

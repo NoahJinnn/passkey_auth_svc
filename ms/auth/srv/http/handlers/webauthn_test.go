@@ -22,37 +22,39 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var userIdBytes = []byte{0x37, 0x45, 0x37, 0x77, 0x53, 0x56, 0x75, 0x49, 0x51, 0x79, 0x47, 0x68, 0x63, 0x79, 0x47, 0x77, 0x37, 0x5f, 0x42, 0x71, 0x42, 0x41}
-var credentials = []*ent.WebauthnCredential{
-	func() *ent.WebauthnCredential {
-		uId, _ := uuid.FromString(userId)
-		aaguid, _ := uuid.FromString("adce0002-35bc-c60a-648b-0b25f1f05503")
-		return &ent.WebauthnCredential{
-			ID:              "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH",
-			UserID:          uId,
-			PublicKey:       "pQECAyYgASFYIPG9WtGAri-mevonFPH4p-lI3JBS29zjuvKvJmaP4_mRIlggOjHw31sdAGvE35vmRep-aPcbAAlbuc0KHxQ9u6zcHog",
-			AttestationType: "none",
-			Aaguid:          aaguid,
-			SignCount:       1650958750,
-			CreatedAt:       time.Time{},
-			UpdatedAt:       time.Time{},
-		}
-	}(),
-	func() *ent.WebauthnCredential {
-		uId, _ := uuid.FromString(userId)
-		aaguid, _ := uuid.FromString("adce0002-35bc-c60a-648b-0b25f1f05503")
-		return &ent.WebauthnCredential{
-			ID:              "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjK",
-			UserID:          uId,
-			PublicKey:       "pQECAyYgASFYIPG9WtGAri-mevonFPH4p-lI3JBS29zjuvKvJmaP4_mRIlggOjHw31sdAGvE35vmRep-aPcbAAlbuc0KHxQ9u6zcHoj",
-			AttestationType: "none",
-			Aaguid:          aaguid,
-			SignCount:       1650958750,
-			CreatedAt:       time.Time{},
-			UpdatedAt:       time.Time{},
-		}
-	}(),
-}
+var (
+	userIdBytes = []byte{0x37, 0x45, 0x37, 0x77, 0x53, 0x56, 0x75, 0x49, 0x51, 0x79, 0x47, 0x68, 0x63, 0x79, 0x47, 0x77, 0x37, 0x5f, 0x42, 0x71, 0x42, 0x41}
+	credentials = []*ent.WebauthnCredential{
+		func() *ent.WebauthnCredential {
+			uId, _ := uuid.FromString(userId)
+			aaguid, _ := uuid.FromString("adce0002-35bc-c60a-648b-0b25f1f05503")
+			return &ent.WebauthnCredential{
+				ID:              "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH",
+				UserID:          uId,
+				PublicKey:       "pQECAyYgASFYIPG9WtGAri-mevonFPH4p-lI3JBS29zjuvKvJmaP4_mRIlggOjHw31sdAGvE35vmRep-aPcbAAlbuc0KHxQ9u6zcHog",
+				AttestationType: "none",
+				Aaguid:          aaguid,
+				SignCount:       1650958750,
+				CreatedAt:       time.Time{},
+				UpdatedAt:       time.Time{},
+			}
+		}(),
+		func() *ent.WebauthnCredential {
+			uId, _ := uuid.FromString(userId)
+			aaguid, _ := uuid.FromString("adce0002-35bc-c60a-648b-0b25f1f05503")
+			return &ent.WebauthnCredential{
+				ID:              "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjK",
+				UserID:          uId,
+				PublicKey:       "pQECAyYgASFYIPG9WtGAri-mevonFPH4p-lI3JBS29zjuvKvJmaP4_mRIlggOjHw31sdAGvE35vmRep-aPcbAAlbuc0KHxQ9u6zcHoj",
+				AttestationType: "none",
+				Aaguid:          aaguid,
+				SignCount:       1650958750,
+				CreatedAt:       time.Time{},
+				UpdatedAt:       time.Time{},
+			}
+		}(),
+	}
+)
 
 var waSessionData = []*ent.WebauthnSessionData{
 	func() *ent.WebauthnSessionData {
@@ -120,7 +122,7 @@ func TestWebauthnHandler_BeginRegistration(t *testing.T) {
 		assert.Equal(t, creationOptions.Response.AuthenticatorSelection.UserVerification, protocol.VerificationRequired)
 		assert.Equal(t, creationOptions.Response.User.Name, users[0].Edges.Emails[0].Address)
 		assert.Equal(t, creationOptions.Response.User.DisplayName, users[0].Edges.Emails[0].Address)
-		assert.Equal(t, creationOptions.Response.User.Icon, "")
+		assert.Equal(t, creationOptions.Response.User.Icon, "") //nolint:staticcheck
 		assert.True(t, *creationOptions.Response.AuthenticatorSelection.RequireResidentKey)
 
 	}

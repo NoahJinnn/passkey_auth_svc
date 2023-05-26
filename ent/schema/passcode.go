@@ -29,9 +29,11 @@ func (Passcode) Fields() []ent.Field {
 		field.UUID("email_id", uuid.UUID{}).Optional(),
 	}
 }
+
 func (Passcode) Edges() []ent.Edge {
 	return []ent.Edge{edge.From("email", Email.Type).Ref("passcodes").Unique().Field("email_id"), edge.From("user", User.Type).Ref("passcodes").Unique().Field("user_id")}
 }
+
 func (Passcode) Annotations() []schema.Annotation {
 	return nil
 }

@@ -28,9 +28,11 @@ func (Identity) Fields() []ent.Field {
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
+
 func (Identity) Edges() []ent.Edge {
 	return []ent.Edge{edge.From("email", Email.Type).Ref("identities").Unique().Field("email_id")}
 }
+
 func (Identity) Annotations() []schema.Annotation {
 	return nil
 }
