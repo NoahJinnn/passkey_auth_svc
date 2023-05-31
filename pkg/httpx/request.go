@@ -12,54 +12,23 @@ import (
 )
 
 type Req struct {
-	BaseUrl string
-	Headers map[string][]string
-	Query   map[string][]string
+	BaseUrl     string
+	defaultOpts *Opts
 }
 
 func NewReq(baseUrl string) *Req {
 	return &Req{
 		BaseUrl: baseUrl,
-		Headers: map[string][]string{},
-		Query:   map[string][]string{},
+		defaultOpts: &Opts{
+			Headers: map[string]string{},
+			Query:   map[string]string{},
+			Body:    nil,
+		},
 	}
 }
 
-// Appends request header
-func (r *Req) SetHeader(key string, value ...string) {
-	r.Headers[key] = append(r.Headers[key], value...)
-}
-
-// Unsets request header
-func (r *Req) UnsetHeader(key string) {
-	delete(r.Headers, key)
-}
-
-// Appends request query
-func (r *Req) SetQ(key string, value ...string) {
-	r.Query[key] = append(r.Query[key], value...)
-}
-
-// Unsets request query
-func (r *Req) UnsetQ(key string) {
-	delete(r.Query, key)
-}
-
-// Appends request query
-func (r *Req) OverrideQ(q map[string][]string) {
-	r.Query = q
-}
-
-func (r *Req) Send(method string, path string, body []byte) (*Resp, error) {
-	httpReq, err := r.PrepareReq(context.Background(), method, path, body)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to prepare request")
-	}
-	return r.SendReq(httpReq)
-}
-
-func (r *Req) SendWithCtx(ctx context.Context, method string, path string, body []byte) (*Resp, error) {
-	httpReq, err := r.PrepareReq(ctx, method, path, body)
+func (r *Req) Send(ctx context.Context, method string, path string, opts *Opts) (*Resp, error) {
+	httpReq, err := r.PrepareReq(ctx, method, path, opts)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to prepare request")
 	}
@@ -90,20 +59,45 @@ func (r *Req) SendReq(httpReq *http.Request) (*Resp, error) {
 	}, nil
 }
 
-func (r *Req) Get(path string) (*Resp, error) {
-	return r.Send(http.MethodGet, path, nil)
+func (r *Req) Get(ctx context.Context, path string, opts *Opts) (*Resp, error) {
+	return r.Send(ctx, http.MethodGet, path, opts)
 }
 
-func (r *Req) Post(path string, body []byte) (*Resp, error) {
-	return r.Send(http.MethodPost, path, body)
+func (r *Req) Post(ctx context.Context, path string, opts *Opts) (*Resp, error) {
+	return r.Send(ctx, http.MethodPost, path, opts)
 }
 
-func (r *Req) Put(path string, body []byte) (*Resp, error) {
-	return r.Send(http.MethodPut, path, body)
+func (r *Req) Put(ctx context.Context, path string, opts *Opts) (*Resp, error) {
+	return r.Send(ctx, http.MethodPut, path, opts)
 }
 
-func (r *Req) Delete(path string, body []byte) (*Resp, error) {
-	return r.Send(http.MethodDelete, path, body)
+func (r *Req) Patch(ctx context.Context, path string, opts *Opts) (*Resp, error) {
+	return r.Send(ctx, http.MethodPatch, path, opts)
+}
+
+func (r *Req) Delete(ctx context.Context, path string, opts *Opts) (*Resp, error) {
+	return r.Send(ctx, http.MethodDelete, path, opts)
+}
+
+func (r *Req) PrepareReq(ctx context.Context, method string, path string, opts *Opts) (*http.Request, error) {
+	req, err := http.NewRequestWithContext(ctx, method, r.BaseUrl+path, bytes.NewBuffer(opts.Body))
+	if err != nil {
+		return nil, err
+	}
+
+	// set headers
+	for key, value := range opts.Headers {
+		req.Header.Set(key, value)
+	}
+
+	// set query
+	q := req.URL.Query()
+	for key, value := range opts.Query {
+		q.Add(key, value)
+	}
+	req.URL.RawQuery = q.Encode()
+
+	return req, err
 }
 
 func (r *Req) String() string {
@@ -111,42 +105,17 @@ func (r *Req) String() string {
 	str := fmt.Sprintf("Base url:\n%s", r.BaseUrl)
 
 	// header
-	if len(r.Headers) > 0 {
-		str = str + fmt.Sprintf("\nHeader:\n%s", printHeaders(r.Headers))
+	if len(r.defaultOpts.Headers) > 0 {
+		str = str + fmt.Sprintf("\nHeader:\n%s", printHeaders(r.defaultOpts.Headers))
 	}
 	return str
 }
 
-func (r *Req) PrepareReq(ctx context.Context, method string, path string, body []byte) (*http.Request, error) {
-	req, err := http.NewRequestWithContext(ctx, method, r.BaseUrl+path, bytes.NewBuffer(body))
-	if err != nil {
-		return nil, err
-	}
-
-	// set headers
-	for key, values := range r.Headers {
-		for _, value := range values {
-			req.Header.Set(key, value)
-		}
-	}
-
-	// set query
-	q := req.URL.Query()
-	for key, values := range r.Query {
-		for _, value := range values {
-			q.Add(key, value)
-		}
-	}
-	req.URL.RawQuery = q.Encode()
-
-	return req, err
-}
-
-func printHeaders(data map[string][]string) string {
+func printHeaders(data map[string]string) string {
 	lines := []string{}
 
-	for key, arr := range data {
-		lines = append(lines, fmt.Sprintf("\t%s: %s", key, strings.Join(arr, ", ")))
+	for key, val := range data {
+		lines = append(lines, fmt.Sprintf("\t%s: %s", key, val))
 	}
 
 	return strings.Join(lines, "\n")

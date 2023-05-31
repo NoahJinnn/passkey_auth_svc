@@ -23,7 +23,7 @@ func (s *TestResponseSuite) SetupSuite() {
 	s.ctx = context.Background()
 }
 
-func (s *TestResponseSuite) Test_Body_ShouldRunSuccesfully() {
+func (s *TestResponseSuite) Test_Body_Success() {
 	// Arrange
 	body := []byte("test")
 	res := &http.Response{
@@ -37,7 +37,7 @@ func (s *TestResponseSuite) Test_Body_ShouldRunSuccesfully() {
 	s.Equal(body, resp.Body())
 }
 
-func (s *TestResponseSuite) Test_Unmarshal_ShouldRunSuccesfully() {
+func (s *TestResponseSuite) Test_Unmarshal_Success() {
 	// Arrange
 	body := []byte(`{"name":"test"}`)
 	res := &http.Response{}
@@ -80,7 +80,7 @@ func (s *TestResponseSuite) Test_Unmarshal_WhenUnMarshalReturnsError_ShouldRetur
 	s.Error(err)
 }
 
-func (s *TestResponseSuite) Test_Status_ShouldRunSuccesfully() {
+func (s *TestResponseSuite) Test_Status_Success() {
 	// Arrange
 	resp := Resp{
 		resp: &http.Response{
@@ -95,7 +95,7 @@ func (s *TestResponseSuite) Test_Status_ShouldRunSuccesfully() {
 	s.Equal(200, status)
 }
 
-func (s *TestResponseSuite) Test_Header_ShouldRunSuccesfully() {
+func (s *TestResponseSuite) Test_Header_Success() {
 	// Arrange
 	resp := Resp{
 		resp: &http.Response{
@@ -112,7 +112,7 @@ func (s *TestResponseSuite) Test_Header_ShouldRunSuccesfully() {
 	s.Equal("application/json", header["Content-Type"][0])
 }
 
-func (s *TestResponseSuite) Test_Cookies_ShouldRunSuccesfully() {
+func (s *TestResponseSuite) Test_Cookies_Success() {
 	// Arrange
 	resp := Resp{
 		resp: &http.Response{
@@ -129,7 +129,7 @@ func (s *TestResponseSuite) Test_Cookies_ShouldRunSuccesfully() {
 	s.Equal("test=1", cookies[0].String())
 }
 
-func (s *TestResponseSuite) Test_Ok_ShouldRunSuccesfully() {
+func (s *TestResponseSuite) Test_Ok_Success() {
 	// Arrange
 	resp := Resp{
 		resp: &http.Response{
@@ -144,7 +144,7 @@ func (s *TestResponseSuite) Test_Ok_ShouldRunSuccesfully() {
 	s.True(ok)
 }
 
-func (s *TestResponseSuite) Test_Get_ShouldRunSuccesfully() {
+func (s *TestResponseSuite) Test_Get_Success() {
 	// Arrange
 	resp := Resp{
 		resp: &http.Response{
