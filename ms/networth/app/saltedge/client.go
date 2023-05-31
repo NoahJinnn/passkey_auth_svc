@@ -1,6 +1,7 @@
 package saltedge
 
 import (
+	"context"
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
@@ -34,7 +35,7 @@ func NewSeClient(cred *config.SaltEdge) *SeClient {
 	}
 }
 
-func (cl *SeClient) DoReq(method string, url string, query map[string][]string, reqBody interface{}) ([]byte, error) {
+func (cl *SeClient) DoReq(ctx context.Context, method string, url string, query map[string][]string, reqBody interface{}) ([]byte, error) {
 	cl.req.OverrideQ(query)
 
 	var b []byte
@@ -48,13 +49,13 @@ func (cl *SeClient) DoReq(method string, url string, query map[string][]string, 
 		}
 	}
 
-	httpReq, err := cl.req.PrepareReq(method, url, b)
+	httpReq, err := cl.req.PrepareReq(ctx, method, url, b)
 	if err != nil {
 		return nil, err
 	}
 	cl.SignedHeaders(httpReq.URL.String(), method, b)
 
-	resp, err := cl.req.SendWithReq(httpReq)
+	resp, err := cl.req.SendReq(httpReq)
 	if err != nil {
 		return nil, err
 	}

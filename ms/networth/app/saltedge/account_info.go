@@ -35,7 +35,7 @@ func NewSeAccountInfoSvc(cfg *config.Config) *SeAccountInfoSvc {
 func (svc *SeAccountInfoSvc) Customer(ctx context.Context, customerId string) (*Customer, error) {
 	path := fmt.Sprintf("/customers/%s", customerId)
 
-	resp, err := svc.client.DoReq(http.MethodGet, path, nil, nil)
+	resp, err := svc.client.DoReq(ctx, http.MethodGet, path, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (svc *SeAccountInfoSvc) Customer(ctx context.Context, customerId string) (*
 }
 
 func (svc *SeAccountInfoSvc) CreateCustomer(ctx context.Context, ccr *CreateCustomer) (*Customer, error) {
-	resp, err := svc.client.DoReq(http.MethodPost, "/customers", nil, ccr)
+	resp, err := svc.client.DoReq(ctx, http.MethodPost, "/customers", nil, ccr)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (svc *SeAccountInfoSvc) CreateCustomer(ctx context.Context, ccr *CreateCust
 func (svc *SeAccountInfoSvc) RemoveCustomer(ctx context.Context, customerId string) (*RemoveCustomer, error) {
 	path := fmt.Sprintf("/customers/%s", customerId)
 
-	resp, err := svc.client.DoReq(http.MethodDelete, path, nil, nil)
+	resp, err := svc.client.DoReq(ctx, http.MethodDelete, path, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func (svc *SeAccountInfoSvc) RemoveCustomer(ctx context.Context, customerId stri
 }
 
 func (svc *SeAccountInfoSvc) CreateConnectSession(ctx context.Context, ccsr *CreateConnectSession) (*ConnectSession, error) {
-	resp, err := svc.client.DoReq(http.MethodPost, "/connect_sessions/create", nil, ccsr)
+	resp, err := svc.client.DoReq(ctx, http.MethodPost, "/connect_sessions/create", nil, ccsr)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (svc *SeAccountInfoSvc) CreateConnectSession(ctx context.Context, ccsr *Cre
 func (svc *SeAccountInfoSvc) GetConnectionByCustomerId(ctx context.Context, customerId string) (interface{}, error) {
 	path := fmt.Sprintf("/customers/%s", customerId)
 
-	resp, err := svc.client.DoReq(http.MethodGet, path, nil, nil)
+	resp, err := svc.client.DoReq(ctx, http.MethodGet, path, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func (svc *SeAccountInfoSvc) GetConnectionByCustomerId(ctx context.Context, cust
 }
 
 func (svc *SeAccountInfoSvc) GetAccountByConnectionId(ctx context.Context, connectionId string) (interface{}, error) {
-	resp, err := svc.client.DoReq(http.MethodGet, "/accounts", map[string][]string{
+	resp, err := svc.client.DoReq(ctx, http.MethodGet, "/accounts", map[string][]string{
 		"connection_id": {connectionId},
 	}, nil)
 	if err != nil {
@@ -143,7 +143,7 @@ func (svc *SeAccountInfoSvc) GetAccountByConnectionId(ctx context.Context, conne
 }
 
 func (svc *SeAccountInfoSvc) GetTxByConnectionIdAndAccountId(ctx context.Context, connectionId string, accountId string) (interface{}, error) {
-	resp, err := svc.client.DoReq(http.MethodGet, "/transactions", map[string][]string{
+	resp, err := svc.client.DoReq(ctx, http.MethodGet, "/transactions", map[string][]string{
 		"connection_id": {connectionId},
 		"account_id":    {accountId},
 	}, nil)

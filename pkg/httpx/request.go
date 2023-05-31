@@ -2,6 +2,7 @@ package httpx
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -50,14 +51,22 @@ func (r *Req) OverrideQ(q map[string][]string) {
 }
 
 func (r *Req) Send(method string, path string, body []byte) (*Resp, error) {
-	httpReq, err := r.PrepareReq(method, path, body)
+	httpReq, err := r.PrepareReq(context.Background(), method, path, body)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to prepare request")
 	}
-	return r.SendWithReq(httpReq)
+	return r.SendReq(httpReq)
 }
 
-func (r *Req) SendWithReq(httpReq *http.Request) (*Resp, error) {
+func (r *Req) SendWithCtx(ctx context.Context, method string, path string, body []byte) (*Resp, error) {
+	httpReq, err := r.PrepareReq(ctx, method, path, body)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to prepare request")
+	}
+	return r.SendReq(httpReq)
+}
+
+func (r *Req) SendReq(httpReq *http.Request) (*Resp, error) {
 	client := &http.Client{}
 	resp, err := client.Do(httpReq)
 	if err != nil {
@@ -108,8 +117,8 @@ func (r *Req) String() string {
 	return str
 }
 
-func (r *Req) PrepareReq(method string, path string, body []byte) (*http.Request, error) {
-	req, err := http.NewRequest(method, r.BaseUrl+path, bytes.NewBuffer(body))
+func (r *Req) PrepareReq(ctx context.Context, method string, path string, body []byte) (*http.Request, error) {
+	req, err := http.NewRequestWithContext(ctx, method, r.BaseUrl+path, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}
