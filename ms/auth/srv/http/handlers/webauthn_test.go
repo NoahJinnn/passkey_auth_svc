@@ -167,11 +167,12 @@ func TestWebauthnHandler_FinishRegistration(t *testing.T) {
 	require.NoError(t, err)
 	c2.Set("session", token2)
 
-	err = handler.FinishRegistration(c2)
-	if assert.Error(t, err) {
-		httpError := errorhandler.ToHttpError(err)
-		assert.Equal(t, http.StatusBadRequest, httpError.Code)
-		assert.Equal(t, "Stored challenge and received challenge do not match: sessionData not found", err.Error())
+	handler.FinishRegistration(c2)
+	if assert.Equal(t, http.StatusBadRequest, rec2.Code) {
+		httpError := errorhandler.HTTPError{}
+		err := json.Unmarshal(rec2.Body.Bytes(), &httpError)
+		assert.NoError(t, err)
+		assert.Equal(t, "Stored challenge and received challenge do not match: sessionData not found", httpError.Message)
 	}
 }
 
