@@ -190,3 +190,23 @@ func (s *userSuite) TestUserHandler_Create_InvalidEmail() {
 		s.Equal(http.StatusBadRequest, httpError.Code)
 	}
 }
+
+func (s *userSuite) TestUserHandler_Create_EmailMissing() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/users", strings.NewReader(`{"bogus": 123}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	c := s.echo.NewContext(req, rec)
+	s.handler.Create(c)
+
+	if s.Equal(http.StatusBadRequest, rec.Code) {
+		httpError := errorhandler.HTTPError{}
+		err := json.Unmarshal(rec.Body.Bytes(), &httpError)
+		s.NoError(err)
+		s.Equal(http.StatusBadRequest, httpError.Code)
+	}
+}
