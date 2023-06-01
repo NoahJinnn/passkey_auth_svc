@@ -114,6 +114,51 @@ func (s *TestRequestSuite) Test_Request_Success() {
 	}
 }
 
+func (s *TestRequestSuite) Test_Request_Fail() {
+	requests := []struct {
+		name    string
+		baseUrl string
+		method  string
+	}{
+		{
+			name:    "GET",
+			baseUrl: s.baseUrl,
+			method:  http.MethodGet,
+		},
+		{
+			name:    "POST",
+			baseUrl: s.baseUrl,
+			method:  http.MethodPost,
+		},
+		{
+			name:    "PUT",
+			baseUrl: s.baseUrl,
+			method:  http.MethodPut,
+		},
+		{
+			name:    "PATCH",
+			baseUrl: s.baseUrl,
+			method:  http.MethodPatch,
+		},
+		{
+			name:    "DELETE",
+			baseUrl: s.baseUrl,
+			method:  http.MethodDelete,
+		},
+	}
+
+	for _, exec := range requests {
+		s.Suite.Run(exec.name, func() {
+			// Act
+			response, err := s.req.InitReq(s.ctx, exec.method, "", nil).
+				Send()
+
+			// Assert
+			s.Nil(response)
+			s.Error(err)
+		})
+	}
+}
 func (s *TestRequestSuite) Test_RequestWithOptions_Success() {
 	// Arrange
 	svc := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -179,52 +224,6 @@ func (s *TestRequestSuite) Test_RequestWithOptions_Success() {
 			// Assert
 			s.NotNil(response)
 			s.NoError(err)
-		})
-	}
-}
-
-func (s *TestRequestSuite) Test_Request_Fail() {
-	requests := []struct {
-		name    string
-		baseUrl string
-		method  string
-	}{
-		{
-			name:    "GET",
-			baseUrl: s.baseUrl,
-			method:  http.MethodGet,
-		},
-		{
-			name:    "POST",
-			baseUrl: s.baseUrl,
-			method:  http.MethodPost,
-		},
-		{
-			name:    "PUT",
-			baseUrl: s.baseUrl,
-			method:  http.MethodPut,
-		},
-		{
-			name:    "PATCH",
-			baseUrl: s.baseUrl,
-			method:  http.MethodPatch,
-		},
-		{
-			name:    "DELETE",
-			baseUrl: s.baseUrl,
-			method:  http.MethodDelete,
-		},
-	}
-
-	for _, exec := range requests {
-		s.Suite.Run(exec.name, func() {
-			// Act
-			response, err := s.req.InitReq(s.ctx, exec.method, "", nil).
-				Send()
-
-			// Assert
-			s.Nil(response)
-			s.Error(err)
 		})
 	}
 }

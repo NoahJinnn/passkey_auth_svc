@@ -3,7 +3,8 @@ package httpx
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
+	"io"
+
 	"net/http"
 	"testing"
 
@@ -27,7 +28,7 @@ func (s *TestResponseSuite) Test_Body_Success() {
 	// Arrange
 	body := []byte("test")
 	res := &http.Response{
-		Body: ioutil.NopCloser(bytes.NewBuffer(body)),
+		Body: io.NopCloser(bytes.NewBuffer(body)),
 	}
 
 	// Act

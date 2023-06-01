@@ -49,7 +49,14 @@ func (r *Req) Send() (*Resp, error) {
 		r.request = nil
 	}()
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		fmt.Printf("request failed: %+v", resp)
+
+		result, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to read failed response body")
+		}
+		defer resp.Body.Close()
+		fmt.Printf("failed response: %+v\n", string(result))
+
 		return nil, fmt.Errorf("request failed with status code: %d", resp.StatusCode)
 	}
 
