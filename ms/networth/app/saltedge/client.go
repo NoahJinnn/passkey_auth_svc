@@ -13,6 +13,8 @@ import (
 	"fmt"
 	"time"
 
+	urlpkg "net/url"
+
 	"github.com/hellohq/hqservice/ms/networth/config"
 	"github.com/hellohq/hqservice/pkg/httpx"
 )
@@ -22,12 +24,19 @@ type SeClient struct {
 	req  *httpx.Req
 }
 
+const BASE_URL = "https://www.saltedge.com/api/v5"
+
 func NewSeClient(cred *config.SaltEdge) *SeClient {
-	req := httpx.NewReq("https://www.saltedge.com/api/v5")
-	req.SetHeader("Accept", "application/json")
-	req.SetHeader("Content-Type", "application/json")
-	req.SetHeader("App-id", cred.AppId)
-	req.SetHeader("Secret", cred.Secret)
+	req := httpx.NewReq(BASE_URL, map[string]string{
+		"Accept":       "application/json",
+		"Content-Type": "application/json",
+		"App-id":       cred.AppId,
+		"Secret":       cred.Secret,
+	}, nil)
+	// req.SetHeader("Accept", "application/json")
+	// req.SetHeader("Content-Type", "application/json")
+	// req.SetHeader("App-id", cred.AppId)
+	// req.SetHeader("Secret", cred.Secret)
 
 	return &SeClient{
 		cred: cred,
@@ -35,8 +44,8 @@ func NewSeClient(cred *config.SaltEdge) *SeClient {
 	}
 }
 
-func (cl *SeClient) DoReq(ctx context.Context, method string, url string, query map[string][]string, reqBody interface{}) ([]byte, error) {
-	cl.req.OverrideQ(query)
+func (cl *SeClient) DoReq(ctx context.Context, method string, path string, query map[string][]string, reqBody interface{}) ([]byte, error) {
+	// cl.req.OverrideQ(query)
 
 	var b []byte
 	if reqBody != nil {
@@ -49,17 +58,16 @@ func (cl *SeClient) DoReq(ctx context.Context, method string, url string, query 
 		}
 	}
 
-	// httpReq, err := cl.req.InitReq(ctx, method, url, b)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	u, err := url.Parse(url)
+	u, err := urlpkg.Parse(BASE_URL + path)
 	if err != nil {
 		return nil, err
 	}
-	cl.SignedHeaders(httpReq.URL.String(), method, b)
+	signedHeaders := cl.SignedHeaders(u.String(), method, b)
 
-	resp, err := cl.req.SendReq(httpReq)
+	resp, err := cl.req.InitReq(ctx, method, path).
+		WithBody(b).
+		WithHeaders(signedHeaders).
+		Send()
 	if err != nil {
 		return nil, err
 	}
@@ -90,8 +98,10 @@ func (cl *SeClient) SignedHeaders(url, method string, body []byte) map[string]st
 		headers["Signature"] = signature
 	}
 
-	cl.req.SetHeader("Expires-at", fmt.Sprintf("%d", expiresAt))
-	cl.req.SetHeader("Signature", signature)
+	headers["Expires-at"] = fmt.Sprintf("%d", expiresAt)
+
+	// cl.req.SetHeader("Expires-at", fmt.Sprintf("%d", expiresAt))
+	// cl.req.SetHeader("Signature", signature)
 
 	return headers
 }

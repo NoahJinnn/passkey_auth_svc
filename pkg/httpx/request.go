@@ -36,45 +36,12 @@ func NewReq(baseUrl string, defaultHeaders map[string]string, defaultQuery map[s
 	}
 }
 
-func (r *Req) Get(ctx context.Context, path string, opts *Opts) (*Resp, error) {
-	if r.request == nil {
-		r.InitReq(ctx, http.MethodGet, path, opts)
-	}
-	return r.Send()
-}
-
-func (r *Req) Post(ctx context.Context, path string, opts *Opts) (*Resp, error) {
-	if r.request == nil {
-		r.InitReq(ctx, http.MethodPost, path, opts)
-	}
-	return r.Send()
-}
-
-func (r *Req) Put(ctx context.Context, path string, opts *Opts) (*Resp, error) {
-	if r.request == nil {
-		r.InitReq(ctx, http.MethodPut, path, opts)
-	}
-	return r.Send()
-}
-
-func (r *Req) Patch(ctx context.Context, path string, opts *Opts) (*Resp, error) {
-	if r.request == nil {
-		r.InitReq(ctx, http.MethodPatch, path, opts)
-	}
-	return r.Send()
-}
-
-func (r *Req) Delete(ctx context.Context, path string, opts *Opts) (*Resp, error) {
-	if r.request == nil {
-		r.InitReq(ctx, http.MethodDelete, path, opts)
-	}
-	return r.Send()
-}
-
 func (r *Req) Send() (*Resp, error) {
 	if r.request == nil {
 		return nil, fmt.Errorf("request is not initialized")
 	}
+
+	fmt.Printf("sending request: %+v\n", r.request.Body)
 
 	client := &http.Client{}
 	resp, err := client.Do(r.request)
@@ -101,12 +68,8 @@ func (r *Req) Send() (*Resp, error) {
 	}, nil
 }
 
-func (r *Req) InitReq(ctx context.Context, method string, path string, opts *Opts) *Req {
-	var body io.Reader
-	if opts != nil {
-		body = bytes.NewReader(opts.Body)
-	}
-	req, err := http.NewRequestWithContext(ctx, method, r.baseUrl+path, body)
+func (r *Req) InitReq(ctx context.Context, method string, path string) *Req {
+	req, err := http.NewRequestWithContext(ctx, method, r.baseUrl+path, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -120,6 +83,9 @@ func (r *Req) WithOpts(opts *Opts) *Req {
 		return r
 	}
 	applyOptions(r.request, opts)
+	if opts.Body != nil {
+		r.request.Body = io.NopCloser(bytes.NewReader(opts.Body))
+	}
 	return r
 }
 
@@ -154,6 +120,15 @@ func (r *Req) WithQuery(query map[string]string) *Req {
 	}
 	r.request.URL.RawQuery = q.Encode()
 
+	return r
+}
+
+func (r *Req) WithBody(body []byte) *Req {
+	if r.request == nil {
+		return r
+	}
+	r.request.Body = io.NopCloser(bytes.NewReader(body))
+	r.request.ContentLength = int64(len(body))
 	return r
 }
 

@@ -2,7 +2,6 @@ package httpx
 
 import (
 	"context"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -36,36 +35,27 @@ func (s *TestRequestSuite) Test_NewReq_Success() {
 
 func (s *TestRequestSuite) Test_InitReq_Success() {
 	// Arrange
-	body := []byte("test")
 	endpoint := "/test"
 
 	// Act
-	req := s.req.InitReq(s.ctx, http.MethodGet, endpoint, &Opts{
-		Body: body,
-	})
+	req := s.req.InitReq(s.ctx, http.MethodGet, endpoint)
 
 	// Assert
 	s.NotNil(req.request)
 	s.Equal(http.MethodGet, req.request.Method)
 	s.Equal(s.baseUrl+endpoint, req.request.URL.String())
 
-	requestBody, err := ioutil.ReadAll(req.request.Body)
-	s.NoError(err)
-	s.Equal(body, requestBody)
 }
 
 func (s *TestRequestSuite) Test_InitReq_Fail() {
 	// Arrange
-	body := []byte("test")
 	endpoint := "\\\test"
 	errMethod := "wrong"
 
 	// Assert
 	s.Panics(
 		func() {
-			s.req.InitReq(s.ctx, errMethod, endpoint, &Opts{
-				Body: body,
-			})
+			s.req.InitReq(s.ctx, errMethod, endpoint)
 		},
 	)
 
@@ -82,39 +72,40 @@ func (s *TestRequestSuite) Test_Request_Success() {
 	requests := []struct {
 		name    string
 		baseUrl string
-		method  func(ctx context.Context, path string, opts *Opts) (*Resp, error)
+		method  string
 	}{
 		{
 			name:    "GET",
 			baseUrl: svc.URL,
-			method:  req.Get,
+			method:  http.MethodGet,
 		},
 		{
 			name:    "POST",
 			baseUrl: svc.URL,
-			method:  req.Post,
+			method:  http.MethodPost,
 		},
 		{
 			name:    "PUT",
 			baseUrl: svc.URL,
-			method:  req.Put,
+			method:  http.MethodPut,
 		},
 		{
 			name:    "PATCH",
 			baseUrl: svc.URL,
-			method:  req.Patch,
+			method:  http.MethodPatch,
 		},
 		{
 			name:    "DELETE",
 			baseUrl: svc.URL,
-			method:  req.Delete,
+			method:  http.MethodDelete,
 		},
 	}
 
 	for _, exec := range requests {
 		s.Suite.Run(exec.name, func() {
 			// Act
-			response, err := exec.method(s.ctx, "", nil)
+			response, err := req.InitReq(s.ctx, exec.method, "").
+				Send()
 
 			// Assert
 			s.NotNil(response)
@@ -132,57 +123,45 @@ func (s *TestRequestSuite) Test_RequestWithOptions_Success() {
 	req := NewReq(svc.URL, nil, nil)
 
 	requests := []struct {
-		name    string
-		baseUrl string
-		method  string
-		f       func(ctx context.Context, path string, opts *Opts) (*Resp, error)
-		opts    *Opts
+		name   string
+		method string
+		opts   *Opts
 	}{
 		{
-			name:    "GET",
-			baseUrl: svc.URL,
-			method:  http.MethodGet,
-			f:       req.Get,
+			name:   "GET",
+			method: http.MethodGet,
 			opts: &Opts{
 				Headers: map[string]string{"key": "value"},
 				Query:   map[string]string{"key": "value"},
 			},
 		},
 		{
-			name:    "POST",
-			baseUrl: svc.URL,
-			method:  http.MethodPost,
-			f:       req.Post,
+			name:   "POST",
+			method: http.MethodPost,
 			opts: &Opts{
 				Headers: map[string]string{"key": "value"},
 				Query:   map[string]string{"key": "value"},
 			},
 		},
 		{
-			name:    "PUT",
-			baseUrl: svc.URL,
-			method:  http.MethodPut,
-			f:       req.Put,
+			name:   "PUT",
+			method: http.MethodPut,
 			opts: &Opts{
 				Headers: map[string]string{"key": "value"},
 				Query:   map[string]string{"key": "value"},
 			},
 		},
 		{
-			name:    "PATCH",
-			baseUrl: svc.URL,
-			method:  http.MethodPatch,
-			f:       req.Patch,
+			name:   "PATCH",
+			method: http.MethodPatch,
 			opts: &Opts{
 				Headers: map[string]string{"key": "value"},
 				Query:   map[string]string{"key": "value"},
 			},
 		},
 		{
-			name:    "DELETE",
-			baseUrl: svc.URL,
-			method:  http.MethodDelete,
-			f:       req.Delete,
+			name:   "DELETE",
+			method: http.MethodDelete,
 			opts: &Opts{
 				Headers: map[string]string{"key": "value"},
 				Query:   map[string]string{"key": "value"},
@@ -193,8 +172,9 @@ func (s *TestRequestSuite) Test_RequestWithOptions_Success() {
 	for _, exec := range requests {
 		s.Suite.Run(exec.name, func() {
 			// Act
-			req.InitReq(s.ctx, exec.method, "", exec.opts)
-			response, err := exec.f(s.ctx, "", nil)
+			response, err := req.InitReq(s.ctx, exec.method, "").
+				WithOpts(exec.opts).
+				Send()
 
 			// Assert
 			s.NotNil(response)
@@ -207,39 +187,40 @@ func (s *TestRequestSuite) Test_Request_Fail() {
 	requests := []struct {
 		name    string
 		baseUrl string
-		method  func(ctx context.Context, path string, opts *Opts) (*Resp, error)
+		method  string
 	}{
 		{
 			name:    "GET",
 			baseUrl: s.baseUrl,
-			method:  s.req.Get,
+			method:  http.MethodGet,
 		},
 		{
 			name:    "POST",
 			baseUrl: s.baseUrl,
-			method:  s.req.Post,
+			method:  http.MethodPost,
 		},
 		{
 			name:    "PUT",
 			baseUrl: s.baseUrl,
-			method:  s.req.Put,
+			method:  http.MethodPut,
 		},
 		{
 			name:    "PATCH",
 			baseUrl: s.baseUrl,
-			method:  s.req.Patch,
+			method:  http.MethodPatch,
 		},
 		{
 			name:    "DELETE",
 			baseUrl: s.baseUrl,
-			method:  s.req.Delete,
+			method:  http.MethodDelete,
 		},
 	}
 
 	for _, exec := range requests {
 		s.Suite.Run(exec.name, func() {
 			// Act
-			response, err := exec.method(s.ctx, "", nil)
+			response, err := s.req.InitReq(s.ctx, exec.method, "").
+				Send()
 
 			// Assert
 			s.Nil(response)
