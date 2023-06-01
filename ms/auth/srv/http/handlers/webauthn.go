@@ -29,17 +29,20 @@ func NewWebauthnHandler(srv *HttpDeps, sessionManager session.IManager) *Webauth
 func (h *WebauthnHandler) InitRegistration(c echo.Context) error {
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
-		return errors.New("failed to cast session object")
+		httperr := errorhandler.NewHTTPError(http.StatusBadRequest, fmt.Errorf("failed to cast session object").Error())
+		return c.JSON(httperr.Code, httperr)
 	}
 
 	uId, err := uuid.FromString(sessionToken.Subject())
 	if err != nil {
-		return fmt.Errorf("failed to parse userId from JWT subject:%w", err)
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
 	}
 
 	options, err := h.GetWebauthnSvc().InitRegistration(c.Request().Context(), uId)
 	if err != nil {
-		return fmt.Errorf("failed to create webauthn creation options: %w", err)
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
 	}
 
 	return c.JSON(http.StatusOK, options)
@@ -59,7 +62,8 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 		if ok {
 			fmt.Printf("ParseCredentialCreationResponse err: %+v\n", errT.DevInfo)
 		}
-		return errorhandler.NewHTTPError(http.StatusBadRequest, err.Error())
+		httperr := errorhandler.NewHTTPError(http.StatusBadRequest, err.Error())
+		return c.JSON(httperr.Code, httperr)
 	}
 
 	credentialId, userId, err := h.GetWebauthnSvc().FinishRegistration(
@@ -68,7 +72,8 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 		sessionToken.Subject(),
 	)
 	if err != nil {
-		return errorhandler.NewHTTPError(http.StatusBadRequest, err.Error())
+		httperr := errorhandler.NewHTTPError(http.StatusBadRequest, err.Error())
+		return c.JSON(httperr.Code, httperr)
 	}
 	return c.JSON(http.StatusOK, map[string]string{"credential_id": credentialId, "user_id": userId})
 }
@@ -103,7 +108,8 @@ func (h *WebauthnHandler) FinishLogin(c echo.Context) error {
 		if ok {
 			fmt.Printf("ParseCredentialRequestResponse err: %+v\n", errT.DevInfo)
 		}
-		return errorhandler.NewHTTPError(http.StatusBadRequest, err.Error())
+		httperr := errorhandler.NewHTTPError(http.StatusBadRequest, err.Error())
+		return c.JSON(httperr.Code, httperr)
 	}
 
 	credentialId, userId, err := h.GetWebauthnSvc().FinishLogin(c.Request().Context(), request)
@@ -114,12 +120,14 @@ func (h *WebauthnHandler) FinishLogin(c echo.Context) error {
 
 	token, err := h.sessionManager.GenerateJWT(userId)
 	if err != nil {
-		return fmt.Errorf("failed to generate jwt: %w", err)
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
 	}
 
 	cookie, err := h.sessionManager.GenerateCookie(token)
 	if err != nil {
-		return fmt.Errorf("failed to create session cookie: %w", err)
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
 	}
 
 	c.SetCookie(cookie)
