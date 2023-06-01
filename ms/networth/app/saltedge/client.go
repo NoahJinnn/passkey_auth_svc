@@ -49,7 +49,11 @@ func (cl *SeClient) DoReq(ctx context.Context, method string, url string, query 
 		}
 	}
 
-	httpReq, err := cl.req.PrepareReq(ctx, method, url, b)
+	// httpReq, err := cl.req.InitReq(ctx, method, url, b)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	u, err := url.Parse(url)
 	if err != nil {
 		return nil, err
 	}

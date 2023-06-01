@@ -12,38 +12,80 @@ import (
 )
 
 type Req struct {
-	BaseUrl     string
+	baseUrl     string
 	defaultOpts *Opts
+	opts        *Opts
+	request     *http.Request
 }
 
-func NewReq(baseUrl string) *Req {
+type Opts struct {
+	Headers map[string]string
+	Query   map[string]string
+	Body    []byte
+}
+
+func NewReq(baseUrl string, defaultHeaders map[string]string, defaultQuery map[string]string) *Req {
 	return &Req{
-		BaseUrl: baseUrl,
+		baseUrl: baseUrl,
 		defaultOpts: &Opts{
-			Headers: map[string]string{},
-			Query:   map[string]string{},
+			Headers: defaultHeaders,
+			Query:   defaultQuery,
 			Body:    nil,
 		},
+		opts: nil,
 	}
 }
 
-func (r *Req) Send(ctx context.Context, method string, path string, opts *Opts) (*Resp, error) {
-	httpReq, err := r.PrepareReq(ctx, method, path, opts)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to prepare request")
+func (r *Req) Get(ctx context.Context, path string, opts *Opts) (*Resp, error) {
+	if r.request == nil {
+		r.InitReq(ctx, http.MethodGet, path, opts)
 	}
-	return r.SendReq(httpReq)
+	return r.Send()
 }
 
-func (r *Req) SendReq(httpReq *http.Request) (*Resp, error) {
+func (r *Req) Post(ctx context.Context, path string, opts *Opts) (*Resp, error) {
+	if r.request == nil {
+		r.InitReq(ctx, http.MethodPost, path, opts)
+	}
+	return r.Send()
+}
+
+func (r *Req) Put(ctx context.Context, path string, opts *Opts) (*Resp, error) {
+	if r.request == nil {
+		r.InitReq(ctx, http.MethodPut, path, opts)
+	}
+	return r.Send()
+}
+
+func (r *Req) Patch(ctx context.Context, path string, opts *Opts) (*Resp, error) {
+	if r.request == nil {
+		r.InitReq(ctx, http.MethodPatch, path, opts)
+	}
+	return r.Send()
+}
+
+func (r *Req) Delete(ctx context.Context, path string, opts *Opts) (*Resp, error) {
+	if r.request == nil {
+		r.InitReq(ctx, http.MethodDelete, path, opts)
+	}
+	return r.Send()
+}
+
+func (r *Req) Send() (*Resp, error) {
+	if r.request == nil {
+		return nil, fmt.Errorf("request is not initialized")
+	}
+
 	client := &http.Client{}
-	resp, err := client.Do(httpReq)
+	resp, err := client.Do(r.request)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to send request")
 	}
 	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
+	defer func() {
+		r.request = nil
+	}()
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		fmt.Printf("request failed: %+v", resp)
 		return nil, fmt.Errorf("request failed with status code: %d", resp.StatusCode)
 	}
@@ -59,50 +101,85 @@ func (r *Req) SendReq(httpReq *http.Request) (*Resp, error) {
 	}, nil
 }
 
-func (r *Req) Get(ctx context.Context, path string, opts *Opts) (*Resp, error) {
-	return r.Send(ctx, http.MethodGet, path, opts)
-}
-
-func (r *Req) Post(ctx context.Context, path string, opts *Opts) (*Resp, error) {
-	return r.Send(ctx, http.MethodPost, path, opts)
-}
-
-func (r *Req) Put(ctx context.Context, path string, opts *Opts) (*Resp, error) {
-	return r.Send(ctx, http.MethodPut, path, opts)
-}
-
-func (r *Req) Patch(ctx context.Context, path string, opts *Opts) (*Resp, error) {
-	return r.Send(ctx, http.MethodPatch, path, opts)
-}
-
-func (r *Req) Delete(ctx context.Context, path string, opts *Opts) (*Resp, error) {
-	return r.Send(ctx, http.MethodDelete, path, opts)
-}
-
-func (r *Req) PrepareReq(ctx context.Context, method string, path string, opts *Opts) (*http.Request, error) {
-	req, err := http.NewRequestWithContext(ctx, method, r.BaseUrl+path, bytes.NewBuffer(opts.Body))
+func (r *Req) InitReq(ctx context.Context, method string, path string, opts *Opts) *Req {
+	var body io.Reader
+	if opts != nil {
+		body = bytes.NewReader(opts.Body)
+	}
+	req, err := http.NewRequestWithContext(ctx, method, r.baseUrl+path, body)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
-	// set headers
-	for key, value := range opts.Headers {
-		req.Header.Set(key, value)
+	r.request = req
+	return r
+}
+
+func (r *Req) WithOpts(opts *Opts) *Req {
+	if r.request == nil {
+		return r
+	}
+	applyOptions(r.request, opts)
+	return r
+}
+
+func (r *Req) WithDefaultOpts() *Req {
+	if r.request == nil {
+		return r
+	}
+	applyOptions(r.request, r.defaultOpts)
+	return r
+}
+
+func (r *Req) WithHeaders(headers map[string]string) *Req {
+	if r.request == nil {
+		return r
 	}
 
-	// set query
+	for k, v := range headers {
+		r.request.Header.Set(k, v)
+	}
+
+	return r
+}
+
+func (r *Req) WithQuery(query map[string]string) *Req {
+	if r.request == nil {
+		return r
+	}
+
+	q := r.request.URL.Query()
+	for k, v := range query {
+		q.Add(k, v)
+	}
+	r.request.URL.RawQuery = q.Encode()
+
+	return r
+}
+
+func applyOptions(req *http.Request, opts *Opts) {
+	if opts == nil {
+		return
+	}
+
+	for k, v := range opts.Headers {
+		req.Header.Set(k, v)
+	}
+
 	q := req.URL.Query()
-	for key, value := range opts.Query {
-		q.Add(key, value)
+	for k, v := range opts.Query {
+		q.Add(k, v)
 	}
 	req.URL.RawQuery = q.Encode()
 
-	return req, err
+	if opts.Body != nil {
+		req.Body = io.NopCloser(bytes.NewReader(opts.Body))
+	}
 }
 
 func (r *Req) String() string {
 	// base url
-	str := fmt.Sprintf("Base url:\n%s", r.BaseUrl)
+	str := fmt.Sprintf("Base url:\n%s", r.baseUrl)
 
 	// header
 	if len(r.defaultOpts.Headers) > 0 {
