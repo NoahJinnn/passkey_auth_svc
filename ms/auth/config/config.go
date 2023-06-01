@@ -33,9 +33,6 @@ var (
 	shared *sharedconfig.Shared
 	own    = &struct {
 		// Below envs is loaded by Doppler
-
-		Secrets appcfg.NotEmptyString `env:"AUTH_SECRETS"`
-
 		RpId appcfg.NotEmptyString `env:"AUTH_RP_ID"`
 
 		RpOrigins          appcfg.StringSlice    `env:"AUTH_RP_ORIGINS"`

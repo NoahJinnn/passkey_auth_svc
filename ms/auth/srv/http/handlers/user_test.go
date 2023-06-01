@@ -10,7 +10,9 @@ import (
 	"testing"
 
 	"github.com/go-testfixtures/testfixtures/v3"
+	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/http/errorhandler"
+	"github.com/hellohq/hqservice/internal/http/session"
 	"github.com/hellohq/hqservice/internal/http/validator"
 	"github.com/hellohq/hqservice/internal/pgsql"
 	"github.com/hellohq/hqservice/ms/auth/app"
@@ -28,6 +30,7 @@ func TestUserSuite(t *testing.T) {
 type userSuite struct {
 	suite.Suite
 	repo    *dal.AuthRepo
+	jwkRepo session.IJwkRepo
 	app     *app.App
 	db      *test.TestDB
 	srv     *HttpDeps
@@ -44,12 +47,10 @@ func (s *userSuite) SetupSuite() {
 	s.NoError(err)
 	entClient := pgsql.CreateEntClient(ctx, db.DatabaseUrl)
 	repo := dal.New(entClient)
-
-	e := echo.New()
-	e.Validator = validator.NewCustomValidator()
-	s.echo = e
+	jwkRepo := session.NewJwkRepo(entClient)
 
 	s.repo = repo
+	s.jwkRepo = jwkRepo
 	s.db = db
 	s.app = app.New(nil, nil, &defaultCfg, repo)
 	s.srv = &HttpDeps{
@@ -58,6 +59,9 @@ func (s *userSuite) SetupSuite() {
 		&sharedCfg,
 	}
 	s.handler = NewUserHandler(s.srv, &sessionManager{})
+	e := echo.New()
+	e.Validator = validator.NewCustomValidator()
+	s.echo = e
 }
 
 func (s *userSuite) TearDownSuite() {
@@ -208,5 +212,44 @@ func (s *userSuite) TestUserHandler_Create_EmailMissing() {
 		err := json.Unmarshal(rec.Body.Bytes(), &httpError)
 		s.NoError(err)
 		s.Equal(http.StatusBadRequest, httpError.Code)
+	}
+}
+
+func (s *userSuite) TestUserHandler_Get() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	err := s.LoadFixtures("../../../test/fixtures")
+	s.Require().NoError(err)
+
+	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
+
+	jwkManager, err := session.NewDefaultManager(sharedCfg.Secrets.Keys, s.jwkRepo)
+	if err != nil {
+		panic(fmt.Errorf("failed to create jwk manager: %w", err))
+	}
+	sessionManager, err := session.NewManager(jwkManager, sharedCfg.Session)
+	if err != nil {
+		panic(fmt.Errorf("failed to create session generator: %w", err))
+	}
+	token, err := sessionManager.GenerateJWT(userId)
+	s.Require().NoError(err)
+	cookie, err := sessionManager.GenerateCookie(token)
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s", userId), nil)
+	req.AddCookie(cookie)
+	rec := httptest.NewRecorder()
+
+	c := s.echo.NewContext(req, rec)
+	s.handler.Get(c)
+
+	if s.Equal(http.StatusOK, rec.Code) {
+		s.Equal(rec.Code, http.StatusOK)
+		user := ent.User{}
+		err := json.Unmarshal(rec.Body.Bytes(), &user)
+		s.NoError(err)
+		s.Equal(userId, user.ID.String())
+		s.Equal(len(user.Edges.WebauthnCredentials), 0)
 	}
 }
