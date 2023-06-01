@@ -32,6 +32,7 @@ type userSuite struct {
 	db      *test.TestDB
 	srv     *HttpDeps
 	handler *UserHandler
+	echo    *echo.Echo
 }
 
 func (s *userSuite) SetupSuite() {
@@ -43,6 +44,10 @@ func (s *userSuite) SetupSuite() {
 	s.NoError(err)
 	entClient := pgsql.CreateEntClient(ctx, db.DatabaseUrl)
 	repo := dal.New(entClient)
+
+	e := echo.New()
+	e.Validator = validator.NewCustomValidator()
+	s.echo = e
 
 	s.repo = repo
 	s.db = db
@@ -93,9 +98,7 @@ func (s *userSuite) TestUserHandler_Create() {
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 
-	e := echo.New()
-	e.Validator = validator.NewCustomValidator()
-	c := e.NewContext(req, rec)
+	c := s.echo.NewContext(req, rec)
 
 	if s.NoError(s.handler.Create(c)) && s.Equal(http.StatusOK, rec.Code) {
 		user := dto.CreateUserResponse{}
@@ -125,9 +128,7 @@ func (s *userSuite) TestUserHandler_Create_CaseInsensitive() {
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 
-	e := echo.New()
-	e.Validator = validator.NewCustomValidator()
-	c := e.NewContext(req, rec)
+	c := s.echo.NewContext(req, rec)
 
 	if s.NoError(s.handler.Create(c)) && s.Equal(http.StatusOK, rec.Code) {
 		user := dto.CreateUserResponse{}
@@ -160,14 +161,32 @@ func (s *userSuite) TestUserHandler_Create_UserExists() {
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 
-	e := echo.New()
-	e.Validator = validator.NewCustomValidator()
-	c := e.NewContext(req, rec)
+	c := s.echo.NewContext(req, rec)
 	s.handler.Create(c)
 	if s.Equal(http.StatusConflict, rec.Code) {
 		httpError := errorhandler.HTTPError{}
 		err := json.Unmarshal(rec.Body.Bytes(), &httpError)
 		s.NoError(err)
 		s.Equal(http.StatusConflict, httpError.Code)
+	}
+}
+
+func (s *userSuite) TestUserHandler_Create_InvalidEmail() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/users", strings.NewReader(`{"email": 123"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	c := s.echo.NewContext(req, rec)
+	s.handler.Create(c)
+
+	if s.Equal(http.StatusBadRequest, rec.Code) {
+		httpError := errorhandler.HTTPError{}
+		err := json.Unmarshal(rec.Body.Bytes(), &httpError)
+		s.NoError(err)
+		s.Equal(http.StatusBadRequest, httpError.Code)
 	}
 }

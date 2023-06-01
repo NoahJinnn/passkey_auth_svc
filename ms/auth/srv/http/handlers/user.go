@@ -33,11 +33,13 @@ type UserCreateBody struct {
 func (h *UserHandler) Create(c echo.Context) error {
 	var body UserCreateBody
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		return errorhandler.ToHttpError(err)
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
 	}
 
 	if err := c.Validate(body); err != nil {
-		return errorhandler.ToHttpError(err)
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
 	}
 
 	body.Email = strings.ToLower(body.Email)

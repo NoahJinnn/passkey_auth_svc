@@ -243,10 +243,11 @@ func TestWebauthnHandler_FinishLogin(t *testing.T) {
 	rec2 := httptest.NewRecorder()
 	c2 := e.NewContext(req2, rec2)
 
-	err := handler.FinishLogin(c2)
-	if assert.Error(t, err) {
-		httpError := errorhandler.ToHttpError(err)
-		assert.Equal(t, http.StatusUnauthorized, httpError.Code)
-		assert.Equal(t, "Stored challenge and received challenge do not match: sessionData not found", err.Error())
+	handler.FinishLogin(c2)
+	if assert.Equal(t, http.StatusUnauthorized, rec2.Code) {
+		httpError := errorhandler.HTTPError{}
+		err := json.Unmarshal(rec2.Body.Bytes(), &httpError)
+		assert.NoError(t, err)
+		assert.Equal(t, "Stored challenge and received challenge do not match", httpError.Message)
 	}
 }
