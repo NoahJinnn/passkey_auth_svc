@@ -44,7 +44,8 @@ func (h *UserHandler) Create(c echo.Context) error {
 
 	newUser, emailId, err := h.GetUserSvc().Create(c.Request().Context(), body.Email)
 	if err != nil {
-		return errorhandler.ToHttpError(err)
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
 	}
 
 	return c.JSON(http.StatusOK, dto.CreateUserResponse{

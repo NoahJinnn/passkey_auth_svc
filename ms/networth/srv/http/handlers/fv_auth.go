@@ -24,7 +24,8 @@ func (h *FvAuthHandler) CreateCustomerToken(c echo.Context) error {
 	}
 	token, err := h.GetFvAuthSvc().CreateCustomerToken(c.Request().Context(), &body)
 	if err != nil {
-		return errorhandler.ToHttpError(err)
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
 	}
 	return c.JSON(http.StatusOK, token)
 }
@@ -38,16 +39,19 @@ func (h *FvAuthHandler) CreateLinkToken(c echo.Context) error {
 	}
 
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		return errorhandler.ToHttpError(err)
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
 	}
 
 	if err := c.Validate(body); err != nil {
-		return errorhandler.ToHttpError(err)
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
 	}
 
 	token, err := h.GetFvAuthSvc().CreateLinkToken(c.Request().Context(), &body)
 	if err != nil {
-		return errorhandler.ToHttpError(err)
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
 	}
 	return c.JSON(http.StatusOK, token)
 }
@@ -55,15 +59,18 @@ func (h *FvAuthHandler) CreateLinkToken(c echo.Context) error {
 func (h *FvAuthHandler) ExchangeAccessToken(c echo.Context) error {
 	var body finverse.ExchangeAccessToken
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		return errorhandler.ToHttpError(err)
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
 	}
 
 	if err := c.Validate(body); err != nil {
-		return errorhandler.ToHttpError(err)
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
 	}
 	token, err := h.GetFvAuthSvc().ExchangeAccessToken(c.Request().Context(), body.Code)
 	if err != nil {
-		return errorhandler.ToHttpError(err)
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
 	}
 	return c.JSON(http.StatusOK, token)
 }

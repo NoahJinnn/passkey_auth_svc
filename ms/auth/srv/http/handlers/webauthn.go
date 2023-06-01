@@ -82,12 +82,14 @@ func (h *WebauthnHandler) InitLogin(c echo.Context) error {
 	var request BeginAuthenticationBody
 
 	if err := (&echo.DefaultBinder{}).BindBody(c, &request); err != nil {
-		return errorhandler.ToHttpError(err)
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
 	}
 
 	options, err := h.GetWebauthnSvc().InitLogin(c.Request().Context(), request.UserID)
 	if err != nil {
-		return errorhandler.ToHttpError(err)
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
 	}
 
 	return c.JSON(http.StatusOK, options)
@@ -106,7 +108,8 @@ func (h *WebauthnHandler) FinishLogin(c echo.Context) error {
 
 	credentialId, userId, err := h.GetWebauthnSvc().FinishLogin(c.Request().Context(), request)
 	if err != nil {
-		return errorhandler.ToHttpError(err)
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
 	}
 
 	token, err := h.sessionManager.GenerateJWT(userId)
