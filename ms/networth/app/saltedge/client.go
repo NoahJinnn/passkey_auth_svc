@@ -64,8 +64,9 @@ func (cl *SeClient) DoReq(ctx context.Context, method string, path string, query
 	}
 	signedHeaders := cl.SignedHeaders(u.String(), method, b)
 
-	resp, err := cl.req.InitReq(ctx, method, path).
-		WithBody(b).
+	resp, err := cl.req.
+		InitReq(ctx, method, path, b).
+		WithDefaultOpts().
 		WithHeaders(signedHeaders).
 		Send()
 	if err != nil {

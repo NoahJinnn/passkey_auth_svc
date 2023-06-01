@@ -39,8 +39,8 @@ func (svc *FvAuthSvc) CreateCustomerToken(ctx context.Context, cct *CreateCustom
 	}
 
 	resp, err := svc.req.
-		InitReq(ctx, "POST", "auth/customer/token").
-		WithBody(b).
+		InitReq(ctx, "POST", "auth/customer/token", b).
+		WithDefaultOpts().
 		Send()
 	if err != nil {
 		return nil, err
@@ -64,8 +64,8 @@ func (svc *FvAuthSvc) CreateLinkToken(ctx context.Context, clt *CreateLinkToken)
 
 	// svc.req.SetHeader("Authorization", "Bearer "+accessToken)
 	resp, err := svc.req.
-		InitReq(ctx, "POST", "/link/token").
-		WithBody(b).
+		InitReq(ctx, "POST", "/link/token", b).
+		WithDefaultOpts().
 		WithHeaders(map[string]string{
 			"Authorization": "Bearer " + accessToken,
 		}).
@@ -89,8 +89,8 @@ func (svc *FvAuthSvc) ExchangeAccessToken(ctx context.Context, exchangeCode stri
 	payload := fmt.Sprintf("client_id=%s&code=%s&redirect_uri=%s&grant_type=authorization_code", svc.config.Finverse.ClientID, exchangeCode, svc.config.Finverse.RedirectURI)
 
 	resp, err := svc.req.
-		InitReq(ctx, "POST", "/auth/token").
-		WithBody([]byte(payload)).
+		InitReq(ctx, "POST", "/auth/token", []byte(payload)).
+		WithDefaultOpts().
 		WithHeaders(map[string]string{
 			"Content-Type": "application/x-www-form-urlencoded",
 		}).

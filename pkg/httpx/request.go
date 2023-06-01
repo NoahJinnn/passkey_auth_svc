@@ -21,7 +21,6 @@ type Req struct {
 type Opts struct {
 	Headers map[string]string
 	Query   map[string]string
-	Body    []byte
 }
 
 func NewReq(baseUrl string, defaultHeaders map[string]string, defaultQuery map[string]string) *Req {
@@ -30,7 +29,6 @@ func NewReq(baseUrl string, defaultHeaders map[string]string, defaultQuery map[s
 		defaultOpts: &Opts{
 			Headers: defaultHeaders,
 			Query:   defaultQuery,
-			Body:    nil,
 		},
 		opts: nil,
 	}
@@ -40,8 +38,6 @@ func (r *Req) Send() (*Resp, error) {
 	if r.request == nil {
 		return nil, fmt.Errorf("request is not initialized")
 	}
-
-	fmt.Printf("sending request: %+v\n", r.request.Body)
 
 	client := &http.Client{}
 	resp, err := client.Do(r.request)
@@ -68,8 +64,8 @@ func (r *Req) Send() (*Resp, error) {
 	}, nil
 }
 
-func (r *Req) InitReq(ctx context.Context, method string, path string) *Req {
-	req, err := http.NewRequestWithContext(ctx, method, r.baseUrl+path, nil)
+func (r *Req) InitReq(ctx context.Context, method string, path string, body []byte) *Req {
+	req, err := http.NewRequestWithContext(ctx, method, r.baseUrl+path, bytes.NewBuffer(body))
 	if err != nil {
 		panic(err)
 	}
@@ -83,9 +79,7 @@ func (r *Req) WithOpts(opts *Opts) *Req {
 		return r
 	}
 	applyOptions(r.request, opts)
-	if opts.Body != nil {
-		r.request.Body = io.NopCloser(bytes.NewReader(opts.Body))
-	}
+
 	return r
 }
 
@@ -123,15 +117,6 @@ func (r *Req) WithQuery(query map[string]string) *Req {
 	return r
 }
 
-func (r *Req) WithBody(body []byte) *Req {
-	if r.request == nil {
-		return r
-	}
-	r.request.Body = io.NopCloser(bytes.NewReader(body))
-	r.request.ContentLength = int64(len(body))
-	return r
-}
-
 func applyOptions(req *http.Request, opts *Opts) {
 	if opts == nil {
 		return
@@ -146,10 +131,6 @@ func applyOptions(req *http.Request, opts *Opts) {
 		q.Add(k, v)
 	}
 	req.URL.RawQuery = q.Encode()
-
-	if opts.Body != nil {
-		req.Body = io.NopCloser(bytes.NewReader(opts.Body))
-	}
 }
 
 func (r *Req) String() string {

@@ -38,7 +38,7 @@ func (s *TestRequestSuite) Test_InitReq_Success() {
 	endpoint := "/test"
 
 	// Act
-	req := s.req.InitReq(s.ctx, http.MethodGet, endpoint)
+	req := s.req.InitReq(s.ctx, http.MethodGet, endpoint, nil)
 
 	// Assert
 	s.NotNil(req.request)
@@ -55,7 +55,7 @@ func (s *TestRequestSuite) Test_InitReq_Fail() {
 	// Assert
 	s.Panics(
 		func() {
-			s.req.InitReq(s.ctx, errMethod, endpoint)
+			s.req.InitReq(s.ctx, errMethod, endpoint, nil)
 		},
 	)
 
@@ -104,7 +104,7 @@ func (s *TestRequestSuite) Test_Request_Success() {
 	for _, exec := range requests {
 		s.Suite.Run(exec.name, func() {
 			// Act
-			response, err := req.InitReq(s.ctx, exec.method, "").
+			response, err := req.InitReq(s.ctx, exec.method, "", nil).
 				Send()
 
 			// Assert
@@ -172,7 +172,7 @@ func (s *TestRequestSuite) Test_RequestWithOptions_Success() {
 	for _, exec := range requests {
 		s.Suite.Run(exec.name, func() {
 			// Act
-			response, err := req.InitReq(s.ctx, exec.method, "").
+			response, err := req.InitReq(s.ctx, exec.method, "", nil).
 				WithOpts(exec.opts).
 				Send()
 
@@ -219,7 +219,7 @@ func (s *TestRequestSuite) Test_Request_Fail() {
 	for _, exec := range requests {
 		s.Suite.Run(exec.name, func() {
 			// Act
-			response, err := s.req.InitReq(s.ctx, exec.method, "").
+			response, err := s.req.InitReq(s.ctx, exec.method, "", nil).
 				Send()
 
 			// Assert
