@@ -1,4 +1,4 @@
-package handlers
+package test
 
 import (
 	"encoding/json"
@@ -11,6 +11,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/handlers"
 	test "github.com/hellohq/hqservice/ms/auth/test/mock/app"
 	testRepo "github.com/hellohq/hqservice/ms/auth/test/mock/dal"
 	"github.com/labstack/echo/v4"
@@ -81,7 +82,7 @@ func TestEmailHandler_ListByUser(t *testing.T) {
 		repo := testRepo.NewRepo(nil, nil, nil, nil, nil, currentTest.data, nil)
 		appl := test.NewApp(nil, nil, &defaultCfg, repo)
 
-		handler := NewEmailHandler(&HttpDeps{
+		handler := handlers.NewEmailHandler(&handlers.HttpDeps{
 			Appl:      appl,
 			Cfg:       &defaultCfg,
 			SharedCfg: &sharedCfg,
@@ -132,7 +133,7 @@ func TestEmailHandler_Delete(t *testing.T) {
 
 	repo := testRepo.NewRepo(nil, testUsers, nil, nil, nil, testEmails, nil)
 	appl := test.NewApp(nil, nil, &defaultCfg, repo)
-	handler := NewEmailHandler(&HttpDeps{
+	handler := handlers.NewEmailHandler(&handlers.HttpDeps{
 		Appl:      appl,
 		Cfg:       &defaultCfg,
 		SharedCfg: &sharedCfg,
