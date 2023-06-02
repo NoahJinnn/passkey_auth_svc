@@ -31,7 +31,7 @@ require (
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/powerman/pqx v0.7.0
 	github.com/sethvargo/go-limiter v0.7.2
-	golang.org/x/tools v0.9.1
+	golang.org/x/tools v0.9.2
 	gotest.tools/gotestsum v1.9.0
 )
 
