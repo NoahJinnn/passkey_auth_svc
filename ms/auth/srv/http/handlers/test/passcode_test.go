@@ -1,4 +1,4 @@
-package handlers
+package test
 
 import (
 	"bytes"
@@ -12,6 +12,7 @@ import (
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/http/validator"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/handlers"
 	"github.com/hellohq/hqservice/ms/auth/srv/mail"
 	test "github.com/hellohq/hqservice/ms/auth/test/mock/app"
 	testRepo "github.com/hellohq/hqservice/ms/auth/test/mock/dal"
@@ -42,12 +43,12 @@ func (m mailer) Send(email []string, subject string, body string) error {
 
 func TestPasscodeHandler_Init(t *testing.T) {
 	appl := test.NewApp(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, nil, emails, nil))
-	srv := &HttpDeps{
-		appl,
-		&defaultCfg,
-		&sharedCfg,
+	srv := &handlers.HttpDeps{
+		Appl:      appl,
+		Cfg:       &defaultCfg,
+		SharedCfg: &sharedCfg,
 	}
-	passcodeHandler := NewPasscodeHandler(srv, sessionManager{})
+	passcodeHandler := handlers.NewPasscodeHandler(srv, sessionManager{})
 
 	body := dto.PasscodeInitRequest{
 		UserId: userId,
@@ -68,12 +69,12 @@ func TestPasscodeHandler_Init(t *testing.T) {
 
 func TestPasscodeHandler_Finish(t *testing.T) {
 	appl := test.NewApp(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, passcodes(), emails, nil))
-	srv := &HttpDeps{
-		appl,
-		&defaultCfg,
-		&sharedCfg,
+	srv := &handlers.HttpDeps{
+		Appl:      appl,
+		Cfg:       &defaultCfg,
+		SharedCfg: &sharedCfg,
 	}
-	passcodeHandler := NewPasscodeHandler(srv, sessionManager{})
+	passcodeHandler := handlers.NewPasscodeHandler(srv, sessionManager{})
 
 	body := dto.PasscodeFinishRequest{
 		Id:   "08ee61aa-0946-4ecf-a8bd-e14c604329e2",

@@ -22,7 +22,7 @@ type (
 
 // NewServer returns Echo server configured to listen on the TCP network
 // address cfg.Host:cfg.Port and handle requests on incoming connections.
-func NewServer(appl app.Appl, sessionManager *session.Manager, sharedCfg *sharedconfig.Shared, cfg *config.Config) error {
+func NewServer(appl app.Appl, sessionManager *session.Manager, sharedCfg *sharedconfig.Shared, cfg *config.Config) (*echo.Echo, error) {
 	srv := &handlers.HttpDeps{
 		Appl:      appl,
 		Cfg:       cfg,
@@ -87,7 +87,5 @@ func NewServer(appl app.Appl, sessionManager *session.Manager, sharedCfg *shared
 	email.GET("", emailHandler.ListByUser)
 	// email.POST("", emailHandler.Create)
 	email.DELETE("/:id", emailHandler.Delete)
-
-	e.Logger.Fatal(e.Start(cfg.Server.BindAddr.String()))
-	return nil
+	return e, nil
 }

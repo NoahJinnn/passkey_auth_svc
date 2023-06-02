@@ -1,4 +1,4 @@
-package handlers
+package test
 
 import (
 	"bytes"
@@ -14,6 +14,7 @@ import (
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/http/errorhandler"
 	"github.com/hellohq/hqservice/ms/auth/app/wa"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/handlers"
 	test "github.com/hellohq/hqservice/ms/auth/test/mock/app"
 	testRepo "github.com/hellohq/hqservice/ms/auth/test/mock/dal"
 	"github.com/labstack/echo/v4"
@@ -97,7 +98,7 @@ func TestWebauthnHandler_BeginRegistration(t *testing.T) {
 	c.Set("session", token)
 
 	appl := test.NewApp(nil, nil, &defaultCfg, testRepo.NewRepo(nil, users, credentials, waSessionData, nil, nil, nil))
-	handler := NewWebauthnHandler(&HttpDeps{
+	handler := handlers.NewWebauthnHandler(&handlers.HttpDeps{
 		Appl:      appl,
 		Cfg:       &defaultCfg,
 		SharedCfg: &sharedCfg,
@@ -148,7 +149,7 @@ func TestWebauthnHandler_FinishRegistration(t *testing.T) {
 	c.Set("session", token)
 
 	appl := test.NewApp(nil, nil, &defaultCfg, testRepo.NewRepo(nil, users, nil, waSessionData, nil, nil, nil))
-	handler := NewWebauthnHandler(&HttpDeps{
+	handler := handlers.NewWebauthnHandler(&handlers.HttpDeps{
 		Appl:      appl,
 		Cfg:       &defaultCfg,
 		SharedCfg: &sharedCfg,
@@ -187,7 +188,7 @@ func TestWebauthnHandler_BeginLogin(t *testing.T) {
 	c.Set("session", token)
 
 	appl := test.NewApp(nil, nil, &defaultCfg, testRepo.NewRepo(nil, users, nil, waSessionData, nil, nil, nil))
-	handler := NewWebauthnHandler(&HttpDeps{
+	handler := handlers.NewWebauthnHandler(&handlers.HttpDeps{
 		Appl:      appl,
 		Cfg:       &defaultCfg,
 		SharedCfg: &sharedCfg,
@@ -223,7 +224,7 @@ func TestWebauthnHandler_FinishLogin(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	appl := test.NewApp(nil, nil, &defaultCfg, testRepo.NewRepo(nil, users, credentials, waSessionData, nil, nil, nil))
-	handler := NewWebauthnHandler(&HttpDeps{
+	handler := handlers.NewWebauthnHandler(&handlers.HttpDeps{
 		Appl:      appl,
 		Cfg:       &defaultCfg,
 		SharedCfg: &sharedCfg,
