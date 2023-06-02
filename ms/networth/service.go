@@ -64,5 +64,7 @@ func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func(), ent
 }
 
 func (s *Service) serveEcho(ctx Ctx) error {
-	return server.NewServer(s.appl, s.sessionManager, s.sharedCfg, s.cfg)
+	e, err := server.NewServer(s.appl, s.sessionManager, s.sharedCfg, s.cfg)
+	e.Logger.Fatal(e.Start(s.cfg.Server.BindAddr.String()))
+	return err
 }
