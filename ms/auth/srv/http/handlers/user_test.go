@@ -1,25 +1,98 @@
-//go:build integration
-
 package handlers
 
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
+	"github.com/go-testfixtures/testfixtures/v3"
+	"github.com/hellohq/hqservice/internal/http/errorhandler"
+	"github.com/hellohq/hqservice/internal/http/session"
 	"github.com/hellohq/hqservice/internal/http/validator"
+	"github.com/hellohq/hqservice/internal/pgsql"
+	"github.com/hellohq/hqservice/ms/auth/app"
+	"github.com/hellohq/hqservice/ms/auth/dal"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
+	test "github.com/hellohq/hqservice/ms/auth/test/mock/dal"
 	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/suite"
 )
 
-func (s *integrationSuite) TestUserHandler_Create() {
+func TestUserSuite(t *testing.T) {
+	suite.Run(t, new(userSuite))
+}
+
+type userSuite struct {
+	suite.Suite
+	repo    *dal.AuthRepo
+	jwkRepo session.IJwkRepo
+	app     *app.App
+	db      *test.TestDB
+	srv     *HttpDeps
+	handler *UserHandler
+	echo    *echo.Echo
+}
+
+func (s *userSuite) SetupSuite() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
+	dialect := "postgres"
+	db, err := test.StartDB("integration_test", dialect)
+	s.NoError(err)
+	entClient := pgsql.CreateEntClient(ctx, db.DatabaseUrl)
+	repo := dal.New(entClient)
+	jwkRepo := session.NewJwkRepo(entClient)
+
+	s.repo = repo
+	s.jwkRepo = jwkRepo
+	s.db = db
+	s.app = app.New(nil, nil, &defaultCfg, repo)
+	s.srv = &HttpDeps{
+		s.app,
+		&defaultCfg,
+		&sharedCfg,
+	}
+	s.handler = NewUserHandler(s.srv, &sessionManager{})
 	e := echo.New()
 	e.Validator = validator.NewCustomValidator()
+	s.echo = e
+}
+
+func (s *userSuite) TearDownSuite() {
+	if s.db != nil {
+		s.NoError(test.PurgeDB(s.db))
+	}
+}
+
+// LoadFixtures loads predefined data from the path in the database.
+func (s *userSuite) LoadFixtures(path string) error {
+	fixtures, err := testfixtures.New(
+		testfixtures.Database(s.db.DbCon),
+		testfixtures.Dialect(s.db.Dialect),
+		testfixtures.Directory(path),
+		testfixtures.SkipResetSequences(),
+	)
+	if err != nil {
+		return fmt.Errorf("could not create testfixtures: %w", err)
+	}
+
+	err = fixtures.Load()
+	if err != nil {
+		return fmt.Errorf("could not load fixtures: %w", err)
+	}
+
+	return nil
+}
+
+func (s *userSuite) TestUserHandler_Create() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 
 	body := UserCreateBody{Email: "noah.jin@example.com"}
 	bodyJson, err := json.Marshal(body)
@@ -27,11 +100,10 @@ func (s *integrationSuite) TestUserHandler_Create() {
 	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewReader(bodyJson))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
 
-	handler := NewUserHandler(s.srv, &sessionManager{})
+	c := s.echo.NewContext(req, rec)
 
-	if s.NoError(handler.Create(c)) {
+	if s.NoError(s.handler.Create(c)) && s.Equal(http.StatusOK, rec.Code) {
 		user := dto.CreateUserResponse{}
 		err := json.Unmarshal(rec.Body.Bytes(), &user)
 		s.NoError(err)
@@ -46,3 +118,138 @@ func (s *integrationSuite) TestUserHandler_Create() {
 		s.NotNil(email)
 	}
 }
+
+func (s *userSuite) TestUserHandler_Create_CaseInsensitive() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	body := UserCreateBody{Email: "JANE.DOE@EXAMPLE.COM"}
+	bodyJson, err := json.Marshal(body)
+	s.NoError(err)
+	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewReader(bodyJson))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	c := s.echo.NewContext(req, rec)
+
+	if s.NoError(s.handler.Create(c)) && s.Equal(http.StatusOK, rec.Code) {
+		user := dto.CreateUserResponse{}
+		err := json.Unmarshal(rec.Body.Bytes(), &user)
+		s.NoError(err)
+		s.False(user.ID.IsNil())
+
+		count, err := s.repo.GetUserRepo().Count(ctx, user.ID)
+		s.NoError(err)
+		s.Equal(1, count)
+
+		email, err := s.repo.GetEmailRepo().GetByAddress(ctx, strings.ToLower(body.Email))
+		s.NoError(err)
+		s.NotNil(email)
+	}
+}
+
+func (s *userSuite) TestUserHandler_Create_UserExists() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	err := s.LoadFixtures("../../../test/fixtures")
+	s.Require().NoError(err)
+
+	body := UserCreateBody{Email: "john.doe@example.com"}
+	bodyJson, err := json.Marshal(body)
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewReader(bodyJson))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	c := s.echo.NewContext(req, rec)
+	s.handler.Create(c)
+	if s.Equal(http.StatusConflict, rec.Code) {
+		httpError := errorhandler.HTTPError{}
+		err := json.Unmarshal(rec.Body.Bytes(), &httpError)
+		s.NoError(err)
+		s.Equal(http.StatusConflict, httpError.Code)
+	}
+}
+
+func (s *userSuite) TestUserHandler_Create_InvalidEmail() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/users", strings.NewReader(`{"email": 123"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	c := s.echo.NewContext(req, rec)
+	s.handler.Create(c)
+
+	if s.Equal(http.StatusBadRequest, rec.Code) {
+		httpError := errorhandler.HTTPError{}
+		err := json.Unmarshal(rec.Body.Bytes(), &httpError)
+		s.NoError(err)
+		s.Equal(http.StatusBadRequest, httpError.Code)
+	}
+}
+
+func (s *userSuite) TestUserHandler_Create_EmailMissing() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/users", strings.NewReader(`{"bogus": 123}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	c := s.echo.NewContext(req, rec)
+	s.handler.Create(c)
+
+	if s.Equal(http.StatusBadRequest, rec.Code) {
+		httpError := errorhandler.HTTPError{}
+		err := json.Unmarshal(rec.Body.Bytes(), &httpError)
+		s.NoError(err)
+		s.Equal(http.StatusBadRequest, httpError.Code)
+	}
+}
+
+// TODO: We can't get "session" in echo request context, need to serve a full http server or find another way to mock it
+// func (s *userSuite) TestUserHandler_Get() {
+// 	if testing.Short() {
+// 		s.T().Skip("skipping test in short mode.")
+// 	}
+// 	err := s.LoadFixtures("../../../test/fixtures")
+// 	s.Require().NoError(err)
+
+// 	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
+
+// 	jwkManager, err := session.NewDefaultManager(sharedCfg.Secrets.Keys, s.jwkRepo)
+// 	if err != nil {
+// 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
+// 	}
+// 	sessionManager, err := session.NewManager(jwkManager, sharedCfg.Session)
+// 	if err != nil {
+// 		panic(fmt.Errorf("failed to create session generator: %w", err))
+// 	}
+// 	token, err := sessionManager.GenerateJWT(userId)
+// 	s.Require().NoError(err)
+// 	cookie, err := sessionManager.GenerateCookie(token)
+// 	s.Require().NoError(err)
+
+// 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s", userId), nil)
+// 	req.AddCookie(cookie)
+// 	rec := httptest.NewRecorder()
+
+// 	c := s.echo.NewContext(req, rec)
+// 	s.handler.Get(c)
+
+// 	if s.Equal(http.StatusOK, rec.Code) {
+// 		s.Equal(rec.Code, http.StatusOK)
+// 		user := ent.User{}
+// 		err := json.Unmarshal(rec.Body.Bytes(), &user)
+// 		s.NoError(err)
+// 		s.Equal(userId, user.ID.String())
+// 		s.Equal(len(user.Edges.WebauthnCredentials), 0)
+// 	}
+// }

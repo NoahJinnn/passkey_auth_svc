@@ -65,7 +65,8 @@ func (h *EmailHandler) Create(c echo.Context) error {
 	var body dto.EmailCreateRequest
 	err = (&echo.DefaultBinder{}).BindBody(c, &body)
 	if err != nil {
-		return errorhandler.ToHttpError(err)
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
 	}
 
 	newEmailAddress := strings.ToLower(body.Address)

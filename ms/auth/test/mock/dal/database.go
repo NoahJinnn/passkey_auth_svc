@@ -20,6 +20,7 @@ type TestDB struct {
 	pool        *dockertest.Pool
 	resource    *dockertest.Resource
 	DatabaseUrl string
+	DbCon       *sql.DB
 	Dialect     string
 }
 
@@ -70,10 +71,16 @@ func StartDB(name string, dialect string) (*TestDB, error) {
 		return nil, fmt.Errorf("could not connect to docker: %w", err)
 	}
 
+	db, err := sql.Open(dialect, databaseUrl)
+	if err != nil {
+		return nil, fmt.Errorf("could not connect to database: %w", err)
+	}
+
 	return &TestDB{
 		pool:        pool,
 		resource:    resource,
 		Dialect:     dialect,
+		DbCon:       db,
 		DatabaseUrl: databaseUrl,
 	}, nil
 }
