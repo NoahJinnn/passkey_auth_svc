@@ -50,11 +50,28 @@ func (svc *UserSvc) Create(ctx Ctx, address string) (newU *ent.User, emailID uui
 				return errorhandler.NewHTTPError(http.StatusConflict).SetInternal(fmt.Errorf("user with email %s already exists", address))
 			}
 		} else {
-			email, err = client.Email.Create().
-				SetAddress(address).
-				Save(ctx)
-			if err != nil {
-				return fmt.Errorf("failed creating email: %w", err)
+			if !svc.cfg.RequireEmailVerification {
+				email, err = client.Email.Create().
+					SetUserID(newU.ID).
+					SetAddress(address).
+					Save(ctx)
+				if err != nil {
+					return fmt.Errorf("failed creating email: %w", err)
+				}
+				_, err = client.PrimaryEmail.Create().
+					SetUserID(newU.ID).
+					SetEmailID(email.ID).
+					Save(ctx)
+				if err != nil {
+					return fmt.Errorf("failed to store primary email: %w", err)
+				}
+			} else {
+				email, err = client.Email.Create().
+					SetAddress(address).
+					Save(ctx)
+				if err != nil {
+					return fmt.Errorf("failed creating email: %w", err)
+				}
 			}
 		}
 

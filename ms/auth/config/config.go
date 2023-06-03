@@ -43,7 +43,8 @@ var (
 		FromAddress        appcfg.NotEmptyString `env:"MAIL_FROM_ADDRESS"`
 		FromName           appcfg.String         `env:"MAIL_FROM_NAME"`
 
-		TTL appcfg.Int `env:"PASSCODE_TTL"`
+		TTL                      appcfg.Int  `env:"PASSCODE_TTL"`
+		RequireEmailVerification appcfg.Bool `env:"REQUIRE_EMAIL_VERIFICATION"`
 	}{
 		RpId:        appcfg.MustNotEmptyString("localhost"),
 		TTL:         appcfg.MustInt("300"),
@@ -52,11 +53,12 @@ var (
 )
 
 type Config struct {
-	Server            Server
-	Webauthn          WebauthnSettings
-	Passcode          Passcode
-	ServiceName       string
-	MaxEmailAddresses int
+	Server                   Server
+	Webauthn                 WebauthnSettings
+	Passcode                 Passcode
+	ServiceName              string
+	MaxEmailAddresses        int
+	RequireEmailVerification bool
 }
 
 func saveStaticFileConfig(fileNameContent map[string]string) error {
@@ -153,7 +155,8 @@ func GetServe() (c *Config, err error) {
 			OneSignalAppID:  own.OneSignalAppID.Value(&err),
 			TTL:             int32(own.TTL.Value(&err)),
 		},
-		MaxEmailAddresses: 5,
+		MaxEmailAddresses:        5,
+		RequireEmailVerification: own.RequireEmailVerification.Value(&err),
 	}
 	if err != nil {
 		return nil, appcfg.WrapPErr(err, fs.Serve, own)

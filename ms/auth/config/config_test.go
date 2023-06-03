@@ -47,7 +47,8 @@ var (
 			OneSignalAppID:  "oneSignalAppID",
 			TTL:             300,
 		},
-		MaxEmailAddresses: 5,
+		MaxEmailAddresses:        5,
+		RequireEmailVerification: true,
 	}
 	testOwn = own
 )
@@ -65,6 +66,7 @@ func TestMain(m *testing.M) {
 	os.Setenv("HQ_ONESIGNAL_APP_KEY", "oneSignalAppKey")
 	os.Setenv("HQ_MAIL_FROM_ADDRESS", "test@gmail.com")
 	os.Setenv("HQ_MAIL_FROM_NAME", "Test Mail")
+	os.Setenv("HQ_REQUIRE_EMAIL_VERIFICATION", "true")
 
 	testShared, _ = sharedconfig.Get()
 	check.TestMain(m)
