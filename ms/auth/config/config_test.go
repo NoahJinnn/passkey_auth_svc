@@ -47,7 +47,8 @@ var (
 			OneSignalAppID:  "oneSignalAppID",
 			TTL:             300,
 		},
-		MaxEmailAddresses: 5,
+		MaxEmailAddresses:        5,
+		RequireEmailVerification: true,
 	}
 	testOwn = own
 )
