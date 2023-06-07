@@ -59,6 +59,7 @@ func NewServer(appl app.Appl, sessionManager *session.Manager, sharedCfg *shared
 	userHandler := handlers.NewUserHandler(srv, sessionManager)
 	user.POST("", userHandler.Create)
 	user.GET("/:id", userHandler.Get, session.Session(sessionManager))
+	e.POST("/user", userHandler.GetUserIdByEmail)
 	e.POST("/logout", userHandler.Logout, session.Session(sessionManager))
 
 	webauthnHandler := handlers.NewWebauthnHandler(srv, sessionManager)

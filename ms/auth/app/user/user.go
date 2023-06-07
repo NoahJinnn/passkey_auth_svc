@@ -18,6 +18,7 @@ type Ctx = context.Context
 
 type IUserSvc interface {
 	GetById(ctx Ctx, userID uuid.UUID) (*ent.User, *string, error)
+	GetUserIdByEmail(ctx Ctx, email string) (*uuid.UUID, error)
 	Create(ctx Ctx, email string) (newU *ent.User, emailID uuid.UUID, err error)
 }
 
@@ -102,4 +103,23 @@ func (svc *UserSvc) GetById(ctx Ctx, userID uuid.UUID) (*ent.User, *string, erro
 		emailAddress = &model.Address
 	}
 	return user, emailAddress, nil
+}
+
+func (svc *UserSvc) GetUserIdByEmail(ctx Ctx, addresss string) (*ent.Email, bool, error) {
+	email, err := svc.repo.GetEmailRepo().GetByAddress(ctx, addresss)
+	if err != nil {
+		return nil, false, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	if email == nil || email.UserID == nil {
+		return nil, false, errorhandler.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
+	}
+
+	credentials, err := svc.repo.GetWebauthnCredentialRepo().GetByUser(ctx, *email.UserID)
+	if err != nil {
+		return nil, false, fmt.Errorf("failed to get webauthn credentials: %w", err)
+	}
+
+	hasCredentials := len(credentials) > 0
+	return email, hasCredentials, nil
 }
