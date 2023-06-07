@@ -307,6 +307,53 @@ func (s *userSuite) TestUserHandler_Get_InvalidUserId() {
 	}
 }
 
+func (s *userSuite) TestUserHandler_GetUserIdByEmail_InvalidEmail() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "123"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	s.e.ServeHTTP(rec, req)
+
+	if s.Equal(http.StatusBadRequest, rec.Code) {
+		httpError := errorhandler.HTTPError{}
+		err := json.Unmarshal(rec.Body.Bytes(), &httpError)
+		s.Require().NoError(err)
+		s.Equal(http.StatusBadRequest, httpError.Code)
+	}
+}
+
+func (s *userSuite) TestUserHandler_GetUserIdByEmail_InvalidJson() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`"email": "123}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	s.e.ServeHTTP(rec, req)
+
+	s.Equal(http.StatusBadRequest, rec.Code)
+}
+
+func (s *userSuite) TestUserHandler_GetUserIdByEmail_UserNotFound() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "unknownAddress@example.com"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	s.e.ServeHTTP(rec, req)
+
+	s.Equal(http.StatusNotFound, rec.Code)
+}
+
 func (s *userSuite) TestUserHandler_Logout() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")

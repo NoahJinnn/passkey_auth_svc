@@ -43,7 +43,7 @@ func (r *emailRepo) GetByAddress(ctx Ctx, address string) (*ent.Email, error) {
 		Query().
 		Where(email.Address(address)).
 		Only(ctx)
-	if err != nil {
+	if err != nil && !ent.IsNotFound(err) {
 		return nil, err
 	}
 
