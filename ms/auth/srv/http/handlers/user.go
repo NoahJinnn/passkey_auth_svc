@@ -102,6 +102,38 @@ func (h *UserHandler) Get(c echo.Context) error {
 	})
 }
 
+type UserGetByEmailBody struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
+func (h *UserHandler) GetUserIdByEmail(c echo.Context) error {
+	var request UserGetByEmailBody
+	if err := (&echo.DefaultBinder{}).BindBody(c, &request); err != nil {
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
+	}
+
+	if err := c.Validate(request); err != nil {
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
+	}
+
+	emailAddress := strings.ToLower(request.Email)
+
+	email, hasCredentials, err := h.GetUserSvc().GetUserIdByEmail(c.Request().Context(), emailAddress)
+	if err != nil {
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
+	}
+
+	return c.JSON(http.StatusOK, dto.UserInfoResponse{
+		ID:                    *email.UserID,
+		Verified:              email.Verified,
+		EmailID:               email.ID,
+		HasWebauthnCredential: hasCredentials,
+	})
+}
+
 func (h *UserHandler) Logout(c echo.Context) error {
 	_, ok := c.Get("session").(jwt.Token)
 	if !ok {
