@@ -8,6 +8,11 @@ table "emails" {
     null = false
     type = character_varying
   }
+  column "verified" {
+    null    = false
+    type    = boolean
+    default = false
+  }
   column "created_at" {
     null = false
     type = timestamptz
@@ -231,7 +236,7 @@ table "webauthn_credential_transports" {
   schema = schema.public
   column "id" {
     null = false
-    type = character_varying
+    type = uuid
   }
   column "name" {
     null = false
