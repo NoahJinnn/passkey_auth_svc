@@ -86,6 +86,7 @@ func NewServer(appl app.Appl, sessionManager *session.Manager, sharedCfg *shared
 	emailHandler := handlers.NewEmailHandler(srv, sessionManager)
 	email := e.Group("/emails", session.Session(sessionManager))
 	email.GET("", emailHandler.ListByUser)
+	email.POST("/:id/set_primary", emailHandler.SetPrimaryEmail)
 	// email.POST("", emailHandler.Create)
 	email.DELETE("/:id", emailHandler.Delete)
 	return e, nil

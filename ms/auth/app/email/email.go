@@ -96,6 +96,11 @@ func (svc *EmailSvc) SetPrimaryEmail(ctx Ctx, userId uuid.UUID, emailId uuid.UUI
 			return fmt.Errorf("failed to fetch primary email from db: %w", err)
 		}
 
+		_, err = client.User.UpdateOneID(user.ID).SetPrimaryEmailID(emailId).Save(ctx)
+		if err != nil {
+			return fmt.Errorf("failed to set primary email for user: %w", err)
+		}
+
 		if primaryEmail == nil {
 			_, err = client.PrimaryEmail.Create().
 				SetUserID(user.ID).
