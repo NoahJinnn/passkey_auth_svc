@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/http/errorhandler"
 	"github.com/hellohq/hqservice/internal/http/session"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
 
@@ -40,6 +42,12 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	userId, err := uuid.FromString(body.UserId)
 	if err != nil {
 		return errorhandler.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
+	}
+
+	sessionToken := h.GetSessionToken(c)
+	if sessionToken != nil && sessionToken.Subject() != body.UserId {
+		// if the user is logged in and the requested user in the body does not match the user from the session then sending and finalizing passcodes is not allowed
+		return errorhandler.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("session.userId does not match requested userId"))
 	}
 
 	var emailId uuid.UUID
@@ -109,4 +117,16 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 		TTL:       passcode.TTL,
 		CreatedAt: passcode.CreatedAt,
 	})
+}
+
+func (h *PasscodeHandler) GetSessionToken(c echo.Context) jwt.Token {
+	var token jwt.Token
+	sessionCookie, _ := c.Cookie("hanko")
+	// we don't need to check the error, because when the cookie can not be found, the user is not logged in
+	if sessionCookie != nil {
+		token, _ = h.sessionManager.Verify(sessionCookie.Value)
+		// we don't need to check the error, because when the token is not returned, the user is not logged in
+	}
+
+	return token
 }
