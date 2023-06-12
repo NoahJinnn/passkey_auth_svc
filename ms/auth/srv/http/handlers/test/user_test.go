@@ -9,19 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/go-testfixtures/testfixtures/v3"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/http/errorhandler"
-	"github.com/hellohq/hqservice/internal/http/session"
-	"github.com/hellohq/hqservice/internal/pgsql"
-	"github.com/hellohq/hqservice/ms/auth/app"
-	"github.com/hellohq/hqservice/ms/auth/dal"
-	server "github.com/hellohq/hqservice/ms/auth/srv/http"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/handlers"
-	test "github.com/hellohq/hqservice/ms/auth/test/mock/dal"
-	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -30,69 +22,7 @@ func TestUserSuite(t *testing.T) {
 }
 
 type userSuite struct {
-	suite.Suite
-	repo           *dal.AuthRepo
-	app            *app.App
-	db             *test.TestDB
-	srv            *handlers.HttpDeps
-	sessionManager *session.Manager
-	e              *echo.Echo
-}
-
-func (s *userSuite) SetupSuite() {
-	if testing.Short() {
-		s.T().Skip("skipping test in short mode.")
-	}
-	dialect := "postgres"
-	db, err := test.StartDB("integration_test", dialect)
-	s.NoError(err)
-	entClient := pgsql.CreateEntClient(ctx, db.DatabaseUrl)
-	repo := dal.New(entClient)
-	jwkRepo := session.NewJwkRepo(entClient)
-	jwkManager, err := session.NewDefaultManager(sharedCfg.Secrets.Keys, jwkRepo)
-	s.NoError(err)
-	sessionManager, err := session.NewManager(jwkManager, sharedCfg.Session)
-	s.NoError(err)
-
-	s.repo = repo
-	s.sessionManager = sessionManager
-	s.db = db
-	s.app = app.New(nil, nil, &defaultCfg, repo)
-	s.srv = &handlers.HttpDeps{
-		Appl:      s.app,
-		Cfg:       &defaultCfg,
-		SharedCfg: &sharedCfg,
-	}
-	srv, err := server.NewServer(s.app, sessionManager, &sharedCfg, &defaultCfg)
-	s.NoError(err)
-
-	s.e = srv
-}
-
-func (s *userSuite) TearDownSuite() {
-	if s.db != nil {
-		s.NoError(test.PurgeDB(s.db))
-	}
-}
-
-// LoadFixtures loads predefined data from the path in the database.
-func (s *userSuite) LoadFixtures(path string) error {
-	fixtures, err := testfixtures.New(
-		testfixtures.Database(s.db.DbCon),
-		testfixtures.Dialect(s.db.Dialect),
-		testfixtures.Directory(path),
-		testfixtures.SkipResetSequences(),
-	)
-	if err != nil {
-		return fmt.Errorf("could not create testfixtures: %w", err)
-	}
-
-	err = fixtures.Load()
-	if err != nil {
-		return fmt.Errorf("could not load fixtures: %w", err)
-	}
-
-	return nil
+	Suite
 }
 
 func (s *userSuite) TestUserHandler_Create() {
