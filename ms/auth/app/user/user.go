@@ -115,7 +115,7 @@ func (svc *UserSvc) GetUserIdByEmail(ctx Ctx, addresss string) (*ent.Email, bool
 		return nil, false, errorhandler.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
 	}
 
-	credentials, err := svc.repo.GetWebauthnCredentialRepo().GetByUser(ctx, *email.UserID)
+	credentials, err := svc.repo.GetWebauthnCredentialRepo().ListByUser(ctx, *email.UserID)
 	if err != nil {
 		return nil, false, fmt.Errorf("failed to get webauthn credentials: %w", err)
 	}

@@ -2,6 +2,7 @@ package test
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -18,7 +19,16 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 )
+
+func TestEmailSuite(t *testing.T) {
+	suite.Run(t, new(emailSuite))
+}
+
+type emailSuite struct {
+	Suite
+}
 
 func TestEmailHandler_ListByUser(t *testing.T) {
 	uId1, _ := uuid.NewV4()
@@ -93,6 +103,35 @@ func TestEmailHandler_ListByUser(t *testing.T) {
 			assert.NoError(t, json.Unmarshal(rec.Body.Bytes(), &emails))
 			assert.Equal(t, currentTest.expectedCount, len(emails))
 		}
+	}
+}
+
+func (s *emailSuite) TestEmailHandler_SetPrimaryEmail() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../../../../test/fixtures/email")
+	s.Require().NoError(err)
+
+	newPrimaryEmailId := uuid.FromStringOrNil("8bb4c8a7-a3e6-48bb-b54f-20e3b485ab33")
+	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
+
+	token, err := s.sessionManager.GenerateJWT(userId)
+	s.Require().NoError(err)
+	cookie, err := s.sessionManager.GenerateCookie(token)
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/emails/%s/set_primary", newPrimaryEmailId), nil)
+	req.AddCookie(cookie)
+	rec := httptest.NewRecorder()
+
+	s.e.ServeHTTP(rec, req)
+	if s.Equal(http.StatusNoContent, rec.Code) {
+		emails, err := s.repo.GetEmailRepo().ListByUser(ctx, uuid.FromStringOrNil(userId))
+		s.Require().NoError(err)
+		s.Equal(3, len(emails))
+		// s.Equal(newPrimaryEmailId, email.ID)
 	}
 }
 

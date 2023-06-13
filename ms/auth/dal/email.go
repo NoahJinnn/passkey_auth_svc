@@ -50,10 +50,10 @@ func (r *emailRepo) GetByAddress(ctx Ctx, address string) (*ent.Email, error) {
 	return e, nil
 }
 
-func (r *emailRepo) GetPrimary(ctx Ctx, emailId uuid.UUID) (*ent.PrimaryEmail, error) {
+func (r *emailRepo) GetPrimary(ctx Ctx, userId uuid.UUID) (*ent.PrimaryEmail, error) {
 	e, err := r.db.PrimaryEmail.
 		Query().
-		Where(primaryemail.EmailID(emailId)).
+		Where(primaryemail.UserID(userId)).
 		Only(ctx)
 
 	if err != nil && !ent.IsNotFound(err) {

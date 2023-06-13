@@ -1,0 +1,19 @@
+- id: 51b7c175-ceb6-45ba-aae6-0092221c1b84
+  user_id: b5dd5267-b462-48be-b70d-bcd6f1bbe7a5
+  address: john.doe@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+- id: 8bb4c8a7-a3e6-48bb-b54f-20e3b485ab33
+  user_id: b5dd5267-b462-48be-b70d-bcd6f1bbe7a5
+  address: john.doe+3@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+- id: f194ee0f-dd1a-48f7-8766-c67e4d6cd1fe
+  user_id: b5dd5267-b462-48be-b70d-bcd6f1bbe7a5
+  address: john.doe+4@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+
