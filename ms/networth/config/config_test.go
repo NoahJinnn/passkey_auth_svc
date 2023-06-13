@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 	"testing"
 
@@ -61,7 +62,11 @@ func TestMain(m *testing.M) {
 	os.Setenv("HQ_FINVERSE_SECRET", "fv_secret")
 	os.Setenv("HQ_FINVERSE_REDIRECT_URI", "fv_redirect_uri")
 
-	testShared, _ = sharedconfig.Get()
+	var err error
+	testShared, err = sharedconfig.Get()
+	if err != nil {
+		log.Fatalf("failed to init config: %v", err)
+	}
 	check.TestMain(m)
 }
 
