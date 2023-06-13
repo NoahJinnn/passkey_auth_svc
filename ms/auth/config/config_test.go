@@ -1,11 +1,14 @@
 package config
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"os"
 	"testing"
 
 	"github.com/hellohq/hqservice/internal/sharedconfig"
+	"github.com/hellohq/hqservice/pkg/httpx"
 	"github.com/hellohq/hqservice/pkg/netx"
 	"github.com/powerman/check"
 	"github.com/sethvargo/go-limiter/httplimit"
@@ -54,6 +57,7 @@ var (
 )
 
 func TestMain(m *testing.M) {
+	loadDopplerEnvs()
 	os.Clearenv()
 	// Shared env
 	os.Setenv("HQ_AUTH_ADDR_HOST", "localhost")
@@ -76,6 +80,31 @@ func TestMain(m *testing.M) {
 		log.Fatalf("failed to init config: %v", err)
 	}
 	check.TestMain(m)
+}
+
+func loadDopplerEnvs() {
+	token := fmt.Sprintf("Bearer %s", os.Getenv("DOPPLER_TOKEN"))
+	fmt.Println(token)
+	req := httpx.NewReq("https://api.doppler.com/v3/configs/config/secrets", map[string]string{
+		"Content-Type":  "application/json",
+		"accept":        "application/json",
+		"accepts":       "application/json",
+		"authorization": token,
+	}, map[string]string{
+		"project":                 "hqservice",
+		"config":                  "dev",
+		"include_dynamic_secrets": "false",
+		"include_managed_secrets": "true",
+	})
+
+	resp, err := req.
+		InitReq(context.Background(), "GET", "", nil).
+		WithDefaultOpts().
+		Send()
+	fmt.Println(string(resp.Body()))
+	if err != nil {
+		log.Fatalf("failed to init config: %v", err)
+	}
 }
 
 func testGetServe(flags ...string) (*Config, error) {

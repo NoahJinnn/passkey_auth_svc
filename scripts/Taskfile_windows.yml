@@ -11,7 +11,6 @@ tasks:
       - ./sh/run_macos "{{.CLI_ARGS}}" # TODO: Implement run script for Windows
       
   test:
-    deps: [install:hadolint]
     desc: "Run test"
     cmds:
         - ./sh/test
