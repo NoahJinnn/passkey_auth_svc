@@ -60,6 +60,7 @@ func TestMain(m *testing.M) {
 	os.Setenv("HQ_AUTH_ADDR_HOST_INT", "127.0.0.1")
 	os.Setenv("HQ_AUTH_ADDR_PORT", "17000")
 	os.Setenv("HQ_POSTGRES_AUTH_PASS", "authpass")
+	os.Setenv("HQ_JWT_LIFESPAN", "1h")
 	// Auth env
 	os.Setenv("HQ_AUTH_RP_ORIGINS", "http://localhost:17000,http://localhost:17001")
 	os.Setenv("HQ_ONESIGNAL_APP_ID", "oneSignalAppID")
@@ -67,8 +68,13 @@ func TestMain(m *testing.M) {
 	os.Setenv("HQ_MAIL_FROM_ADDRESS", "test@gmail.com")
 	os.Setenv("HQ_MAIL_FROM_NAME", "Test Mail")
 	os.Setenv("HQ_REQUIRE_EMAIL_VERIFICATION", "true")
+	os.Setenv("HQ_AUTH_RP_ID", "localhost")
 
-	testShared, _ = sharedconfig.Get()
+	var err error
+	testShared, err = sharedconfig.Get()
+	if err != nil {
+		log.Fatalf("failed to init config: %v", err)
+	}
 	check.TestMain(m)
 }
 

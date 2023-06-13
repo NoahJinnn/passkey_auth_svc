@@ -33,20 +33,17 @@ var (
 	shared *sharedconfig.Shared
 	own    = &struct {
 		// Below envs is loaded by Doppler
-		RpId appcfg.NotEmptyString `env:"AUTH_RP_ID"`
-
-		RpOrigins          appcfg.StringSlice    `env:"AUTH_RP_ORIGINS"`
-		IosAssociationSite appcfg.String         `env:"IOS_SITE_ASSOCIATION"`
-		AndroidAssetLinks  appcfg.String         `env:"ANDROID_ASSET_LINKS"`
-		OneSignalAppID     appcfg.String         `env:"ONESIGNAL_APP_ID"`
-		OneSignalAppKey    appcfg.String         `env:"ONESIGNAL_APP_KEY"`
-		FromAddress        appcfg.NotEmptyString `env:"MAIL_FROM_ADDRESS"`
-		FromName           appcfg.String         `env:"MAIL_FROM_NAME"`
-
-		TTL                      appcfg.Int  `env:"PASSCODE_TTL"`
-		RequireEmailVerification appcfg.Bool `env:"REQUIRE_EMAIL_VERIFICATION"`
+		RpId                     appcfg.String         `env:"AUTH_RP_ID"`
+		RpOrigins                appcfg.StringSlice    `env:"AUTH_RP_ORIGINS"`
+		IosAssociationSite       appcfg.String         `env:"IOS_SITE_ASSOCIATION"`
+		AndroidAssetLinks        appcfg.String         `env:"ANDROID_ASSET_LINKS"`
+		OneSignalAppID           appcfg.String         `env:"ONESIGNAL_APP_ID"`
+		OneSignalAppKey          appcfg.String         `env:"ONESIGNAL_APP_KEY"`
+		FromAddress              appcfg.NotEmptyString `env:"MAIL_FROM_ADDRESS"`
+		FromName                 appcfg.String         `env:"MAIL_FROM_NAME"`
+		TTL                      appcfg.Int            `env:"PASSCODE_TTL"`
+		RequireEmailVerification appcfg.Bool           `env:"REQUIRE_EMAIL_VERIFICATION"`
 	}{
-		RpId:        appcfg.MustNotEmptyString("localhost"),
 		TTL:         appcfg.MustInt("300"),
 		FromAddress: appcfg.MustNotEmptyString("noah@hellohq.com"),
 	}
