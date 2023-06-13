@@ -19,7 +19,7 @@ func (r *webauthnRepo) GetById(ctx Ctx, id string) (*ent.WebauthnCredential, err
 	panic("implement me")
 }
 
-func (r *webauthnRepo) GetByUser(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error) {
+func (r *webauthnRepo) ListByUser(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error) {
 	var found []*ent.WebauthnCredential
 	for _, cre := range r.init {
 		if cre.UserID == userId {
