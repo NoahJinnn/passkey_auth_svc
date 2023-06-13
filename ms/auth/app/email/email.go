@@ -61,6 +61,7 @@ func (svc *EmailSvc) Create(ctx Ctx, userId uuid.UUID, address string) (*ent.Ema
 		} else {
 			email, err = client.Email.Create().
 				SetAddress(address).
+				SetUserID(userId).
 				Save(ctx)
 			if err != nil {
 				return fmt.Errorf("failed creating email: %w", err)
@@ -81,24 +82,14 @@ func (svc *EmailSvc) SetPrimaryEmail(ctx Ctx, userId uuid.UUID, emailId uuid.UUI
 		return fmt.Errorf("failed to fetch user from db: %w", err)
 	}
 
-	emails := user.Edges.Emails
-	for _, email := range emails {
-		if email.ID == emailId {
-			if email.ID == user.Edges.PrimaryEmail.EmailID {
-				return fmt.Errorf("email is already primary: %w", err)
-			}
-		}
+	if emailId == user.Edges.PrimaryEmail.EmailID {
+		return fmt.Errorf("email is already primary: %w", err)
 	}
 
 	return svc.repo.WithTx(ctx, func(ctx Ctx, client *ent.Client) error {
-		primaryEmail, err := svc.repo.GetEmailRepo().GetPrimary(ctx, emailId)
+		primaryEmail, err := svc.repo.GetEmailRepo().GetPrimary(ctx, userId)
 		if err != nil {
 			return fmt.Errorf("failed to fetch primary email from db: %w", err)
-		}
-
-		_, err = client.User.UpdateOneID(user.ID).SetPrimaryEmailID(emailId).Save(ctx)
-		if err != nil {
-			return fmt.Errorf("failed to set primary email for user: %w", err)
 		}
 
 		if primaryEmail == nil {
