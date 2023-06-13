@@ -23,6 +23,8 @@ type Manager struct {
 	jwtGenerator  hqJwt.Generator
 	sessionLength time.Duration
 	cookieConfig  cookieConfig
+	issuer        string
+	audience      []string
 }
 
 type cookieConfig struct {
@@ -60,30 +62,36 @@ func NewManager(jwkManager IJwkManager, config sharedconfig.Session) (*Manager, 
 	default:
 		sameSite = http.SameSiteDefaultMode
 	}
+
 	return &Manager{
 		jwtGenerator:  g,
 		sessionLength: duration,
+		issuer:        config.Issuer,
 		cookieConfig: cookieConfig{
 			Domain:   config.Cookie.Domain,
 			HttpOnly: config.Cookie.HttpOnly,
 			SameSite: sameSite,
 			Secure:   config.Cookie.Secure,
 		},
+		audience: config.Audience,
 	}, nil
 }
 
 // GenerateJWT creates a new session JWT for the given user
-func (g *Manager) GenerateJWT(userId string) (string, error) {
+func (m *Manager) GenerateJWT(userId string) (string, error) {
 	issuedAt := time.Now()
-	expiration := issuedAt.Add(g.sessionLength)
+	expiration := issuedAt.Add(m.sessionLength)
 
 	token := jwt.New()
 	_ = token.Set(jwt.SubjectKey, userId)
 	_ = token.Set(jwt.IssuedAtKey, issuedAt)
 	_ = token.Set(jwt.ExpirationKey, expiration)
-	//_ = token.Set(jwt.AudienceKey, []string{"http://localhost"})
+	_ = token.Set(jwt.AudienceKey, m.audience)
+	if m.issuer != "" {
+		_ = token.Set(jwt.IssuerKey, m.issuer)
+	}
 
-	signed, err := g.jwtGenerator.Sign(token)
+	signed, err := m.jwtGenerator.Sign(token)
 	if err != nil {
 		return "", err
 	}
@@ -92,8 +100,8 @@ func (g *Manager) GenerateJWT(userId string) (string, error) {
 }
 
 // Verify verifies the given JWT and returns a parsed one if verification was successful
-func (g *Manager) Verify(token string) (jwt.Token, error) {
-	parsedToken, err := g.jwtGenerator.Verify([]byte(token))
+func (m *Manager) Verify(token string) (jwt.Token, error) {
+	parsedToken, err := m.jwtGenerator.Verify([]byte(token))
 	if err != nil {
 		return nil, fmt.Errorf("failed to verify session token: %w", err)
 	}
@@ -102,28 +110,28 @@ func (g *Manager) Verify(token string) (jwt.Token, error) {
 }
 
 // GenerateCookie creates a new session cookie for the given user
-func (g *Manager) GenerateCookie(token string) (*http.Cookie, error) {
+func (m *Manager) GenerateCookie(token string) (*http.Cookie, error) {
 	return &http.Cookie{
 		Name:     "hqservice",
 		Value:    token,
-		Domain:   g.cookieConfig.Domain,
+		Domain:   m.cookieConfig.Domain,
 		Path:     "/",
-		Secure:   g.cookieConfig.Secure,
-		HttpOnly: g.cookieConfig.HttpOnly,
-		SameSite: g.cookieConfig.SameSite,
+		Secure:   m.cookieConfig.Secure,
+		HttpOnly: m.cookieConfig.HttpOnly,
+		SameSite: m.cookieConfig.SameSite,
 	}, nil
 }
 
 // DeleteCookie returns a cookie that will expire the cookie on the frontend
-func (g *Manager) DeleteCookie() (*http.Cookie, error) {
+func (m *Manager) DeleteCookie() (*http.Cookie, error) {
 	return &http.Cookie{
 		Name:     "hqservice",
 		Value:    "",
-		Domain:   g.cookieConfig.Domain,
+		Domain:   m.cookieConfig.Domain,
 		Path:     "/",
-		Secure:   g.cookieConfig.Secure,
-		HttpOnly: g.cookieConfig.HttpOnly,
-		SameSite: g.cookieConfig.SameSite,
+		Secure:   m.cookieConfig.Secure,
+		HttpOnly: m.cookieConfig.HttpOnly,
+		SameSite: m.cookieConfig.SameSite,
 		MaxAge:   -1,
 	}, nil
 }

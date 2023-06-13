@@ -12,12 +12,18 @@ import (
 	"strconv"
 
 	"github.com/hellohq/hqservice/pkg/def"
+	"github.com/pkg/errors"
 	"github.com/powerman/appcfg"
 	"github.com/powerman/pqx"
 )
 
-// EnvPrefix defines common prefix for environment variables.
-const EnvPrefix = "HQ_"
+const (
+	// EnvPrefix defines common prefix for environment variables.
+	EnvPrefix = "HQ_"
+	// Default ports
+	AuthPort = 17000 + iota*2
+	NetworthPort
+)
 
 // Shared contains configurable values shared by microservices.
 type Shared struct {
@@ -34,25 +40,6 @@ type Shared struct {
 	Secrets  Secrets
 }
 
-func (c *Shared) Validate() error {
-	err := c.Session.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate session settings: %w", err)
-	}
-	err = c.Secrets.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate secrets settings: %w", err)
-	}
-
-	return nil
-}
-
-// Default ports.
-const (
-	AuthPort = 17000 + iota*2
-	NetworthPort
-)
-
 var shared = &struct {
 	AuthAddrHost    appcfg.NotEmptyString `env:"AUTH_ADDR_HOST"`
 	AuthAddrHostInt appcfg.NotEmptyString `env:"AUTH_ADDR_HOST_INT"`
@@ -68,7 +55,12 @@ var shared = &struct {
 	PostgresAddrPort appcfg.Port           `env:"POSTGRES_ADDR_PORT"`
 	PostgresDBName   appcfg.NotEmptyString `env:"POSTGRES_DB_NAME"`
 
-	Secrets appcfg.NotEmptyString `env:"AUTH_SECRETS"`
+	Secrets appcfg.NotEmptyString `env:"JWK_SECRETS"`
+
+	SessionLifespan       appcfg.String      `env:"JWT_LIFESPAN"`
+	Issuer                appcfg.String      `env:"JWT_ISSUER"`
+	Audience              appcfg.StringSlice `env:"JWT_AUDIENCE"`
+	EnableAuthTokenHeader appcfg.Bool        `env:"AUTH_ENABLE_TOKEN_HEADER"`
 }{ //nolint:gochecknoglobals // Config is global anyway.
 	AuthAddrHost:    appcfg.MustNotEmptyString(def.Hostname),
 	AuthAddrHostInt: appcfg.MustNotEmptyString(def.HostnameInt),
@@ -82,8 +74,7 @@ var shared = &struct {
 	PostgresAddrPort: appcfg.MustPort("5432"),
 	PostgresAddrHost: appcfg.MustNotEmptyString("localhost"),
 	PostgresDBName:   appcfg.MustNotEmptyString("postgres"),
-
-	Secrets: appcfg.MustNotEmptyString("needsToBeAtLeast16"),
+	Secrets:          appcfg.MustNotEmptyString("needsToBeAtLeast16"),
 }
 
 // Get updates config defaults (from env) and returns shared config.
@@ -93,7 +84,7 @@ func Get() (*Shared, error) {
 	fromEnv := appcfg.NewFromEnv(EnvPrefix)
 	err := appcfg.ProvideStruct(shared, fromEnv)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	sharedCfg := &Shared{
@@ -114,13 +105,15 @@ func Get() (*Shared, error) {
 		}),
 
 		Session: Session{
-			Lifespan: "1h",
+			Lifespan: shared.SessionLifespan.Value(&err),
 			Cookie: Cookie{
 				HttpOnly: true,
 				SameSite: "strict",
 				Secure:   true,
 			},
-			EnableAuthTokenHeader: true,
+			EnableAuthTokenHeader: shared.EnableAuthTokenHeader.Value(&err),
+			Issuer:                shared.Issuer.Value(&err),
+			Audience:              shared.Audience.Value(&err),
 		},
 		Secrets: Secrets{
 			Keys: []string{shared.Secrets.Value(&err)},
@@ -128,10 +121,23 @@ func Get() (*Shared, error) {
 	}
 	err = sharedCfg.Validate()
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	return sharedCfg, nil
+}
+
+func (c *Shared) Validate() error {
+	err := c.Session.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate session settings: %w", err)
+	}
+	err = c.Secrets.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate secrets settings: %w", err)
+	}
+
+	return nil
 }
 
 // Cleanup must be called by all Get* functions to ensure second call to
