@@ -2,14 +2,14 @@ package config
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"testing"
 
 	"github.com/hellohq/hqservice/internal/sharedconfig"
-	"github.com/hellohq/hqservice/pkg/httpx"
 	"github.com/hellohq/hqservice/pkg/netx"
+	"github.com/nikoksr/doppler-go"
+	"github.com/nikoksr/doppler-go/secret"
 	"github.com/powerman/check"
 	"github.com/sethvargo/go-limiter/httplimit"
 	"github.com/spf13/pflag"
@@ -35,7 +35,7 @@ var (
 		},
 		Webauthn: WebauthnSettings{
 			RelyingParty: RelyingParty{
-				Id:          "localhost",
+				Id:          "127.0.0.1",
 				DisplayName: "Authentication Service",
 				Origins:     []string{"http://localhost:17000", "http://localhost:17001"},
 			},
@@ -43,37 +43,21 @@ var (
 		},
 		Passcode: Passcode{
 			Email: Email{
-				FromAddress: "test@gmail.com",
-				FromName:    "Test Mail",
+				FromAddress: "noah@hellohq.com",
+				FromName:    "HelloHQ Pte. Ltd.",
 			},
 			OneSignalAppKey: "oneSignalAppKey",
 			OneSignalAppID:  "oneSignalAppID",
 			TTL:             300,
 		},
 		MaxEmailAddresses:        5,
-		RequireEmailVerification: true,
+		RequireEmailVerification: false,
 	}
 	testOwn = own
 )
 
 func TestMain(m *testing.M) {
 	loadDopplerEnvs()
-	os.Clearenv()
-	// Shared env
-	os.Setenv("HQ_AUTH_ADDR_HOST", "localhost")
-	os.Setenv("HQ_AUTH_ADDR_HOST_INT", "127.0.0.1")
-	os.Setenv("HQ_AUTH_ADDR_PORT", "17000")
-	os.Setenv("HQ_POSTGRES_AUTH_PASS", "authpass")
-	os.Setenv("HQ_JWT_LIFESPAN", "1h")
-	// Auth env
-	os.Setenv("HQ_AUTH_RP_ORIGINS", "http://localhost:17000,http://localhost:17001")
-	os.Setenv("HQ_ONESIGNAL_APP_ID", "oneSignalAppID")
-	os.Setenv("HQ_ONESIGNAL_APP_KEY", "oneSignalAppKey")
-	os.Setenv("HQ_MAIL_FROM_ADDRESS", "test@gmail.com")
-	os.Setenv("HQ_MAIL_FROM_NAME", "Test Mail")
-	os.Setenv("HQ_REQUIRE_EMAIL_VERIFICATION", "true")
-	os.Setenv("HQ_AUTH_RP_ID", "localhost")
-
 	var err error
 	testShared, err = sharedconfig.Get()
 	if err != nil {
@@ -83,28 +67,23 @@ func TestMain(m *testing.M) {
 }
 
 func loadDopplerEnvs() {
-	token := fmt.Sprintf("Bearer %s", os.Getenv("DOPPLER_TOKEN"))
-	fmt.Println(token)
-	req := httpx.NewReq("https://api.doppler.com/v3/configs/config/secrets", map[string]string{
-		"Content-Type":  "application/json",
-		"accept":        "application/json",
-		"accepts":       "application/json",
-		"authorization": token,
-	}, map[string]string{
-		"project":                 "hqservice",
-		"config":                  "dev",
-		"include_dynamic_secrets": "false",
-		"include_managed_secrets": "true",
-	})
+	// Set your API key
+	doppler.Key = os.Getenv("DOPPLER_TOKEN")
 
-	resp, err := req.
-		InitReq(context.Background(), "GET", "", nil).
-		WithDefaultOpts().
-		Send()
-	fmt.Println(string(resp.Body()))
+	// List all your secrets
+	secrets, _, err := secret.List(context.Background(), &doppler.SecretListOptions{
+		Project: "hqservice",
+		Config:  "dev",
+	})
 	if err != nil {
-		log.Fatalf("failed to init config: %v", err)
+		log.Fatalf("failed to list secrets: %v", err)
 	}
+	os.Clearenv()
+	for name, value := range secrets {
+		os.Setenv(name, *value.Raw)
+	}
+	os.Setenv("HQ_ONESIGNAL_APP_ID", "oneSignalAppID")
+	os.Setenv("HQ_ONESIGNAL_APP_KEY", "oneSignalAppKey")
 }
 
 func testGetServe(flags ...string) (*Config, error) {
