@@ -7,6 +7,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/http/session"
 	"github.com/hellohq/hqservice/internal/sharedconfig"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -32,6 +33,56 @@ func TestGenerator_Generate(t *testing.T) {
 	session, err := sessionGenerator.GenerateJWT(userId.String())
 	assert.NoError(t, err)
 	require.NotEmpty(t, session)
+}
+
+func TestManager_GenerateJWT_IssAndAud(t *testing.T) {
+	manager := JwkManager{}
+	cfg := sharedconfig.Session{
+		Issuer:   "hanko",
+		Lifespan: "5m",
+		Audience: []string{"test.hanko.io"},
+	}
+
+	sessionGenerator, err := session.NewManager(&manager, cfg)
+	assert.NoError(t, err)
+	require.NotEmpty(t, sessionGenerator)
+
+	userId, _ := uuid.NewV4()
+	j, err := sessionGenerator.GenerateJWT(userId.String())
+	assert.NoError(t, err)
+
+	token, err := jwt.ParseString(j, jwt.WithVerify(false))
+	assert.NoError(t, err)
+	assert.Equal(t, []string{"test.hanko.io"}, token.Audience())
+	assert.Equal(t, "hanko", token.Issuer())
+}
+
+func TestManager_GenerateJWT_AdditionalAudiences(t *testing.T) {
+	manager := JwkManager{}
+	cfg := sharedconfig.Session{
+		Issuer:   "hanko",
+		Lifespan: "5m",
+		Audience: []string{
+			"additional.hanko.io",
+			"anotherOne",
+		},
+	}
+
+	sessionGenerator, err := session.NewManager(&manager, cfg)
+	assert.NoError(t, err)
+	require.NotEmpty(t, sessionGenerator)
+
+	userId, _ := uuid.NewV4()
+	j, err := sessionGenerator.GenerateJWT(userId.String())
+	assert.NoError(t, err)
+
+	token, err := jwt.ParseString(j, jwt.WithVerify(false))
+	assert.NoError(t, err)
+	assert.Equal(t, []string{
+		"additional.hanko.io",
+		"anotherOne",
+	}, token.Audience())
+	assert.Equal(t, "hanko", token.Issuer())
 }
 
 func TestGenerator_Verify(t *testing.T) {

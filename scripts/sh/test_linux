@@ -7,6 +7,10 @@ set -x
 scriptsdir=$( dirname -- "$0"; )
 cd $scriptsdir/../../
 
-hadolint docker/Dockerfile
-
-go test -race -covermode atomic -coverprofile=coverage.out ./...
+if ! command -v hadolint &> /dev/null; then
+    echo "hadolint is not installed or not in PATH, please run 'task scripts:install:hadolint' and try again"
+else
+    hadolint docker/Dockerfile
+    export DOPPLER_TOKEN=$(doppler configs tokens create your-token-name-here -p hqservice -c dev --max-age 1m --plain)
+    go test -race -covermode atomic -coverprofile=coverage.out ./...
+fi

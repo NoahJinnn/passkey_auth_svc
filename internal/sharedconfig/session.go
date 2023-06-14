@@ -9,6 +9,10 @@ type Session struct {
 	EnableAuthTokenHeader bool `split_words:"true"`
 	Lifespan              string
 	Cookie                Cookie
+	// Issuer optional string to be used in the jwt iss claim.
+	Issuer string `json:"issuer"`
+	// Audience optional []string containing strings which get put into the aud claim. If not set default to Webauthn.RelyingParty.Id config parameter.
+	Audience []string `json:"audience"`
 }
 
 type Cookie struct {
