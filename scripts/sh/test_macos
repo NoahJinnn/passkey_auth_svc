@@ -11,8 +11,7 @@ if ! command -v hadolint &> /dev/null; then
 else
     hadolint docker/Dockerfile
     export DOPPLER_TOKEN=$(doppler configs tokens create your-token-name-here -p hqservice -c dev --max-age 1m --plain)
-    go test -v ./ms/auth/config/...      
-    # go test -race -covermode atomic -coverprofile=coverage.out ./...
+    go test -race -covermode atomic -coverprofile=coverage.out ./...
 fi
 
 
