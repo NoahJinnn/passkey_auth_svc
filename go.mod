@@ -28,10 +28,11 @@ require (
 	github.com/lestrrat-go/jwx/v2 v2.0.10
 	github.com/mattn/goveralls v0.0.11
 	github.com/nicksnyder/go-i18n/v2 v2.2.1
+	github.com/nikoksr/doppler-go v0.3.0
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/powerman/pqx v0.7.0
 	github.com/sethvargo/go-limiter v0.7.2
-	golang.org/x/tools v0.9.3
+	golang.org/x/tools v0.10.0
 	gotest.tools/gotestsum v1.9.0
 )
 
@@ -79,7 +80,6 @@ require (
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
-	github.com/nikoksr/doppler-go v0.3.0 // indirect
 	github.com/opencontainers/runc v1.1.3 // indirect
 	github.com/paulmach/orb v0.9.2 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
@@ -282,10 +282,10 @@ require (
 	golang.org/x/crypto v0.10.0
 	golang.org/x/exp v0.0.0-20230307190834-24139beb5833 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20230206171751-46f607a40771 // indirect
-	golang.org/x/mod v0.10.0 // indirect
+	golang.org/x/mod v0.11.0 // indirect
 	golang.org/x/net v0.11.0 // indirect
 	golang.org/x/oauth2 v0.7.0 // indirect
-	golang.org/x/sync v0.2.0 // indirect
+	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.9.0 // indirect
 	golang.org/x/term v0.9.0 // indirect
 	golang.org/x/text v0.10.0
