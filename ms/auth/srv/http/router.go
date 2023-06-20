@@ -30,7 +30,7 @@ func NewServer(appl app.Appl, sessionManager *session.Manager, sharedCfg *shared
 	}
 	e := echo.New()
 	e.File("/.well-known/apple-app-site-association", "static/apple-app-site-association")
-	e.File("/.well-known/assetlinks.jsons", "static/assetlinks.json")
+	e.File("/.well-known/assetlinks.json", "static/assetlinks.json")
 	e.HideBanner = true
 
 	// TODO: Turn Debug to "false" in production
