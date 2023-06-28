@@ -83,13 +83,7 @@ $ /path/to/easyrsa --days=3650 "--subject-alt-name=IP:127.0.0.1" build-server-fu
 
 ### Usage
 
-To develop this project you'll need only standard tools: `go generate`,
-`go test`, `go build`, `docker build` with `doppler run`
-
-- `go generate ./...` - do not forget to run after making changes related
-  to auto-generated code
-- `doppler run -- go test ./...` - test project (excluding integration tests), fast
-- `./scripts/test` - thoroughly test project, slow
+- `./scripts/sh` - test and run project
 - `./scripts/cover` - analyse and show coverage
 - `./scripts/build` - build docker image and binaries in `bin/`
   - Access project at host/port(s) defined in `doppler`.
@@ -190,9 +184,15 @@ $ ./bin/hq serve
 
 ## Test
 
-Run all test
+Running tests
+
 ```sh
-go test -race -covermode atomic -coverprofile=coverage.out ./... && go tool cover -html=coverage.out
+# run all tests
+task scripts:test
+
+# TODO: 
+# currently not working, fix this and add integration test
+# change this to task scripts:test:integration
 go test -count=1 --tags=integration ./... # run integration tests
 ```
 
