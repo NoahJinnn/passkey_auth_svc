@@ -54,3 +54,7 @@ Temporary Items
 /static/assetlinks.json
 
 /configs/*
+
+# test and build artifacts
+coverage.html
+hqservice

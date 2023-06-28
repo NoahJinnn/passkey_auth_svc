@@ -190,9 +190,15 @@ $ ./bin/hq serve
 
 ## Test
 
-Run all test
+Running tests
+
 ```sh
-go test -race -covermode atomic -coverprofile=coverage.out ./... && go tool cover -html=coverage.out
+# run all tests
+task scripts:test
+
+# TODO: 
+# currently not working, fix this and add integration test
+# change this to task scripts:test:integration
 go test -count=1 --tags=integration ./... # run integration tests
 ```
 
