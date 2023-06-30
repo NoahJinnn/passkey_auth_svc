@@ -104,42 +104,40 @@ docker volume rm PROJECT_SERVICENAME    # remove some service's data
 
 ### Docker
 
-#### Run local PostgresSQL DB
+#### Start services
 
 ```bash
 doppler run -- docker-compose up -d --remove-orphans
 ```
 
-#### Remove container storage
+#### Stop services & Remove container storage
 
 ```bash
 docker-compose stop && docker-compose rm -f
 docker volume rm hqservice_postgres
 ```
 
-### Source
+### Taskfile
 
-#### Run without build
+We use the `Taskfile` command to build our binary, then, run our built `hq` binary.
+
 ```bash
-# main.go is the entry point with the `main` function
-task scripts:run
+$ task scripts:run
 ```
 
 ```bash
 # Run with cmd arguments to override configurations
-task scripts:run -- --port 17002 --wa.id example --wa.origins https://example.com,android:apk-key-hash:your_apk_hash  # Specific auth service running on port `17002` with webauthn ID equals `example`; webauthn origns equals `https://example.com,android:apk-key-hash:your_apk_hash`  
+# Specific auth service running on:
+# port = `17002`
+# webauthn ID = `example`;
+# webauthn origins = `https://example.com,android:apk-key-hash:your_apk_hash`
+$ task scripts:run -- --port 17002 --wa.id example --wa.origins https://example.com,android:apk-key-hash:your_apk_hash
 ```
-
-#### Build first, then run
-
-We use the `Taskfile` command to build our binary, then, run our built `hq` binary.
 
 ```bash
 # build binary only
 # our binary gets installed into the ./bin/ folder, as `hq`.
 $ task scripts:build:binary
-
-# so now, we can just run the built `hq` binary.
 $ ./bin/hq -h
 Example monolith with embedded microservices
 
