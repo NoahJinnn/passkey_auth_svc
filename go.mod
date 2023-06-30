@@ -25,7 +25,7 @@ require (
 	github.com/go-webauthn/webauthn v0.8.2
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.10.2
-	github.com/lestrrat-go/jwx/v2 v2.0.10
+	github.com/lestrrat-go/jwx/v2 v2.0.11
 	github.com/mattn/goveralls v0.0.11
 	github.com/nicksnyder/go-i18n/v2 v2.2.1
 	github.com/nikoksr/doppler-go v0.3.0
