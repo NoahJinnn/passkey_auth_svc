@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/internal/db"
 	"github.com/hellohq/hqservice/internal/http/session"
 	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/ms/auth/app"
@@ -42,7 +42,7 @@ func (s *Service) Init(sharedCfg *sharedconfig.Shared, serveCmd *cobra.Command) 
 }
 
 // RunServe implements main.embeddedService interface.
-func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func(), entClient *ent.Client, sessionManager *session.Manager) (err error) {
+func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func(), dbClient *db.DbClient, sessionManager *session.Manager) (err error) {
 	log := structlog.FromContext(ctxShutdown, nil)
 
 	if s.cfg == nil {
@@ -59,7 +59,7 @@ func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func(), ent
 	}
 
 	s.sessionManager = sessionManager
-	s.repo = dal.New(entClient)
+	s.repo = dal.New(dbClient)
 	s.appl = app.New(mailer, renderer, s.cfg, s.repo)
 
 	err = concurrent.Serve(ctxShutdown, shutdown,

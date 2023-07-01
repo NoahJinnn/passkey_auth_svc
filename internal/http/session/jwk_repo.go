@@ -6,6 +6,7 @@ import (
 
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ent/jwk"
+	"github.com/hellohq/hqservice/internal/db"
 )
 
 type IJwkRepo interface {
@@ -16,15 +17,15 @@ type IJwkRepo interface {
 }
 
 type jwkRepo struct {
-	db *ent.Client
+	db *db.DbClient
 }
 
-func NewJwkRepo(db *ent.Client) IJwkRepo {
+func NewJwkRepo(db *db.DbClient) IJwkRepo {
 	return &jwkRepo{db: db}
 }
 
 func (r *jwkRepo) Jwk(ctx context.Context, id uint) (*ent.Jwk, error) {
-	jwk, err := r.db.Jwk.
+	jwk, err := r.db.PgClient.Jwk.
 		Query().
 		Where(jwk.ID(id)).
 		Only(ctx)
@@ -39,7 +40,7 @@ func (r *jwkRepo) Jwk(ctx context.Context, id uint) (*ent.Jwk, error) {
 }
 
 func (r *jwkRepo) All(ctx context.Context) ([]*ent.Jwk, error) {
-	jwks, err := r.db.Jwk.
+	jwks, err := r.db.PgClient.Jwk.
 		Query().
 		All(ctx)
 	if err != nil {
@@ -50,7 +51,7 @@ func (r *jwkRepo) All(ctx context.Context) ([]*ent.Jwk, error) {
 }
 
 func (r *jwkRepo) Last(ctx context.Context) (*ent.Jwk, error) {
-	jwk, err := r.db.Jwk.
+	jwk, err := r.db.PgClient.Jwk.
 		Query().
 		Order(ent.Desc(jwk.FieldCreatedAt, jwk.FieldID)).
 		Limit(1).
@@ -63,7 +64,7 @@ func (r *jwkRepo) Last(ctx context.Context) (*ent.Jwk, error) {
 }
 
 func (r *jwkRepo) Create(ctx context.Context, jwk ent.Jwk) error {
-	_, err := r.db.Jwk.
+	_, err := r.db.PgClient.Jwk.
 		Create().
 		SetID(jwk.ID).
 		SetKeyData(jwk.KeyData).

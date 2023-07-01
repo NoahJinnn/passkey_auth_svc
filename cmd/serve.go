@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/internal/db"
 	"github.com/hellohq/hqservice/internal/http/session"
 	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/ms/auth"
@@ -25,7 +25,7 @@ type (
 	embeddedService interface {
 		Name() string
 		Init(cfg *sharedconfig.Shared, serveCmd *cobra.Command) error
-		RunServe(ctxStartup, ctxShutdown Ctx, shutdown func(), dbClient *ent.Client, sessionManage *session.Manager) error
+		RunServe(ctxStartup, ctxShutdown Ctx, shutdown func(), dbClient *db.DbClient, sessionManage *session.Manager) error
 	}
 )
 
@@ -50,11 +50,11 @@ func NewServeCmd(cfg *sharedconfig.Shared) *cobra.Command {
 			ctxStartupCmdServe, cancel := context.WithTimeout(context.Background(), serveStartupTimeout.Value(nil))
 			defer cancel()
 
-			entClient := InitEntClient(ctxStartupCmdServe, cfg)
-			defer entClient.Close()
+			dbClient := db.InitDbClient(ctxStartupCmdServe, cfg)
+			defer dbClient.PgClient.Close()
 
-			jwkRepo := session.NewJwkRepo(entClient)
-			sessionManager := InitSessionManager(ctxStartupCmdServe, cfg, jwkRepo)
+			jwkRepo := session.NewJwkRepo(dbClient)
+			sessionManager := session.InitSessionManager(ctxStartupCmdServe, cfg, jwkRepo)
 
 			ctxShutdownCmdServe, shutdown := context.WithCancel(context.Background())
 			ctxShutdownCmdServe, _ = signal.NotifyContext(ctxShutdownCmdServe, syscall.SIGHUP, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGABRT, syscall.SIGTERM)
@@ -73,7 +73,7 @@ func NewServeCmd(cfg *sharedconfig.Shared) *cobra.Command {
 				ctxStartupCmdMs := structlog.NewContext(ctxStartupCmdServe, log)
 				services[i] = func(ctxShutdown Ctx) error {
 					ctxShutdowCmdMs := structlog.NewContext(ctxShutdownCmdServe, log)
-					return runServe(ctxStartupCmdMs, ctxShutdowCmdMs, shutdown, entClient, sessionManager)
+					return runServe(ctxStartupCmdMs, ctxShutdowCmdMs, shutdown, dbClient, sessionManager)
 				}
 			}
 

@@ -10,8 +10,9 @@ import (
 	"github.com/go-testfixtures/testfixtures/v3"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/internal/db"
+	"github.com/hellohq/hqservice/internal/db/pgsql"
 	"github.com/hellohq/hqservice/internal/http/session"
-	"github.com/hellohq/hqservice/internal/pgsql"
 	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/config"
@@ -116,7 +117,7 @@ type Suite struct {
 	suite.Suite
 	repo           *dal.AuthRepo
 	app            *app.App
-	db             *testDal.TestDB
+	testDb         *testDal.TestDB
 	srv            *handlers.HttpDeps
 	sessionManager *session.Manager
 	e              *echo.Echo
@@ -127,11 +128,12 @@ func (s *Suite) SetupSuite() {
 		s.T().Skip("skipping test in short mode.")
 	}
 	dialect := "postgres"
-	db, err := testDal.StartDB("integration_test", dialect)
+	testDb, err := testDal.StartDB("integration_test", dialect)
 	s.NoError(err)
-	entClient := pgsql.CreateEntClient(ctx, db.DatabaseUrl)
-	repo := dal.New(entClient)
-	jwkRepo := session.NewJwkRepo(entClient)
+	pgClient := pgsql.NewPgClient(ctx, testDb.DatabaseUrl)
+	dbClient := &db.DbClient{PgClient: pgClient}
+	repo := dal.New(dbClient)
+	jwkRepo := session.NewJwkRepo(dbClient)
 	jwkManager, err := session.NewDefaultManager(sharedCfg.Secrets.Keys, jwkRepo)
 	s.NoError(err)
 	sessionManager, err := session.NewManager(jwkManager, sharedCfg.Session)
@@ -139,7 +141,7 @@ func (s *Suite) SetupSuite() {
 
 	s.repo = repo
 	s.sessionManager = sessionManager
-	s.db = db
+	s.testDb = testDb
 	s.app = app.New(nil, nil, &defaultCfg, repo)
 	s.srv = &handlers.HttpDeps{
 		Appl:      s.app,
@@ -153,16 +155,16 @@ func (s *Suite) SetupSuite() {
 }
 
 func (s *Suite) TearDownSuite() {
-	if s.db != nil {
-		s.NoError(testDal.PurgeDB(s.db))
+	if s.testDb != nil {
+		s.NoError(testDal.PurgeDB(s.testDb))
 	}
 }
 
 // LoadFixtures loads predefined data from the path in the database.
 func (s *Suite) LoadFixtures(path string) error {
 	fixtures, err := testfixtures.New(
-		testfixtures.Database(s.db.DbCon),
-		testfixtures.Dialect(s.db.Dialect),
+		testfixtures.Database(s.testDb.DbCon),
+		testfixtures.Dialect(s.testDb.Dialect),
 		testfixtures.Directory(path),
 		testfixtures.SkipResetSequences(),
 	)
