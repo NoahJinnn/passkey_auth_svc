@@ -4,12 +4,13 @@ import (
 	"context"
 	"log"
 
+	"entgo.io/ent/dialect"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ent/migrate"
 )
 
-func CreateEntClient(ctx context.Context, dateSourceName string) *ent.Client {
-	client, err := ent.Open("postgres", dateSourceName)
+func NewPgClient(ctx context.Context, dateSourceName string) *ent.Client {
+	client, err := ent.Open(dialect.Postgres, dateSourceName)
 	if err != nil {
 		log.Fatalf("failed opening connection to postgres: %v", err)
 	}
