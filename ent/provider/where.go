@@ -60,11 +60,6 @@ func UserID(v uuid.UUID) predicate.Provider {
 	return predicate.Provider(sql.FieldEQ(FieldUserID, v))
 }
 
-// Verified applies equality check predicate on the "verified" field. It's identical to VerifiedEQ.
-func Verified(v bool) predicate.Provider {
-	return predicate.Provider(sql.FieldEQ(FieldVerified, v))
-}
-
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Provider {
 	return predicate.Provider(sql.FieldEQ(FieldCreatedAt, v))
@@ -123,16 +118,6 @@ func UserIDIsNil() predicate.Provider {
 // UserIDNotNil applies the NotNil predicate on the "user_id" field.
 func UserIDNotNil() predicate.Provider {
 	return predicate.Provider(sql.FieldNotNull(FieldUserID))
-}
-
-// VerifiedEQ applies the EQ predicate on the "verified" field.
-func VerifiedEQ(v bool) predicate.Provider {
-	return predicate.Provider(sql.FieldEQ(FieldVerified, v))
-}
-
-// VerifiedNEQ applies the NEQ predicate on the "verified" field.
-func VerifiedNEQ(v bool) predicate.Provider {
-	return predicate.Provider(sql.FieldNEQ(FieldVerified, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

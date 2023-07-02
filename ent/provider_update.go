@@ -49,20 +49,6 @@ func (pu *ProviderUpdate) ClearUserID() *ProviderUpdate {
 	return pu
 }
 
-// SetVerified sets the "verified" field.
-func (pu *ProviderUpdate) SetVerified(b bool) *ProviderUpdate {
-	pu.mutation.SetVerified(b)
-	return pu
-}
-
-// SetNillableVerified sets the "verified" field if the given value is not nil.
-func (pu *ProviderUpdate) SetNillableVerified(b *bool) *ProviderUpdate {
-	if b != nil {
-		pu.SetVerified(*b)
-	}
-	return pu
-}
-
 // SetUpdatedAt sets the "updated_at" field.
 func (pu *ProviderUpdate) SetUpdatedAt(t time.Time) *ProviderUpdate {
 	pu.mutation.SetUpdatedAt(t)
@@ -125,9 +111,6 @@ func (pu *ProviderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if pu.mutation.UserIDCleared() {
 		_spec.ClearField(provider.FieldUserID, field.TypeUUID)
 	}
-	if value, ok := pu.mutation.Verified(); ok {
-		_spec.SetField(provider.FieldVerified, field.TypeBool, value)
-	}
 	if value, ok := pu.mutation.UpdatedAt(); ok {
 		_spec.SetField(provider.FieldUpdatedAt, field.TypeTime, value)
 	}
@@ -168,20 +151,6 @@ func (puo *ProviderUpdateOne) SetNillableUserID(u *uuid.UUID) *ProviderUpdateOne
 // ClearUserID clears the value of the "user_id" field.
 func (puo *ProviderUpdateOne) ClearUserID() *ProviderUpdateOne {
 	puo.mutation.ClearUserID()
-	return puo
-}
-
-// SetVerified sets the "verified" field.
-func (puo *ProviderUpdateOne) SetVerified(b bool) *ProviderUpdateOne {
-	puo.mutation.SetVerified(b)
-	return puo
-}
-
-// SetNillableVerified sets the "verified" field if the given value is not nil.
-func (puo *ProviderUpdateOne) SetNillableVerified(b *bool) *ProviderUpdateOne {
-	if b != nil {
-		puo.SetVerified(*b)
-	}
 	return puo
 }
 
@@ -276,9 +245,6 @@ func (puo *ProviderUpdateOne) sqlSave(ctx context.Context) (_node *Provider, err
 	}
 	if puo.mutation.UserIDCleared() {
 		_spec.ClearField(provider.FieldUserID, field.TypeUUID)
-	}
-	if value, ok := puo.mutation.Verified(); ok {
-		_spec.SetField(provider.FieldVerified, field.TypeBool, value)
 	}
 	if value, ok := puo.mutation.UpdatedAt(); ok {
 		_spec.SetField(provider.FieldUpdatedAt, field.TypeTime, value)

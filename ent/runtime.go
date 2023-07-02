@@ -100,16 +100,12 @@ func init() {
 	primaryemail.DefaultID = primaryemailDescID.Default.(func() uuid.UUID)
 	providerFields := schema.Provider{}.Fields()
 	_ = providerFields
-	// providerDescVerified is the schema descriptor for verified field.
-	providerDescVerified := providerFields[2].Descriptor()
-	// provider.DefaultVerified holds the default value on creation for the verified field.
-	provider.DefaultVerified = providerDescVerified.Default.(bool)
 	// providerDescCreatedAt is the schema descriptor for created_at field.
-	providerDescCreatedAt := providerFields[3].Descriptor()
+	providerDescCreatedAt := providerFields[2].Descriptor()
 	// provider.DefaultCreatedAt holds the default value on creation for the created_at field.
 	provider.DefaultCreatedAt = providerDescCreatedAt.Default.(func() time.Time)
 	// providerDescUpdatedAt is the schema descriptor for updated_at field.
-	providerDescUpdatedAt := providerFields[4].Descriptor()
+	providerDescUpdatedAt := providerFields[3].Descriptor()
 	// provider.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	provider.DefaultUpdatedAt = providerDescUpdatedAt.Default.(func() time.Time)
 	// provider.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

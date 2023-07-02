@@ -20,8 +20,6 @@ type Provider struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID *uuid.UUID `json:"user_id,omitempty"`
-	// Verified holds the value of the "verified" field.
-	Verified bool `json:"verified,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -36,8 +34,6 @@ func (*Provider) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case provider.FieldUserID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case provider.FieldVerified:
-			values[i] = new(sql.NullBool)
 		case provider.FieldCreatedAt, provider.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case provider.FieldID:
@@ -69,12 +65,6 @@ func (pr *Provider) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				pr.UserID = new(uuid.UUID)
 				*pr.UserID = *value.S.(*uuid.UUID)
-			}
-		case provider.FieldVerified:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field verified", values[i])
-			} else if value.Valid {
-				pr.Verified = value.Bool
 			}
 		case provider.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -128,9 +118,6 @@ func (pr *Provider) String() string {
 		builder.WriteString("user_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
-	builder.WriteString(", ")
-	builder.WriteString("verified=")
-	builder.WriteString(fmt.Sprintf("%v", pr.Verified))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(pr.CreatedAt.Format(time.ANSIC))

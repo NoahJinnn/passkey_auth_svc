@@ -35,20 +35,6 @@ func (pc *ProviderCreate) SetNillableUserID(u *uuid.UUID) *ProviderCreate {
 	return pc
 }
 
-// SetVerified sets the "verified" field.
-func (pc *ProviderCreate) SetVerified(b bool) *ProviderCreate {
-	pc.mutation.SetVerified(b)
-	return pc
-}
-
-// SetNillableVerified sets the "verified" field if the given value is not nil.
-func (pc *ProviderCreate) SetNillableVerified(b *bool) *ProviderCreate {
-	if b != nil {
-		pc.SetVerified(*b)
-	}
-	return pc
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (pc *ProviderCreate) SetCreatedAt(t time.Time) *ProviderCreate {
 	pc.mutation.SetCreatedAt(t)
@@ -126,10 +112,6 @@ func (pc *ProviderCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (pc *ProviderCreate) defaults() {
-	if _, ok := pc.mutation.Verified(); !ok {
-		v := provider.DefaultVerified
-		pc.mutation.SetVerified(v)
-	}
 	if _, ok := pc.mutation.CreatedAt(); !ok {
 		v := provider.DefaultCreatedAt()
 		pc.mutation.SetCreatedAt(v)
@@ -146,9 +128,6 @@ func (pc *ProviderCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (pc *ProviderCreate) check() error {
-	if _, ok := pc.mutation.Verified(); !ok {
-		return &ValidationError{Name: "verified", err: errors.New(`ent: missing required field "Provider.verified"`)}
-	}
 	if _, ok := pc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Provider.created_at"`)}
 	}
@@ -193,10 +172,6 @@ func (pc *ProviderCreate) createSpec() (*Provider, *sqlgraph.CreateSpec) {
 	if value, ok := pc.mutation.UserID(); ok {
 		_spec.SetField(provider.FieldUserID, field.TypeUUID, value)
 		_node.UserID = &value
-	}
-	if value, ok := pc.mutation.Verified(); ok {
-		_spec.SetField(provider.FieldVerified, field.TypeBool, value)
-		_node.Verified = value
 	}
 	if value, ok := pc.mutation.CreatedAt(); ok {
 		_spec.SetField(provider.FieldCreatedAt, field.TypeTime, value)
