@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"entgo.io/ent/dialect"
-	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent"
 	_ "github.com/mattn/go-sqlite3"
 )
 

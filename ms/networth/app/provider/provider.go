@@ -3,8 +3,8 @@ package provider
 import (
 	"context"
 
-	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/db/sqlite"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent"
 )
 
 type Provider struct {
