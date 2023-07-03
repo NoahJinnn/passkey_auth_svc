@@ -18,4 +18,9 @@ tasks:
   stat:
     desc: "Get code statistics"
     cmds:
-      - ./sh/stat_macos 
+      - ./sh/stat_macos
+  
+  migrate:
+    desc: "Migrate DBs"
+    cmds:
+      - ./sql/migrate.sh

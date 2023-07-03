@@ -15,19 +15,6 @@ Feel free to remove sections which do not make sense.
 
 With @pair
 
-<!--
-
-Some description of HOW you achieved it. Perhaps give a high level description of the program flow. Did you need to refactor something? What tradeoffs did you take? Are there things in here which you’d particularly like people to pay close attention to?
-
--->
-
-## Screenshots
-
-|         | before | after |
-| ------- | ------ | ----- |
-| desktop |        |       |
-| mobile  |        |       |
-
 ## How to Test
 
 <!--
@@ -41,23 +28,3 @@ A "How To Test" section can look something like this:
 - You should see a GIF with cats dancing
 
 -->
-
-## Emoji Guide
-
-**For reviewers: Emojis can be added to comments to call out blocking versus non-blocking feedback.**
-
-E.g: Praise, minor suggestions, or clarifying questions that don’t block merging the PR.
-
-> 🟢 Nice refactor!
-
-> 🟡 Why was the default value removed?
-
-E.g: Blocking feedback must be addressed before merging.
-
-> 🔴 This change will break something important
-
-| | | |
-| --- | --- | --- |
-| Blocking | 🔴 ❌ 🚨 | RED |
-| Non-blocking | 🟡 💡 🤔 💭 | Yellow, thinking, etc |
-| Praise | 🟢 💚 😍 👍 🙌 | Green, hearts, positive emojis, etc |

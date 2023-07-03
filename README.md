@@ -194,6 +194,22 @@ task scripts:test
 go test -count=1 --tags=integration ./... # run integration tests
 ```
 
+## Migration
+
+Running schema diff to generate migration scripts for:
+
+```sh
+# PostgreSQL
+atlas migrate diff migration_name \
+  --dir "file://ent/migrate/migrations" \
+  --to "ent://ent/schema" \
+  --dev-url "docker://postgres/15/test?search_path=public"
+```
+
+```sh
+task scripts:migrate
+```
+
 ## TODO
 
 Functionality Group 1: add/connect assets and debts

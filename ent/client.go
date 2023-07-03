@@ -20,6 +20,7 @@ import (
 	"github.com/hellohq/hqservice/ent/jwk"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/primaryemail"
+	"github.com/hellohq/hqservice/ent/provider"
 	"github.com/hellohq/hqservice/ent/user"
 	"github.com/hellohq/hqservice/ent/webauthncredential"
 	"github.com/hellohq/hqservice/ent/webauthncredentialtransport"
@@ -42,6 +43,8 @@ type Client struct {
 	Passcode *PasscodeClient
 	// PrimaryEmail is the client for interacting with the PrimaryEmail builders.
 	PrimaryEmail *PrimaryEmailClient
+	// Provider is the client for interacting with the Provider builders.
+	Provider *ProviderClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// WebauthnCredential is the client for interacting with the WebauthnCredential builders.
@@ -70,6 +73,7 @@ func (c *Client) init() {
 	c.Jwk = NewJwkClient(c.config)
 	c.Passcode = NewPasscodeClient(c.config)
 	c.PrimaryEmail = NewPrimaryEmailClient(c.config)
+	c.Provider = NewProviderClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.WebauthnCredential = NewWebauthnCredentialClient(c.config)
 	c.WebauthnCredentialTransport = NewWebauthnCredentialTransportClient(c.config)
@@ -162,6 +166,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Jwk:                                  NewJwkClient(cfg),
 		Passcode:                             NewPasscodeClient(cfg),
 		PrimaryEmail:                         NewPrimaryEmailClient(cfg),
+		Provider:                             NewProviderClient(cfg),
 		User:                                 NewUserClient(cfg),
 		WebauthnCredential:                   NewWebauthnCredentialClient(cfg),
 		WebauthnCredentialTransport:          NewWebauthnCredentialTransportClient(cfg),
@@ -191,6 +196,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Jwk:                                  NewJwkClient(cfg),
 		Passcode:                             NewPasscodeClient(cfg),
 		PrimaryEmail:                         NewPrimaryEmailClient(cfg),
+		Provider:                             NewProviderClient(cfg),
 		User:                                 NewUserClient(cfg),
 		WebauthnCredential:                   NewWebauthnCredentialClient(cfg),
 		WebauthnCredentialTransport:          NewWebauthnCredentialTransportClient(cfg),
@@ -225,7 +231,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Email, c.Identity, c.Jwk, c.Passcode, c.PrimaryEmail, c.User,
+		c.Email, c.Identity, c.Jwk, c.Passcode, c.PrimaryEmail, c.Provider, c.User,
 		c.WebauthnCredential, c.WebauthnCredentialTransport, c.WebauthnSessionData,
 		c.WebauthnSessionDataAllowedCredential,
 	} {
@@ -237,7 +243,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Email, c.Identity, c.Jwk, c.Passcode, c.PrimaryEmail, c.User,
+		c.Email, c.Identity, c.Jwk, c.Passcode, c.PrimaryEmail, c.Provider, c.User,
 		c.WebauthnCredential, c.WebauthnCredentialTransport, c.WebauthnSessionData,
 		c.WebauthnSessionDataAllowedCredential,
 	} {
@@ -258,6 +264,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Passcode.mutate(ctx, m)
 	case *PrimaryEmailMutation:
 		return c.PrimaryEmail.mutate(ctx, m)
+	case *ProviderMutation:
+		return c.Provider.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	case *WebauthnCredentialMutation:
@@ -1007,6 +1015,124 @@ func (c *PrimaryEmailClient) mutate(ctx context.Context, m *PrimaryEmailMutation
 	}
 }
 
+// ProviderClient is a client for the Provider schema.
+type ProviderClient struct {
+	config
+}
+
+// NewProviderClient returns a client for the Provider from the given config.
+func NewProviderClient(c config) *ProviderClient {
+	return &ProviderClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `provider.Hooks(f(g(h())))`.
+func (c *ProviderClient) Use(hooks ...Hook) {
+	c.hooks.Provider = append(c.hooks.Provider, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `provider.Intercept(f(g(h())))`.
+func (c *ProviderClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Provider = append(c.inters.Provider, interceptors...)
+}
+
+// Create returns a builder for creating a Provider entity.
+func (c *ProviderClient) Create() *ProviderCreate {
+	mutation := newProviderMutation(c.config, OpCreate)
+	return &ProviderCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Provider entities.
+func (c *ProviderClient) CreateBulk(builders ...*ProviderCreate) *ProviderCreateBulk {
+	return &ProviderCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Provider.
+func (c *ProviderClient) Update() *ProviderUpdate {
+	mutation := newProviderMutation(c.config, OpUpdate)
+	return &ProviderUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProviderClient) UpdateOne(pr *Provider) *ProviderUpdateOne {
+	mutation := newProviderMutation(c.config, OpUpdateOne, withProvider(pr))
+	return &ProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProviderClient) UpdateOneID(id uuid.UUID) *ProviderUpdateOne {
+	mutation := newProviderMutation(c.config, OpUpdateOne, withProviderID(id))
+	return &ProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Provider.
+func (c *ProviderClient) Delete() *ProviderDelete {
+	mutation := newProviderMutation(c.config, OpDelete)
+	return &ProviderDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ProviderClient) DeleteOne(pr *Provider) *ProviderDeleteOne {
+	return c.DeleteOneID(pr.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ProviderClient) DeleteOneID(id uuid.UUID) *ProviderDeleteOne {
+	builder := c.Delete().Where(provider.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProviderDeleteOne{builder}
+}
+
+// Query returns a query builder for Provider.
+func (c *ProviderClient) Query() *ProviderQuery {
+	return &ProviderQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeProvider},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Provider entity by its id.
+func (c *ProviderClient) Get(ctx context.Context, id uuid.UUID) (*Provider, error) {
+	return c.Query().Where(provider.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProviderClient) GetX(ctx context.Context, id uuid.UUID) *Provider {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ProviderClient) Hooks() []Hook {
+	return c.hooks.Provider
+}
+
+// Interceptors returns the client interceptors.
+func (c *ProviderClient) Interceptors() []Interceptor {
+	return c.inters.Provider
+}
+
+func (c *ProviderClient) mutate(ctx context.Context, m *ProviderMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ProviderCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ProviderUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ProviderDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Provider mutation op: %q", m.Op())
+	}
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -1744,13 +1870,13 @@ func (c *WebauthnSessionDataAllowedCredentialClient) mutate(ctx context.Context,
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Email, Identity, Jwk, Passcode, PrimaryEmail, User, WebauthnCredential,
-		WebauthnCredentialTransport, WebauthnSessionData,
+		Email, Identity, Jwk, Passcode, PrimaryEmail, Provider, User,
+		WebauthnCredential, WebauthnCredentialTransport, WebauthnSessionData,
 		WebauthnSessionDataAllowedCredential []ent.Hook
 	}
 	inters struct {
-		Email, Identity, Jwk, Passcode, PrimaryEmail, User, WebauthnCredential,
-		WebauthnCredentialTransport, WebauthnSessionData,
+		Email, Identity, Jwk, Passcode, PrimaryEmail, Provider, User,
+		WebauthnCredential, WebauthnCredentialTransport, WebauthnSessionData,
 		WebauthnSessionDataAllowedCredential []ent.Interceptor
 	}
 )

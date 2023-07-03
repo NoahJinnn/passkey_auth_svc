@@ -14,15 +14,15 @@ type IPasscodeRepo interface {
 }
 
 type passcodeRepo struct {
-	db *ent.Client
+	pgsql *ent.Client
 }
 
-func NewPasscodeRepo(db *ent.Client) IPasscodeRepo {
-	return &passcodeRepo{db: db}
+func NewPasscodeRepo(pgsql *ent.Client) IPasscodeRepo {
+	return &passcodeRepo{pgsql: pgsql}
 }
 
 func (r *passcodeRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.Passcode, error) {
-	pc, err := r.db.Passcode.
+	pc, err := r.pgsql.Passcode.
 		Query().
 		Where(passcode.ID(id)).
 		WithEmail().
@@ -36,7 +36,7 @@ func (r *passcodeRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.Passcode, error) {
 }
 
 func (r *passcodeRepo) Create(ctx Ctx, pc *ent.Passcode) (*ent.Passcode, error) {
-	pc, err := r.db.Passcode.
+	pc, err := r.pgsql.Passcode.
 		Create().
 		SetUserID(pc.UserID).
 		SetEmailID(pc.EmailID).
@@ -52,7 +52,7 @@ func (r *passcodeRepo) Create(ctx Ctx, pc *ent.Passcode) (*ent.Passcode, error) 
 }
 
 func (r *passcodeRepo) Update(ctx Ctx, pc *ent.Passcode) error {
-	_, err := r.db.Passcode.
+	_, err := r.pgsql.Passcode.
 		UpdateOne(pc).
 		SetCode(pc.Code).
 		SetTTL(pc.TTL).
@@ -66,7 +66,7 @@ func (r *passcodeRepo) Update(ctx Ctx, pc *ent.Passcode) error {
 }
 
 func (r *passcodeRepo) Delete(ctx Ctx, pc *ent.Passcode) error {
-	err := r.db.Passcode.
+	err := r.pgsql.Passcode.
 		DeleteOne(pc).
 		Exec(ctx)
 	if err != nil {

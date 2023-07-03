@@ -17,6 +17,7 @@ import (
 	"github.com/hellohq/hqservice/ent/jwk"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/primaryemail"
+	"github.com/hellohq/hqservice/ent/provider"
 	"github.com/hellohq/hqservice/ent/user"
 	"github.com/hellohq/hqservice/ent/webauthncredential"
 	"github.com/hellohq/hqservice/ent/webauthncredentialtransport"
@@ -87,6 +88,7 @@ func checkColumn(table, column string) error {
 			jwk.Table:                         jwk.ValidColumn,
 			passcode.Table:                    passcode.ValidColumn,
 			primaryemail.Table:                primaryemail.ValidColumn,
+			provider.Table:                    provider.ValidColumn,
 			user.Table:                        user.ValidColumn,
 			webauthncredential.Table:          webauthncredential.ValidColumn,
 			webauthncredentialtransport.Table: webauthncredentialtransport.ValidColumn,

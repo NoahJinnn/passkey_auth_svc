@@ -21,6 +21,9 @@ type Passcode func(*sql.Selector)
 // PrimaryEmail is the predicate function for primaryemail builders.
 type PrimaryEmail func(*sql.Selector)
 
+// Provider is the predicate function for provider builders.
+type Provider func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
 

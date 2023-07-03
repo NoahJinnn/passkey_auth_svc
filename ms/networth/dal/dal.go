@@ -5,7 +5,8 @@ import (
 	"context"
 
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/internal/pgsql"
+	"github.com/hellohq/hqservice/internal/db"
+	"github.com/hellohq/hqservice/internal/db/pgsql"
 )
 
 type Ctx = context.Context
@@ -25,15 +26,15 @@ type INwRepo interface {
 }
 
 type NwRepo struct {
-	Db *ent.Client
+	Db *db.DbClient
 }
 
-func New(client *ent.Client) *NwRepo {
+func New(client *db.DbClient) *NwRepo {
 	return &NwRepo{
 		Db: client,
 	}
 }
 
 func (r NwRepo) WithTx(ctx Ctx, exec func(ctx Ctx, client *ent.Client) error) error {
-	return pgsql.WithTx(ctx, r.Db, exec)
+	return pgsql.WithTx(ctx, r.Db.PgClient, exec)
 }

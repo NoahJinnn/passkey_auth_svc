@@ -19,15 +19,15 @@ type IEmailRepo interface {
 }
 
 type emailRepo struct {
-	db *ent.Client
+	pgsql *ent.Client
 }
 
-func NewEmailRepo(db *ent.Client) IEmailRepo {
-	return &emailRepo{db: db}
+func NewEmailRepo(pgsql *ent.Client) IEmailRepo {
+	return &emailRepo{pgsql: pgsql}
 }
 
 func (r *emailRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.Email, error) {
-	e, err := r.db.Email.
+	e, err := r.pgsql.Email.
 		Query().
 		Where(email.ID(id)).
 		Only(ctx)
@@ -39,7 +39,7 @@ func (r *emailRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.Email, error) {
 }
 
 func (r *emailRepo) GetByAddress(ctx Ctx, address string) (*ent.Email, error) {
-	e, err := r.db.Email.
+	e, err := r.pgsql.Email.
 		Query().
 		Where(email.Address(address)).
 		Only(ctx)
@@ -51,7 +51,7 @@ func (r *emailRepo) GetByAddress(ctx Ctx, address string) (*ent.Email, error) {
 }
 
 func (r *emailRepo) GetPrimary(ctx Ctx, userId uuid.UUID) (*ent.PrimaryEmail, error) {
-	e, err := r.db.PrimaryEmail.
+	e, err := r.pgsql.PrimaryEmail.
 		Query().
 		Where(primaryemail.UserID(userId)).
 		Only(ctx)
@@ -64,7 +64,7 @@ func (r *emailRepo) GetPrimary(ctx Ctx, userId uuid.UUID) (*ent.PrimaryEmail, er
 }
 
 func (r *emailRepo) UpdatePrimary(ctx Ctx, primary ent.PrimaryEmail) error {
-	_, err := r.db.PrimaryEmail.
+	_, err := r.pgsql.PrimaryEmail.
 		UpdateOneID(primary.ID).
 		SetUserID(*primary.UserID).
 		SetEmailID(primary.EmailID).
@@ -77,7 +77,7 @@ func (r *emailRepo) UpdatePrimary(ctx Ctx, primary ent.PrimaryEmail) error {
 }
 
 func (r *emailRepo) ListByUser(ctx Ctx, userID uuid.UUID) ([]*ent.Email, error) {
-	emails, err := r.db.Email.
+	emails, err := r.pgsql.Email.
 		Query().
 		Where(email.UserID(userID)).
 		All(ctx)
@@ -89,7 +89,7 @@ func (r *emailRepo) ListByUser(ctx Ctx, userID uuid.UUID) ([]*ent.Email, error) 
 }
 
 func (r *emailRepo) CountByUserId(ctx Ctx, userID uuid.UUID) (int, error) {
-	cnt, err := r.db.Email.
+	cnt, err := r.pgsql.Email.
 		Query().
 		Where(email.UserID(userID)).
 		Count(ctx)
@@ -101,7 +101,7 @@ func (r *emailRepo) CountByUserId(ctx Ctx, userID uuid.UUID) (int, error) {
 }
 
 func (r *emailRepo) Update(ctx Ctx, email *ent.Email) error {
-	_, err := r.db.Email.
+	_, err := r.pgsql.Email.
 		UpdateOneID(email.ID).
 		SetAddress(email.Address).
 		SetVerified(email.Verified).
@@ -114,5 +114,5 @@ func (r *emailRepo) Update(ctx Ctx, email *ent.Email) error {
 }
 
 func (r *emailRepo) Delete(ctx Ctx, email *ent.Email) error {
-	return r.db.Email.DeleteOne(email).Exec(ctx)
+	return r.pgsql.Email.DeleteOne(email).Exec(ctx)
 }

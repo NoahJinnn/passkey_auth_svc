@@ -5,7 +5,8 @@ import (
 	"context"
 
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/internal/pgsql"
+	"github.com/hellohq/hqservice/internal/db"
+	"github.com/hellohq/hqservice/internal/db/pgsql"
 )
 
 // Error names.
@@ -28,36 +29,36 @@ type IAuthRepo interface {
 }
 
 type AuthRepo struct {
-	Db *ent.Client
+	Db *db.DbClient
 }
 type Ctx = context.Context
 
-func New(client *ent.Client) *AuthRepo {
+func New(client *db.DbClient) *AuthRepo {
 	return &AuthRepo{
 		Db: client,
 	}
 }
 
 func (r AuthRepo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error {
-	return pgsql.WithTx(ctx, r.Db, exec)
+	return pgsql.WithTx(ctx, r.Db.PgClient, exec)
 }
 
 func (r AuthRepo) GetUserRepo() IUserRepo {
-	return NewUserRepo(r.Db)
+	return NewUserRepo(r.Db.PgClient)
 }
 
 func (r AuthRepo) GetWebauthnCredentialRepo() IWebauthnCredentialRepo {
-	return NewWebauthnCredentialRepo(r.Db)
+	return NewWebauthnCredentialRepo(r.Db.PgClient)
 }
 
 func (r AuthRepo) GetWebauthnSessionRepo() IWebauthnSessionRepo {
-	return NewWebauthnSessionRepo(r.Db)
+	return NewWebauthnSessionRepo(r.Db.PgClient)
 }
 
 func (r AuthRepo) GetEmailRepo() IEmailRepo {
-	return NewEmailRepo(r.Db)
+	return NewEmailRepo(r.Db.PgClient)
 }
 
 func (r AuthRepo) GetPasscodeRepo() IPasscodeRepo {
-	return NewPasscodeRepo(r.Db)
+	return NewPasscodeRepo(r.Db.PgClient)
 }

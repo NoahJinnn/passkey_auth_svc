@@ -11,6 +11,7 @@ import (
 	"github.com/hellohq/hqservice/ent/jwk"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/primaryemail"
+	"github.com/hellohq/hqservice/ent/provider"
 	"github.com/hellohq/hqservice/ent/schema"
 	"github.com/hellohq/hqservice/ent/user"
 	"github.com/hellohq/hqservice/ent/webauthncredential"
@@ -97,6 +98,22 @@ func init() {
 	primaryemailDescID := primaryemailFields[0].Descriptor()
 	// primaryemail.DefaultID holds the default value on creation for the id field.
 	primaryemail.DefaultID = primaryemailDescID.Default.(func() uuid.UUID)
+	providerFields := schema.Provider{}.Fields()
+	_ = providerFields
+	// providerDescCreatedAt is the schema descriptor for created_at field.
+	providerDescCreatedAt := providerFields[2].Descriptor()
+	// provider.DefaultCreatedAt holds the default value on creation for the created_at field.
+	provider.DefaultCreatedAt = providerDescCreatedAt.Default.(func() time.Time)
+	// providerDescUpdatedAt is the schema descriptor for updated_at field.
+	providerDescUpdatedAt := providerFields[3].Descriptor()
+	// provider.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	provider.DefaultUpdatedAt = providerDescUpdatedAt.Default.(func() time.Time)
+	// provider.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	provider.UpdateDefaultUpdatedAt = providerDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// providerDescID is the schema descriptor for id field.
+	providerDescID := providerFields[0].Descriptor()
+	// provider.DefaultID holds the default value on creation for the id field.
+	provider.DefaultID = providerDescID.Default.(func() uuid.UUID)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescCreatedAt is the schema descriptor for created_at field.

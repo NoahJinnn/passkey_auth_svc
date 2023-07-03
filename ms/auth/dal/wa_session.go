@@ -12,16 +12,16 @@ type IWebauthnSessionRepo interface {
 }
 
 type webauthnSessionRepo struct {
-	db *ent.Client
+	pgsql *ent.Client
 }
 
-func NewWebauthnSessionRepo(db *ent.Client) IWebauthnSessionRepo {
-	return &webauthnSessionRepo{db: db}
+func NewWebauthnSessionRepo(pgsql *ent.Client) IWebauthnSessionRepo {
+	return &webauthnSessionRepo{pgsql: pgsql}
 }
 
 func (r *webauthnSessionRepo) GetByChallenge(ctx Ctx, challenge string) (*ent.WebauthnSessionData, error) {
 	var sessionData []*ent.WebauthnSessionData
-	sessionData, err := r.db.WebauthnSessionData.Query().Where(webauthnsessiondata.Challenge(challenge)).All(ctx)
+	sessionData, err := r.pgsql.WebauthnSessionData.Query().Where(webauthnsessiondata.Challenge(challenge)).All(ctx)
 
 	if err != nil && ent.IsNotFound(err) {
 		return nil, nil
@@ -38,7 +38,7 @@ func (r *webauthnSessionRepo) GetByChallenge(ctx Ctx, challenge string) (*ent.We
 }
 
 func (r *webauthnSessionRepo) Create(ctx Ctx, sessionData ent.WebauthnSessionData) error {
-	_, err := r.db.WebauthnSessionData.Create().
+	_, err := r.pgsql.WebauthnSessionData.Create().
 		SetUserID(sessionData.UserID).
 		SetChallenge(sessionData.Challenge).
 		SetOperation(sessionData.Operation).
@@ -52,7 +52,7 @@ func (r *webauthnSessionRepo) Create(ctx Ctx, sessionData ent.WebauthnSessionDat
 }
 
 func (r *webauthnSessionRepo) Delete(ctx Ctx, session ent.WebauthnSessionData) error {
-	err := r.db.WebauthnSessionData.DeleteOne(&session).Exec(ctx)
+	err := r.pgsql.WebauthnSessionData.DeleteOne(&session).Exec(ctx)
 	if err != nil {
 		return err
 	}

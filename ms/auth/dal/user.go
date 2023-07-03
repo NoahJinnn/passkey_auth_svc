@@ -14,15 +14,15 @@ type IUserRepo interface {
 }
 
 type userRepo struct {
-	db *ent.Client
+	pgsql *ent.Client
 }
 
-func NewUserRepo(db *ent.Client) IUserRepo {
-	return &userRepo{db: db}
+func NewUserRepo(pgsql *ent.Client) IUserRepo {
+	return &userRepo{pgsql: pgsql}
 }
 
 func (r *userRepo) All(ctx Ctx) ([]*ent.User, error) {
-	us, err := r.db.User.
+	us, err := r.pgsql.User.
 		Query().
 		All(ctx)
 	if err != nil {
@@ -33,7 +33,7 @@ func (r *userRepo) All(ctx Ctx) ([]*ent.User, error) {
 }
 
 func (r *userRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.User, error) {
-	u, err := r.db.User.
+	u, err := r.pgsql.User.
 		Query().
 		Where(user.ID(id)).
 		WithEmails().
@@ -48,7 +48,7 @@ func (r *userRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.User, error) {
 }
 
 func (r *userRepo) Create(ctx Ctx, u *ent.User) (*ent.User, error) {
-	newu, err := r.db.User.
+	newu, err := r.pgsql.User.
 		Create().
 		Save(ctx)
 	if err != nil {
@@ -59,7 +59,7 @@ func (r *userRepo) Create(ctx Ctx, u *ent.User) (*ent.User, error) {
 }
 
 func (r *userRepo) Count(ctx Ctx, id uuid.UUID) (int, error) {
-	count, err := r.db.User.
+	count, err := r.pgsql.User.
 		Query().
 		Where(user.ID(id)).
 		Count(ctx)
