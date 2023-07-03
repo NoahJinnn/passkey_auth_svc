@@ -23,4 +23,4 @@ tasks:
   migrate:
     desc: "Migrate DBs"
     cmds:
-      - ./sql/migrate.sh
+      - ./sql/migrate_diff.sh
