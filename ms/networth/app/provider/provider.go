@@ -11,13 +11,13 @@ type ProviderSvc struct {
 	sqliteClient *ent.Client
 }
 
-func NewProviderSvc() *ProviderSvc {
-	sqliteClient := sqlite.NewSqliteClient("file:ent?mode=memory&cache=shared&_fk=1")
+func NewProviderSvc(dsn string) *ProviderSvc {
+	sqliteClient := sqlite.NewSqliteClient(dsn)
 	return &ProviderSvc{
 		sqliteClient: sqliteClient,
 	}
 }
 
-func (p *ProviderSvc) Get(ctx context.Context) {
-	p.sqliteClient.Provider.Query().AllX(ctx)
+func (p *ProviderSvc) List(ctx context.Context) []*ent.Provider {
+	return p.sqliteClient.Provider.Query().AllX(ctx)
 }

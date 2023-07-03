@@ -6,7 +6,10 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/provider"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/asset"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/schema"
 )
 
@@ -14,24 +17,68 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	providerFields := schema.Provider{}.Fields()
-	_ = providerFields
-	// providerDescVerified is the schema descriptor for verified field.
-	providerDescVerified := providerFields[2].Descriptor()
-	// provider.DefaultVerified holds the default value on creation for the verified field.
-	provider.DefaultVerified = providerDescVerified.Default.(bool)
-	// providerDescCreatedAt is the schema descriptor for created_at field.
-	providerDescCreatedAt := providerFields[3].Descriptor()
-	// provider.DefaultCreatedAt holds the default value on creation for the created_at field.
-	provider.DefaultCreatedAt = providerDescCreatedAt.Default.(func() time.Time)
-	// providerDescUpdatedAt is the schema descriptor for updated_at field.
-	providerDescUpdatedAt := providerFields[4].Descriptor()
-	// provider.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	provider.DefaultUpdatedAt = providerDescUpdatedAt.Default.(func() time.Time)
-	// provider.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	provider.UpdateDefaultUpdatedAt = providerDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// providerDescID is the schema descriptor for id field.
-	providerDescID := providerFields[0].Descriptor()
-	// provider.DefaultID holds the default value on creation for the id field.
-	provider.DefaultID = providerDescID.Default.(func() uuid.UUID)
+	accountFields := schema.Account{}.Fields()
+	_ = accountFields
+	// accountDescCreatedAt is the schema descriptor for created_at field.
+	accountDescCreatedAt := accountFields[3].Descriptor()
+	// account.DefaultCreatedAt holds the default value on creation for the created_at field.
+	account.DefaultCreatedAt = accountDescCreatedAt.Default.(func() time.Time)
+	// accountDescUpdatedAt is the schema descriptor for updated_at field.
+	accountDescUpdatedAt := accountFields[4].Descriptor()
+	// account.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	account.DefaultUpdatedAt = accountDescUpdatedAt.Default.(func() time.Time)
+	// account.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	account.UpdateDefaultUpdatedAt = accountDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// accountDescID is the schema descriptor for id field.
+	accountDescID := accountFields[0].Descriptor()
+	// account.DefaultID holds the default value on creation for the id field.
+	account.DefaultID = accountDescID.Default.(func() uuid.UUID)
+	assetFields := schema.Asset{}.Fields()
+	_ = assetFields
+	// assetDescCreatedAt is the schema descriptor for created_at field.
+	assetDescCreatedAt := assetFields[3].Descriptor()
+	// asset.DefaultCreatedAt holds the default value on creation for the created_at field.
+	asset.DefaultCreatedAt = assetDescCreatedAt.Default.(func() time.Time)
+	// assetDescUpdatedAt is the schema descriptor for updated_at field.
+	assetDescUpdatedAt := assetFields[4].Descriptor()
+	// asset.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	asset.DefaultUpdatedAt = assetDescUpdatedAt.Default.(func() time.Time)
+	// asset.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	asset.UpdateDefaultUpdatedAt = assetDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// assetDescID is the schema descriptor for id field.
+	assetDescID := assetFields[0].Descriptor()
+	// asset.DefaultID holds the default value on creation for the id field.
+	asset.DefaultID = assetDescID.Default.(func() uuid.UUID)
+	connectionFields := schema.Connection{}.Fields()
+	_ = connectionFields
+	// connectionDescCreatedAt is the schema descriptor for created_at field.
+	connectionDescCreatedAt := connectionFields[3].Descriptor()
+	// connection.DefaultCreatedAt holds the default value on creation for the created_at field.
+	connection.DefaultCreatedAt = connectionDescCreatedAt.Default.(func() time.Time)
+	// connectionDescUpdatedAt is the schema descriptor for updated_at field.
+	connectionDescUpdatedAt := connectionFields[4].Descriptor()
+	// connection.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	connection.DefaultUpdatedAt = connectionDescUpdatedAt.Default.(func() time.Time)
+	// connection.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	connection.UpdateDefaultUpdatedAt = connectionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// connectionDescID is the schema descriptor for id field.
+	connectionDescID := connectionFields[0].Descriptor()
+	// connection.DefaultID holds the default value on creation for the id field.
+	connection.DefaultID = connectionDescID.Default.(func() uuid.UUID)
+	institutionFields := schema.Institution{}.Fields()
+	_ = institutionFields
+	// institutionDescCreatedAt is the schema descriptor for created_at field.
+	institutionDescCreatedAt := institutionFields[3].Descriptor()
+	// institution.DefaultCreatedAt holds the default value on creation for the created_at field.
+	institution.DefaultCreatedAt = institutionDescCreatedAt.Default.(func() time.Time)
+	// institutionDescUpdatedAt is the schema descriptor for updated_at field.
+	institutionDescUpdatedAt := institutionFields[4].Descriptor()
+	// institution.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	institution.DefaultUpdatedAt = institutionDescUpdatedAt.Default.(func() time.Time)
+	// institution.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	institution.UpdateDefaultUpdatedAt = institutionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// institutionDescID is the schema descriptor for id field.
+	institutionDescID := institutionFields[0].Descriptor()
+	// institution.DefaultID holds the default value on creation for the id field.
+	institution.DefaultID = institutionDescID.Default.(func() uuid.UUID)
 }

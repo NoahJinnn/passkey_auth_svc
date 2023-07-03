@@ -29,7 +29,7 @@ type App struct {
 
 // New creates and returns new App.
 func New(cfg *config.Config, repo *dal.NwRepo) *App {
-	providerSvc := provider.NewProviderSvc()
+	providerSvc := provider.NewProviderSvc("file:user1.db?cache=shared&_fk=1")
 	seAccountInfoSvc := saltedge.NewSeAccountInfoSvc(cfg)
 	fvAuthSvc := finverse.NewFvAuthSvc(cfg)
 

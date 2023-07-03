@@ -5,27 +5,34 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 )
 
-type Provider struct {
+type Account struct {
 	ent.Schema
 }
 
-func (Provider) Fields() []ent.Field {
+func (Account) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Default(func() uuid.UUID {
 			id, _ := uuid.NewV4()
 			return id
 		}).Immutable(),
-		field.UUID("user_id", uuid.UUID{}).Optional().Nillable(),
-		field.Bool("verified").Default(false),
+		field.UUID("institution_id", uuid.UUID{}).Optional(),
+		field.String("data").Optional().Nillable(),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 
-func (Provider) Annotations() []schema.Annotation {
+func (Account) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("institution", Institution.Type).Ref("accounts").Unique().Field("institution_id"),
+	}
+}
+
+func (Account) Annotations() []schema.Annotation {
 	return nil
 }

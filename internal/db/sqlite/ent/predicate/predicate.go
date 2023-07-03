@@ -6,5 +6,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// Provider is the predicate function for provider builders.
-type Provider func(*sql.Selector)
+// Account is the predicate function for account builders.
+type Account func(*sql.Selector)
+
+// Asset is the predicate function for asset builders.
+type Asset func(*sql.Selector)
+
+// Connection is the predicate function for connection builders.
+type Connection func(*sql.Selector)
+
+// Institution is the predicate function for institution builders.
+type Institution func(*sql.Selector)
