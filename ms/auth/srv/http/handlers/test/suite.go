@@ -132,7 +132,7 @@ func (s *Suite) SetupSuite() {
 	dialect := "postgres"
 	testDb, err := testDal.StartDB("integration_test", dialect)
 	s.NoError(err)
-	pgClient := pgsql.NewPgClient(ctx, testDb.DatabaseUrl)
+	pgClient := pgsql.NewPgClient(testDb.DatabaseUrl)
 
 	// Run the auto migration tool.
 	if err := pgClient.Schema.Create(ctx,

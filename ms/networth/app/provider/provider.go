@@ -7,13 +7,17 @@ import (
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent"
 )
 
-type Provider struct {
+type ProviderSvc struct {
 	sqliteClient *ent.Client
 }
 
-func NewProvider(ctx context.Context) *Provider {
-	sqliteClient := sqlite.NewSqliteClient(ctx, "file:ent_pgsql?mode=memory&cache=shared&_fk=1")
-	return &Provider{
+func NewProviderSvc() *ProviderSvc {
+	sqliteClient := sqlite.NewSqliteClient("file:ent?mode=memory&cache=shared&_fk=1")
+	return &ProviderSvc{
 		sqliteClient: sqliteClient,
 	}
+}
+
+func (p *ProviderSvc) Get(ctx context.Context) {
+	p.sqliteClient.Provider.Query().AllX(ctx)
 }

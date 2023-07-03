@@ -5,7 +5,6 @@ import (
 
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/db/pgsql"
-	"github.com/hellohq/hqservice/internal/db/sqlite"
 	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/powerman/pqx"
 )
@@ -18,8 +17,7 @@ type DbClient struct {
 func InitDbClient(ctxStartupCmdServe context.Context, cfg *sharedconfig.Shared) *DbClient {
 	cfg.Postgres.SSLMode = pqx.SSLRequire
 	dateSourceName := cfg.Postgres.FormatDSN()
-	pgClient := pgsql.NewPgClient(ctxStartupCmdServe, dateSourceName)
-	sqlite.NewSqliteClient(ctxStartupCmdServe, "file:ent?mode=memory&cache=shared&_fk=1")
+	pgClient := pgsql.NewPgClient(dateSourceName)
 	return &DbClient{
 		PgClient: pgClient,
 	}
