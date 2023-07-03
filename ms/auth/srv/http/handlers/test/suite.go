@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"testing"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/go-testfixtures/testfixtures/v3"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/ent/migrate"
 	"github.com/hellohq/hqservice/internal/db"
 	"github.com/hellohq/hqservice/internal/db/pgsql"
 	"github.com/hellohq/hqservice/internal/http/session"
@@ -131,6 +133,16 @@ func (s *Suite) SetupSuite() {
 	testDb, err := testDal.StartDB("integration_test", dialect)
 	s.NoError(err)
 	pgClient := pgsql.NewPgClient(ctx, testDb.DatabaseUrl)
+
+	// Run the auto migration tool.
+	if err := pgClient.Schema.Create(ctx,
+		migrate.WithDropIndex(true),
+		migrate.WithDropColumn(true),
+		migrate.WithGlobalUniqueID(true),
+	); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+
 	dbClient := &db.DbClient{PgClient: pgClient}
 	repo := dal.New(dbClient)
 	jwkRepo := session.NewJwkRepo(dbClient)
