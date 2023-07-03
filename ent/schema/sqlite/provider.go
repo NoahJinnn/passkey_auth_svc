@@ -20,6 +20,7 @@ func (Provider) Fields() []ent.Field {
 			return id
 		}).Immutable(),
 		field.UUID("user_id", uuid.UUID{}).Optional().Nillable(),
+		field.Bool("verified").Default(false),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
