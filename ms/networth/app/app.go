@@ -6,6 +6,7 @@ package app
 
 import (
 	"github.com/hellohq/hqservice/ms/networth/app/finverse"
+	"github.com/hellohq/hqservice/ms/networth/app/provider"
 	"github.com/hellohq/hqservice/ms/networth/app/saltedge"
 	"github.com/hellohq/hqservice/ms/networth/config"
 	"github.com/hellohq/hqservice/ms/networth/dal"
@@ -21,21 +22,28 @@ type Appl interface {
 type App struct {
 	cfg              *config.Config
 	repo             *dal.NwRepo
+	providerSvc      *provider.ProviderSvc
 	seAccountInfoSvc *saltedge.SeAccountInfoSvc
 	fvAuthSvc        *finverse.FvAuthSvc
 }
 
 // New creates and returns new App.
 func New(cfg *config.Config, repo *dal.NwRepo) *App {
+	providerSvc := provider.NewProviderSvc("file:user1.db?cache=shared&_fk=1")
 	seAccountInfoSvc := saltedge.NewSeAccountInfoSvc(cfg)
 	fvAuthSvc := finverse.NewFvAuthSvc(cfg)
 
 	return &App{
 		cfg:              cfg,
 		repo:             repo,
+		providerSvc:      providerSvc,
 		seAccountInfoSvc: seAccountInfoSvc,
 		fvAuthSvc:        fvAuthSvc,
 	}
+}
+
+func (a App) GetProviderSvc() *provider.ProviderSvc {
+	return a.providerSvc
 }
 
 func (a App) GetSeAccountInfoSvc() *saltedge.SeAccountInfoSvc {

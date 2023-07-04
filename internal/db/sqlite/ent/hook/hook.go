@@ -6,127 +6,55 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent"
 )
 
-// The EmailFunc type is an adapter to allow the use of ordinary
-// function as Email mutator.
-type EmailFunc func(context.Context, *ent.EmailMutation) (ent.Value, error)
+// The AccountFunc type is an adapter to allow the use of ordinary
+// function as Account mutator.
+type AccountFunc func(context.Context, *ent.AccountMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f EmailFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.EmailMutation); ok {
+func (f AccountFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AccountMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EmailMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AccountMutation", m)
 }
 
-// The IdentityFunc type is an adapter to allow the use of ordinary
-// function as Identity mutator.
-type IdentityFunc func(context.Context, *ent.IdentityMutation) (ent.Value, error)
+// The AssetFunc type is an adapter to allow the use of ordinary
+// function as Asset mutator.
+type AssetFunc func(context.Context, *ent.AssetMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f IdentityFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.IdentityMutation); ok {
+func (f AssetFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AssetMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IdentityMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AssetMutation", m)
 }
 
-// The JwkFunc type is an adapter to allow the use of ordinary
-// function as Jwk mutator.
-type JwkFunc func(context.Context, *ent.JwkMutation) (ent.Value, error)
+// The ConnectionFunc type is an adapter to allow the use of ordinary
+// function as Connection mutator.
+type ConnectionFunc func(context.Context, *ent.ConnectionMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f JwkFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.JwkMutation); ok {
+func (f ConnectionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ConnectionMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.JwkMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ConnectionMutation", m)
 }
 
-// The PasscodeFunc type is an adapter to allow the use of ordinary
-// function as Passcode mutator.
-type PasscodeFunc func(context.Context, *ent.PasscodeMutation) (ent.Value, error)
+// The InstitutionFunc type is an adapter to allow the use of ordinary
+// function as Institution mutator.
+type InstitutionFunc func(context.Context, *ent.InstitutionMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f PasscodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.PasscodeMutation); ok {
+func (f InstitutionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.InstitutionMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PasscodeMutation", m)
-}
-
-// The PrimaryEmailFunc type is an adapter to allow the use of ordinary
-// function as PrimaryEmail mutator.
-type PrimaryEmailFunc func(context.Context, *ent.PrimaryEmailMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f PrimaryEmailFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.PrimaryEmailMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PrimaryEmailMutation", m)
-}
-
-// The UserFunc type is an adapter to allow the use of ordinary
-// function as User mutator.
-type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.UserMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
-}
-
-// The WebauthnCredentialFunc type is an adapter to allow the use of ordinary
-// function as WebauthnCredential mutator.
-type WebauthnCredentialFunc func(context.Context, *ent.WebauthnCredentialMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f WebauthnCredentialFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.WebauthnCredentialMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WebauthnCredentialMutation", m)
-}
-
-// The WebauthnCredentialTransportFunc type is an adapter to allow the use of ordinary
-// function as WebauthnCredentialTransport mutator.
-type WebauthnCredentialTransportFunc func(context.Context, *ent.WebauthnCredentialTransportMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f WebauthnCredentialTransportFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.WebauthnCredentialTransportMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WebauthnCredentialTransportMutation", m)
-}
-
-// The WebauthnSessionDataFunc type is an adapter to allow the use of ordinary
-// function as WebauthnSessionData mutator.
-type WebauthnSessionDataFunc func(context.Context, *ent.WebauthnSessionDataMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f WebauthnSessionDataFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.WebauthnSessionDataMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WebauthnSessionDataMutation", m)
-}
-
-// The WebauthnSessionDataAllowedCredentialFunc type is an adapter to allow the use of ordinary
-// function as WebauthnSessionDataAllowedCredential mutator.
-type WebauthnSessionDataAllowedCredentialFunc func(context.Context, *ent.WebauthnSessionDataAllowedCredentialMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f WebauthnSessionDataAllowedCredentialFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.WebauthnSessionDataAllowedCredentialMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WebauthnSessionDataAllowedCredentialMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.InstitutionMutation", m)
 }
 
 // Condition is a hook condition function.

@@ -130,7 +130,8 @@ func (s *Suite) SetupSuite() {
 	dialect := "postgres"
 	testDb, err := testDal.StartDB("integration_test", dialect)
 	s.NoError(err)
-	pgClient := pgsql.NewPgClient(ctx, testDb.DatabaseUrl)
+	pgClient := pgsql.NewPgClient(testDb.DatabaseUrl)
+
 	dbClient := &db.DbClient{PgClient: pgClient}
 	repo := dal.New(dbClient)
 	jwkRepo := session.NewJwkRepo(dbClient)

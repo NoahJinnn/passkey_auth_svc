@@ -12,26 +12,14 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// Email is the client for interacting with the Email builders.
-	Email *EmailClient
-	// Identity is the client for interacting with the Identity builders.
-	Identity *IdentityClient
-	// Jwk is the client for interacting with the Jwk builders.
-	Jwk *JwkClient
-	// Passcode is the client for interacting with the Passcode builders.
-	Passcode *PasscodeClient
-	// PrimaryEmail is the client for interacting with the PrimaryEmail builders.
-	PrimaryEmail *PrimaryEmailClient
-	// User is the client for interacting with the User builders.
-	User *UserClient
-	// WebauthnCredential is the client for interacting with the WebauthnCredential builders.
-	WebauthnCredential *WebauthnCredentialClient
-	// WebauthnCredentialTransport is the client for interacting with the WebauthnCredentialTransport builders.
-	WebauthnCredentialTransport *WebauthnCredentialTransportClient
-	// WebauthnSessionData is the client for interacting with the WebauthnSessionData builders.
-	WebauthnSessionData *WebauthnSessionDataClient
-	// WebauthnSessionDataAllowedCredential is the client for interacting with the WebauthnSessionDataAllowedCredential builders.
-	WebauthnSessionDataAllowedCredential *WebauthnSessionDataAllowedCredentialClient
+	// Account is the client for interacting with the Account builders.
+	Account *AccountClient
+	// Asset is the client for interacting with the Asset builders.
+	Asset *AssetClient
+	// Connection is the client for interacting with the Connection builders.
+	Connection *ConnectionClient
+	// Institution is the client for interacting with the Institution builders.
+	Institution *InstitutionClient
 
 	// lazily loaded.
 	client     *Client
@@ -163,16 +151,10 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.Email = NewEmailClient(tx.config)
-	tx.Identity = NewIdentityClient(tx.config)
-	tx.Jwk = NewJwkClient(tx.config)
-	tx.Passcode = NewPasscodeClient(tx.config)
-	tx.PrimaryEmail = NewPrimaryEmailClient(tx.config)
-	tx.User = NewUserClient(tx.config)
-	tx.WebauthnCredential = NewWebauthnCredentialClient(tx.config)
-	tx.WebauthnCredentialTransport = NewWebauthnCredentialTransportClient(tx.config)
-	tx.WebauthnSessionData = NewWebauthnSessionDataClient(tx.config)
-	tx.WebauthnSessionDataAllowedCredential = NewWebauthnSessionDataAllowedCredentialClient(tx.config)
+	tx.Account = NewAccountClient(tx.config)
+	tx.Asset = NewAssetClient(tx.config)
+	tx.Connection = NewConnectionClient(tx.config)
+	tx.Institution = NewInstitutionClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -182,7 +164,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Email.QueryXXX(), the query will be executed
+// applies a query, for example: Account.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

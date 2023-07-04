@@ -126,19 +126,6 @@ var (
 			},
 		},
 	}
-	// ProvidersColumns holds the columns for the "providers" table.
-	ProvidersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-	}
-	// ProvidersTable holds the schema information for the "providers" table.
-	ProvidersTable = &schema.Table{
-		Name:       "providers",
-		Columns:    ProvidersColumns,
-		PrimaryKey: []*schema.Column{ProvidersColumns[0]},
-	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -245,7 +232,6 @@ var (
 		JwksTable,
 		PasscodesTable,
 		PrimaryEmailsTable,
-		ProvidersTable,
 		UsersTable,
 		WebauthnCredentialsTable,
 		WebauthnCredentialTransportsTable,

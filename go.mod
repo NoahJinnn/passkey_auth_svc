@@ -26,6 +26,7 @@ require (
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/lestrrat-go/jwx/v2 v2.0.11
+	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/mattn/goveralls v0.0.11
 	github.com/nicksnyder/go-i18n/v2 v2.2.1
 	github.com/nikoksr/doppler-go v0.3.0
@@ -78,7 +79,6 @@ require (
 	github.com/lestrrat-go/httprc v1.0.4 // indirect
 	github.com/lestrrat-go/iter v1.0.2 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
-	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
 	github.com/opencontainers/runc v1.1.3 // indirect
 	github.com/paulmach/orb v0.9.2 // indirect

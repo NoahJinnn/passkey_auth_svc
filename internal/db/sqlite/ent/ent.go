@@ -12,16 +12,10 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/hellohq/hqservice/ent/email"
-	"github.com/hellohq/hqservice/ent/identity"
-	"github.com/hellohq/hqservice/ent/jwk"
-	"github.com/hellohq/hqservice/ent/passcode"
-	"github.com/hellohq/hqservice/ent/primaryemail"
-	"github.com/hellohq/hqservice/ent/user"
-	"github.com/hellohq/hqservice/ent/webauthncredential"
-	"github.com/hellohq/hqservice/ent/webauthncredentialtransport"
-	"github.com/hellohq/hqservice/ent/webauthnsessiondata"
-	"github.com/hellohq/hqservice/ent/webauthnsessiondataallowedcredential"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/asset"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -82,16 +76,10 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			email.Table:                       email.ValidColumn,
-			identity.Table:                    identity.ValidColumn,
-			jwk.Table:                         jwk.ValidColumn,
-			passcode.Table:                    passcode.ValidColumn,
-			primaryemail.Table:                primaryemail.ValidColumn,
-			user.Table:                        user.ValidColumn,
-			webauthncredential.Table:          webauthncredential.ValidColumn,
-			webauthncredentialtransport.Table: webauthncredentialtransport.ValidColumn,
-			webauthnsessiondata.Table:         webauthnsessiondata.ValidColumn,
-			webauthnsessiondataallowedcredential.Table: webauthnsessiondataallowedcredential.ValidColumn,
+			account.Table:     account.ValidColumn,
+			asset.Table:       asset.ValidColumn,
+			connection.Table:  connection.ValidColumn,
+			institution.Table: institution.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)
