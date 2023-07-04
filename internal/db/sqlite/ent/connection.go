@@ -23,6 +23,8 @@ type Connection struct {
 	InstitutionID *uuid.UUID `json:"institution_id,omitempty"`
 	// Data holds the value of the "data" field.
 	Data string `json:"data,omitempty"`
+	// Env holds the value of the "env" field.
+	Env string `json:"env,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -62,7 +64,7 @@ func (*Connection) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case connection.FieldInstitutionID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case connection.FieldData:
+		case connection.FieldData, connection.FieldEnv:
 			values[i] = new(sql.NullString)
 		case connection.FieldCreatedAt, connection.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -101,6 +103,12 @@ func (c *Connection) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field data", values[i])
 			} else if value.Valid {
 				c.Data = value.String
+			}
+		case connection.FieldEnv:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field env", values[i])
+			} else if value.Valid {
+				c.Env = value.String
 			}
 		case connection.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -162,6 +170,9 @@ func (c *Connection) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("data=")
 	builder.WriteString(c.Data)
+	builder.WriteString(", ")
+	builder.WriteString("env=")
+	builder.WriteString(c.Env)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(c.CreatedAt.Format(time.ANSIC))

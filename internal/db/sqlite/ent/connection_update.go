@@ -56,6 +56,12 @@ func (cu *ConnectionUpdate) SetData(s string) *ConnectionUpdate {
 	return cu
 }
 
+// SetEnv sets the "env" field.
+func (cu *ConnectionUpdate) SetEnv(s string) *ConnectionUpdate {
+	cu.mutation.SetEnv(s)
+	return cu
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (cu *ConnectionUpdate) SetUpdatedAt(t time.Time) *ConnectionUpdate {
 	cu.mutation.SetUpdatedAt(t)
@@ -125,6 +131,9 @@ func (cu *ConnectionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := cu.mutation.Data(); ok {
 		_spec.SetField(connection.FieldData, field.TypeString, value)
+	}
+	if value, ok := cu.mutation.Env(); ok {
+		_spec.SetField(connection.FieldEnv, field.TypeString, value)
 	}
 	if value, ok := cu.mutation.UpdatedAt(); ok {
 		_spec.SetField(connection.FieldUpdatedAt, field.TypeTime, value)
@@ -201,6 +210,12 @@ func (cuo *ConnectionUpdateOne) ClearInstitutionID() *ConnectionUpdateOne {
 // SetData sets the "data" field.
 func (cuo *ConnectionUpdateOne) SetData(s string) *ConnectionUpdateOne {
 	cuo.mutation.SetData(s)
+	return cuo
+}
+
+// SetEnv sets the "env" field.
+func (cuo *ConnectionUpdateOne) SetEnv(s string) *ConnectionUpdateOne {
+	cuo.mutation.SetEnv(s)
 	return cuo
 }
 
@@ -303,6 +318,9 @@ func (cuo *ConnectionUpdateOne) sqlSave(ctx context.Context) (_node *Connection,
 	}
 	if value, ok := cuo.mutation.Data(); ok {
 		_spec.SetField(connection.FieldData, field.TypeString, value)
+	}
+	if value, ok := cuo.mutation.Env(); ok {
+		_spec.SetField(connection.FieldEnv, field.TypeString, value)
 	}
 	if value, ok := cuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(connection.FieldUpdatedAt, field.TypeTime, value)

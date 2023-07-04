@@ -33,10 +33,6 @@ func NewSeClient(cred *config.SaltEdge) *SeClient {
 		"App-id":       cred.AppId,
 		"Secret":       cred.Secret,
 	}, nil)
-	// req.SetHeader("Accept", "application/json")
-	// req.SetHeader("Content-Type", "application/json")
-	// req.SetHeader("App-id", cred.AppId)
-	// req.SetHeader("Secret", cred.Secret)
 
 	return &SeClient{
 		cred: cred,
@@ -45,8 +41,6 @@ func NewSeClient(cred *config.SaltEdge) *SeClient {
 }
 
 func (cl *SeClient) DoReq(ctx context.Context, method string, path string, query map[string][]string, reqBody interface{}) ([]byte, error) {
-	// cl.req.OverrideQ(query)
-
 	var b []byte
 	if reqBody != nil {
 		var err error
@@ -98,11 +92,7 @@ func (cl *SeClient) SignedHeaders(url, method string, body []byte) map[string]st
 		}
 		headers["Signature"] = signature
 	}
-
 	headers["Expires-at"] = fmt.Sprintf("%d", expiresAt)
-
-	// cl.req.SetHeader("Expires-at", fmt.Sprintf("%d", expiresAt))
-	// cl.req.SetHeader("Signature", signature)
 
 	return headers
 }

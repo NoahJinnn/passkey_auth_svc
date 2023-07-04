@@ -52,11 +52,11 @@ func init() {
 	connectionFields := schema.Connection{}.Fields()
 	_ = connectionFields
 	// connectionDescCreatedAt is the schema descriptor for created_at field.
-	connectionDescCreatedAt := connectionFields[3].Descriptor()
+	connectionDescCreatedAt := connectionFields[4].Descriptor()
 	// connection.DefaultCreatedAt holds the default value on creation for the created_at field.
 	connection.DefaultCreatedAt = connectionDescCreatedAt.Default.(func() time.Time)
 	// connectionDescUpdatedAt is the schema descriptor for updated_at field.
-	connectionDescUpdatedAt := connectionFields[4].Descriptor()
+	connectionDescUpdatedAt := connectionFields[5].Descriptor()
 	// connection.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	connection.DefaultUpdatedAt = connectionDescUpdatedAt.Default.(func() time.Time)
 	// connection.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

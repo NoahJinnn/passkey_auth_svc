@@ -22,6 +22,7 @@ func (Connection) Fields() []ent.Field {
 		}).Immutable(),
 		field.UUID("institution_id", uuid.UUID{}).Optional().Nillable().Unique(),
 		field.String("data"),
+		field.String("env"),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}

@@ -56,6 +56,7 @@ var (
 	ConnectionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "data", Type: field.TypeString},
+		{Name: "env", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "institution_id", Type: field.TypeUUID, Unique: true, Nullable: true},
@@ -68,7 +69,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "connections_institutions_connection",
-				Columns:    []*schema.Column{ConnectionsColumns[4]},
+				Columns:    []*schema.Column{ConnectionsColumns[5]},
 				RefColumns: []*schema.Column{InstitutionsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
