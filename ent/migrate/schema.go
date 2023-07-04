@@ -31,6 +31,31 @@ var (
 			},
 		},
 	}
+	// FvSessionsColumns holds the columns for the "fv_sessions" table.
+	FvSessionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "access_token", Type: field.TypeString},
+		{Name: "expires_in", Type: field.TypeInt},
+		{Name: "issued_at", Type: field.TypeString},
+		{Name: "token_type", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUUID, Unique: true, Nullable: true},
+	}
+	// FvSessionsTable holds the schema information for the "fv_sessions" table.
+	FvSessionsTable = &schema.Table{
+		Name:       "fv_sessions",
+		Columns:    FvSessionsColumns,
+		PrimaryKey: []*schema.Column{FvSessionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "fv_sessions_users_fv_session",
+				Columns:    []*schema.Column{FvSessionsColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// IdentitiesColumns holds the columns for the "identities" table.
 	IdentitiesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -228,6 +253,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		EmailsTable,
+		FvSessionsTable,
 		IdentitiesTable,
 		JwksTable,
 		PasscodesTable,
@@ -242,6 +268,7 @@ var (
 
 func init() {
 	EmailsTable.ForeignKeys[0].RefTable = UsersTable
+	FvSessionsTable.ForeignKeys[0].RefTable = UsersTable
 	IdentitiesTable.ForeignKeys[0].RefTable = EmailsTable
 	PasscodesTable.ForeignKeys[0].RefTable = EmailsTable
 	PasscodesTable.ForeignKeys[1].RefTable = UsersTable

@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
+	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/identity"
 	"github.com/hellohq/hqservice/ent/jwk"
 	"github.com/hellohq/hqservice/ent/passcode"
@@ -35,6 +36,7 @@ const (
 
 	// Node types.
 	TypeEmail                                = "Email"
+	TypeFvSession                            = "FvSession"
 	TypeIdentity                             = "Identity"
 	TypeJwk                                  = "Jwk"
 	TypePasscode                             = "Passcode"
@@ -894,6 +896,773 @@ func (m *EmailMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Email edge %s", name)
+}
+
+// FvSessionMutation represents an operation that mutates the FvSession nodes in the graph.
+type FvSessionMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	access_token  *string
+	expires_in    *int
+	addexpires_in *int
+	issued_at     *string
+	token_type    *string
+	created_at    *time.Time
+	updated_at    *time.Time
+	clearedFields map[string]struct{}
+	user          *uuid.UUID
+	cleareduser   bool
+	done          bool
+	oldValue      func(context.Context) (*FvSession, error)
+	predicates    []predicate.FvSession
+}
+
+var _ ent.Mutation = (*FvSessionMutation)(nil)
+
+// fvsessionOption allows management of the mutation configuration using functional options.
+type fvsessionOption func(*FvSessionMutation)
+
+// newFvSessionMutation creates new mutation for the FvSession entity.
+func newFvSessionMutation(c config, op Op, opts ...fvsessionOption) *FvSessionMutation {
+	m := &FvSessionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeFvSession,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withFvSessionID sets the ID field of the mutation.
+func withFvSessionID(id uuid.UUID) fvsessionOption {
+	return func(m *FvSessionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *FvSession
+		)
+		m.oldValue = func(ctx context.Context) (*FvSession, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().FvSession.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withFvSession sets the old FvSession of the mutation.
+func withFvSession(node *FvSession) fvsessionOption {
+	return func(m *FvSessionMutation) {
+		m.oldValue = func(context.Context) (*FvSession, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m FvSessionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m FvSessionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of FvSession entities.
+func (m *FvSessionMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *FvSessionMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *FvSessionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().FvSession.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetUserID sets the "user_id" field.
+func (m *FvSessionMutation) SetUserID(u uuid.UUID) {
+	m.user = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *FvSessionMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the FvSession entity.
+// If the FvSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FvSessionMutation) OldUserID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ClearUserID clears the value of the "user_id" field.
+func (m *FvSessionMutation) ClearUserID() {
+	m.user = nil
+	m.clearedFields[fvsession.FieldUserID] = struct{}{}
+}
+
+// UserIDCleared returns if the "user_id" field was cleared in this mutation.
+func (m *FvSessionMutation) UserIDCleared() bool {
+	_, ok := m.clearedFields[fvsession.FieldUserID]
+	return ok
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *FvSessionMutation) ResetUserID() {
+	m.user = nil
+	delete(m.clearedFields, fvsession.FieldUserID)
+}
+
+// SetAccessToken sets the "access_token" field.
+func (m *FvSessionMutation) SetAccessToken(s string) {
+	m.access_token = &s
+}
+
+// AccessToken returns the value of the "access_token" field in the mutation.
+func (m *FvSessionMutation) AccessToken() (r string, exists bool) {
+	v := m.access_token
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccessToken returns the old "access_token" field's value of the FvSession entity.
+// If the FvSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FvSessionMutation) OldAccessToken(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccessToken is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccessToken requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccessToken: %w", err)
+	}
+	return oldValue.AccessToken, nil
+}
+
+// ResetAccessToken resets all changes to the "access_token" field.
+func (m *FvSessionMutation) ResetAccessToken() {
+	m.access_token = nil
+}
+
+// SetExpiresIn sets the "expires_in" field.
+func (m *FvSessionMutation) SetExpiresIn(i int) {
+	m.expires_in = &i
+	m.addexpires_in = nil
+}
+
+// ExpiresIn returns the value of the "expires_in" field in the mutation.
+func (m *FvSessionMutation) ExpiresIn() (r int, exists bool) {
+	v := m.expires_in
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExpiresIn returns the old "expires_in" field's value of the FvSession entity.
+// If the FvSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FvSessionMutation) OldExpiresIn(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExpiresIn is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExpiresIn requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExpiresIn: %w", err)
+	}
+	return oldValue.ExpiresIn, nil
+}
+
+// AddExpiresIn adds i to the "expires_in" field.
+func (m *FvSessionMutation) AddExpiresIn(i int) {
+	if m.addexpires_in != nil {
+		*m.addexpires_in += i
+	} else {
+		m.addexpires_in = &i
+	}
+}
+
+// AddedExpiresIn returns the value that was added to the "expires_in" field in this mutation.
+func (m *FvSessionMutation) AddedExpiresIn() (r int, exists bool) {
+	v := m.addexpires_in
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetExpiresIn resets all changes to the "expires_in" field.
+func (m *FvSessionMutation) ResetExpiresIn() {
+	m.expires_in = nil
+	m.addexpires_in = nil
+}
+
+// SetIssuedAt sets the "issued_at" field.
+func (m *FvSessionMutation) SetIssuedAt(s string) {
+	m.issued_at = &s
+}
+
+// IssuedAt returns the value of the "issued_at" field in the mutation.
+func (m *FvSessionMutation) IssuedAt() (r string, exists bool) {
+	v := m.issued_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIssuedAt returns the old "issued_at" field's value of the FvSession entity.
+// If the FvSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FvSessionMutation) OldIssuedAt(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIssuedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIssuedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIssuedAt: %w", err)
+	}
+	return oldValue.IssuedAt, nil
+}
+
+// ResetIssuedAt resets all changes to the "issued_at" field.
+func (m *FvSessionMutation) ResetIssuedAt() {
+	m.issued_at = nil
+}
+
+// SetTokenType sets the "token_type" field.
+func (m *FvSessionMutation) SetTokenType(s string) {
+	m.token_type = &s
+}
+
+// TokenType returns the value of the "token_type" field in the mutation.
+func (m *FvSessionMutation) TokenType() (r string, exists bool) {
+	v := m.token_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTokenType returns the old "token_type" field's value of the FvSession entity.
+// If the FvSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FvSessionMutation) OldTokenType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTokenType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTokenType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTokenType: %w", err)
+	}
+	return oldValue.TokenType, nil
+}
+
+// ResetTokenType resets all changes to the "token_type" field.
+func (m *FvSessionMutation) ResetTokenType() {
+	m.token_type = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *FvSessionMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *FvSessionMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the FvSession entity.
+// If the FvSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FvSessionMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *FvSessionMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *FvSessionMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *FvSessionMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the FvSession entity.
+// If the FvSession object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FvSessionMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *FvSessionMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *FvSessionMutation) ClearUser() {
+	m.cleareduser = true
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *FvSessionMutation) UserCleared() bool {
+	return m.UserIDCleared() || m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *FvSessionMutation) UserIDs() (ids []uuid.UUID) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *FvSessionMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// Where appends a list predicates to the FvSessionMutation builder.
+func (m *FvSessionMutation) Where(ps ...predicate.FvSession) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the FvSessionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *FvSessionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.FvSession, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *FvSessionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *FvSessionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (FvSession).
+func (m *FvSessionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *FvSessionMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.user != nil {
+		fields = append(fields, fvsession.FieldUserID)
+	}
+	if m.access_token != nil {
+		fields = append(fields, fvsession.FieldAccessToken)
+	}
+	if m.expires_in != nil {
+		fields = append(fields, fvsession.FieldExpiresIn)
+	}
+	if m.issued_at != nil {
+		fields = append(fields, fvsession.FieldIssuedAt)
+	}
+	if m.token_type != nil {
+		fields = append(fields, fvsession.FieldTokenType)
+	}
+	if m.created_at != nil {
+		fields = append(fields, fvsession.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, fvsession.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *FvSessionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case fvsession.FieldUserID:
+		return m.UserID()
+	case fvsession.FieldAccessToken:
+		return m.AccessToken()
+	case fvsession.FieldExpiresIn:
+		return m.ExpiresIn()
+	case fvsession.FieldIssuedAt:
+		return m.IssuedAt()
+	case fvsession.FieldTokenType:
+		return m.TokenType()
+	case fvsession.FieldCreatedAt:
+		return m.CreatedAt()
+	case fvsession.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *FvSessionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case fvsession.FieldUserID:
+		return m.OldUserID(ctx)
+	case fvsession.FieldAccessToken:
+		return m.OldAccessToken(ctx)
+	case fvsession.FieldExpiresIn:
+		return m.OldExpiresIn(ctx)
+	case fvsession.FieldIssuedAt:
+		return m.OldIssuedAt(ctx)
+	case fvsession.FieldTokenType:
+		return m.OldTokenType(ctx)
+	case fvsession.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case fvsession.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown FvSession field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *FvSessionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case fvsession.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case fvsession.FieldAccessToken:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccessToken(v)
+		return nil
+	case fvsession.FieldExpiresIn:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExpiresIn(v)
+		return nil
+	case fvsession.FieldIssuedAt:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIssuedAt(v)
+		return nil
+	case fvsession.FieldTokenType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTokenType(v)
+		return nil
+	case fvsession.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case fvsession.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown FvSession field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *FvSessionMutation) AddedFields() []string {
+	var fields []string
+	if m.addexpires_in != nil {
+		fields = append(fields, fvsession.FieldExpiresIn)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *FvSessionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case fvsession.FieldExpiresIn:
+		return m.AddedExpiresIn()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *FvSessionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case fvsession.FieldExpiresIn:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddExpiresIn(v)
+		return nil
+	}
+	return fmt.Errorf("unknown FvSession numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *FvSessionMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(fvsession.FieldUserID) {
+		fields = append(fields, fvsession.FieldUserID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *FvSessionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *FvSessionMutation) ClearField(name string) error {
+	switch name {
+	case fvsession.FieldUserID:
+		m.ClearUserID()
+		return nil
+	}
+	return fmt.Errorf("unknown FvSession nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *FvSessionMutation) ResetField(name string) error {
+	switch name {
+	case fvsession.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case fvsession.FieldAccessToken:
+		m.ResetAccessToken()
+		return nil
+	case fvsession.FieldExpiresIn:
+		m.ResetExpiresIn()
+		return nil
+	case fvsession.FieldIssuedAt:
+		m.ResetIssuedAt()
+		return nil
+	case fvsession.FieldTokenType:
+		m.ResetTokenType()
+		return nil
+	case fvsession.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case fvsession.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown FvSession field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *FvSessionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.user != nil {
+		edges = append(edges, fvsession.EdgeUser)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *FvSessionMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case fvsession.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *FvSessionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *FvSessionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *FvSessionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareduser {
+		edges = append(edges, fvsession.EdgeUser)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *FvSessionMutation) EdgeCleared(name string) bool {
+	switch name {
+	case fvsession.EdgeUser:
+		return m.cleareduser
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *FvSessionMutation) ClearEdge(name string) error {
+	switch name {
+	case fvsession.EdgeUser:
+		m.ClearUser()
+		return nil
+	}
+	return fmt.Errorf("unknown FvSession unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *FvSessionMutation) ResetEdge(name string) error {
+	switch name {
+	case fvsession.EdgeUser:
+		m.ResetUser()
+		return nil
+	}
+	return fmt.Errorf("unknown FvSession edge %s", name)
 }
 
 // IdentityMutation represents an operation that mutates the Identity nodes in the graph.
@@ -3490,11 +4259,13 @@ type UserMutation struct {
 	passcodes                   map[uuid.UUID]struct{}
 	removedpasscodes            map[uuid.UUID]struct{}
 	clearedpasscodes            bool
-	primary_email               *uuid.UUID
-	clearedprimary_email        bool
 	webauthn_credentials        map[string]struct{}
 	removedwebauthn_credentials map[string]struct{}
 	clearedwebauthn_credentials bool
+	primary_email               *uuid.UUID
+	clearedprimary_email        bool
+	fv_session                  *uuid.UUID
+	clearedfv_session           bool
 	done                        bool
 	oldValue                    func(context.Context) (*User, error)
 	predicates                  []predicate.User
@@ -3784,45 +4555,6 @@ func (m *UserMutation) ResetPasscodes() {
 	m.removedpasscodes = nil
 }
 
-// SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by id.
-func (m *UserMutation) SetPrimaryEmailID(id uuid.UUID) {
-	m.primary_email = &id
-}
-
-// ClearPrimaryEmail clears the "primary_email" edge to the PrimaryEmail entity.
-func (m *UserMutation) ClearPrimaryEmail() {
-	m.clearedprimary_email = true
-}
-
-// PrimaryEmailCleared reports if the "primary_email" edge to the PrimaryEmail entity was cleared.
-func (m *UserMutation) PrimaryEmailCleared() bool {
-	return m.clearedprimary_email
-}
-
-// PrimaryEmailID returns the "primary_email" edge ID in the mutation.
-func (m *UserMutation) PrimaryEmailID() (id uuid.UUID, exists bool) {
-	if m.primary_email != nil {
-		return *m.primary_email, true
-	}
-	return
-}
-
-// PrimaryEmailIDs returns the "primary_email" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// PrimaryEmailID instead. It exists only for internal usage by the builders.
-func (m *UserMutation) PrimaryEmailIDs() (ids []uuid.UUID) {
-	if id := m.primary_email; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetPrimaryEmail resets all changes to the "primary_email" edge.
-func (m *UserMutation) ResetPrimaryEmail() {
-	m.primary_email = nil
-	m.clearedprimary_email = false
-}
-
 // AddWebauthnCredentialIDs adds the "webauthn_credentials" edge to the WebauthnCredential entity by ids.
 func (m *UserMutation) AddWebauthnCredentialIDs(ids ...string) {
 	if m.webauthn_credentials == nil {
@@ -3875,6 +4607,84 @@ func (m *UserMutation) ResetWebauthnCredentials() {
 	m.webauthn_credentials = nil
 	m.clearedwebauthn_credentials = false
 	m.removedwebauthn_credentials = nil
+}
+
+// SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by id.
+func (m *UserMutation) SetPrimaryEmailID(id uuid.UUID) {
+	m.primary_email = &id
+}
+
+// ClearPrimaryEmail clears the "primary_email" edge to the PrimaryEmail entity.
+func (m *UserMutation) ClearPrimaryEmail() {
+	m.clearedprimary_email = true
+}
+
+// PrimaryEmailCleared reports if the "primary_email" edge to the PrimaryEmail entity was cleared.
+func (m *UserMutation) PrimaryEmailCleared() bool {
+	return m.clearedprimary_email
+}
+
+// PrimaryEmailID returns the "primary_email" edge ID in the mutation.
+func (m *UserMutation) PrimaryEmailID() (id uuid.UUID, exists bool) {
+	if m.primary_email != nil {
+		return *m.primary_email, true
+	}
+	return
+}
+
+// PrimaryEmailIDs returns the "primary_email" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PrimaryEmailID instead. It exists only for internal usage by the builders.
+func (m *UserMutation) PrimaryEmailIDs() (ids []uuid.UUID) {
+	if id := m.primary_email; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPrimaryEmail resets all changes to the "primary_email" edge.
+func (m *UserMutation) ResetPrimaryEmail() {
+	m.primary_email = nil
+	m.clearedprimary_email = false
+}
+
+// SetFvSessionID sets the "fv_session" edge to the FvSession entity by id.
+func (m *UserMutation) SetFvSessionID(id uuid.UUID) {
+	m.fv_session = &id
+}
+
+// ClearFvSession clears the "fv_session" edge to the FvSession entity.
+func (m *UserMutation) ClearFvSession() {
+	m.clearedfv_session = true
+}
+
+// FvSessionCleared reports if the "fv_session" edge to the FvSession entity was cleared.
+func (m *UserMutation) FvSessionCleared() bool {
+	return m.clearedfv_session
+}
+
+// FvSessionID returns the "fv_session" edge ID in the mutation.
+func (m *UserMutation) FvSessionID() (id uuid.UUID, exists bool) {
+	if m.fv_session != nil {
+		return *m.fv_session, true
+	}
+	return
+}
+
+// FvSessionIDs returns the "fv_session" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// FvSessionID instead. It exists only for internal usage by the builders.
+func (m *UserMutation) FvSessionIDs() (ids []uuid.UUID) {
+	if id := m.fv_session; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetFvSession resets all changes to the "fv_session" edge.
+func (m *UserMutation) ResetFvSession() {
+	m.fv_session = nil
+	m.clearedfv_session = false
 }
 
 // Where appends a list predicates to the UserMutation builder.
@@ -4027,18 +4837,21 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.emails != nil {
 		edges = append(edges, user.EdgeEmails)
 	}
 	if m.passcodes != nil {
 		edges = append(edges, user.EdgePasscodes)
 	}
+	if m.webauthn_credentials != nil {
+		edges = append(edges, user.EdgeWebauthnCredentials)
+	}
 	if m.primary_email != nil {
 		edges = append(edges, user.EdgePrimaryEmail)
 	}
-	if m.webauthn_credentials != nil {
-		edges = append(edges, user.EdgeWebauthnCredentials)
+	if m.fv_session != nil {
+		edges = append(edges, user.EdgeFvSession)
 	}
 	return edges
 }
@@ -4059,23 +4872,27 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgePrimaryEmail:
-		if id := m.primary_email; id != nil {
-			return []ent.Value{*id}
-		}
 	case user.EdgeWebauthnCredentials:
 		ids := make([]ent.Value, 0, len(m.webauthn_credentials))
 		for id := range m.webauthn_credentials {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgePrimaryEmail:
+		if id := m.primary_email; id != nil {
+			return []ent.Value{*id}
+		}
+	case user.EdgeFvSession:
+		if id := m.fv_session; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.removedemails != nil {
 		edges = append(edges, user.EdgeEmails)
 	}
@@ -4116,18 +4933,21 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.clearedemails {
 		edges = append(edges, user.EdgeEmails)
 	}
 	if m.clearedpasscodes {
 		edges = append(edges, user.EdgePasscodes)
 	}
+	if m.clearedwebauthn_credentials {
+		edges = append(edges, user.EdgeWebauthnCredentials)
+	}
 	if m.clearedprimary_email {
 		edges = append(edges, user.EdgePrimaryEmail)
 	}
-	if m.clearedwebauthn_credentials {
-		edges = append(edges, user.EdgeWebauthnCredentials)
+	if m.clearedfv_session {
+		edges = append(edges, user.EdgeFvSession)
 	}
 	return edges
 }
@@ -4140,10 +4960,12 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedemails
 	case user.EdgePasscodes:
 		return m.clearedpasscodes
-	case user.EdgePrimaryEmail:
-		return m.clearedprimary_email
 	case user.EdgeWebauthnCredentials:
 		return m.clearedwebauthn_credentials
+	case user.EdgePrimaryEmail:
+		return m.clearedprimary_email
+	case user.EdgeFvSession:
+		return m.clearedfv_session
 	}
 	return false
 }
@@ -4154,6 +4976,9 @@ func (m *UserMutation) ClearEdge(name string) error {
 	switch name {
 	case user.EdgePrimaryEmail:
 		m.ClearPrimaryEmail()
+		return nil
+	case user.EdgeFvSession:
+		m.ClearFvSession()
 		return nil
 	}
 	return fmt.Errorf("unknown User unique edge %s", name)
@@ -4169,11 +4994,14 @@ func (m *UserMutation) ResetEdge(name string) error {
 	case user.EdgePasscodes:
 		m.ResetPasscodes()
 		return nil
+	case user.EdgeWebauthnCredentials:
+		m.ResetWebauthnCredentials()
+		return nil
 	case user.EdgePrimaryEmail:
 		m.ResetPrimaryEmail()
 		return nil
-	case user.EdgeWebauthnCredentials:
-		m.ResetWebauthnCredentials()
+	case user.EdgeFvSession:
+		m.ResetFvSession()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

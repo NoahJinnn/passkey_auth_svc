@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
+	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/primaryemail"
 	"github.com/hellohq/hqservice/ent/user"
@@ -97,6 +98,21 @@ func (uc *UserCreate) AddPasscodes(p ...*Passcode) *UserCreate {
 	return uc.AddPasscodeIDs(ids...)
 }
 
+// AddWebauthnCredentialIDs adds the "webauthn_credentials" edge to the WebauthnCredential entity by IDs.
+func (uc *UserCreate) AddWebauthnCredentialIDs(ids ...string) *UserCreate {
+	uc.mutation.AddWebauthnCredentialIDs(ids...)
+	return uc
+}
+
+// AddWebauthnCredentials adds the "webauthn_credentials" edges to the WebauthnCredential entity.
+func (uc *UserCreate) AddWebauthnCredentials(w ...*WebauthnCredential) *UserCreate {
+	ids := make([]string, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uc.AddWebauthnCredentialIDs(ids...)
+}
+
 // SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID.
 func (uc *UserCreate) SetPrimaryEmailID(id uuid.UUID) *UserCreate {
 	uc.mutation.SetPrimaryEmailID(id)
@@ -116,19 +132,23 @@ func (uc *UserCreate) SetPrimaryEmail(p *PrimaryEmail) *UserCreate {
 	return uc.SetPrimaryEmailID(p.ID)
 }
 
-// AddWebauthnCredentialIDs adds the "webauthn_credentials" edge to the WebauthnCredential entity by IDs.
-func (uc *UserCreate) AddWebauthnCredentialIDs(ids ...string) *UserCreate {
-	uc.mutation.AddWebauthnCredentialIDs(ids...)
+// SetFvSessionID sets the "fv_session" edge to the FvSession entity by ID.
+func (uc *UserCreate) SetFvSessionID(id uuid.UUID) *UserCreate {
+	uc.mutation.SetFvSessionID(id)
 	return uc
 }
 
-// AddWebauthnCredentials adds the "webauthn_credentials" edges to the WebauthnCredential entity.
-func (uc *UserCreate) AddWebauthnCredentials(w ...*WebauthnCredential) *UserCreate {
-	ids := make([]string, len(w))
-	for i := range w {
-		ids[i] = w[i].ID
+// SetNillableFvSessionID sets the "fv_session" edge to the FvSession entity by ID if the given value is not nil.
+func (uc *UserCreate) SetNillableFvSessionID(id *uuid.UUID) *UserCreate {
+	if id != nil {
+		uc = uc.SetFvSessionID(*id)
 	}
-	return uc.AddWebauthnCredentialIDs(ids...)
+	return uc
+}
+
+// SetFvSession sets the "fv_session" edge to the FvSession entity.
+func (uc *UserCreate) SetFvSession(f *FvSession) *UserCreate {
+	return uc.SetFvSessionID(f.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -263,6 +283,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := uc.mutation.WebauthnCredentialsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WebauthnCredentialsTable,
+			Columns: []string{user.WebauthnCredentialsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(webauthncredential.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := uc.mutation.PrimaryEmailIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -279,15 +315,15 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.WebauthnCredentialsIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.FvSessionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   user.WebauthnCredentialsTable,
-			Columns: []string{user.WebauthnCredentialsColumn},
+			Table:   user.FvSessionTable,
+			Columns: []string{user.FvSessionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(webauthncredential.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(fvsession.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

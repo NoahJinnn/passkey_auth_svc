@@ -31,7 +31,8 @@ func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("emails", Email.Type),
 		edge.To("passcodes", Passcode.Type),
-		edge.To("primary_email", PrimaryEmail.Type).Unique(),
 		edge.To("webauthn_credentials", WebauthnCredential.Type),
+		edge.To("primary_email", PrimaryEmail.Type).Unique(),
+		edge.To("fv_session", FvSession.Type).Unique(),
 	}
 }
