@@ -54,6 +54,21 @@ func (p *ProviderSvc) ListConnection(ctx context.Context, userId string) ([]*ent
 	return conns, nil
 }
 
+func (p *ProviderSvc) SaveConnection(ctx context.Context, userId string, env string, data interface{}) error {
+	dns := sqliteDns(userId)
+	storage := p.userStorage[dns]
+	json := toJSON(data)
+	_, err := storage.Connection.Create().
+		SetData(json).
+		SetEnv(env).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func sqliteDns(userId string) string {
 	return "file:" + userId + ".db?cache=shared&_fk=1"
 }
