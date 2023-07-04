@@ -4,13 +4,14 @@ import (
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/ms/auth/dal"
 )
 
 type waCredentialRepo struct {
 	init []*ent.WebauthnCredential
 }
 
-func NewWebauthnCredentialRepo(init []*ent.WebauthnCredential) *waCredentialRepo {
+func NewWebauthnCredentialRepo(init []*ent.WebauthnCredential) dal.IWebauthnCredentialRepo {
 	return &waCredentialRepo{append([]*ent.WebauthnCredential{}, init...)}
 }
 

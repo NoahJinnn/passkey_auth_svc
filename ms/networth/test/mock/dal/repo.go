@@ -9,7 +9,7 @@ import (
 
 func NewRepo(
 	db *ent.Client,
-) dal.INwRepo {
+) *repoT {
 	return &repoT{
 		Db: db,
 	}
@@ -24,4 +24,8 @@ func (r repoT) WithTx(ctx context.Context, exec func(ctx context.Context, client
 		return exec(ctx, db)
 	}
 	return txForw(nil)
+}
+
+func (r repoT) GetFvSessionRepo() dal.IFvSessionRepo {
+	panic("implement me")
 }

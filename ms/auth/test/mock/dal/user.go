@@ -3,9 +3,10 @@ package test
 import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/ms/auth/dal"
 )
 
-func NewUserRepo(init []*ent.User) *userRepo {
+func NewUserRepo(init []*ent.User) dal.IUserRepo {
 	return &userRepo{append([]*ent.User{}, init...)}
 }
 

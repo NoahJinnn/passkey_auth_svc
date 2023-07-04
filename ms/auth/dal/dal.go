@@ -21,11 +21,11 @@ const (
 // Repo provides data storage.
 type IAuthRepo interface {
 	WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error
-	GetUserRepo() *userRepo
-	GetWebauthnCredentialRepo() *waCredentialRepo
-	GetWebauthnSessionRepo() *waSessionRepo
-	GetEmailRepo() *emailRepo
-	GetPasscodeRepo() *passcodeRepo
+	GetUserRepo() IUserRepo
+	GetWebauthnCredentialRepo() IWebauthnCredentialRepo
+	GetWebauthnSessionRepo() IWebauthnSessionRepo
+	GetEmailRepo() IEmailRepo
+	GetPasscodeRepo() IPasscodeRepo
 }
 
 type AuthRepo struct {
@@ -58,22 +58,22 @@ func (r AuthRepo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Cli
 	return pgsql.WithTx(ctx, r.Db.PgClient, exec)
 }
 
-func (r AuthRepo) GetUserRepo() *userRepo {
+func (r AuthRepo) GetUserRepo() IUserRepo {
 	return r.userRepo
 }
 
-func (r AuthRepo) GetWebauthnCredentialRepo() *waCredentialRepo {
+func (r AuthRepo) GetWebauthnCredentialRepo() IWebauthnCredentialRepo {
 	return r.waCredentialRepo
 }
 
-func (r AuthRepo) GetWebauthnSessionRepo() *waSessionRepo {
+func (r AuthRepo) GetWebauthnSessionRepo() IWebauthnSessionRepo {
 	return r.waSessionRepo
 }
 
-func (r AuthRepo) GetEmailRepo() *emailRepo {
+func (r AuthRepo) GetEmailRepo() IEmailRepo {
 	return r.emailRepo
 }
 
-func (r AuthRepo) GetPasscodeRepo() *passcodeRepo {
+func (r AuthRepo) GetPasscodeRepo() IPasscodeRepo {
 	return r.passcodeRepo
 }

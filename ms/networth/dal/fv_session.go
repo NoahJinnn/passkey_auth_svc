@@ -15,7 +15,7 @@ type fvSessionRepo struct {
 	pgsql *ent.Client
 }
 
-func NewFvSessionRepo(pgsql *ent.Client) IFvSessionRepo {
+func NewFvSessionRepo(pgsql *ent.Client) *fvSessionRepo {
 	return &fvSessionRepo{pgsql: pgsql}
 }
 

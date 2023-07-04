@@ -2,13 +2,14 @@ package test
 
 import (
 	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/ms/auth/dal"
 )
 
 type waSessionRepo struct {
 	init []*ent.WebauthnSessionData
 }
 
-func NewWebauthnSessionRepo(init []*ent.WebauthnSessionData) *waSessionRepo {
+func NewWebauthnSessionRepo(init []*ent.WebauthnSessionData) dal.IWebauthnSessionRepo {
 	return &waSessionRepo{append([]*ent.WebauthnSessionData{}, init...)}
 }
 

@@ -3,9 +3,10 @@ package test
 import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/ms/auth/dal"
 )
 
-func NewEmailRepo(init []*ent.Email, primaryEmail *ent.PrimaryEmail) *emailRepo {
+func NewEmailRepo(init []*ent.Email, primaryEmail *ent.PrimaryEmail) dal.IEmailRepo {
 	return &emailRepo{
 		emails:       append([]*ent.Email{}, init...),
 		primaryEmail: primaryEmail,
