@@ -42,7 +42,7 @@ func (s *Service) Init(sharedCfg *sharedconfig.Shared, serveCmd *cobra.Command) 
 }
 
 // RunServe implements main.embeddedService interface.
-func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func(), dbClient *db.DbClient, sessionManager *session.Manager) (err error) {
+func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func(), dbClient *db.Db, sessionManager *session.Manager) (err error) {
 	log := structlog.FromContext(ctxShutdown, nil)
 
 	if s.cfg == nil {

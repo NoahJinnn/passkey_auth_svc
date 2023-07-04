@@ -17,7 +17,7 @@ type userRepo struct {
 	pgsql *ent.Client
 }
 
-func NewUserRepo(pgsql *ent.Client) IUserRepo {
+func NewUserRepo(pgsql *ent.Client) *userRepo {
 	return &userRepo{pgsql: pgsql}
 }
 

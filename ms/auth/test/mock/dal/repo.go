@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/ms/auth/dal"
 )
 
 type Ctx = context.Context
@@ -17,7 +16,7 @@ func NewRepo(
 	passcode []*ent.Passcode,
 	email []*ent.Email,
 	primaryEmail *ent.PrimaryEmail,
-) dal.IAuthRepo {
+) *repoT {
 	return &repoT{
 		Db:                     db,
 		userRepo:               NewUserRepo(user),
@@ -30,11 +29,11 @@ func NewRepo(
 
 type repoT struct {
 	Db                     *ent.Client
-	userRepo               dal.IUserRepo
-	webAuthnCredentialRepo dal.IWebauthnCredentialRepo
-	webAuthnSessionRepo    dal.IWebauthnSessionRepo
-	emailRepo              dal.IEmailRepo
-	passcodeRepo           dal.IPasscodeRepo
+	userRepo               *userRepo
+	webAuthnCredentialRepo *waCredentialRepo
+	webAuthnSessionRepo    *waSessionRepo
+	emailRepo              *emailRepo
+	passcodeRepo           *passcodeRepo
 }
 
 func (r repoT) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error {
@@ -44,22 +43,22 @@ func (r repoT) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client
 	return txForw(nil)
 }
 
-func (r repoT) GetUserRepo() dal.IUserRepo {
+func (r repoT) GetUserRepo() *userRepo {
 	return r.userRepo
 }
 
-func (r repoT) GetWebauthnCredentialRepo() dal.IWebauthnCredentialRepo {
+func (r repoT) GetWebauthnCredentialRepo() *waCredentialRepo {
 	return r.webAuthnCredentialRepo
 }
 
-func (r repoT) GetWebauthnSessionRepo() dal.IWebauthnSessionRepo {
+func (r repoT) GetWebauthnSessionRepo() *waSessionRepo {
 	return r.webAuthnSessionRepo
 }
 
-func (r repoT) GetEmailRepo() dal.IEmailRepo {
+func (r repoT) GetEmailRepo() *emailRepo {
 	return r.emailRepo
 }
 
-func (r repoT) GetPasscodeRepo() dal.IPasscodeRepo {
+func (r repoT) GetPasscodeRepo() *passcodeRepo {
 	return r.passcodeRepo
 }

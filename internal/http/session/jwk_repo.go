@@ -17,10 +17,10 @@ type IJwkRepo interface {
 }
 
 type jwkRepo struct {
-	db *db.DbClient
+	db *db.Db
 }
 
-func NewJwkRepo(db *db.DbClient) IJwkRepo {
+func NewJwkRepo(db *db.Db) IJwkRepo {
 	return &jwkRepo{db: db}
 }
 

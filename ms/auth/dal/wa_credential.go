@@ -16,15 +16,15 @@ type IWebauthnCredentialRepo interface {
 	Delete(ctx Ctx, credential ent.WebauthnCredential) error
 }
 
-type webauthnRepo struct {
+type waCredentialRepo struct {
 	pgsql *ent.Client
 }
 
-func NewWebauthnCredentialRepo(pgsql *ent.Client) IWebauthnCredentialRepo {
-	return &webauthnRepo{pgsql: pgsql}
+func NewWebauthnCredentialRepo(pgsql *ent.Client) *waCredentialRepo {
+	return &waCredentialRepo{pgsql: pgsql}
 }
 
-func (r *webauthnRepo) GetById(ctx Ctx, id string) (credential *ent.WebauthnCredential, err error) {
+func (r *waCredentialRepo) GetById(ctx Ctx, id string) (credential *ent.WebauthnCredential, err error) {
 	credential, err = r.pgsql.WebauthnCredential.
 		Query().
 		Where(webauthncredential.ID(id)).
@@ -37,7 +37,7 @@ func (r *webauthnRepo) GetById(ctx Ctx, id string) (credential *ent.WebauthnCred
 	return credential, nil
 }
 
-func (r *webauthnRepo) ListByUser(ctx Ctx, userId uuid.UUID) (credentials []*ent.WebauthnCredential, err error) {
+func (r *waCredentialRepo) ListByUser(ctx Ctx, userId uuid.UUID) (credentials []*ent.WebauthnCredential, err error) {
 	// Query all ent.WebauthnCredential by ent.User id and sort by created at return them
 	credentials, err = r.pgsql.WebauthnCredential.
 		Query().
@@ -53,7 +53,7 @@ func (r *webauthnRepo) ListByUser(ctx Ctx, userId uuid.UUID) (credentials []*ent
 	return credentials, nil
 }
 
-func (r *webauthnRepo) Create(ctx Ctx, credential ent.WebauthnCredential, transports []protocol.AuthenticatorTransport) error {
+func (r *waCredentialRepo) Create(ctx Ctx, credential ent.WebauthnCredential, transports []protocol.AuthenticatorTransport) error {
 	bulk := make([]*ent.WebauthnCredentialTransportCreate, len(transports))
 	for i, transport := range transports {
 		bulk[i] = r.pgsql.WebauthnCredentialTransport.Create().SetName(string(transport))
@@ -84,7 +84,7 @@ func (r *webauthnRepo) Create(ctx Ctx, credential ent.WebauthnCredential, transp
 	return nil
 }
 
-func (r *webauthnRepo) Update(ctx Ctx, credential ent.WebauthnCredential) error {
+func (r *waCredentialRepo) Update(ctx Ctx, credential ent.WebauthnCredential) error {
 	_, err := r.pgsql.WebauthnCredential.
 		UpdateOne(&credential).
 		Save(ctx)
@@ -94,7 +94,7 @@ func (r *webauthnRepo) Update(ctx Ctx, credential ent.WebauthnCredential) error 
 	return nil
 }
 
-func (r *webauthnRepo) Delete(ctx Ctx, credential ent.WebauthnCredential) error {
+func (r *waCredentialRepo) Delete(ctx Ctx, credential ent.WebauthnCredential) error {
 	err := r.pgsql.WebauthnCredential.DeleteOneID(credential.ID).Exec(ctx)
 	if err != nil {
 		return err

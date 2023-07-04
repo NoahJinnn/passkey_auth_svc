@@ -1,11 +1,15 @@
 package handlers
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 
+	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/http/errorhandler"
 	"github.com/hellohq/hqservice/ms/networth/app/finverse"
 	"github.com/labstack/echo/v4"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
 type FvAuthHandler struct {
@@ -17,12 +21,22 @@ func NewFvAuthHandler(srv *HttpDeps) *FvAuthHandler {
 }
 
 func (h *FvAuthHandler) CreateCustomerToken(c echo.Context) error {
+	sessionToken, ok := c.Get("session").(jwt.Token)
+	if !ok {
+		return errors.New("failed to cast session object")
+	}
+
+	userId, err := uuid.FromString(sessionToken.Subject())
+	if err != nil {
+		return fmt.Errorf("failed to parse subject as uuid: %w", err)
+	}
+
 	body := finverse.CreateCustomerToken{
 		ClientID:     h.Cfg.Finverse.ClientID,
 		ClientSecret: h.Cfg.Finverse.Secret,
 		GrantType:    "client_credentials",
 	}
-	token, err := h.GetFvAuthSvc().CreateCustomerToken(c.Request().Context(), &body)
+	token, err := h.GetFvAuthSvc().CreateCustomerToken(c.Request().Context(), &body, userId.String())
 	if err != nil {
 		httperr := errorhandler.ToHttpError(err)
 		return c.JSON(httperr.Code, httperr)

@@ -25,7 +25,7 @@ type (
 	embeddedService interface {
 		Name() string
 		Init(cfg *sharedconfig.Shared, serveCmd *cobra.Command) error
-		RunServe(ctxStartup, ctxShutdown Ctx, shutdown func(), dbClient *db.DbClient, sessionManage *session.Manager) error
+		RunServe(ctxStartup, ctxShutdown Ctx, shutdown func(), dbClient *db.Db, sessionManage *session.Manager) error
 	}
 )
 

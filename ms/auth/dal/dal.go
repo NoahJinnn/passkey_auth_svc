@@ -21,21 +21,36 @@ const (
 // Repo provides data storage.
 type IAuthRepo interface {
 	WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error
-	GetUserRepo() IUserRepo
-	GetWebauthnCredentialRepo() IWebauthnCredentialRepo
-	GetWebauthnSessionRepo() IWebauthnSessionRepo
-	GetEmailRepo() IEmailRepo
-	GetPasscodeRepo() IPasscodeRepo
+	GetUserRepo() *userRepo
+	GetWebauthnCredentialRepo() *waCredentialRepo
+	GetWebauthnSessionRepo() *waSessionRepo
+	GetEmailRepo() *emailRepo
+	GetPasscodeRepo() *passcodeRepo
 }
 
 type AuthRepo struct {
-	Db *db.DbClient
+	Db               *db.Db
+	userRepo         *userRepo
+	waCredentialRepo *waCredentialRepo
+	waSessionRepo    *waSessionRepo
+	emailRepo        *emailRepo
+	passcodeRepo     *passcodeRepo
 }
 type Ctx = context.Context
 
-func New(client *db.DbClient) *AuthRepo {
+func New(client *db.Db) *AuthRepo {
+	userRepo := NewUserRepo(client.PgClient)
+	waCredentialRepo := NewWebauthnCredentialRepo(client.PgClient)
+	waSessionRepo := NewWebauthnSessionRepo(client.PgClient)
+	emailRepo := NewEmailRepo(client.PgClient)
+	passcodeRepo := NewPasscodeRepo(client.PgClient)
 	return &AuthRepo{
-		Db: client,
+		Db:               client,
+		userRepo:         userRepo,
+		waCredentialRepo: waCredentialRepo,
+		waSessionRepo:    waSessionRepo,
+		emailRepo:        emailRepo,
+		passcodeRepo:     passcodeRepo,
 	}
 }
 
@@ -43,22 +58,22 @@ func (r AuthRepo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Cli
 	return pgsql.WithTx(ctx, r.Db.PgClient, exec)
 }
 
-func (r AuthRepo) GetUserRepo() IUserRepo {
-	return NewUserRepo(r.Db.PgClient)
+func (r AuthRepo) GetUserRepo() *userRepo {
+	return r.userRepo
 }
 
-func (r AuthRepo) GetWebauthnCredentialRepo() IWebauthnCredentialRepo {
-	return NewWebauthnCredentialRepo(r.Db.PgClient)
+func (r AuthRepo) GetWebauthnCredentialRepo() *waCredentialRepo {
+	return r.waCredentialRepo
 }
 
-func (r AuthRepo) GetWebauthnSessionRepo() IWebauthnSessionRepo {
-	return NewWebauthnSessionRepo(r.Db.PgClient)
+func (r AuthRepo) GetWebauthnSessionRepo() *waSessionRepo {
+	return r.waSessionRepo
 }
 
-func (r AuthRepo) GetEmailRepo() IEmailRepo {
-	return NewEmailRepo(r.Db.PgClient)
+func (r AuthRepo) GetEmailRepo() *emailRepo {
+	return r.emailRepo
 }
 
-func (r AuthRepo) GetPasscodeRepo() IPasscodeRepo {
-	return NewPasscodeRepo(r.Db.PgClient)
+func (r AuthRepo) GetPasscodeRepo() *passcodeRepo {
+	return r.passcodeRepo
 }

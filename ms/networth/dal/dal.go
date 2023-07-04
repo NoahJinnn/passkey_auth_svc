@@ -26,10 +26,10 @@ type INwRepo interface {
 }
 
 type NwRepo struct {
-	Db *db.DbClient
+	Db *db.Db
 }
 
-func New(client *db.DbClient) *NwRepo {
+func New(client *db.Db) *NwRepo {
 	return &NwRepo{
 		Db: client,
 	}
