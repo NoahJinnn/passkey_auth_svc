@@ -8,16 +8,31 @@ import (
 )
 
 type ProviderSvc struct {
-	sqliteClient *ent.Client
+	userConn map[string]*ent.Client
 }
 
-func NewProviderSvc(dsn string) *ProviderSvc {
-	sqliteClient := sqlite.NewSqliteClient(dsn)
+func NewProviderSvc() *ProviderSvc {
 	return &ProviderSvc{
-		sqliteClient: sqliteClient,
+		userConn: nil,
 	}
 }
 
-func (p *ProviderSvc) List(ctx context.Context) []*ent.Provider {
-	return p.sqliteClient.Provider.Query().AllX(ctx)
+func (p *ProviderSvc) NewConnect(userId string) {
+	dns := sqliteDns(userId)
+	if p.userConn == nil {
+		p.userConn = make(map[string]*ent.Client)
+		p.userConn[dns] = sqlite.NewSqliteClient(dns)
+	} else {
+		p.userConn[dns] = sqlite.NewSqliteClient(dns)
+	}
+}
+
+func (p *ProviderSvc) ListInstitution(ctx context.Context, userId string) []*ent.Institution {
+	dns := sqliteDns(userId)
+	conn := p.userConn[dns]
+	return conn.Institution.Query().AllX(ctx)
+}
+
+func sqliteDns(userId string) string {
+	return "file:" + userId + ".db?cache=shared&_fk=1"
 }

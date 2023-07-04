@@ -8,8 +8,9 @@ import (
 )
 
 func TestListProviders(t *testing.T) {
-	p := NewProviderSvc("file:user1.db?cache=shared&_fk=1")
+	p := NewProviderSvc()
+	p.NewConnect("user1")
 	ctx := context.Background()
-	providers := p.List(ctx)
-	assert.Equal(t, len(providers), 0)
+	instis := p.ListInstitution(ctx, "user1")
+	assert.Equal(t, len(instis), 0)
 }
