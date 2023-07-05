@@ -29,13 +29,28 @@ type IAuthRepo interface {
 }
 
 type AuthRepo struct {
-	Db *db.DbClient
+	Db               *db.Db
+	userRepo         *userRepo
+	waCredentialRepo *waCredentialRepo
+	waSessionRepo    *waSessionRepo
+	emailRepo        *emailRepo
+	passcodeRepo     *passcodeRepo
 }
 type Ctx = context.Context
 
-func New(client *db.DbClient) *AuthRepo {
+func New(client *db.Db) *AuthRepo {
+	userRepo := NewUserRepo(client.PgClient)
+	waCredentialRepo := NewWebauthnCredentialRepo(client.PgClient)
+	waSessionRepo := NewWebauthnSessionRepo(client.PgClient)
+	emailRepo := NewEmailRepo(client.PgClient)
+	passcodeRepo := NewPasscodeRepo(client.PgClient)
 	return &AuthRepo{
-		Db: client,
+		Db:               client,
+		userRepo:         userRepo,
+		waCredentialRepo: waCredentialRepo,
+		waSessionRepo:    waSessionRepo,
+		emailRepo:        emailRepo,
+		passcodeRepo:     passcodeRepo,
 	}
 }
 
@@ -44,21 +59,21 @@ func (r AuthRepo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Cli
 }
 
 func (r AuthRepo) GetUserRepo() IUserRepo {
-	return NewUserRepo(r.Db.PgClient)
+	return r.userRepo
 }
 
 func (r AuthRepo) GetWebauthnCredentialRepo() IWebauthnCredentialRepo {
-	return NewWebauthnCredentialRepo(r.Db.PgClient)
+	return r.waCredentialRepo
 }
 
 func (r AuthRepo) GetWebauthnSessionRepo() IWebauthnSessionRepo {
-	return NewWebauthnSessionRepo(r.Db.PgClient)
+	return r.waSessionRepo
 }
 
 func (r AuthRepo) GetEmailRepo() IEmailRepo {
-	return NewEmailRepo(r.Db.PgClient)
+	return r.emailRepo
 }
 
 func (r AuthRepo) GetPasscodeRepo() IPasscodeRepo {
-	return NewPasscodeRepo(r.Db.PgClient)
+	return r.passcodeRepo
 }

@@ -23,10 +23,12 @@ const (
 	EdgeEmails = "emails"
 	// EdgePasscodes holds the string denoting the passcodes edge name in mutations.
 	EdgePasscodes = "passcodes"
-	// EdgePrimaryEmail holds the string denoting the primary_email edge name in mutations.
-	EdgePrimaryEmail = "primary_email"
 	// EdgeWebauthnCredentials holds the string denoting the webauthn_credentials edge name in mutations.
 	EdgeWebauthnCredentials = "webauthn_credentials"
+	// EdgePrimaryEmail holds the string denoting the primary_email edge name in mutations.
+	EdgePrimaryEmail = "primary_email"
+	// EdgeFvSession holds the string denoting the fv_session edge name in mutations.
+	EdgeFvSession = "fv_session"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// EmailsTable is the table that holds the emails relation/edge.
@@ -43,13 +45,6 @@ const (
 	PasscodesInverseTable = "passcodes"
 	// PasscodesColumn is the table column denoting the passcodes relation/edge.
 	PasscodesColumn = "user_id"
-	// PrimaryEmailTable is the table that holds the primary_email relation/edge.
-	PrimaryEmailTable = "primary_emails"
-	// PrimaryEmailInverseTable is the table name for the PrimaryEmail entity.
-	// It exists in this package in order to avoid circular dependency with the "primaryemail" package.
-	PrimaryEmailInverseTable = "primary_emails"
-	// PrimaryEmailColumn is the table column denoting the primary_email relation/edge.
-	PrimaryEmailColumn = "user_id"
 	// WebauthnCredentialsTable is the table that holds the webauthn_credentials relation/edge.
 	WebauthnCredentialsTable = "webauthn_credentials"
 	// WebauthnCredentialsInverseTable is the table name for the WebauthnCredential entity.
@@ -57,6 +52,20 @@ const (
 	WebauthnCredentialsInverseTable = "webauthn_credentials"
 	// WebauthnCredentialsColumn is the table column denoting the webauthn_credentials relation/edge.
 	WebauthnCredentialsColumn = "user_id"
+	// PrimaryEmailTable is the table that holds the primary_email relation/edge.
+	PrimaryEmailTable = "primary_emails"
+	// PrimaryEmailInverseTable is the table name for the PrimaryEmail entity.
+	// It exists in this package in order to avoid circular dependency with the "primaryemail" package.
+	PrimaryEmailInverseTable = "primary_emails"
+	// PrimaryEmailColumn is the table column denoting the primary_email relation/edge.
+	PrimaryEmailColumn = "user_id"
+	// FvSessionTable is the table that holds the fv_session relation/edge.
+	FvSessionTable = "fv_sessions"
+	// FvSessionInverseTable is the table name for the FvSession entity.
+	// It exists in this package in order to avoid circular dependency with the "fvsession" package.
+	FvSessionInverseTable = "fv_sessions"
+	// FvSessionColumn is the table column denoting the fv_session relation/edge.
+	FvSessionColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -133,13 +142,6 @@ func ByPasscodes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByPrimaryEmailField orders the results by primary_email field.
-func ByPrimaryEmailField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPrimaryEmailStep(), sql.OrderByField(field, opts...))
-	}
-}
-
 // ByWebauthnCredentialsCount orders the results by webauthn_credentials count.
 func ByWebauthnCredentialsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -151,6 +153,20 @@ func ByWebauthnCredentialsCount(opts ...sql.OrderTermOption) OrderOption {
 func ByWebauthnCredentials(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newWebauthnCredentialsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPrimaryEmailField orders the results by primary_email field.
+func ByPrimaryEmailField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPrimaryEmailStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByFvSessionField orders the results by fv_session field.
+func ByFvSessionField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFvSessionStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newEmailsStep() *sqlgraph.Step {
@@ -167,6 +183,13 @@ func newPasscodesStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, PasscodesTable, PasscodesColumn),
 	)
 }
+func newWebauthnCredentialsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(WebauthnCredentialsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, WebauthnCredentialsTable, WebauthnCredentialsColumn),
+	)
+}
 func newPrimaryEmailStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -174,10 +197,10 @@ func newPrimaryEmailStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2O, false, PrimaryEmailTable, PrimaryEmailColumn),
 	)
 }
-func newWebauthnCredentialsStep() *sqlgraph.Step {
+func newFvSessionStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(WebauthnCredentialsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, WebauthnCredentialsTable, WebauthnCredentialsColumn),
+		sqlgraph.To(FvSessionInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, FvSessionTable, FvSessionColumn),
 	)
 }

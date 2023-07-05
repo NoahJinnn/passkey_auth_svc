@@ -21,6 +21,18 @@ func (f EmailFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EmailMutation", m)
 }
 
+// The FvSessionFunc type is an adapter to allow the use of ordinary
+// function as FvSession mutator.
+type FvSessionFunc func(context.Context, *ent.FvSessionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FvSessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.FvSessionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FvSessionMutation", m)
+}
+
 // The IdentityFunc type is an adapter to allow the use of ordinary
 // function as Identity mutator.
 type IdentityFunc func(context.Context, *ent.IdentityMutation) (ent.Value, error)

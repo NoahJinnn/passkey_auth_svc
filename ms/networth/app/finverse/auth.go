@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/hellohq/hqservice/ms/networth/config"
+	"github.com/hellohq/hqservice/ms/networth/dal"
 	"github.com/hellohq/hqservice/pkg/httpx"
 )
 
@@ -21,6 +22,7 @@ type IFvAuthSvc interface {
 type FvAuthSvc struct {
 	config *config.Config
 	req    *httpx.Req
+	repo   dal.INwRepo
 }
 
 func NewFvAuthSvc(cfg *config.Config) *FvAuthSvc {
@@ -31,7 +33,7 @@ func NewFvAuthSvc(cfg *config.Config) *FvAuthSvc {
 	return &FvAuthSvc{config: cfg, req: req}
 }
 
-func (svc *FvAuthSvc) CreateCustomerToken(ctx context.Context, cct *CreateCustomerToken) (*CustomerToken, error) {
+func (svc *FvAuthSvc) CreateCustomerToken(ctx context.Context, cct *CreateCustomerToken, userId string) (*CustomerToken, error) {
 	b, err := json.Marshal(cct)
 	if err != nil {
 		return nil, err
@@ -52,6 +54,8 @@ func (svc *FvAuthSvc) CreateCustomerToken(ctx context.Context, cct *CreateCustom
 	}
 
 	accessToken = result.AccessToken
+	// TODO: Save finverse session to db
+	// svc.repo.GetFvSessionRepo()
 	return &result, nil
 }
 

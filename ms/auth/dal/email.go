@@ -22,7 +22,7 @@ type emailRepo struct {
 	pgsql *ent.Client
 }
 
-func NewEmailRepo(pgsql *ent.Client) IEmailRepo {
+func NewEmailRepo(pgsql *ent.Client) *emailRepo {
 	return &emailRepo{pgsql: pgsql}
 }
 

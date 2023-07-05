@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
+	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/identity"
 	"github.com/hellohq/hqservice/ent/jwk"
 	"github.com/hellohq/hqservice/ent/passcode"
@@ -43,6 +44,22 @@ func init() {
 	emailDescID := emailFields[0].Descriptor()
 	// email.DefaultID holds the default value on creation for the id field.
 	email.DefaultID = emailDescID.Default.(func() uuid.UUID)
+	fvsessionFields := schema.FvSession{}.Fields()
+	_ = fvsessionFields
+	// fvsessionDescCreatedAt is the schema descriptor for created_at field.
+	fvsessionDescCreatedAt := fvsessionFields[6].Descriptor()
+	// fvsession.DefaultCreatedAt holds the default value on creation for the created_at field.
+	fvsession.DefaultCreatedAt = fvsessionDescCreatedAt.Default.(func() time.Time)
+	// fvsessionDescUpdatedAt is the schema descriptor for updated_at field.
+	fvsessionDescUpdatedAt := fvsessionFields[7].Descriptor()
+	// fvsession.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	fvsession.DefaultUpdatedAt = fvsessionDescUpdatedAt.Default.(func() time.Time)
+	// fvsession.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	fvsession.UpdateDefaultUpdatedAt = fvsessionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// fvsessionDescID is the schema descriptor for id field.
+	fvsessionDescID := fvsessionFields[0].Descriptor()
+	// fvsession.DefaultID holds the default value on creation for the id field.
+	fvsession.DefaultID = fvsessionDescID.Default.(func() uuid.UUID)
 	identityFields := schema.Identity{}.Fields()
 	_ = identityFields
 	// identityDescCreatedAt is the schema descriptor for created_at field.

@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
+	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/predicate"
 	"github.com/hellohq/hqservice/ent/primaryemail"
@@ -29,8 +30,9 @@ type UserQuery struct {
 	predicates              []predicate.User
 	withEmails              *EmailQuery
 	withPasscodes           *PasscodeQuery
-	withPrimaryEmail        *PrimaryEmailQuery
 	withWebauthnCredentials *WebauthnCredentialQuery
+	withPrimaryEmail        *PrimaryEmailQuery
+	withFvSession           *FvSessionQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -111,6 +113,28 @@ func (uq *UserQuery) QueryPasscodes() *PasscodeQuery {
 	return query
 }
 
+// QueryWebauthnCredentials chains the current query on the "webauthn_credentials" edge.
+func (uq *UserQuery) QueryWebauthnCredentials() *WebauthnCredentialQuery {
+	query := (&WebauthnCredentialClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(webauthncredential.Table, webauthncredential.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.WebauthnCredentialsTable, user.WebauthnCredentialsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QueryPrimaryEmail chains the current query on the "primary_email" edge.
 func (uq *UserQuery) QueryPrimaryEmail() *PrimaryEmailQuery {
 	query := (&PrimaryEmailClient{config: uq.config}).Query()
@@ -133,9 +157,9 @@ func (uq *UserQuery) QueryPrimaryEmail() *PrimaryEmailQuery {
 	return query
 }
 
-// QueryWebauthnCredentials chains the current query on the "webauthn_credentials" edge.
-func (uq *UserQuery) QueryWebauthnCredentials() *WebauthnCredentialQuery {
-	query := (&WebauthnCredentialClient{config: uq.config}).Query()
+// QueryFvSession chains the current query on the "fv_session" edge.
+func (uq *UserQuery) QueryFvSession() *FvSessionQuery {
+	query := (&FvSessionClient{config: uq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -146,8 +170,8 @@ func (uq *UserQuery) QueryWebauthnCredentials() *WebauthnCredentialQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(webauthncredential.Table, webauthncredential.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.WebauthnCredentialsTable, user.WebauthnCredentialsColumn),
+			sqlgraph.To(fvsession.Table, fvsession.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.FvSessionTable, user.FvSessionColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -349,8 +373,9 @@ func (uq *UserQuery) Clone() *UserQuery {
 		predicates:              append([]predicate.User{}, uq.predicates...),
 		withEmails:              uq.withEmails.Clone(),
 		withPasscodes:           uq.withPasscodes.Clone(),
-		withPrimaryEmail:        uq.withPrimaryEmail.Clone(),
 		withWebauthnCredentials: uq.withWebauthnCredentials.Clone(),
+		withPrimaryEmail:        uq.withPrimaryEmail.Clone(),
+		withFvSession:           uq.withFvSession.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -379,6 +404,17 @@ func (uq *UserQuery) WithPasscodes(opts ...func(*PasscodeQuery)) *UserQuery {
 	return uq
 }
 
+// WithWebauthnCredentials tells the query-builder to eager-load the nodes that are connected to
+// the "webauthn_credentials" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithWebauthnCredentials(opts ...func(*WebauthnCredentialQuery)) *UserQuery {
+	query := (&WebauthnCredentialClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withWebauthnCredentials = query
+	return uq
+}
+
 // WithPrimaryEmail tells the query-builder to eager-load the nodes that are connected to
 // the "primary_email" edge. The optional arguments are used to configure the query builder of the edge.
 func (uq *UserQuery) WithPrimaryEmail(opts ...func(*PrimaryEmailQuery)) *UserQuery {
@@ -390,14 +426,14 @@ func (uq *UserQuery) WithPrimaryEmail(opts ...func(*PrimaryEmailQuery)) *UserQue
 	return uq
 }
 
-// WithWebauthnCredentials tells the query-builder to eager-load the nodes that are connected to
-// the "webauthn_credentials" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithWebauthnCredentials(opts ...func(*WebauthnCredentialQuery)) *UserQuery {
-	query := (&WebauthnCredentialClient{config: uq.config}).Query()
+// WithFvSession tells the query-builder to eager-load the nodes that are connected to
+// the "fv_session" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithFvSession(opts ...func(*FvSessionQuery)) *UserQuery {
+	query := (&FvSessionClient{config: uq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withWebauthnCredentials = query
+	uq.withFvSession = query
 	return uq
 }
 
@@ -479,11 +515,12 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [5]bool{
 			uq.withEmails != nil,
 			uq.withPasscodes != nil,
-			uq.withPrimaryEmail != nil,
 			uq.withWebauthnCredentials != nil,
+			uq.withPrimaryEmail != nil,
+			uq.withFvSession != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -518,18 +555,24 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
-	if query := uq.withPrimaryEmail; query != nil {
-		if err := uq.loadPrimaryEmail(ctx, query, nodes, nil,
-			func(n *User, e *PrimaryEmail) { n.Edges.PrimaryEmail = e }); err != nil {
-			return nil, err
-		}
-	}
 	if query := uq.withWebauthnCredentials; query != nil {
 		if err := uq.loadWebauthnCredentials(ctx, query, nodes,
 			func(n *User) { n.Edges.WebauthnCredentials = []*WebauthnCredential{} },
 			func(n *User, e *WebauthnCredential) {
 				n.Edges.WebauthnCredentials = append(n.Edges.WebauthnCredentials, e)
 			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withPrimaryEmail; query != nil {
+		if err := uq.loadPrimaryEmail(ctx, query, nodes, nil,
+			func(n *User, e *PrimaryEmail) { n.Edges.PrimaryEmail = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withFvSession; query != nil {
+		if err := uq.loadFvSession(ctx, query, nodes, nil,
+			func(n *User, e *FvSession) { n.Edges.FvSession = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -599,6 +642,36 @@ func (uq *UserQuery) loadPasscodes(ctx context.Context, query *PasscodeQuery, no
 	}
 	return nil
 }
+func (uq *UserQuery) loadWebauthnCredentials(ctx context.Context, query *WebauthnCredentialQuery, nodes []*User, init func(*User), assign func(*User, *WebauthnCredential)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(webauthncredential.FieldUserID)
+	}
+	query.Where(predicate.WebauthnCredential(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.WebauthnCredentialsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 func (uq *UserQuery) loadPrimaryEmail(ctx context.Context, query *PrimaryEmailQuery, nodes []*User, init func(*User), assign func(*User, *PrimaryEmail)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*User)
@@ -629,21 +702,18 @@ func (uq *UserQuery) loadPrimaryEmail(ctx context.Context, query *PrimaryEmailQu
 	}
 	return nil
 }
-func (uq *UserQuery) loadWebauthnCredentials(ctx context.Context, query *WebauthnCredentialQuery, nodes []*User, init func(*User), assign func(*User, *WebauthnCredential)) error {
+func (uq *UserQuery) loadFvSession(ctx context.Context, query *FvSessionQuery, nodes []*User, init func(*User), assign func(*User, *FvSession)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*User)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(webauthncredential.FieldUserID)
+		query.ctx.AppendFieldOnce(fvsession.FieldUserID)
 	}
-	query.Where(predicate.WebauthnCredential(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.WebauthnCredentialsColumn), fks...))
+	query.Where(predicate.FvSession(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.FvSessionColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -651,9 +721,12 @@ func (uq *UserQuery) loadWebauthnCredentials(ctx context.Context, query *Webauth
 	}
 	for _, n := range neighbors {
 		fk := n.UserID
-		node, ok := nodeids[fk]
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

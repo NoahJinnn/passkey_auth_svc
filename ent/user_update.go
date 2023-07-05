@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
+	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/predicate"
 	"github.com/hellohq/hqservice/ent/primaryemail"
@@ -69,6 +70,21 @@ func (uu *UserUpdate) AddPasscodes(p ...*Passcode) *UserUpdate {
 	return uu.AddPasscodeIDs(ids...)
 }
 
+// AddWebauthnCredentialIDs adds the "webauthn_credentials" edge to the WebauthnCredential entity by IDs.
+func (uu *UserUpdate) AddWebauthnCredentialIDs(ids ...string) *UserUpdate {
+	uu.mutation.AddWebauthnCredentialIDs(ids...)
+	return uu
+}
+
+// AddWebauthnCredentials adds the "webauthn_credentials" edges to the WebauthnCredential entity.
+func (uu *UserUpdate) AddWebauthnCredentials(w ...*WebauthnCredential) *UserUpdate {
+	ids := make([]string, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uu.AddWebauthnCredentialIDs(ids...)
+}
+
 // SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID.
 func (uu *UserUpdate) SetPrimaryEmailID(id uuid.UUID) *UserUpdate {
 	uu.mutation.SetPrimaryEmailID(id)
@@ -88,19 +104,23 @@ func (uu *UserUpdate) SetPrimaryEmail(p *PrimaryEmail) *UserUpdate {
 	return uu.SetPrimaryEmailID(p.ID)
 }
 
-// AddWebauthnCredentialIDs adds the "webauthn_credentials" edge to the WebauthnCredential entity by IDs.
-func (uu *UserUpdate) AddWebauthnCredentialIDs(ids ...string) *UserUpdate {
-	uu.mutation.AddWebauthnCredentialIDs(ids...)
+// SetFvSessionID sets the "fv_session" edge to the FvSession entity by ID.
+func (uu *UserUpdate) SetFvSessionID(id uuid.UUID) *UserUpdate {
+	uu.mutation.SetFvSessionID(id)
 	return uu
 }
 
-// AddWebauthnCredentials adds the "webauthn_credentials" edges to the WebauthnCredential entity.
-func (uu *UserUpdate) AddWebauthnCredentials(w ...*WebauthnCredential) *UserUpdate {
-	ids := make([]string, len(w))
-	for i := range w {
-		ids[i] = w[i].ID
+// SetNillableFvSessionID sets the "fv_session" edge to the FvSession entity by ID if the given value is not nil.
+func (uu *UserUpdate) SetNillableFvSessionID(id *uuid.UUID) *UserUpdate {
+	if id != nil {
+		uu = uu.SetFvSessionID(*id)
 	}
-	return uu.AddWebauthnCredentialIDs(ids...)
+	return uu
+}
+
+// SetFvSession sets the "fv_session" edge to the FvSession entity.
+func (uu *UserUpdate) SetFvSession(f *FvSession) *UserUpdate {
+	return uu.SetFvSessionID(f.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -150,12 +170,6 @@ func (uu *UserUpdate) RemovePasscodes(p ...*Passcode) *UserUpdate {
 	return uu.RemovePasscodeIDs(ids...)
 }
 
-// ClearPrimaryEmail clears the "primary_email" edge to the PrimaryEmail entity.
-func (uu *UserUpdate) ClearPrimaryEmail() *UserUpdate {
-	uu.mutation.ClearPrimaryEmail()
-	return uu
-}
-
 // ClearWebauthnCredentials clears all "webauthn_credentials" edges to the WebauthnCredential entity.
 func (uu *UserUpdate) ClearWebauthnCredentials() *UserUpdate {
 	uu.mutation.ClearWebauthnCredentials()
@@ -175,6 +189,18 @@ func (uu *UserUpdate) RemoveWebauthnCredentials(w ...*WebauthnCredential) *UserU
 		ids[i] = w[i].ID
 	}
 	return uu.RemoveWebauthnCredentialIDs(ids...)
+}
+
+// ClearPrimaryEmail clears the "primary_email" edge to the PrimaryEmail entity.
+func (uu *UserUpdate) ClearPrimaryEmail() *UserUpdate {
+	uu.mutation.ClearPrimaryEmail()
+	return uu
+}
+
+// ClearFvSession clears the "fv_session" edge to the FvSession entity.
+func (uu *UserUpdate) ClearFvSession() *UserUpdate {
+	uu.mutation.ClearFvSession()
+	return uu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -315,35 +341,6 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.PrimaryEmailCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.PrimaryEmailTable,
-			Columns: []string{user.PrimaryEmailColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(primaryemail.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.PrimaryEmailIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.PrimaryEmailTable,
-			Columns: []string{user.PrimaryEmailColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(primaryemail.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if uu.mutation.WebauthnCredentialsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -382,6 +379,64 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(webauthncredential.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.PrimaryEmailCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.PrimaryEmailTable,
+			Columns: []string{user.PrimaryEmailColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(primaryemail.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.PrimaryEmailIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.PrimaryEmailTable,
+			Columns: []string{user.PrimaryEmailColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(primaryemail.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.FvSessionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.FvSessionTable,
+			Columns: []string{user.FvSessionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fvsession.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.FvSessionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.FvSessionTable,
+			Columns: []string{user.FvSessionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fvsession.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -445,6 +500,21 @@ func (uuo *UserUpdateOne) AddPasscodes(p ...*Passcode) *UserUpdateOne {
 	return uuo.AddPasscodeIDs(ids...)
 }
 
+// AddWebauthnCredentialIDs adds the "webauthn_credentials" edge to the WebauthnCredential entity by IDs.
+func (uuo *UserUpdateOne) AddWebauthnCredentialIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.AddWebauthnCredentialIDs(ids...)
+	return uuo
+}
+
+// AddWebauthnCredentials adds the "webauthn_credentials" edges to the WebauthnCredential entity.
+func (uuo *UserUpdateOne) AddWebauthnCredentials(w ...*WebauthnCredential) *UserUpdateOne {
+	ids := make([]string, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uuo.AddWebauthnCredentialIDs(ids...)
+}
+
 // SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID.
 func (uuo *UserUpdateOne) SetPrimaryEmailID(id uuid.UUID) *UserUpdateOne {
 	uuo.mutation.SetPrimaryEmailID(id)
@@ -464,19 +534,23 @@ func (uuo *UserUpdateOne) SetPrimaryEmail(p *PrimaryEmail) *UserUpdateOne {
 	return uuo.SetPrimaryEmailID(p.ID)
 }
 
-// AddWebauthnCredentialIDs adds the "webauthn_credentials" edge to the WebauthnCredential entity by IDs.
-func (uuo *UserUpdateOne) AddWebauthnCredentialIDs(ids ...string) *UserUpdateOne {
-	uuo.mutation.AddWebauthnCredentialIDs(ids...)
+// SetFvSessionID sets the "fv_session" edge to the FvSession entity by ID.
+func (uuo *UserUpdateOne) SetFvSessionID(id uuid.UUID) *UserUpdateOne {
+	uuo.mutation.SetFvSessionID(id)
 	return uuo
 }
 
-// AddWebauthnCredentials adds the "webauthn_credentials" edges to the WebauthnCredential entity.
-func (uuo *UserUpdateOne) AddWebauthnCredentials(w ...*WebauthnCredential) *UserUpdateOne {
-	ids := make([]string, len(w))
-	for i := range w {
-		ids[i] = w[i].ID
+// SetNillableFvSessionID sets the "fv_session" edge to the FvSession entity by ID if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableFvSessionID(id *uuid.UUID) *UserUpdateOne {
+	if id != nil {
+		uuo = uuo.SetFvSessionID(*id)
 	}
-	return uuo.AddWebauthnCredentialIDs(ids...)
+	return uuo
+}
+
+// SetFvSession sets the "fv_session" edge to the FvSession entity.
+func (uuo *UserUpdateOne) SetFvSession(f *FvSession) *UserUpdateOne {
+	return uuo.SetFvSessionID(f.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -526,12 +600,6 @@ func (uuo *UserUpdateOne) RemovePasscodes(p ...*Passcode) *UserUpdateOne {
 	return uuo.RemovePasscodeIDs(ids...)
 }
 
-// ClearPrimaryEmail clears the "primary_email" edge to the PrimaryEmail entity.
-func (uuo *UserUpdateOne) ClearPrimaryEmail() *UserUpdateOne {
-	uuo.mutation.ClearPrimaryEmail()
-	return uuo
-}
-
 // ClearWebauthnCredentials clears all "webauthn_credentials" edges to the WebauthnCredential entity.
 func (uuo *UserUpdateOne) ClearWebauthnCredentials() *UserUpdateOne {
 	uuo.mutation.ClearWebauthnCredentials()
@@ -551,6 +619,18 @@ func (uuo *UserUpdateOne) RemoveWebauthnCredentials(w ...*WebauthnCredential) *U
 		ids[i] = w[i].ID
 	}
 	return uuo.RemoveWebauthnCredentialIDs(ids...)
+}
+
+// ClearPrimaryEmail clears the "primary_email" edge to the PrimaryEmail entity.
+func (uuo *UserUpdateOne) ClearPrimaryEmail() *UserUpdateOne {
+	uuo.mutation.ClearPrimaryEmail()
+	return uuo
+}
+
+// ClearFvSession clears the "fv_session" edge to the FvSession entity.
+func (uuo *UserUpdateOne) ClearFvSession() *UserUpdateOne {
+	uuo.mutation.ClearFvSession()
+	return uuo
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -721,35 +801,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.PrimaryEmailCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.PrimaryEmailTable,
-			Columns: []string{user.PrimaryEmailColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(primaryemail.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.PrimaryEmailIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.PrimaryEmailTable,
-			Columns: []string{user.PrimaryEmailColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(primaryemail.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if uuo.mutation.WebauthnCredentialsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -788,6 +839,64 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(webauthncredential.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.PrimaryEmailCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.PrimaryEmailTable,
+			Columns: []string{user.PrimaryEmailColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(primaryemail.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.PrimaryEmailIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.PrimaryEmailTable,
+			Columns: []string{user.PrimaryEmailColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(primaryemail.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.FvSessionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.FvSessionTable,
+			Columns: []string{user.FvSessionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fvsession.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.FvSessionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.FvSessionTable,
+			Columns: []string{user.FvSessionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fvsession.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

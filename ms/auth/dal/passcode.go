@@ -17,7 +17,7 @@ type passcodeRepo struct {
 	pgsql *ent.Client
 }
 
-func NewPasscodeRepo(pgsql *ent.Client) IPasscodeRepo {
+func NewPasscodeRepo(pgsql *ent.Client) *passcodeRepo {
 	return &passcodeRepo{pgsql: pgsql}
 }
 

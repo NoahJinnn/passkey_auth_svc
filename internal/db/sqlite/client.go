@@ -20,7 +20,6 @@ func NewSqliteClient(dsn string) *ent.Client {
 	if err := client.Schema.Create(ctx,
 		migrate.WithDropIndex(true),
 		migrate.WithDropColumn(true),
-		migrate.WithGlobalUniqueID(true),
 	); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}

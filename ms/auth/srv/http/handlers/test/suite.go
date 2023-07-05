@@ -132,7 +132,7 @@ func (s *Suite) SetupSuite() {
 	s.NoError(err)
 	pgClient := pgsql.NewPgClient(testDb.DatabaseUrl)
 
-	dbClient := &db.DbClient{PgClient: pgClient}
+	dbClient := &db.Db{PgClient: pgClient}
 	repo := dal.New(dbClient)
 	jwkRepo := session.NewJwkRepo(dbClient)
 	jwkManager, err := session.NewDefaultManager(sharedCfg.Secrets.Keys, jwkRepo)

@@ -23,18 +23,26 @@ const (
 // Repo provides data storage.
 type INwRepo interface {
 	WithTx(ctx Ctx, exec func(ctx Ctx, client *ent.Client) error) error
+	GetFvSessionRepo() IFvSessionRepo
 }
 
 type NwRepo struct {
-	Db *db.DbClient
+	Db            *db.Db
+	fvSessionRepo *fvSessionRepo
 }
 
-func New(client *db.DbClient) *NwRepo {
+func New(client *db.Db) *NwRepo {
+	fvSessionRepo := NewFvSessionRepo(client.PgClient)
 	return &NwRepo{
-		Db: client,
+		Db:            client,
+		fvSessionRepo: fvSessionRepo,
 	}
 }
 
 func (r NwRepo) WithTx(ctx Ctx, exec func(ctx Ctx, client *ent.Client) error) error {
 	return pgsql.WithTx(ctx, r.Db.PgClient, exec)
+}
+
+func (r NwRepo) GetFvSessionRepo() IFvSessionRepo {
+	return r.fvSessionRepo
 }

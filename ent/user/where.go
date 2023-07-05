@@ -192,6 +192,29 @@ func HasPasscodesWith(preds ...predicate.Passcode) predicate.User {
 	})
 }
 
+// HasWebauthnCredentials applies the HasEdge predicate on the "webauthn_credentials" edge.
+func HasWebauthnCredentials() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, WebauthnCredentialsTable, WebauthnCredentialsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasWebauthnCredentialsWith applies the HasEdge predicate on the "webauthn_credentials" edge with a given conditions (other predicates).
+func HasWebauthnCredentialsWith(preds ...predicate.WebauthnCredential) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newWebauthnCredentialsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasPrimaryEmail applies the HasEdge predicate on the "primary_email" edge.
 func HasPrimaryEmail() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -215,21 +238,21 @@ func HasPrimaryEmailWith(preds ...predicate.PrimaryEmail) predicate.User {
 	})
 }
 
-// HasWebauthnCredentials applies the HasEdge predicate on the "webauthn_credentials" edge.
-func HasWebauthnCredentials() predicate.User {
+// HasFvSession applies the HasEdge predicate on the "fv_session" edge.
+func HasFvSession() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, WebauthnCredentialsTable, WebauthnCredentialsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, FvSessionTable, FvSessionColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasWebauthnCredentialsWith applies the HasEdge predicate on the "webauthn_credentials" edge with a given conditions (other predicates).
-func HasWebauthnCredentialsWith(preds ...predicate.WebauthnCredential) predicate.User {
+// HasFvSessionWith applies the HasEdge predicate on the "fv_session" edge with a given conditions (other predicates).
+func HasFvSessionWith(preds ...predicate.FvSession) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := newWebauthnCredentialsStep()
+		step := newFvSessionStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

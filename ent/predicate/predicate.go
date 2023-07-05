@@ -9,6 +9,9 @@ import (
 // Email is the predicate function for email builders.
 type Email func(*sql.Selector)
 
+// FvSession is the predicate function for fvsession builders.
+type FvSession func(*sql.Selector)
+
 // Identity is the predicate function for identity builders.
 type Identity func(*sql.Selector)
 

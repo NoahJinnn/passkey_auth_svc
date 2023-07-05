@@ -5,15 +5,15 @@ import (
 	"github.com/hellohq/hqservice/ms/auth/dal"
 )
 
-type webauthnSessionRepo struct {
+type waSessionRepo struct {
 	init []*ent.WebauthnSessionData
 }
 
 func NewWebauthnSessionRepo(init []*ent.WebauthnSessionData) dal.IWebauthnSessionRepo {
-	return &webauthnSessionRepo{append([]*ent.WebauthnSessionData{}, init...)}
+	return &waSessionRepo{append([]*ent.WebauthnSessionData{}, init...)}
 }
 
-func (r *webauthnSessionRepo) GetByChallenge(ctx Ctx, challenge string) (*ent.WebauthnSessionData, error) {
+func (r *waSessionRepo) GetByChallenge(ctx Ctx, challenge string) (*ent.WebauthnSessionData, error) {
 	var session *ent.WebauthnSessionData
 	for _, s := range r.init {
 		if s.Challenge == challenge {
@@ -23,12 +23,12 @@ func (r *webauthnSessionRepo) GetByChallenge(ctx Ctx, challenge string) (*ent.We
 	return session, nil
 }
 
-func (r *webauthnSessionRepo) Create(ctx Ctx, sessionData ent.WebauthnSessionData) error {
+func (r *waSessionRepo) Create(ctx Ctx, sessionData ent.WebauthnSessionData) error {
 	r.init = append(r.init, &sessionData)
 	return nil
 }
 
-func (r *webauthnSessionRepo) Delete(ctx Ctx, sessionData ent.WebauthnSessionData) error {
+func (r *waSessionRepo) Delete(ctx Ctx, sessionData ent.WebauthnSessionData) error {
 	index := -1
 	for i, data := range r.init {
 		if data.ID == sessionData.ID {

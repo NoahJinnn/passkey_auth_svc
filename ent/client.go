@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/hellohq/hqservice/ent/email"
+	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/identity"
 	"github.com/hellohq/hqservice/ent/jwk"
 	"github.com/hellohq/hqservice/ent/passcode"
@@ -34,6 +35,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Email is the client for interacting with the Email builders.
 	Email *EmailClient
+	// FvSession is the client for interacting with the FvSession builders.
+	FvSession *FvSessionClient
 	// Identity is the client for interacting with the Identity builders.
 	Identity *IdentityClient
 	// Jwk is the client for interacting with the Jwk builders.
@@ -66,6 +69,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Email = NewEmailClient(c.config)
+	c.FvSession = NewFvSessionClient(c.config)
 	c.Identity = NewIdentityClient(c.config)
 	c.Jwk = NewJwkClient(c.config)
 	c.Passcode = NewPasscodeClient(c.config)
@@ -158,6 +162,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:                                  ctx,
 		config:                               cfg,
 		Email:                                NewEmailClient(cfg),
+		FvSession:                            NewFvSessionClient(cfg),
 		Identity:                             NewIdentityClient(cfg),
 		Jwk:                                  NewJwkClient(cfg),
 		Passcode:                             NewPasscodeClient(cfg),
@@ -187,6 +192,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:                                  ctx,
 		config:                               cfg,
 		Email:                                NewEmailClient(cfg),
+		FvSession:                            NewFvSessionClient(cfg),
 		Identity:                             NewIdentityClient(cfg),
 		Jwk:                                  NewJwkClient(cfg),
 		Passcode:                             NewPasscodeClient(cfg),
@@ -225,7 +231,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Email, c.Identity, c.Jwk, c.Passcode, c.PrimaryEmail, c.User,
+		c.Email, c.FvSession, c.Identity, c.Jwk, c.Passcode, c.PrimaryEmail, c.User,
 		c.WebauthnCredential, c.WebauthnCredentialTransport, c.WebauthnSessionData,
 		c.WebauthnSessionDataAllowedCredential,
 	} {
@@ -237,7 +243,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Email, c.Identity, c.Jwk, c.Passcode, c.PrimaryEmail, c.User,
+		c.Email, c.FvSession, c.Identity, c.Jwk, c.Passcode, c.PrimaryEmail, c.User,
 		c.WebauthnCredential, c.WebauthnCredentialTransport, c.WebauthnSessionData,
 		c.WebauthnSessionDataAllowedCredential,
 	} {
@@ -250,6 +256,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *EmailMutation:
 		return c.Email.mutate(ctx, m)
+	case *FvSessionMutation:
+		return c.FvSession.mutate(ctx, m)
 	case *IdentityMutation:
 		return c.Identity.mutate(ctx, m)
 	case *JwkMutation:
@@ -452,6 +460,140 @@ func (c *EmailClient) mutate(ctx context.Context, m *EmailMutation) (Value, erro
 		return (&EmailDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Email mutation op: %q", m.Op())
+	}
+}
+
+// FvSessionClient is a client for the FvSession schema.
+type FvSessionClient struct {
+	config
+}
+
+// NewFvSessionClient returns a client for the FvSession from the given config.
+func NewFvSessionClient(c config) *FvSessionClient {
+	return &FvSessionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `fvsession.Hooks(f(g(h())))`.
+func (c *FvSessionClient) Use(hooks ...Hook) {
+	c.hooks.FvSession = append(c.hooks.FvSession, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `fvsession.Intercept(f(g(h())))`.
+func (c *FvSessionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.FvSession = append(c.inters.FvSession, interceptors...)
+}
+
+// Create returns a builder for creating a FvSession entity.
+func (c *FvSessionClient) Create() *FvSessionCreate {
+	mutation := newFvSessionMutation(c.config, OpCreate)
+	return &FvSessionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of FvSession entities.
+func (c *FvSessionClient) CreateBulk(builders ...*FvSessionCreate) *FvSessionCreateBulk {
+	return &FvSessionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for FvSession.
+func (c *FvSessionClient) Update() *FvSessionUpdate {
+	mutation := newFvSessionMutation(c.config, OpUpdate)
+	return &FvSessionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FvSessionClient) UpdateOne(fs *FvSession) *FvSessionUpdateOne {
+	mutation := newFvSessionMutation(c.config, OpUpdateOne, withFvSession(fs))
+	return &FvSessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FvSessionClient) UpdateOneID(id uuid.UUID) *FvSessionUpdateOne {
+	mutation := newFvSessionMutation(c.config, OpUpdateOne, withFvSessionID(id))
+	return &FvSessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for FvSession.
+func (c *FvSessionClient) Delete() *FvSessionDelete {
+	mutation := newFvSessionMutation(c.config, OpDelete)
+	return &FvSessionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *FvSessionClient) DeleteOne(fs *FvSession) *FvSessionDeleteOne {
+	return c.DeleteOneID(fs.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *FvSessionClient) DeleteOneID(id uuid.UUID) *FvSessionDeleteOne {
+	builder := c.Delete().Where(fvsession.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FvSessionDeleteOne{builder}
+}
+
+// Query returns a query builder for FvSession.
+func (c *FvSessionClient) Query() *FvSessionQuery {
+	return &FvSessionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeFvSession},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a FvSession entity by its id.
+func (c *FvSessionClient) Get(ctx context.Context, id uuid.UUID) (*FvSession, error) {
+	return c.Query().Where(fvsession.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FvSessionClient) GetX(ctx context.Context, id uuid.UUID) *FvSession {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a FvSession.
+func (c *FvSessionClient) QueryUser(fs *FvSession) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := fs.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fvsession.Table, fvsession.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, fvsession.UserTable, fvsession.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(fs.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *FvSessionClient) Hooks() []Hook {
+	return c.hooks.FvSession
+}
+
+// Interceptors returns the client interceptors.
+func (c *FvSessionClient) Interceptors() []Interceptor {
+	return c.inters.FvSession
+}
+
+func (c *FvSessionClient) mutate(ctx context.Context, m *FvSessionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&FvSessionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&FvSessionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&FvSessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&FvSessionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown FvSession mutation op: %q", m.Op())
 	}
 }
 
@@ -1132,6 +1274,22 @@ func (c *UserClient) QueryPasscodes(u *User) *PasscodeQuery {
 	return query
 }
 
+// QueryWebauthnCredentials queries the webauthn_credentials edge of a User.
+func (c *UserClient) QueryWebauthnCredentials(u *User) *WebauthnCredentialQuery {
+	query := (&WebauthnCredentialClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(webauthncredential.Table, webauthncredential.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.WebauthnCredentialsTable, user.WebauthnCredentialsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryPrimaryEmail queries the primary_email edge of a User.
 func (c *UserClient) QueryPrimaryEmail(u *User) *PrimaryEmailQuery {
 	query := (&PrimaryEmailClient{config: c.config}).Query()
@@ -1148,15 +1306,15 @@ func (c *UserClient) QueryPrimaryEmail(u *User) *PrimaryEmailQuery {
 	return query
 }
 
-// QueryWebauthnCredentials queries the webauthn_credentials edge of a User.
-func (c *UserClient) QueryWebauthnCredentials(u *User) *WebauthnCredentialQuery {
-	query := (&WebauthnCredentialClient{config: c.config}).Query()
+// QueryFvSession queries the fv_session edge of a User.
+func (c *UserClient) QueryFvSession(u *User) *FvSessionQuery {
+	query := (&FvSessionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(webauthncredential.Table, webauthncredential.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.WebauthnCredentialsTable, user.WebauthnCredentialsColumn),
+			sqlgraph.To(fvsession.Table, fvsession.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.FvSessionTable, user.FvSessionColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -1744,13 +1902,13 @@ func (c *WebauthnSessionDataAllowedCredentialClient) mutate(ctx context.Context,
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Email, Identity, Jwk, Passcode, PrimaryEmail, User, WebauthnCredential,
-		WebauthnCredentialTransport, WebauthnSessionData,
+		Email, FvSession, Identity, Jwk, Passcode, PrimaryEmail, User,
+		WebauthnCredential, WebauthnCredentialTransport, WebauthnSessionData,
 		WebauthnSessionDataAllowedCredential []ent.Hook
 	}
 	inters struct {
-		Email, Identity, Jwk, Passcode, PrimaryEmail, User, WebauthnCredential,
-		WebauthnCredentialTransport, WebauthnSessionData,
+		Email, FvSession, Identity, Jwk, Passcode, PrimaryEmail, User,
+		WebauthnCredential, WebauthnCredentialTransport, WebauthnSessionData,
 		WebauthnSessionDataAllowedCredential []ent.Interceptor
 	}
 )
