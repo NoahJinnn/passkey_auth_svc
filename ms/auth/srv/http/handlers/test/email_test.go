@@ -96,7 +96,7 @@ func TestEmailHandler_ListByUser(t *testing.T) {
 			Appl:      appl,
 			Cfg:       &defaultCfg,
 			SharedCfg: &sharedCfg,
-		}, &sessionManager{})
+		})
 
 		if assert.NoError(t, handler.ListByUser(c)) {
 			assert.Equal(t, http.StatusOK, rec.Code)
@@ -176,7 +176,7 @@ func TestEmailHandler_Delete(t *testing.T) {
 		Appl:      appl,
 		Cfg:       &defaultCfg,
 		SharedCfg: &sharedCfg,
-	}, &sessionManager{})
+	})
 
 	if assert.NoError(t, handler.Delete(c)) {
 		assert.Equal(t, http.StatusNoContent, rec.Code)
