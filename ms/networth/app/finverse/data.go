@@ -16,6 +16,8 @@ import (
 type IFvDataSvc interface {
 	AllInstitution(ctx context.Context, userId uuid.UUID) ([]interface{}, error)
 	AllAccount(ctx context.Context, userId uuid.UUID) (interface{}, error)
+	AllTransactions(ctx context.Context, userId uuid.UUID) (interface{}, error)
+	GetBalanceHistoryByAccountId(ctx context.Context, accountId string, userId uuid.UUID) (interface{}, error)
 }
 
 type FvDataSvc struct {
@@ -74,6 +76,57 @@ func (svc *FvDataSvc) AllAccount(ctx context.Context, userId uuid.UUID) (interfa
 	err = json.Unmarshal(resp.Body(), &result)
 	if err != nil {
 		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to get fv accounts: %w", err))
+	}
+
+	return result, nil
+}
+
+func (svc *FvDataSvc) AllTransactions(ctx context.Context, offset string, limit string, userId uuid.UUID) (interface{}, error) {
+	var queryStr = ""
+	if offset != "" && limit != "" {
+		queryStr = fmt.Sprintf("?offset=%s&limit=%s", offset, limit)
+	} else if limit != "" {
+		queryStr = fmt.Sprintf("?limit=%s", limit)
+	} else if offset != "" {
+		queryStr = fmt.Sprintf("?offset=%s", offset)
+	}
+
+	resp, err := svc.req.
+		InitReq(ctx, "GET", "/transactions"+queryStr, nil).
+		WithDefaultOpts().
+		WithHeaders(map[string]string{
+			"Authorization": "Bearer " + accessToken,
+		}).
+		Send()
+	if err != nil {
+		return nil, err
+	}
+
+	var result interface{}
+	err = json.Unmarshal(resp.Body(), &result)
+	if err != nil {
+		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to get fv balance history: %w", err))
+	}
+
+	return result, nil
+}
+
+func (svc *FvDataSvc) GetBalanceHistoryByAccountId(ctx context.Context, accountId string, userId uuid.UUID) (interface{}, error) {
+	resp, err := svc.req.
+		InitReq(ctx, "GET", "/balance_history/"+accountId, nil).
+		WithDefaultOpts().
+		WithHeaders(map[string]string{
+			"Authorization": "Bearer " + accessToken,
+		}).
+		Send()
+	if err != nil {
+		return nil, err
+	}
+
+	var result interface{}
+	err = json.Unmarshal(resp.Body(), &result)
+	if err != nil {
+		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to get fv balance history: %w", err))
 	}
 
 	return result, nil

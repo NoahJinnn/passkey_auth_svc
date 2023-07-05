@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/internal/http/errorhandler"
 	"github.com/hellohq/hqservice/ms/networth/app/finverse"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
@@ -43,8 +42,7 @@ func (h *FvAuthHandler) CreateCustomerToken(c echo.Context) error {
 	}
 	isSuccess, err := h.GetFvAuthSvc().CreateCustomerToken(c.Request().Context(), &body, &userId)
 	if err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return err
 	}
 	return c.JSON(http.StatusOK, CreateCustomerTokenResp{
 		IsSuccess: isSuccess,
@@ -71,19 +69,16 @@ func (h *FvAuthHandler) CreateLinkToken(c echo.Context) error {
 	}
 
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return err
 	}
 
 	if err := c.Validate(body); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return err
 	}
 
 	token, err := h.GetFvAuthSvc().CreateLinkToken(c.Request().Context(), &body, userId)
 	if err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return err
 	}
 	return c.JSON(http.StatusOK, token)
 }
@@ -101,18 +96,15 @@ func (h *FvAuthHandler) ExchangeAccessToken(c echo.Context) error {
 
 	var body finverse.ExchangeAccessToken
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return err
 	}
 
 	if err := c.Validate(body); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return err
 	}
 	token, err := h.GetFvAuthSvc().ExchangeAccessToken(c.Request().Context(), body.Code, userId)
 	if err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return err
 	}
 	return c.JSON(http.StatusOK, token)
 }
