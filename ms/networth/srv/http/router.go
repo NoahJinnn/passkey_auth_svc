@@ -75,6 +75,7 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 
 	fvData := handlers.NewFvDataHandler(srv)
 	fv.GET("/institutions", fvData.AllInstitution)
+	fv.GET("/accounts", fvData.AllAccount)
 
 	return e, nil
 }

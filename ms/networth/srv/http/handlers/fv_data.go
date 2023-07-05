@@ -37,3 +37,22 @@ func (h *FvDataHandler) AllInstitution(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, instis)
 }
+
+func (h *FvDataHandler) AllAccount(c echo.Context) error {
+	sessionToken, ok := c.Get("session").(jwt.Token)
+	if !ok {
+		return errors.New("failed to cast session object")
+	}
+
+	userId, err := uuid.FromString(sessionToken.Subject())
+	if err != nil {
+		return fmt.Errorf("failed to parse subject as uuid: %w", err)
+	}
+
+	instis, err := h.GetFvDataSvc().AllAccount(c.Request().Context(), userId)
+	if err != nil {
+		httperr := errorhandler.ToHttpError(err)
+		return c.JSON(httperr.Code, httperr)
+	}
+	return c.JSON(http.StatusOK, instis)
+}
