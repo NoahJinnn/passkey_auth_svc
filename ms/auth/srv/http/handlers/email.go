@@ -8,7 +8,6 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/http/errorhandler"
-	"github.com/hellohq/hqservice/internal/http/session"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
@@ -16,13 +15,11 @@ import (
 
 type EmailHandler struct {
 	*HttpDeps
-	sessionManager session.IManager
 }
 
-func NewEmailHandler(srv *HttpDeps, sessionManager session.IManager) *EmailHandler {
+func NewEmailHandler(srv *HttpDeps) *EmailHandler {
 	return &EmailHandler{
 		srv,
-		sessionManager,
 	}
 }
 

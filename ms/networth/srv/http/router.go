@@ -68,7 +68,7 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 	se.GET("/transactions", seAccountInfo.GetTxByConnectionIdAndAccountId)
 
 	fvAuth := handlers.NewFvAuthHandler(srv)
-	fv := nw.Group("/fv")
+	fv := nw.Group("/fv", session.Session(sessionManager))
 	fv.POST("/customer/token", fvAuth.CreateCustomerToken)
 	fv.POST("/link/token", fvAuth.CreateLinkToken)
 	fv.POST("/auth/token", fvAuth.ExchangeAccessToken)

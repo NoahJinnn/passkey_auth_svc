@@ -83,7 +83,7 @@ func NewServer(appl app.Appl, sessionManager *session.Manager, sharedCfg *shared
 	passcodeLogin.POST("/initialize", passcodeHandler.Init)
 	passcodeLogin.POST("/finalize", passcodeHandler.Finish)
 
-	emailHandler := handlers.NewEmailHandler(srv, sessionManager)
+	emailHandler := handlers.NewEmailHandler(srv)
 	email := e.Group("/emails", session.Session(sessionManager))
 	email.GET("", emailHandler.ListByUser)
 	email.POST("/:id/set_primary", emailHandler.SetPrimaryEmail)
