@@ -24,7 +24,7 @@ func NewAssetRepo(pgsql *ent.Client) *assetRepo {
 	return &assetRepo{pgsql: pgsql}
 }
 
-func (r assetRepo) All(ctx context.Context) ([]*ent.Asset, error) {
+func (r *assetRepo) All(ctx context.Context) ([]*ent.Asset, error) {
 	s, err := r.pgsql.Asset.
 		Query().
 		All(ctx)
@@ -35,7 +35,7 @@ func (r assetRepo) All(ctx context.Context) ([]*ent.Asset, error) {
 	return s, nil
 }
 
-func (r assetRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]*ent.Asset, error) {
+func (r *assetRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]*ent.Asset, error) {
 	s, err := r.pgsql.Asset.
 		Query().
 		Where(asset.UserID(userID)).
@@ -47,7 +47,7 @@ func (r assetRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]*ent.Ass
 	return s, nil
 }
 
-func (r assetRepo) Create(ctx context.Context, userID uuid.UUID, asset *ent.Asset) (*ent.Asset, error) {
+func (r *assetRepo) Create(ctx context.Context, userID uuid.UUID, asset *ent.Asset) (*ent.Asset, error) {
 	newAsset, err := r.pgsql.Asset.
 		Create().
 		SetUserID(userID).
@@ -67,7 +67,7 @@ func (r assetRepo) Create(ctx context.Context, userID uuid.UUID, asset *ent.Asse
 	return newAsset, nil
 }
 
-func (r assetRepo) Update(ctx context.Context, userID uuid.UUID, uAsset *ent.Asset) error {
+func (r *assetRepo) Update(ctx context.Context, userID uuid.UUID, uAsset *ent.Asset) error {
 	_, err := r.pgsql.Asset.
 		Update().
 		Where(
@@ -92,7 +92,7 @@ func (r assetRepo) Update(ctx context.Context, userID uuid.UUID, uAsset *ent.Ass
 	return nil
 }
 
-func (r assetRepo) Delete(ctx context.Context, userID uuid.UUID, assetID uuid.UUID) error {
+func (r *assetRepo) Delete(ctx context.Context, userID uuid.UUID, assetID uuid.UUID) error {
 	_, err := r.pgsql.Asset.
 		Delete().
 		Where(
