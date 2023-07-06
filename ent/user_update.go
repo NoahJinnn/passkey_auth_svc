@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ent/asset"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/passcode"
@@ -83,6 +84,21 @@ func (uu *UserUpdate) AddWebauthnCredentials(w ...*WebauthnCredential) *UserUpda
 		ids[i] = w[i].ID
 	}
 	return uu.AddWebauthnCredentialIDs(ids...)
+}
+
+// AddAssetIDs adds the "assets" edge to the Asset entity by IDs.
+func (uu *UserUpdate) AddAssetIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddAssetIDs(ids...)
+	return uu
+}
+
+// AddAssets adds the "assets" edges to the Asset entity.
+func (uu *UserUpdate) AddAssets(a ...*Asset) *UserUpdate {
+	ids := make([]uuid.UUID, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return uu.AddAssetIDs(ids...)
 }
 
 // SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID.
@@ -189,6 +205,27 @@ func (uu *UserUpdate) RemoveWebauthnCredentials(w ...*WebauthnCredential) *UserU
 		ids[i] = w[i].ID
 	}
 	return uu.RemoveWebauthnCredentialIDs(ids...)
+}
+
+// ClearAssets clears all "assets" edges to the Asset entity.
+func (uu *UserUpdate) ClearAssets() *UserUpdate {
+	uu.mutation.ClearAssets()
+	return uu
+}
+
+// RemoveAssetIDs removes the "assets" edge to Asset entities by IDs.
+func (uu *UserUpdate) RemoveAssetIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveAssetIDs(ids...)
+	return uu
+}
+
+// RemoveAssets removes "assets" edges to Asset entities.
+func (uu *UserUpdate) RemoveAssets(a ...*Asset) *UserUpdate {
+	ids := make([]uuid.UUID, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return uu.RemoveAssetIDs(ids...)
 }
 
 // ClearPrimaryEmail clears the "primary_email" edge to the PrimaryEmail entity.
@@ -386,6 +423,51 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.AssetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AssetsTable,
+			Columns: []string{user.AssetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(asset.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedAssetsIDs(); len(nodes) > 0 && !uu.mutation.AssetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AssetsTable,
+			Columns: []string{user.AssetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(asset.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.AssetsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AssetsTable,
+			Columns: []string{user.AssetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(asset.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if uu.mutation.PrimaryEmailCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -515,6 +597,21 @@ func (uuo *UserUpdateOne) AddWebauthnCredentials(w ...*WebauthnCredential) *User
 	return uuo.AddWebauthnCredentialIDs(ids...)
 }
 
+// AddAssetIDs adds the "assets" edge to the Asset entity by IDs.
+func (uuo *UserUpdateOne) AddAssetIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddAssetIDs(ids...)
+	return uuo
+}
+
+// AddAssets adds the "assets" edges to the Asset entity.
+func (uuo *UserUpdateOne) AddAssets(a ...*Asset) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return uuo.AddAssetIDs(ids...)
+}
+
 // SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID.
 func (uuo *UserUpdateOne) SetPrimaryEmailID(id uuid.UUID) *UserUpdateOne {
 	uuo.mutation.SetPrimaryEmailID(id)
@@ -619,6 +716,27 @@ func (uuo *UserUpdateOne) RemoveWebauthnCredentials(w ...*WebauthnCredential) *U
 		ids[i] = w[i].ID
 	}
 	return uuo.RemoveWebauthnCredentialIDs(ids...)
+}
+
+// ClearAssets clears all "assets" edges to the Asset entity.
+func (uuo *UserUpdateOne) ClearAssets() *UserUpdateOne {
+	uuo.mutation.ClearAssets()
+	return uuo
+}
+
+// RemoveAssetIDs removes the "assets" edge to Asset entities by IDs.
+func (uuo *UserUpdateOne) RemoveAssetIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveAssetIDs(ids...)
+	return uuo
+}
+
+// RemoveAssets removes "assets" edges to Asset entities.
+func (uuo *UserUpdateOne) RemoveAssets(a ...*Asset) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return uuo.RemoveAssetIDs(ids...)
 }
 
 // ClearPrimaryEmail clears the "primary_email" edge to the PrimaryEmail entity.
@@ -839,6 +957,51 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(webauthncredential.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.AssetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AssetsTable,
+			Columns: []string{user.AssetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(asset.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedAssetsIDs(); len(nodes) > 0 && !uuo.mutation.AssetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AssetsTable,
+			Columns: []string{user.AssetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(asset.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.AssetsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AssetsTable,
+			Columns: []string{user.AssetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(asset.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

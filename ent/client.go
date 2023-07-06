@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/hellohq/hqservice/ent/asset"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/identity"
@@ -33,6 +34,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Asset is the client for interacting with the Asset builders.
+	Asset *AssetClient
 	// Email is the client for interacting with the Email builders.
 	Email *EmailClient
 	// FvSession is the client for interacting with the FvSession builders.
@@ -68,6 +71,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Asset = NewAssetClient(c.config)
 	c.Email = NewEmailClient(c.config)
 	c.FvSession = NewFvSessionClient(c.config)
 	c.Identity = NewIdentityClient(c.config)
@@ -161,6 +165,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:                                  ctx,
 		config:                               cfg,
+		Asset:                                NewAssetClient(cfg),
 		Email:                                NewEmailClient(cfg),
 		FvSession:                            NewFvSessionClient(cfg),
 		Identity:                             NewIdentityClient(cfg),
@@ -191,6 +196,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:                                  ctx,
 		config:                               cfg,
+		Asset:                                NewAssetClient(cfg),
 		Email:                                NewEmailClient(cfg),
 		FvSession:                            NewFvSessionClient(cfg),
 		Identity:                             NewIdentityClient(cfg),
@@ -208,7 +214,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Email.
+//		Asset.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -231,9 +237,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Email, c.FvSession, c.Identity, c.Jwk, c.Passcode, c.PrimaryEmail, c.User,
-		c.WebauthnCredential, c.WebauthnCredentialTransport, c.WebauthnSessionData,
-		c.WebauthnSessionDataAllowedCredential,
+		c.Asset, c.Email, c.FvSession, c.Identity, c.Jwk, c.Passcode, c.PrimaryEmail,
+		c.User, c.WebauthnCredential, c.WebauthnCredentialTransport,
+		c.WebauthnSessionData, c.WebauthnSessionDataAllowedCredential,
 	} {
 		n.Use(hooks...)
 	}
@@ -243,9 +249,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Email, c.FvSession, c.Identity, c.Jwk, c.Passcode, c.PrimaryEmail, c.User,
-		c.WebauthnCredential, c.WebauthnCredentialTransport, c.WebauthnSessionData,
-		c.WebauthnSessionDataAllowedCredential,
+		c.Asset, c.Email, c.FvSession, c.Identity, c.Jwk, c.Passcode, c.PrimaryEmail,
+		c.User, c.WebauthnCredential, c.WebauthnCredentialTransport,
+		c.WebauthnSessionData, c.WebauthnSessionDataAllowedCredential,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -254,6 +260,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *AssetMutation:
+		return c.Asset.mutate(ctx, m)
 	case *EmailMutation:
 		return c.Email.mutate(ctx, m)
 	case *FvSessionMutation:
@@ -278,6 +286,140 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.WebauthnSessionDataAllowedCredential.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// AssetClient is a client for the Asset schema.
+type AssetClient struct {
+	config
+}
+
+// NewAssetClient returns a client for the Asset from the given config.
+func NewAssetClient(c config) *AssetClient {
+	return &AssetClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `asset.Hooks(f(g(h())))`.
+func (c *AssetClient) Use(hooks ...Hook) {
+	c.hooks.Asset = append(c.hooks.Asset, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `asset.Intercept(f(g(h())))`.
+func (c *AssetClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Asset = append(c.inters.Asset, interceptors...)
+}
+
+// Create returns a builder for creating a Asset entity.
+func (c *AssetClient) Create() *AssetCreate {
+	mutation := newAssetMutation(c.config, OpCreate)
+	return &AssetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Asset entities.
+func (c *AssetClient) CreateBulk(builders ...*AssetCreate) *AssetCreateBulk {
+	return &AssetCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Asset.
+func (c *AssetClient) Update() *AssetUpdate {
+	mutation := newAssetMutation(c.config, OpUpdate)
+	return &AssetUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AssetClient) UpdateOne(a *Asset) *AssetUpdateOne {
+	mutation := newAssetMutation(c.config, OpUpdateOne, withAsset(a))
+	return &AssetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AssetClient) UpdateOneID(id uuid.UUID) *AssetUpdateOne {
+	mutation := newAssetMutation(c.config, OpUpdateOne, withAssetID(id))
+	return &AssetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Asset.
+func (c *AssetClient) Delete() *AssetDelete {
+	mutation := newAssetMutation(c.config, OpDelete)
+	return &AssetDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AssetClient) DeleteOne(a *Asset) *AssetDeleteOne {
+	return c.DeleteOneID(a.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AssetClient) DeleteOneID(id uuid.UUID) *AssetDeleteOne {
+	builder := c.Delete().Where(asset.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AssetDeleteOne{builder}
+}
+
+// Query returns a query builder for Asset.
+func (c *AssetClient) Query() *AssetQuery {
+	return &AssetQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAsset},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Asset entity by its id.
+func (c *AssetClient) Get(ctx context.Context, id uuid.UUID) (*Asset, error) {
+	return c.Query().Where(asset.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AssetClient) GetX(ctx context.Context, id uuid.UUID) *Asset {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Asset.
+func (c *AssetClient) QueryUser(a *Asset) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(asset.Table, asset.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, asset.UserTable, asset.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AssetClient) Hooks() []Hook {
+	return c.hooks.Asset
+}
+
+// Interceptors returns the client interceptors.
+func (c *AssetClient) Interceptors() []Interceptor {
+	return c.inters.Asset
+}
+
+func (c *AssetClient) mutate(ctx context.Context, m *AssetMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AssetCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AssetUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AssetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AssetDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Asset mutation op: %q", m.Op())
 	}
 }
 
@@ -1290,6 +1432,22 @@ func (c *UserClient) QueryWebauthnCredentials(u *User) *WebauthnCredentialQuery 
 	return query
 }
 
+// QueryAssets queries the assets edge of a User.
+func (c *UserClient) QueryAssets(u *User) *AssetQuery {
+	query := (&AssetClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(asset.Table, asset.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.AssetsTable, user.AssetsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryPrimaryEmail queries the primary_email edge of a User.
 func (c *UserClient) QueryPrimaryEmail(u *User) *PrimaryEmailQuery {
 	query := (&PrimaryEmailClient{config: c.config}).Query()
@@ -1902,12 +2060,12 @@ func (c *WebauthnSessionDataAllowedCredentialClient) mutate(ctx context.Context,
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Email, FvSession, Identity, Jwk, Passcode, PrimaryEmail, User,
+		Asset, Email, FvSession, Identity, Jwk, Passcode, PrimaryEmail, User,
 		WebauthnCredential, WebauthnCredentialTransport, WebauthnSessionData,
 		WebauthnSessionDataAllowedCredential []ent.Hook
 	}
 	inters struct {
-		Email, FvSession, Identity, Jwk, Passcode, PrimaryEmail, User,
+		Asset, Email, FvSession, Identity, Jwk, Passcode, PrimaryEmail, User,
 		WebauthnCredential, WebauthnCredentialTransport, WebauthnSessionData,
 		WebauthnSessionDataAllowedCredential []ent.Interceptor
 	}

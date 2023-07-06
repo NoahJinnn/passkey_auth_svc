@@ -20,7 +20,7 @@ type FvSession struct {
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
 	// UserID holds the value of the "user_id" field.
-	UserID *uuid.UUID `json:"user_id,omitempty"`
+	UserID uuid.UUID `json:"user_id,omitempty"`
 	// AccessToken holds the value of the "access_token" field.
 	AccessToken string `json:"access_token,omitempty"`
 	// ExpiresIn holds the value of the "expires_in" field.
@@ -66,15 +66,13 @@ func (*FvSession) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case fvsession.FieldUserID:
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case fvsession.FieldExpiresIn:
 			values[i] = new(sql.NullInt64)
 		case fvsession.FieldAccessToken, fvsession.FieldIssuedAt, fvsession.FieldTokenType:
 			values[i] = new(sql.NullString)
 		case fvsession.FieldCreatedAt, fvsession.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case fvsession.FieldID:
+		case fvsession.FieldID, fvsession.FieldUserID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -98,11 +96,10 @@ func (fs *FvSession) assignValues(columns []string, values []any) error {
 				fs.ID = *value
 			}
 		case fvsession.FieldUserID:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
-			} else if value.Valid {
-				fs.UserID = new(uuid.UUID)
-				*fs.UserID = *value.S.(*uuid.UUID)
+			} else if value != nil {
+				fs.UserID = *value
 			}
 		case fvsession.FieldAccessToken:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -181,10 +178,8 @@ func (fs *FvSession) String() string {
 	var builder strings.Builder
 	builder.WriteString("FvSession(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", fs.ID))
-	if v := fs.UserID; v != nil {
-		builder.WriteString("user_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("user_id=")
+	builder.WriteString(fmt.Sprintf("%v", fs.UserID))
 	builder.WriteString(", ")
 	builder.WriteString("access_token=")
 	builder.WriteString(fs.AccessToken)

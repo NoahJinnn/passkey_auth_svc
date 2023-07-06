@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ent/asset"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/passcode"
@@ -111,6 +112,21 @@ func (uc *UserCreate) AddWebauthnCredentials(w ...*WebauthnCredential) *UserCrea
 		ids[i] = w[i].ID
 	}
 	return uc.AddWebauthnCredentialIDs(ids...)
+}
+
+// AddAssetIDs adds the "assets" edge to the Asset entity by IDs.
+func (uc *UserCreate) AddAssetIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddAssetIDs(ids...)
+	return uc
+}
+
+// AddAssets adds the "assets" edges to the Asset entity.
+func (uc *UserCreate) AddAssets(a ...*Asset) *UserCreate {
+	ids := make([]uuid.UUID, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return uc.AddAssetIDs(ids...)
 }
 
 // SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID.
@@ -292,6 +308,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(webauthncredential.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.AssetsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AssetsTable,
+			Columns: []string{user.AssetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(asset.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

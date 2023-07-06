@@ -40,7 +40,7 @@ func (h *FvAuthHandler) CreateCustomerToken(c echo.Context) error {
 		ClientSecret: h.Cfg.Finverse.Secret,
 		GrantType:    grantType,
 	}
-	isSuccess, err := h.GetFvAuthSvc().CreateCustomerToken(c.Request().Context(), &body, &userId)
+	isSuccess, err := h.GetFvAuthSvc().CreateCustomerToken(c.Request().Context(), &body, userId)
 	if err != nil {
 		return err
 	}

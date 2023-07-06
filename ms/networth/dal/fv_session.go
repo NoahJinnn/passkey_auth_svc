@@ -34,7 +34,7 @@ func (r *fvSessionRepo) GetByUserId(ctx Ctx, id uuid.UUID) (*ent.FvSession, erro
 func (r *fvSessionRepo) Create(ctx Ctx, s *ent.FvSession) (*ent.FvSession, error) {
 	news, err := r.pgsql.FvSession.
 		Create().
-		SetUserID(*s.UserID).
+		SetUserID(s.UserID).
 		SetAccessToken(s.AccessToken).
 		SetExpiresIn(s.ExpiresIn).
 		SetIssuedAt(s.IssuedAt).

@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Asset is the predicate function for asset builders.
+type Asset func(*sql.Selector)
+
 // Email is the predicate function for email builders.
 type Email func(*sql.Selector)
 

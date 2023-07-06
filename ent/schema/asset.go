@@ -20,14 +20,14 @@ func (Asset) Fields() []ent.Field {
 			id, _ := uuid.NewV4()
 			return id
 		}).Immutable(),
-		field.UUID("user_id", uuid.UUID{}).Unique(),
+		field.UUID("user_id", uuid.UUID{}).Optional(),
 		field.Int("sheet").Optional().Default(-1),
 		field.Int("section").Optional().Default(-1),
 		field.String("type").Default("manual"),
-		field.String("provider_name").Nillable(),
+		field.String("provider_name").Default("manual"),
+		field.String("description").Optional().Nillable(),
 		field.String("currency"),
 		field.Float("value").SchemaType(map[string]string{dialect.Postgres: "numeric(19,4)"}),
-		field.String("description").Optional().Nillable(),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}

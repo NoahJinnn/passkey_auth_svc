@@ -3,7 +3,8 @@ package asset
 import (
 	"context"
 
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent"
+	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ms/networth/config"
 	"github.com/hellohq/hqservice/ms/networth/dal"
 )
@@ -23,4 +24,20 @@ type AssetSvc struct {
 
 func NewAssetSvc(cfg *config.Config, repo dal.INwRepo) *AssetSvc {
 	return &AssetSvc{config: cfg, repo: repo}
+}
+
+func (svc AssetSvc) All(ctx context.Context) ([]*ent.Asset, error) {
+	return svc.repo.GetAssetRepo().All(ctx)
+}
+
+func (svc AssetSvc) ListByUser(ctx context.Context, userID uuid.UUID) ([]*ent.Asset, error) {
+	return svc.repo.GetAssetRepo().ListByUser(ctx, userID)
+}
+
+func (svc AssetSvc) Create(ctx context.Context, userID uuid.UUID, asset *ent.Asset) (*ent.Asset, error) {
+	return svc.repo.GetAssetRepo().Create(ctx, userID, asset)
+}
+
+func (svc AssetSvc) Update(ctx context.Context, userID uuid.UUID, asset *ent.Asset) error {
+	return svc.repo.GetAssetRepo().Update(ctx, userID, asset)
 }

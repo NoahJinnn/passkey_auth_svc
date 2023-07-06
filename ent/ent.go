@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/hellohq/hqservice/ent/asset"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/identity"
@@ -83,6 +84,7 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			asset.Table:                       asset.ValidColumn,
 			email.Table:                       email.ValidColumn,
 			fvsession.Table:                   fvsession.ValidColumn,
 			identity.Table:                    identity.ValidColumn,
