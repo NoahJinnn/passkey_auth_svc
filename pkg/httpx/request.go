@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/hellohq/hqservice/internal/http/errorhandler"
 	"github.com/pkg/errors"
 )
 
@@ -55,9 +56,8 @@ func (r *Req) Send() (*Resp, error) {
 			return nil, errors.Wrap(err, "failed to read failed response body")
 		}
 		defer resp.Body.Close()
-		fmt.Printf("failed response: %+v\n", string(result))
 
-		return nil, fmt.Errorf("request failed with status code: %d", resp.StatusCode)
+		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("req FAILED\nstatus code: %d\nresponse: %+v", resp.StatusCode, string(result)))
 	}
 
 	result, err := io.ReadAll(resp.Body)

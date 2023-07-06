@@ -57,8 +57,8 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 		"/networth",
 		// session.Session(sessionManager), TODO: Enable back when finish nw service
 	)
-	seAccountInfo := handlers.NewSeAccountInfoHandler(srv)
 	se := nw.Group("/se")
+	seAccountInfo := handlers.NewSeAccountInfoHandler(srv)
 	se.GET("/customers/:customer_id", seAccountInfo.Customer)
 	se.POST("/customers", seAccountInfo.CreateCustomer)
 	se.DELETE("/customers/:customer_id", seAccountInfo.DeleteCustomer)
@@ -67,11 +67,17 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 	se.GET("/accounts", seAccountInfo.GetAccountByConnectionId)
 	se.GET("/transactions", seAccountInfo.GetTxByConnectionIdAndAccountId)
 
-	fvAuth := handlers.NewFvAuthHandler(srv)
 	fv := nw.Group("/fv", session.Session(sessionManager))
+	fvAuth := handlers.NewFvAuthHandler(srv)
 	fv.POST("/customer/token", fvAuth.CreateCustomerToken)
 	fv.POST("/link/token", fvAuth.CreateLinkToken)
 	fv.POST("/auth/token", fvAuth.ExchangeAccessToken)
+
+	fvData := handlers.NewFvDataHandler(srv)
+	fv.GET("/institutions", fvData.AllInstitution)
+	fv.GET("/accounts", fvData.AllAccount)
+	fv.GET("/transactions", fvData.AllTransaction)
+	fv.GET("/balance_history/:accountId", fvData.GetBalanceHistoryByAccountId)
 
 	return e, nil
 }
