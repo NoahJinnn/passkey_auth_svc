@@ -57,7 +57,7 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 		"/networth",
 		// session.Session(sessionManager), TODO: Enable back when finish nw service
 	)
-	se := nw.Group("/se")
+	se := nw.Group("/se", session.Session(sessionManager))
 	seAccountInfo := handlers.NewSeAccountInfoHandler(srv)
 	se.GET("/customers/:customer_id", seAccountInfo.Customer)
 	se.POST("/customers", seAccountInfo.CreateCustomer)
@@ -79,5 +79,12 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 	fv.GET("/transactions", fvData.AllTransaction)
 	fv.GET("/balance_history/:accountId", fvData.GetBalanceHistoryByAccountId)
 
+	asset := nw.Group("/asset", session.Session(sessionManager))
+	assetHandler := handlers.NewAssetHandler(srv)
+	asset.GET("/all", assetHandler.All)
+	asset.GET("", assetHandler.ListByUser)
+	asset.POST("", assetHandler.Create)
+	asset.PUT("", assetHandler.Update)
+	asset.DELETE("/:id", assetHandler.Delete)
 	return e, nil
 }
