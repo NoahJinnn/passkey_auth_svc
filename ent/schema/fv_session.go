@@ -20,7 +20,7 @@ func (FvSession) Fields() []ent.Field {
 			id, _ := uuid.NewV4()
 			return id
 		}).Immutable(),
-		field.UUID("user_id", uuid.UUID{}).Optional().Nillable().Unique(),
+		field.UUID("user_id", uuid.UUID{}).Unique(),
 		field.String("access_token"),
 		field.Int("expires_in"),
 		field.String("issued_at"),
