@@ -20,24 +20,6 @@ func NewAssetHandler(srv *HttpDeps) *AssetHandler {
 	return &AssetHandler{srv}
 }
 
-func (h *AssetHandler) All(c echo.Context) error {
-	sessionToken, ok := c.Get("session").(jwt.Token)
-	if !ok {
-		return errors.New("failed to cast session object")
-	}
-
-	_, err := uuid.FromString(sessionToken.Subject())
-	if err != nil {
-		return fmt.Errorf("failed to parse subject as uuid: %w", err)
-	}
-
-	result, err := h.GetAssetSvc().All(c.Request().Context())
-	if err != nil {
-		return err
-	}
-	return c.JSON(http.StatusOK, result)
-}
-
 func (h *AssetHandler) ListByUser(c echo.Context) error {
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {

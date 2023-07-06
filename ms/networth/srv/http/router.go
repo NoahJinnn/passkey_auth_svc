@@ -81,7 +81,6 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 
 	asset := nw.Group("/asset", session.Session(sessionManager))
 	assetHandler := handlers.NewAssetHandler(srv)
-	asset.GET("/all", assetHandler.All)
 	asset.GET("", assetHandler.ListByUser)
 	asset.POST("", assetHandler.Create)
 	asset.PUT("", assetHandler.Update)

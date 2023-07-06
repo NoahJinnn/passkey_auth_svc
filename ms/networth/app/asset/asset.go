@@ -11,7 +11,6 @@ import (
 )
 
 type IAssetSvc interface {
-	All(ctx context.Context) ([]*ent.Asset, error)
 	ListByUser(ctx context.Context, userID string) ([]*ent.Asset, error)
 	Create(ctx context.Context, userID string, body dto.AssetBodyRequest) (*ent.Asset, error)
 	Update(ctx context.Context, userID string, body dto.AssetBodyRequest) error
@@ -25,10 +24,6 @@ type AssetSvc struct {
 
 func NewAssetSvc(cfg *config.Config, repo dal.INwRepo) *AssetSvc {
 	return &AssetSvc{config: cfg, repo: repo}
-}
-
-func (svc *AssetSvc) All(ctx context.Context) ([]*ent.Asset, error) {
-	return svc.repo.GetAssetRepo().All(ctx)
 }
 
 func (svc *AssetSvc) ListByUser(ctx context.Context, userID uuid.UUID) ([]*ent.Asset, error) {

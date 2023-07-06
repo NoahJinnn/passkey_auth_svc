@@ -9,7 +9,6 @@ import (
 )
 
 type IAssetRepo interface {
-	All(ctx context.Context) ([]*ent.Asset, error)
 	ListByUser(ctx context.Context, userID uuid.UUID) ([]*ent.Asset, error)
 	Create(ctx context.Context, userID uuid.UUID, asset *ent.Asset) (*ent.Asset, error)
 	Update(ctx context.Context, userID uuid.UUID, uAsset *ent.Asset) error
@@ -22,17 +21,6 @@ type assetRepo struct {
 
 func NewAssetRepo(pgsql *ent.Client) *assetRepo {
 	return &assetRepo{pgsql: pgsql}
-}
-
-func (r *assetRepo) All(ctx context.Context) ([]*ent.Asset, error) {
-	s, err := r.pgsql.Asset.
-		Query().
-		All(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return s, nil
 }
 
 func (r *assetRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]*ent.Asset, error) {
