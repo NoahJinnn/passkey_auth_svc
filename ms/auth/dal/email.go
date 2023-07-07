@@ -31,7 +31,7 @@ func (r *emailRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.Email, error) {
 		Query().
 		Where(email.ID(id)).
 		Only(ctx)
-	if err != nil {
+	if err != nil && !ent.IsNotFound(err) {
 		return nil, err
 	}
 
