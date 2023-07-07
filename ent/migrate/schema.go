@@ -8,6 +8,34 @@ import (
 )
 
 var (
+	// AssetsColumns holds the columns for the "assets" table.
+	AssetsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "sheet", Type: field.TypeInt, Nullable: true, Default: -1},
+		{Name: "section", Type: field.TypeInt, Nullable: true, Default: -1},
+		{Name: "type", Type: field.TypeString, Default: "manual"},
+		{Name: "provider_name", Type: field.TypeString, Default: "manual"},
+		{Name: "currency", Type: field.TypeString},
+		{Name: "value", Type: field.TypeFloat64, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
+		{Name: "description", Type: field.TypeString, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
+	}
+	// AssetsTable holds the schema information for the "assets" table.
+	AssetsTable = &schema.Table{
+		Name:       "assets",
+		Columns:    AssetsColumns,
+		PrimaryKey: []*schema.Column{AssetsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "assets_users_assets",
+				Columns:    []*schema.Column{AssetsColumns[10]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// EmailsColumns holds the columns for the "emails" table.
 	EmailsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -252,6 +280,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AssetsTable,
 		EmailsTable,
 		FvSessionsTable,
 		IdentitiesTable,
@@ -267,6 +296,7 @@ var (
 )
 
 func init() {
+	AssetsTable.ForeignKeys[0].RefTable = UsersTable
 	EmailsTable.ForeignKeys[0].RefTable = UsersTable
 	FvSessionsTable.ForeignKeys[0].RefTable = UsersTable
 	IdentitiesTable.ForeignKeys[0].RefTable = EmailsTable

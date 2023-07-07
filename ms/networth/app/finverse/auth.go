@@ -37,7 +37,7 @@ func NewFvAuthSvc(cfg *config.Config, repo dal.INwRepo) *FvAuthSvc {
 	return &FvAuthSvc{config: cfg, req: req, repo: repo}
 }
 
-func (svc *FvAuthSvc) CreateCustomerToken(ctx context.Context, cct *CreateCustomerToken, userId *uuid.UUID) (bool, error) {
+func (svc *FvAuthSvc) CreateCustomerToken(ctx context.Context, cct *CreateCustomerToken, userId uuid.UUID) (bool, error) {
 	b, err := json.Marshal(cct)
 	if err != nil {
 		return false, err

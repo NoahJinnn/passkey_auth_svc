@@ -25,6 +25,8 @@ const (
 	EdgePasscodes = "passcodes"
 	// EdgeWebauthnCredentials holds the string denoting the webauthn_credentials edge name in mutations.
 	EdgeWebauthnCredentials = "webauthn_credentials"
+	// EdgeAssets holds the string denoting the assets edge name in mutations.
+	EdgeAssets = "assets"
 	// EdgePrimaryEmail holds the string denoting the primary_email edge name in mutations.
 	EdgePrimaryEmail = "primary_email"
 	// EdgeFvSession holds the string denoting the fv_session edge name in mutations.
@@ -52,6 +54,13 @@ const (
 	WebauthnCredentialsInverseTable = "webauthn_credentials"
 	// WebauthnCredentialsColumn is the table column denoting the webauthn_credentials relation/edge.
 	WebauthnCredentialsColumn = "user_id"
+	// AssetsTable is the table that holds the assets relation/edge.
+	AssetsTable = "assets"
+	// AssetsInverseTable is the table name for the Asset entity.
+	// It exists in this package in order to avoid circular dependency with the "asset" package.
+	AssetsInverseTable = "assets"
+	// AssetsColumn is the table column denoting the assets relation/edge.
+	AssetsColumn = "user_id"
 	// PrimaryEmailTable is the table that holds the primary_email relation/edge.
 	PrimaryEmailTable = "primary_emails"
 	// PrimaryEmailInverseTable is the table name for the PrimaryEmail entity.
@@ -156,6 +165,20 @@ func ByWebauthnCredentials(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOpti
 	}
 }
 
+// ByAssetsCount orders the results by assets count.
+func ByAssetsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAssetsStep(), opts...)
+	}
+}
+
+// ByAssets orders the results by assets terms.
+func ByAssets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAssetsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByPrimaryEmailField orders the results by primary_email field.
 func ByPrimaryEmailField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -188,6 +211,13 @@ func newWebauthnCredentialsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(WebauthnCredentialsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, WebauthnCredentialsTable, WebauthnCredentialsColumn),
+	)
+}
+func newAssetsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AssetsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, AssetsTable, AssetsColumn),
 	)
 }
 func newPrimaryEmailStep() *sqlgraph.Step {
