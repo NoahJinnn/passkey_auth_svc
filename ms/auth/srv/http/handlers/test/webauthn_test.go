@@ -13,9 +13,9 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/http/errorhandler"
+	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/app/wa"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/handlers"
-	test "github.com/hellohq/hqservice/ms/auth/test/mock/app"
 	testRepo "github.com/hellohq/hqservice/ms/auth/test/mock/dal"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
@@ -97,7 +97,7 @@ func TestWebauthnHandler_BeginRegistration(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	appl := test.NewApp(nil, nil, &defaultCfg, testRepo.NewRepo(nil, users, credentials, waSessionData, nil, nil, nil))
+	appl := app.New(nil, nil, &defaultCfg, testRepo.NewRepo(nil, users, credentials, waSessionData, nil, nil, nil))
 	handler := handlers.NewWebauthnHandler(&handlers.HttpDeps{
 		Appl:      appl,
 		Cfg:       &defaultCfg,
@@ -148,7 +148,7 @@ func TestWebauthnHandler_FinishRegistration(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	appl := test.NewApp(nil, nil, &defaultCfg, testRepo.NewRepo(nil, users, nil, waSessionData, nil, nil, nil))
+	appl := app.New(nil, nil, &defaultCfg, testRepo.NewRepo(nil, users, nil, waSessionData, nil, nil, nil))
 	handler := handlers.NewWebauthnHandler(&handlers.HttpDeps{
 		Appl:      appl,
 		Cfg:       &defaultCfg,
@@ -187,7 +187,7 @@ func TestWebauthnHandler_BeginLogin(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	appl := test.NewApp(nil, nil, &defaultCfg, testRepo.NewRepo(nil, users, nil, waSessionData, nil, nil, nil))
+	appl := app.New(nil, nil, &defaultCfg, testRepo.NewRepo(nil, users, nil, waSessionData, nil, nil, nil))
 	handler := handlers.NewWebauthnHandler(&handlers.HttpDeps{
 		Appl:      appl,
 		Cfg:       &defaultCfg,
@@ -223,7 +223,7 @@ func TestWebauthnHandler_FinishLogin(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	appl := test.NewApp(nil, nil, &defaultCfg, testRepo.NewRepo(nil, users, credentials, waSessionData, nil, nil, nil))
+	appl := app.New(nil, nil, &defaultCfg, testRepo.NewRepo(nil, users, credentials, waSessionData, nil, nil, nil))
 	handler := handlers.NewWebauthnHandler(&handlers.HttpDeps{
 		Appl:      appl,
 		Cfg:       &defaultCfg,

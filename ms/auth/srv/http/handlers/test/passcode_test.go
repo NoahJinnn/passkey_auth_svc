@@ -12,10 +12,10 @@ import (
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/http/errorhandler"
 	"github.com/hellohq/hqservice/internal/http/validator"
+	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/handlers"
 	"github.com/hellohq/hqservice/ms/auth/srv/mail"
-	test "github.com/hellohq/hqservice/ms/auth/test/mock/app"
 	testRepo "github.com/hellohq/hqservice/ms/auth/test/mock/dal"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
@@ -43,7 +43,7 @@ func (m mailer) Send(email []string, subject string, body string) error {
 }
 
 func TestPasscodeHandler_Init(t *testing.T) {
-	appl := test.NewApp(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, nil, emails, nil))
+	appl := app.New(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, nil, emails, nil))
 	srv := &handlers.HttpDeps{
 		Appl:      appl,
 		Cfg:       &defaultCfg,
@@ -69,7 +69,7 @@ func TestPasscodeHandler_Init(t *testing.T) {
 }
 
 func TestPasscodeHandler_Init_UnknownUserId(t *testing.T) {
-	appl := test.NewApp(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, nil, emails, nil))
+	appl := app.New(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, nil, emails, nil))
 	srv := &handlers.HttpDeps{
 		Appl:      appl,
 		Cfg:       &defaultCfg,
@@ -95,7 +95,7 @@ func TestPasscodeHandler_Init_UnknownUserId(t *testing.T) {
 }
 
 func TestPasscodeHandler_Finish(t *testing.T) {
-	appl := test.NewApp(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, passcodes(), emails, nil))
+	appl := app.New(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, passcodes(), emails, nil))
 	srv := &handlers.HttpDeps{
 		Appl:      appl,
 		Cfg:       &defaultCfg,
@@ -123,7 +123,7 @@ func TestPasscodeHandler_Finish(t *testing.T) {
 }
 
 func TestPasscodeHandler_Finish_WrongCode(t *testing.T) {
-	appl := test.NewApp(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, passcodes(), emails, nil))
+	appl := app.New(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, passcodes(), emails, nil))
 	srv := &handlers.HttpDeps{
 		Appl:      appl,
 		Cfg:       &defaultCfg,
@@ -153,7 +153,7 @@ func TestPasscodeHandler_Finish_WrongCode(t *testing.T) {
 }
 
 func TestPasscodeHandler_Finish_WrongCode_3_Times(t *testing.T) {
-	appl := test.NewApp(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, passcodes(), emails, nil))
+	appl := app.New(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, passcodes(), emails, nil))
 	srv := &handlers.HttpDeps{
 		Appl:      appl,
 		Cfg:       &defaultCfg,
@@ -192,7 +192,7 @@ func TestPasscodeHandler_Finish_WrongCode_3_Times(t *testing.T) {
 }
 
 func TestPasscodeHandler_Finish_WrongId(t *testing.T) {
-	appl := test.NewApp(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, passcodes(), emails, nil))
+	appl := app.New(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, passcodes(), emails, nil))
 	srv := &handlers.HttpDeps{
 		Appl:      appl,
 		Cfg:       &defaultCfg,
