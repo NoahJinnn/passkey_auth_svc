@@ -71,7 +71,7 @@ func (svc *WebauthnSvc) InitRegistration(ctx Ctx, userId uuid.UUID) (*protocol.C
 
 	err = svc.repo.GetWebauthnSessionRepo().Create(ctx, *WebauthnSessionDataToModel(sessionData, WebauthnOperationRegistration))
 	if err != nil {
-		return nil, fmt.Errorf("failed to store creation options session data: %w", err)
+		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return options, nil
@@ -82,7 +82,7 @@ func (svc *WebauthnSvc) FinishRegistration(ctx Ctx, request *protocol.ParsedCred
 		sessionDataRepo := svc.repo.GetWebauthnSessionRepo()
 		sessionData, err := sessionDataRepo.GetByChallenge(ctx, request.Response.CollectedClientData.Challenge)
 		if err != nil {
-			return fmt.Errorf("failed to get webauthn registration session data: %w", err)
+			return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		if sessionData != nil && sessionData.Operation != WebauthnOperationRegistration {
@@ -134,12 +134,12 @@ func (svc *WebauthnSvc) FinishRegistration(ctx Ctx, request *protocol.ParsedCred
 		model := WebauthnCredentialToModel(credential, sessionData.UserID, backupEligible, backupState)
 		err = svc.repo.GetWebauthnCredentialRepo().Create(ctx, *model, credential.Transport)
 		if err != nil {
-			return fmt.Errorf("failed to store webauthn credential: %w", err)
+			return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		err = sessionDataRepo.Delete(ctx, *sessionData)
 		if err != nil {
-			return fmt.Errorf("failed to delete attestation session data: %w", err)
+			return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		// TODO: audit logger
@@ -190,7 +190,7 @@ func (svc *WebauthnSvc) InitLogin(ctx Ctx, reqUserId *string) (*protocol.Credent
 
 	err := svc.repo.GetWebauthnSessionRepo().Create(ctx, *WebauthnSessionDataToModel(sessionData, WebauthnOperationAuthentication))
 	if err != nil {
-		return nil, fmt.Errorf("failed to store webauthn assertion session data: %w", err)
+		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	// Remove all transports, because of a bug in android and windows where the internal authenticator gets triggered,
@@ -207,7 +207,7 @@ func (svc *WebauthnSvc) FinishLogin(ctx Ctx, request *protocol.ParsedCredentialA
 		sessionDataRepo := svc.repo.GetWebauthnSessionRepo()
 		sessionData, err := sessionDataRepo.GetByChallenge(ctx, request.Response.CollectedClientData.Challenge)
 		if err != nil {
-			return fmt.Errorf("failed to get webauthn assertion session data: %w", err)
+			return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		if sessionData != nil && sessionData.Operation != WebauthnOperationAuthentication {
@@ -242,13 +242,13 @@ func (svc *WebauthnSvc) FinishLogin(ctx Ctx, request *protocol.ParsedCredentialA
 
 			err = svc.repo.GetWebauthnCredentialRepo().Update(ctx, *dbCred)
 			if err != nil {
-				return fmt.Errorf("failed to update webauthn credential: %w", err)
+				return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
 		}
 
 		err = sessionDataRepo.Delete(ctx, *sessionData)
 		if err != nil {
-			return fmt.Errorf("failed to delete assertion session data: %w", err)
+			return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		userId = webauthnUser.UserId.String()
 		credentialId = base64.RawURLEncoding.EncodeToString(credential.ID)
@@ -266,12 +266,12 @@ func (svc *WebauthnSvc) ListCredentials(ctx Ctx, userId uuid.UUID) ([]*ent.Webau
 func (svc *WebauthnSvc) UpdateCredential(ctx Ctx, userId uuid.UUID, id string, name *string) error {
 	user, err := svc.repo.GetUserRepo().GetById(ctx, userId)
 	if err != nil {
-		return fmt.Errorf("failed to get user: %w", err)
+		return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	credential, err := svc.repo.GetWebauthnCredentialRepo().GetById(ctx, id)
 	if err != nil {
-		return fmt.Errorf("failed to get webauthn credentials: %w", err)
+		return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	if credential == nil || credential.UserID.String() != user.ID.String() {
@@ -289,12 +289,12 @@ func (svc *WebauthnSvc) UpdateCredential(ctx Ctx, userId uuid.UUID, id string, n
 func (svc *WebauthnSvc) DeleteCredential(ctx Ctx, userId uuid.UUID, id string) error {
 	user, err := svc.repo.GetUserRepo().GetById(ctx, userId)
 	if err != nil {
-		return fmt.Errorf("failed to get user: %w", err)
+		return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	credential, err := svc.repo.GetWebauthnCredentialRepo().GetById(ctx, id)
 	if err != nil {
-		return fmt.Errorf("failed to get webauthn credentials: %w", err)
+		return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	if credential == nil || credential.UserID.String() != user.ID.String() {
@@ -309,7 +309,7 @@ func (svc *WebauthnSvc) DeleteCredential(ctx Ctx, userId uuid.UUID, id string) e
 func (svc *WebauthnSvc) getWebauthnUser(ctx Ctx, userId uuid.UUID) (*WebauthnUser, *ent.User, error) {
 	user, err := svc.repo.GetUserRepo().GetById(ctx, userId)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get user: %w", err)
+		return nil, nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	if user == nil {
@@ -318,7 +318,7 @@ func (svc *WebauthnSvc) getWebauthnUser(ctx Ctx, userId uuid.UUID) (*WebauthnUse
 
 	credentials, err := svc.repo.GetWebauthnCredentialRepo().ListByUser(ctx, user.ID)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get webauthn credentials: %w", err)
+		return nil, nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	webauthnUser, err := NewWebauthnUser(ctx, *user, credentials)

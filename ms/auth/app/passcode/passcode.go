@@ -46,7 +46,7 @@ func NewPasscodeSvc(mailer mail.IMailer, renderer *mail.Renderer, cfg *config.Co
 func (svc *PasscodeSvc) InitLogin(ctx Ctx, userId uuid.UUID, emailId uuid.UUID, acceptLang string) (*ent.Passcode, error) {
 	user, err := svc.repo.GetUserRepo().GetById(ctx, userId)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user: %w", err)
+		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	if user == nil {
 		// TODO: audit logger
@@ -66,7 +66,7 @@ func (svc *PasscodeSvc) InitLogin(ctx Ctx, userId uuid.UUID, emailId uuid.UUID, 
 		// Send the passcode to the specified email address
 		email, err = svc.repo.GetEmailRepo().GetById(ctx, emailId)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get email: %w", err)
+			return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		if email == nil {
 			return nil, errorhandler.NewHTTPError(http.StatusBadRequest, "the specified emailId is not available")
@@ -105,7 +105,7 @@ func (svc *PasscodeSvc) InitLogin(ctx Ctx, userId uuid.UUID, emailId uuid.UUID, 
 
 	newPc, err := svc.repo.GetPasscodeRepo().Create(ctx, passcodeModel)
 	if err != nil {
-		return nil, fmt.Errorf("failed to store passcode: %w", err)
+		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	durationTTL := time.Duration(svc.cfg.Passcode.TTL) * time.Second
@@ -141,29 +141,23 @@ func (svc *PasscodeSvc) FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode strin
 
 		passcode, err := passcodeRepo.GetById(ctx, passcodeId)
 		if err != nil {
-			return fmt.Errorf("failed to get passcode: %w", err)
+			return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		if passcode == nil {
 			// TODO: audit logger
-			if err != nil {
-				return fmt.Errorf("failed to create audit log: %w", err)
-			}
 			businessError = errorhandler.NewHTTPError(http.StatusUnauthorized, "passcode not found")
 			return nil
 		}
 
 		user, err := userRepo.GetById(ctx, passcode.UserID)
 		if err != nil {
-			return fmt.Errorf("failed to get user: %w", err)
+			return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		lastVerificationTime := passcode.CreatedAt.Add(time.Duration(passcode.TTL) * time.Second)
 		if lastVerificationTime.Before(startTime) {
 			// TODO: audit logger
-			if err != nil {
-				return fmt.Errorf("failed to create audit log: %w", err)
-			}
 			businessError = errorhandler.NewHTTPError(http.StatusRequestTimeout, "passcode request timed out").SetInternal(fmt.Errorf("createdAt: %s -> lastVerificationTime: %s - current: %s", passcode.CreatedAt, lastVerificationTime, startTime)) // TODO: maybe we should use BadRequest, because RequestTimeout might be to technical and can refer to different error
 			return nil
 		}
@@ -177,32 +171,26 @@ func (svc *PasscodeSvc) FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode strin
 			if passcode.TryCount >= int32(maxPasscodeTries) {
 				err = passcodeRepo.Delete(ctx, passcode)
 				if err != nil {
-					return fmt.Errorf("failed to delete passcode: %w", err)
+					return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 				}
 				// TODO: audit logger
-				if err != nil {
-					return fmt.Errorf("failed to create audit log: %w", err)
-				}
 				businessError = errorhandler.NewHTTPError(http.StatusGone, "max attempts reached")
 				return nil
 			}
 
 			err = passcodeRepo.Update(ctx, passcode)
 			if err != nil {
-				return fmt.Errorf("failed to update passcode: %w", err)
+				return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
 
 			// TODO: audit logger
-			if err != nil {
-				return fmt.Errorf("failed to create audit log: %w", err)
-			}
 			businessError = errorhandler.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("passcode invalid"))
 			return nil
 		}
 
 		err = passcodeRepo.Delete(ctx, passcode)
 		if err != nil {
-			return fmt.Errorf("failed to delete passcode: %w", err)
+			return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		if passcode.Edges.User != nil && passcode.Edges.Email.UserID != nil && passcode.Edges.Email.UserID.String() != user.ID.String() {
@@ -216,7 +204,7 @@ func (svc *PasscodeSvc) FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode strin
 
 			err = emailRepo.Update(ctx, passcode.Edges.Email)
 			if err != nil {
-				return fmt.Errorf("failed to update the email verified status: %w", err)
+				return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
 
 			if user.Edges.PrimaryEmail == nil {
@@ -225,14 +213,11 @@ func (svc *PasscodeSvc) FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode strin
 					SetEmailID(passcode.Edges.Email.ID).
 					Save(ctx)
 				if err != nil {
-					return fmt.Errorf("failed to store primary email: %w", err)
+					return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 				}
 			}
 
 			// TODO: audit logger
-			if err != nil {
-				return fmt.Errorf("failed to create audit log: %w", err)
-			}
 		}
 
 		entPc = passcode
