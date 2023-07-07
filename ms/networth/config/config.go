@@ -55,7 +55,7 @@ var (
 
 type Config struct {
 	Server   Server
-	Plaid    *PlaidConfig // TODO: Need to finalize Plaid integration
+	Plaid    *Plaid // TODO: Need to finalize Plaid integration
 	SaltEdge *SaltEdge
 	Finverse *Finverse
 }

@@ -1,8 +1,12 @@
 package test
 
 import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
+	"github.com/hellohq/hqservice/ent"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -13,4 +17,31 @@ type assetSuite struct {
 func TestAssetSuite(t *testing.T) {
 	t.Parallel()
 	suite.Run(t, new(assetSuite))
+}
+
+func (s *assetSuite) TestGetAsset() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	err := s.LoadFixtures("../../../../test/fixtures/asset")
+	s.Require().NoError(err)
+
+	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
+	token, err := s.sessionManager.GenerateJWT(userId)
+	s.Require().NoError(err)
+	cookie, err := s.sessionManager.GenerateCookie(token)
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, "/networth/asset", nil)
+	req.AddCookie(cookie)
+	rec := httptest.NewRecorder()
+
+	s.e.ServeHTTP(rec, req)
+	if s.Equal(http.StatusOK, rec.Code) {
+		s.Equal(rec.Code, http.StatusOK)
+		assets := []ent.Asset{}
+		err := json.Unmarshal(rec.Body.Bytes(), &assets)
+		s.NoError(err)
+		s.Equal(userId, assets[0].UserID.String())
+	}
 }

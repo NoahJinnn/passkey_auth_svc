@@ -1,7 +1,7 @@
 package config
 
 // // Ref: https://github.com/plaid/quickstart/blob/master/.env.example
-type PlaidConfig struct {
+type Plaid struct {
 	// 	// See https://dashboard.plaid.com/account/keys
 	ClientID string
 	Secret   string

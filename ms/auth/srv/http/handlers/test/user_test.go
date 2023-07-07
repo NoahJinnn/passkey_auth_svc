@@ -153,15 +153,12 @@ func (s *userSuite) TestUserHandler_Get() {
 	s.Require().NoError(err)
 
 	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
-
-	s.Require().NoError(err)
-
-	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s", userId), nil)
 	token, err := s.sessionManager.GenerateJWT(userId)
 	s.Require().NoError(err)
 	cookie, err := s.sessionManager.GenerateCookie(token)
 	s.NoError(err)
 
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s", userId), nil)
 	req.AddCookie(cookie)
 	rec := httptest.NewRecorder()
 

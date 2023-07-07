@@ -1,6 +1,11 @@
 - id: 51b7c175-ceb6-45ba-aae6-0092221c1b84
   user_id: b5dd5267-b462-48be-b70d-bcd6f1bbe7a5
-  address: john.doe@example.com
-  verified: true
+  sheet: 1
+  section: 1
+  type: manual
+  provider_name: manual
+  currency: USD
+  value: 1.123456789
+  description: Cash
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59

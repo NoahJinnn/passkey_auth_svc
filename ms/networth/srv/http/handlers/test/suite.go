@@ -2,8 +2,10 @@ package test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
+	"github.com/go-testfixtures/testfixtures/v3"
 	"github.com/hellohq/hqservice/internal/db"
 	"github.com/hellohq/hqservice/internal/db/pgsql"
 	"github.com/hellohq/hqservice/internal/http/session"
@@ -19,9 +21,27 @@ import (
 )
 
 var (
-	ctx        = context.Background()
-	defaultCfg = config.Config{}
-	sharedCfg  = sharedconfig.Shared{
+	ctx = context.Background()
+	// TODO: Test 3rd provider with test configuration
+	defaultCfg = config.Config{
+		SaltEdge: &config.SaltEdge{
+			AppId:  "",
+			Secret: "",
+			PK:     "",
+		},
+		Finverse: &config.Finverse{
+			AppId:       "",
+			Secret:      "",
+			ClientID:    "",
+			RedirectURI: "",
+		},
+		Plaid: &config.Plaid{
+			ClientID: "",
+			Secret:   "",
+			Env:      "dev",
+		},
+	}
+	sharedCfg = sharedconfig.Shared{
 		Session: sharedconfig.Session{
 			Lifespan: "1h",
 			Cookie: sharedconfig.Cookie{
@@ -83,4 +103,24 @@ func (s *Suite) TearDownSuite() {
 	if s.testDb != nil {
 		s.NoError(testDal.PurgeDB(s.testDb))
 	}
+}
+
+// LoadFixtures loads predefined data from the path in the database.
+func (s *Suite) LoadFixtures(path string) error {
+	fixtures, err := testfixtures.New(
+		testfixtures.Database(s.testDb.DbCon),
+		testfixtures.Dialect(s.testDb.Dialect),
+		testfixtures.Directory(path),
+		testfixtures.SkipResetSequences(),
+	)
+	if err != nil {
+		return fmt.Errorf("could not create testfixtures: %w", err)
+	}
+
+	err = fixtures.Load()
+	if err != nil {
+		return fmt.Errorf("could not load fixtures: %w", err)
+	}
+
+	return nil
 }
