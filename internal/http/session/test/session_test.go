@@ -38,9 +38,9 @@ func TestGenerator_Generate(t *testing.T) {
 func TestManager_GenerateJWT_IssAndAud(t *testing.T) {
 	manager := JwkManager{}
 	cfg := sharedconfig.Session{
-		Issuer:   "hanko",
+		Issuer:   "hqservice",
 		Lifespan: "5m",
-		Audience: []string{"test.hanko.io"},
+		Audience: []string{"test.hellohq.com"},
 	}
 
 	sessionGenerator, err := session.NewManager(&manager, cfg)
@@ -53,17 +53,17 @@ func TestManager_GenerateJWT_IssAndAud(t *testing.T) {
 
 	token, err := jwt.ParseString(j, jwt.WithVerify(false))
 	assert.NoError(t, err)
-	assert.Equal(t, []string{"test.hanko.io"}, token.Audience())
-	assert.Equal(t, "hanko", token.Issuer())
+	assert.Equal(t, []string{"test.hellohq.com"}, token.Audience())
+	assert.Equal(t, "hqservice", token.Issuer())
 }
 
 func TestManager_GenerateJWT_AdditionalAudiences(t *testing.T) {
 	manager := JwkManager{}
 	cfg := sharedconfig.Session{
-		Issuer:   "hanko",
+		Issuer:   "hqservice",
 		Lifespan: "5m",
 		Audience: []string{
-			"additional.hanko.io",
+			"additional.hellohq.com",
 			"anotherOne",
 		},
 	}
@@ -79,10 +79,10 @@ func TestManager_GenerateJWT_AdditionalAudiences(t *testing.T) {
 	token, err := jwt.ParseString(j, jwt.WithVerify(false))
 	assert.NoError(t, err)
 	assert.Equal(t, []string{
-		"additional.hanko.io",
+		"additional.hellohq.com",
 		"anotherOne",
 	}, token.Audience())
-	assert.Equal(t, "hanko", token.Issuer())
+	assert.Equal(t, "hqservice", token.Issuer())
 }
 
 func TestGenerator_Verify(t *testing.T) {
