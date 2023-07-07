@@ -77,7 +77,7 @@ func (svc *PasscodeSvc) InitLogin(ctx Ctx, userId uuid.UUID, emailId uuid.UUID, 
 		return nil, errorhandler.NewHTTPError(http.StatusBadRequest, "an emailId needs to be specified")
 	} else {
 		if primE.Edges.Email == nil {
-			return nil, errorhandler.NewHTTPError(http.StatusBadRequest, "an emailId needs to be specified")
+			return nil, errorhandler.NewHTTPError(http.StatusBadRequest, "primary email address is not available")
 		}
 		// Send the passcode to the primary email address
 		email = primE.Edges.Email

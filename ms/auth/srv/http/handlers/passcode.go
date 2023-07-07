@@ -30,13 +30,11 @@ func NewPasscodeHandler(srv *HttpDeps, sessionManager session.IManager) *Passcod
 func (h *PasscodeHandler) Init(c echo.Context) error {
 	var body dto.PasscodeInitRequest
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	if err := c.Validate(body); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	userId, err := uuid.FromString(body.UserId)
@@ -60,8 +58,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	lang := c.Request().Header.Get("Accept-Language")
 	passcodeEnt, err := h.GetPasscodeSvc().InitLogin(c.Request().Context(), userId, emailId, lang)
 	if err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	return c.JSON(http.StatusOK, dto.PasscodeReturn{
@@ -74,13 +71,11 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 func (h *PasscodeHandler) Finish(c echo.Context) error {
 	var body dto.PasscodeFinishRequest
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	if err := c.Validate(body); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	passcodeId, err := uuid.FromString(body.Id)

@@ -33,21 +33,18 @@ type UserCreateBody struct {
 func (h *UserHandler) Create(c echo.Context) error {
 	var body UserCreateBody
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	if err := c.Validate(body); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	body.Email = strings.ToLower(body.Email)
 
 	newUser, emailId, err := h.GetUserSvc().Create(c.Request().Context(), body.Email)
 	if err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	if !h.Cfg.RequireEmailVerification {
@@ -109,21 +106,18 @@ type UserGetByEmailBody struct {
 func (h *UserHandler) GetUserIdByEmail(c echo.Context) error {
 	var request UserGetByEmailBody
 	if err := (&echo.DefaultBinder{}).BindBody(c, &request); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	if err := c.Validate(request); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	emailAddress := strings.ToLower(request.Email)
 
 	email, hasCredentials, err := h.GetUserSvc().GetUserIdByEmail(c.Request().Context(), emailAddress)
 	if err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	return c.JSON(http.StatusOK, dto.UserInfoResponse{

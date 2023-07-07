@@ -35,14 +35,12 @@ func (h *WebauthnHandler) InitRegistration(c echo.Context) error {
 
 	uId, err := uuid.FromString(sessionToken.Subject())
 	if err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	options, err := h.GetWebauthnSvc().InitRegistration(c.Request().Context(), uId)
 	if err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	return c.JSON(http.StatusOK, options)
@@ -87,14 +85,12 @@ func (h *WebauthnHandler) InitLogin(c echo.Context) error {
 	var request BeginAuthenticationBody
 
 	if err := (&echo.DefaultBinder{}).BindBody(c, &request); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	options, err := h.GetWebauthnSvc().InitLogin(c.Request().Context(), request.UserID)
 	if err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	return c.JSON(http.StatusOK, options)
@@ -114,20 +110,17 @@ func (h *WebauthnHandler) FinishLogin(c echo.Context) error {
 
 	credentialId, userId, err := h.GetWebauthnSvc().FinishLogin(c.Request().Context(), request)
 	if err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	token, err := h.sessionManager.GenerateJWT(userId)
 	if err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	cookie, err := h.sessionManager.GenerateCookie(token)
 	if err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	c.SetCookie(cookie)

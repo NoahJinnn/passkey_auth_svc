@@ -30,13 +30,11 @@ func (h *SeAccountInfoHandler) Customer(c echo.Context) error {
 func (h *SeAccountInfoHandler) CreateCustomer(c echo.Context) error {
 	var body saltedge.CreateCustomer
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	if err := c.Validate(body); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 	resp, err := h.GetSeAccountInfoSvc().CreateCustomer(c.Request().Context(), &body)
 	if err != nil {
@@ -60,13 +58,11 @@ func (h *SeAccountInfoHandler) DeleteCustomer(c echo.Context) error {
 func (h *SeAccountInfoHandler) CreateConnectSession(c echo.Context) error {
 	var body saltedge.CreateConnectSession
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	if err := c.Validate(body); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 	resp, err := h.GetSeAccountInfoSvc().CreateConnectSession(c.Request().Context(), &body)
 	if err != nil {

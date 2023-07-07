@@ -36,11 +36,15 @@ func (r *userRepo) GetById(ctx Ctx, id uuid.UUID) (*ent.User, error) {
 	u, err := r.pgsql.User.
 		Query().
 		Where(user.ID(id)).
-		WithEmails().
-		WithPrimaryEmail().
+		WithPrimaryEmail(
+			func(q *ent.PrimaryEmailQuery) {
+				q.Limit(1)
+				q.WithEmail()
+			},
+		).
 		WithWebauthnCredentials().
 		Only(ctx)
-	if err != nil {
+	if err != nil && !ent.IsNotFound(err) {
 		return nil, err
 	}
 

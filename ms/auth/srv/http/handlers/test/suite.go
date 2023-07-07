@@ -19,6 +19,7 @@ import (
 	"github.com/hellohq/hqservice/ms/auth/dal"
 	server "github.com/hellohq/hqservice/ms/auth/srv/http"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/handlers"
+	"github.com/hellohq/hqservice/ms/auth/srv/mail"
 	testDal "github.com/hellohq/hqservice/ms/auth/test/mock/dal"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
@@ -108,6 +109,26 @@ func (s sessionManager) Verify(token string) (jwt.Token, error) {
 	return nil, nil
 }
 
+type mailer struct{}
+
+var renderer, _ = mail.NewRenderer()
+
+func passcodes() []*ent.Passcode {
+	now := time.Now()
+	return []*ent.Passcode{{
+		ID:        uuid.FromStringOrNil("08ee61aa-0946-4ecf-a8bd-e14c604329e2"),
+		UserID:    uuid.FromStringOrNil(userId),
+		TTL:       300,
+		Code:      "$2a$12$gBPH9jnbXFmwAGwZMSzYkeXx7oOTElzhvHfiDgj.D7G8q4znvHpMK",
+		CreatedAt: now,
+		UpdatedAt: now,
+	}}
+}
+
+func (m mailer) Send(email []string, subject string, body string) error {
+	return nil
+}
+
 type Suite struct {
 	suite.Suite
 	repo           *dal.AuthRepo
@@ -138,7 +159,7 @@ func (s *Suite) SetupSuite() {
 	s.repo = repo
 	s.sessionManager = sessionManager
 	s.testDb = testDb
-	s.app = app.New(nil, nil, &defaultCfg, repo)
+	s.app = app.New(mailer{}, renderer, &defaultCfg, repo)
 	s.srv = &handlers.HttpDeps{
 		Appl:      s.app,
 		Cfg:       &defaultCfg,
