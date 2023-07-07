@@ -43,7 +43,7 @@ func (fsc *FvSessionCreate) SetAccessToken(s string) *FvSessionCreate {
 }
 
 // SetExpiresIn sets the "expires_in" field.
-func (fsc *FvSessionCreate) SetExpiresIn(i int) *FvSessionCreate {
+func (fsc *FvSessionCreate) SetExpiresIn(i int32) *FvSessionCreate {
 	fsc.mutation.SetExpiresIn(i)
 	return fsc
 }
@@ -216,7 +216,7 @@ func (fsc *FvSessionCreate) createSpec() (*FvSession, *sqlgraph.CreateSpec) {
 		_node.AccessToken = value
 	}
 	if value, ok := fsc.mutation.ExpiresIn(); ok {
-		_spec.SetField(fvsession.FieldExpiresIn, field.TypeInt, value)
+		_spec.SetField(fvsession.FieldExpiresIn, field.TypeInt32, value)
 		_node.ExpiresIn = value
 	}
 	if value, ok := fsc.mutation.IssuedAt(); ok {

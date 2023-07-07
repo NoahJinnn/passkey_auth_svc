@@ -22,19 +22,19 @@ type Asset struct {
 	// UserID holds the value of the "user_id" field.
 	UserID uuid.UUID `json:"user_id,omitempty"`
 	// Sheet holds the value of the "sheet" field.
-	Sheet int `json:"sheet,omitempty"`
+	Sheet int32 `json:"sheet,omitempty"`
 	// Section holds the value of the "section" field.
-	Section int `json:"section,omitempty"`
+	Section int32 `json:"section,omitempty"`
 	// Type holds the value of the "type" field.
 	Type string `json:"type,omitempty"`
 	// ProviderName holds the value of the "provider_name" field.
 	ProviderName string `json:"provider_name,omitempty"`
+	// Description holds the value of the "description" field.
+	Description *string `json:"description,omitempty"`
 	// Currency holds the value of the "currency" field.
 	Currency string `json:"currency,omitempty"`
 	// Value holds the value of the "value" field.
 	Value float64 `json:"value,omitempty"`
-	// Description holds the value of the "description" field.
-	Description *string `json:"description,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -76,7 +76,7 @@ func (*Asset) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case asset.FieldSheet, asset.FieldSection:
 			values[i] = new(sql.NullInt64)
-		case asset.FieldType, asset.FieldProviderName, asset.FieldCurrency, asset.FieldDescription:
+		case asset.FieldType, asset.FieldProviderName, asset.FieldDescription, asset.FieldCurrency:
 			values[i] = new(sql.NullString)
 		case asset.FieldCreatedAt, asset.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -113,13 +113,13 @@ func (a *Asset) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field sheet", values[i])
 			} else if value.Valid {
-				a.Sheet = int(value.Int64)
+				a.Sheet = int32(value.Int64)
 			}
 		case asset.FieldSection:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field section", values[i])
 			} else if value.Valid {
-				a.Section = int(value.Int64)
+				a.Section = int32(value.Int64)
 			}
 		case asset.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -133,6 +133,13 @@ func (a *Asset) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				a.ProviderName = value.String
 			}
+		case asset.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				a.Description = new(string)
+				*a.Description = value.String
+			}
 		case asset.FieldCurrency:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field currency", values[i])
@@ -144,13 +151,6 @@ func (a *Asset) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field value", values[i])
 			} else if value.Valid {
 				a.Value = value.Float64
-			}
-		case asset.FieldDescription:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field description", values[i])
-			} else if value.Valid {
-				a.Description = new(string)
-				*a.Description = value.String
 			}
 		case asset.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -220,16 +220,16 @@ func (a *Asset) String() string {
 	builder.WriteString("provider_name=")
 	builder.WriteString(a.ProviderName)
 	builder.WriteString(", ")
+	if v := a.Description; v != nil {
+		builder.WriteString("description=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
 	builder.WriteString("currency=")
 	builder.WriteString(a.Currency)
 	builder.WriteString(", ")
 	builder.WriteString("value=")
 	builder.WriteString(fmt.Sprintf("%v", a.Value))
-	builder.WriteString(", ")
-	if v := a.Description; v != nil {
-		builder.WriteString("description=")
-		builder.WriteString(*v)
-	}
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(a.CreatedAt.Format(time.ANSIC))

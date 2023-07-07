@@ -56,16 +56,16 @@ type AssetMutation struct {
 	op            Op
 	typ           string
 	id            *uuid.UUID
-	sheet         *int
-	addsheet      *int
-	section       *int
-	addsection    *int
+	sheet         *int32
+	addsheet      *int32
+	section       *int32
+	addsection    *int32
 	_type         *string
 	provider_name *string
+	description   *string
 	currency      *string
 	value         *float64
 	addvalue      *float64
-	description   *string
 	created_at    *time.Time
 	updated_at    *time.Time
 	clearedFields map[string]struct{}
@@ -230,13 +230,13 @@ func (m *AssetMutation) ResetUserID() {
 }
 
 // SetSheet sets the "sheet" field.
-func (m *AssetMutation) SetSheet(i int) {
+func (m *AssetMutation) SetSheet(i int32) {
 	m.sheet = &i
 	m.addsheet = nil
 }
 
 // Sheet returns the value of the "sheet" field in the mutation.
-func (m *AssetMutation) Sheet() (r int, exists bool) {
+func (m *AssetMutation) Sheet() (r int32, exists bool) {
 	v := m.sheet
 	if v == nil {
 		return
@@ -247,7 +247,7 @@ func (m *AssetMutation) Sheet() (r int, exists bool) {
 // OldSheet returns the old "sheet" field's value of the Asset entity.
 // If the Asset object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AssetMutation) OldSheet(ctx context.Context) (v int, err error) {
+func (m *AssetMutation) OldSheet(ctx context.Context) (v int32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldSheet is only allowed on UpdateOne operations")
 	}
@@ -262,7 +262,7 @@ func (m *AssetMutation) OldSheet(ctx context.Context) (v int, err error) {
 }
 
 // AddSheet adds i to the "sheet" field.
-func (m *AssetMutation) AddSheet(i int) {
+func (m *AssetMutation) AddSheet(i int32) {
 	if m.addsheet != nil {
 		*m.addsheet += i
 	} else {
@@ -271,7 +271,7 @@ func (m *AssetMutation) AddSheet(i int) {
 }
 
 // AddedSheet returns the value that was added to the "sheet" field in this mutation.
-func (m *AssetMutation) AddedSheet() (r int, exists bool) {
+func (m *AssetMutation) AddedSheet() (r int32, exists bool) {
 	v := m.addsheet
 	if v == nil {
 		return
@@ -300,13 +300,13 @@ func (m *AssetMutation) ResetSheet() {
 }
 
 // SetSection sets the "section" field.
-func (m *AssetMutation) SetSection(i int) {
+func (m *AssetMutation) SetSection(i int32) {
 	m.section = &i
 	m.addsection = nil
 }
 
 // Section returns the value of the "section" field in the mutation.
-func (m *AssetMutation) Section() (r int, exists bool) {
+func (m *AssetMutation) Section() (r int32, exists bool) {
 	v := m.section
 	if v == nil {
 		return
@@ -317,7 +317,7 @@ func (m *AssetMutation) Section() (r int, exists bool) {
 // OldSection returns the old "section" field's value of the Asset entity.
 // If the Asset object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AssetMutation) OldSection(ctx context.Context) (v int, err error) {
+func (m *AssetMutation) OldSection(ctx context.Context) (v int32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldSection is only allowed on UpdateOne operations")
 	}
@@ -332,7 +332,7 @@ func (m *AssetMutation) OldSection(ctx context.Context) (v int, err error) {
 }
 
 // AddSection adds i to the "section" field.
-func (m *AssetMutation) AddSection(i int) {
+func (m *AssetMutation) AddSection(i int32) {
 	if m.addsection != nil {
 		*m.addsection += i
 	} else {
@@ -341,7 +341,7 @@ func (m *AssetMutation) AddSection(i int) {
 }
 
 // AddedSection returns the value that was added to the "section" field in this mutation.
-func (m *AssetMutation) AddedSection() (r int, exists bool) {
+func (m *AssetMutation) AddedSection() (r int32, exists bool) {
 	v := m.addsection
 	if v == nil {
 		return
@@ -441,6 +441,55 @@ func (m *AssetMutation) ResetProviderName() {
 	m.provider_name = nil
 }
 
+// SetDescription sets the "description" field.
+func (m *AssetMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *AssetMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the Asset entity.
+// If the Asset object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AssetMutation) OldDescription(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ClearDescription clears the value of the "description" field.
+func (m *AssetMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[asset.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *AssetMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[asset.FieldDescription]
+	return ok
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *AssetMutation) ResetDescription() {
+	m.description = nil
+	delete(m.clearedFields, asset.FieldDescription)
+}
+
 // SetCurrency sets the "currency" field.
 func (m *AssetMutation) SetCurrency(s string) {
 	m.currency = &s
@@ -531,55 +580,6 @@ func (m *AssetMutation) AddedValue() (r float64, exists bool) {
 func (m *AssetMutation) ResetValue() {
 	m.value = nil
 	m.addvalue = nil
-}
-
-// SetDescription sets the "description" field.
-func (m *AssetMutation) SetDescription(s string) {
-	m.description = &s
-}
-
-// Description returns the value of the "description" field in the mutation.
-func (m *AssetMutation) Description() (r string, exists bool) {
-	v := m.description
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDescription returns the old "description" field's value of the Asset entity.
-// If the Asset object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AssetMutation) OldDescription(ctx context.Context) (v *string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDescription requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
-	}
-	return oldValue.Description, nil
-}
-
-// ClearDescription clears the value of the "description" field.
-func (m *AssetMutation) ClearDescription() {
-	m.description = nil
-	m.clearedFields[asset.FieldDescription] = struct{}{}
-}
-
-// DescriptionCleared returns if the "description" field was cleared in this mutation.
-func (m *AssetMutation) DescriptionCleared() bool {
-	_, ok := m.clearedFields[asset.FieldDescription]
-	return ok
-}
-
-// ResetDescription resets all changes to the "description" field.
-func (m *AssetMutation) ResetDescription() {
-	m.description = nil
-	delete(m.clearedFields, asset.FieldDescription)
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -730,14 +730,14 @@ func (m *AssetMutation) Fields() []string {
 	if m.provider_name != nil {
 		fields = append(fields, asset.FieldProviderName)
 	}
+	if m.description != nil {
+		fields = append(fields, asset.FieldDescription)
+	}
 	if m.currency != nil {
 		fields = append(fields, asset.FieldCurrency)
 	}
 	if m.value != nil {
 		fields = append(fields, asset.FieldValue)
-	}
-	if m.description != nil {
-		fields = append(fields, asset.FieldDescription)
 	}
 	if m.created_at != nil {
 		fields = append(fields, asset.FieldCreatedAt)
@@ -763,12 +763,12 @@ func (m *AssetMutation) Field(name string) (ent.Value, bool) {
 		return m.GetType()
 	case asset.FieldProviderName:
 		return m.ProviderName()
+	case asset.FieldDescription:
+		return m.Description()
 	case asset.FieldCurrency:
 		return m.Currency()
 	case asset.FieldValue:
 		return m.Value()
-	case asset.FieldDescription:
-		return m.Description()
 	case asset.FieldCreatedAt:
 		return m.CreatedAt()
 	case asset.FieldUpdatedAt:
@@ -792,12 +792,12 @@ func (m *AssetMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldType(ctx)
 	case asset.FieldProviderName:
 		return m.OldProviderName(ctx)
+	case asset.FieldDescription:
+		return m.OldDescription(ctx)
 	case asset.FieldCurrency:
 		return m.OldCurrency(ctx)
 	case asset.FieldValue:
 		return m.OldValue(ctx)
-	case asset.FieldDescription:
-		return m.OldDescription(ctx)
 	case asset.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case asset.FieldUpdatedAt:
@@ -819,14 +819,14 @@ func (m *AssetMutation) SetField(name string, value ent.Value) error {
 		m.SetUserID(v)
 		return nil
 	case asset.FieldSheet:
-		v, ok := value.(int)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSheet(v)
 		return nil
 	case asset.FieldSection:
-		v, ok := value.(int)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -846,6 +846,13 @@ func (m *AssetMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetProviderName(v)
 		return nil
+	case asset.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
 	case asset.FieldCurrency:
 		v, ok := value.(string)
 		if !ok {
@@ -859,13 +866,6 @@ func (m *AssetMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetValue(v)
-		return nil
-	case asset.FieldDescription:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDescription(v)
 		return nil
 	case asset.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -922,14 +922,14 @@ func (m *AssetMutation) AddedField(name string) (ent.Value, bool) {
 func (m *AssetMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case asset.FieldSheet:
-		v, ok := value.(int)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddSheet(v)
 		return nil
 	case asset.FieldSection:
-		v, ok := value.(int)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1011,14 +1011,14 @@ func (m *AssetMutation) ResetField(name string) error {
 	case asset.FieldProviderName:
 		m.ResetProviderName()
 		return nil
+	case asset.FieldDescription:
+		m.ResetDescription()
+		return nil
 	case asset.FieldCurrency:
 		m.ResetCurrency()
 		return nil
 	case asset.FieldValue:
 		m.ResetValue()
-		return nil
-	case asset.FieldDescription:
-		m.ResetDescription()
 		return nil
 	case asset.FieldCreatedAt:
 		m.ResetCreatedAt()
@@ -1961,8 +1961,8 @@ type FvSessionMutation struct {
 	typ           string
 	id            *uuid.UUID
 	access_token  *string
-	expires_in    *int
-	addexpires_in *int
+	expires_in    *int32
+	addexpires_in *int32
 	issued_at     *string
 	token_type    *string
 	created_at    *time.Time
@@ -2165,13 +2165,13 @@ func (m *FvSessionMutation) ResetAccessToken() {
 }
 
 // SetExpiresIn sets the "expires_in" field.
-func (m *FvSessionMutation) SetExpiresIn(i int) {
+func (m *FvSessionMutation) SetExpiresIn(i int32) {
 	m.expires_in = &i
 	m.addexpires_in = nil
 }
 
 // ExpiresIn returns the value of the "expires_in" field in the mutation.
-func (m *FvSessionMutation) ExpiresIn() (r int, exists bool) {
+func (m *FvSessionMutation) ExpiresIn() (r int32, exists bool) {
 	v := m.expires_in
 	if v == nil {
 		return
@@ -2182,7 +2182,7 @@ func (m *FvSessionMutation) ExpiresIn() (r int, exists bool) {
 // OldExpiresIn returns the old "expires_in" field's value of the FvSession entity.
 // If the FvSession object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FvSessionMutation) OldExpiresIn(ctx context.Context) (v int, err error) {
+func (m *FvSessionMutation) OldExpiresIn(ctx context.Context) (v int32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldExpiresIn is only allowed on UpdateOne operations")
 	}
@@ -2197,7 +2197,7 @@ func (m *FvSessionMutation) OldExpiresIn(ctx context.Context) (v int, err error)
 }
 
 // AddExpiresIn adds i to the "expires_in" field.
-func (m *FvSessionMutation) AddExpiresIn(i int) {
+func (m *FvSessionMutation) AddExpiresIn(i int32) {
 	if m.addexpires_in != nil {
 		*m.addexpires_in += i
 	} else {
@@ -2206,7 +2206,7 @@ func (m *FvSessionMutation) AddExpiresIn(i int) {
 }
 
 // AddedExpiresIn returns the value that was added to the "expires_in" field in this mutation.
-func (m *FvSessionMutation) AddedExpiresIn() (r int, exists bool) {
+func (m *FvSessionMutation) AddedExpiresIn() (r int32, exists bool) {
 	v := m.addexpires_in
 	if v == nil {
 		return
@@ -2515,7 +2515,7 @@ func (m *FvSessionMutation) SetField(name string, value ent.Value) error {
 		m.SetAccessToken(v)
 		return nil
 	case fvsession.FieldExpiresIn:
-		v, ok := value.(int)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -2580,7 +2580,7 @@ func (m *FvSessionMutation) AddedField(name string) (ent.Value, bool) {
 func (m *FvSessionMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case fvsession.FieldExpiresIn:
-		v, ok := value.(int)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

@@ -62,12 +62,12 @@ func UserID(v uuid.UUID) predicate.Asset {
 }
 
 // Sheet applies equality check predicate on the "sheet" field. It's identical to SheetEQ.
-func Sheet(v int) predicate.Asset {
+func Sheet(v int32) predicate.Asset {
 	return predicate.Asset(sql.FieldEQ(FieldSheet, v))
 }
 
 // Section applies equality check predicate on the "section" field. It's identical to SectionEQ.
-func Section(v int) predicate.Asset {
+func Section(v int32) predicate.Asset {
 	return predicate.Asset(sql.FieldEQ(FieldSection, v))
 }
 
@@ -81,6 +81,11 @@ func ProviderName(v string) predicate.Asset {
 	return predicate.Asset(sql.FieldEQ(FieldProviderName, v))
 }
 
+// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
+func Description(v string) predicate.Asset {
+	return predicate.Asset(sql.FieldEQ(FieldDescription, v))
+}
+
 // Currency applies equality check predicate on the "currency" field. It's identical to CurrencyEQ.
 func Currency(v string) predicate.Asset {
 	return predicate.Asset(sql.FieldEQ(FieldCurrency, v))
@@ -89,11 +94,6 @@ func Currency(v string) predicate.Asset {
 // Value applies equality check predicate on the "value" field. It's identical to ValueEQ.
 func Value(v float64) predicate.Asset {
 	return predicate.Asset(sql.FieldEQ(FieldValue, v))
-}
-
-// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
-func Description(v string) predicate.Asset {
-	return predicate.Asset(sql.FieldEQ(FieldDescription, v))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -137,42 +137,42 @@ func UserIDNotNil() predicate.Asset {
 }
 
 // SheetEQ applies the EQ predicate on the "sheet" field.
-func SheetEQ(v int) predicate.Asset {
+func SheetEQ(v int32) predicate.Asset {
 	return predicate.Asset(sql.FieldEQ(FieldSheet, v))
 }
 
 // SheetNEQ applies the NEQ predicate on the "sheet" field.
-func SheetNEQ(v int) predicate.Asset {
+func SheetNEQ(v int32) predicate.Asset {
 	return predicate.Asset(sql.FieldNEQ(FieldSheet, v))
 }
 
 // SheetIn applies the In predicate on the "sheet" field.
-func SheetIn(vs ...int) predicate.Asset {
+func SheetIn(vs ...int32) predicate.Asset {
 	return predicate.Asset(sql.FieldIn(FieldSheet, vs...))
 }
 
 // SheetNotIn applies the NotIn predicate on the "sheet" field.
-func SheetNotIn(vs ...int) predicate.Asset {
+func SheetNotIn(vs ...int32) predicate.Asset {
 	return predicate.Asset(sql.FieldNotIn(FieldSheet, vs...))
 }
 
 // SheetGT applies the GT predicate on the "sheet" field.
-func SheetGT(v int) predicate.Asset {
+func SheetGT(v int32) predicate.Asset {
 	return predicate.Asset(sql.FieldGT(FieldSheet, v))
 }
 
 // SheetGTE applies the GTE predicate on the "sheet" field.
-func SheetGTE(v int) predicate.Asset {
+func SheetGTE(v int32) predicate.Asset {
 	return predicate.Asset(sql.FieldGTE(FieldSheet, v))
 }
 
 // SheetLT applies the LT predicate on the "sheet" field.
-func SheetLT(v int) predicate.Asset {
+func SheetLT(v int32) predicate.Asset {
 	return predicate.Asset(sql.FieldLT(FieldSheet, v))
 }
 
 // SheetLTE applies the LTE predicate on the "sheet" field.
-func SheetLTE(v int) predicate.Asset {
+func SheetLTE(v int32) predicate.Asset {
 	return predicate.Asset(sql.FieldLTE(FieldSheet, v))
 }
 
@@ -187,42 +187,42 @@ func SheetNotNil() predicate.Asset {
 }
 
 // SectionEQ applies the EQ predicate on the "section" field.
-func SectionEQ(v int) predicate.Asset {
+func SectionEQ(v int32) predicate.Asset {
 	return predicate.Asset(sql.FieldEQ(FieldSection, v))
 }
 
 // SectionNEQ applies the NEQ predicate on the "section" field.
-func SectionNEQ(v int) predicate.Asset {
+func SectionNEQ(v int32) predicate.Asset {
 	return predicate.Asset(sql.FieldNEQ(FieldSection, v))
 }
 
 // SectionIn applies the In predicate on the "section" field.
-func SectionIn(vs ...int) predicate.Asset {
+func SectionIn(vs ...int32) predicate.Asset {
 	return predicate.Asset(sql.FieldIn(FieldSection, vs...))
 }
 
 // SectionNotIn applies the NotIn predicate on the "section" field.
-func SectionNotIn(vs ...int) predicate.Asset {
+func SectionNotIn(vs ...int32) predicate.Asset {
 	return predicate.Asset(sql.FieldNotIn(FieldSection, vs...))
 }
 
 // SectionGT applies the GT predicate on the "section" field.
-func SectionGT(v int) predicate.Asset {
+func SectionGT(v int32) predicate.Asset {
 	return predicate.Asset(sql.FieldGT(FieldSection, v))
 }
 
 // SectionGTE applies the GTE predicate on the "section" field.
-func SectionGTE(v int) predicate.Asset {
+func SectionGTE(v int32) predicate.Asset {
 	return predicate.Asset(sql.FieldGTE(FieldSection, v))
 }
 
 // SectionLT applies the LT predicate on the "section" field.
-func SectionLT(v int) predicate.Asset {
+func SectionLT(v int32) predicate.Asset {
 	return predicate.Asset(sql.FieldLT(FieldSection, v))
 }
 
 // SectionLTE applies the LTE predicate on the "section" field.
-func SectionLTE(v int) predicate.Asset {
+func SectionLTE(v int32) predicate.Asset {
 	return predicate.Asset(sql.FieldLTE(FieldSection, v))
 }
 
@@ -366,6 +366,81 @@ func ProviderNameContainsFold(v string) predicate.Asset {
 	return predicate.Asset(sql.FieldContainsFold(FieldProviderName, v))
 }
 
+// DescriptionEQ applies the EQ predicate on the "description" field.
+func DescriptionEQ(v string) predicate.Asset {
+	return predicate.Asset(sql.FieldEQ(FieldDescription, v))
+}
+
+// DescriptionNEQ applies the NEQ predicate on the "description" field.
+func DescriptionNEQ(v string) predicate.Asset {
+	return predicate.Asset(sql.FieldNEQ(FieldDescription, v))
+}
+
+// DescriptionIn applies the In predicate on the "description" field.
+func DescriptionIn(vs ...string) predicate.Asset {
+	return predicate.Asset(sql.FieldIn(FieldDescription, vs...))
+}
+
+// DescriptionNotIn applies the NotIn predicate on the "description" field.
+func DescriptionNotIn(vs ...string) predicate.Asset {
+	return predicate.Asset(sql.FieldNotIn(FieldDescription, vs...))
+}
+
+// DescriptionGT applies the GT predicate on the "description" field.
+func DescriptionGT(v string) predicate.Asset {
+	return predicate.Asset(sql.FieldGT(FieldDescription, v))
+}
+
+// DescriptionGTE applies the GTE predicate on the "description" field.
+func DescriptionGTE(v string) predicate.Asset {
+	return predicate.Asset(sql.FieldGTE(FieldDescription, v))
+}
+
+// DescriptionLT applies the LT predicate on the "description" field.
+func DescriptionLT(v string) predicate.Asset {
+	return predicate.Asset(sql.FieldLT(FieldDescription, v))
+}
+
+// DescriptionLTE applies the LTE predicate on the "description" field.
+func DescriptionLTE(v string) predicate.Asset {
+	return predicate.Asset(sql.FieldLTE(FieldDescription, v))
+}
+
+// DescriptionContains applies the Contains predicate on the "description" field.
+func DescriptionContains(v string) predicate.Asset {
+	return predicate.Asset(sql.FieldContains(FieldDescription, v))
+}
+
+// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
+func DescriptionHasPrefix(v string) predicate.Asset {
+	return predicate.Asset(sql.FieldHasPrefix(FieldDescription, v))
+}
+
+// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
+func DescriptionHasSuffix(v string) predicate.Asset {
+	return predicate.Asset(sql.FieldHasSuffix(FieldDescription, v))
+}
+
+// DescriptionIsNil applies the IsNil predicate on the "description" field.
+func DescriptionIsNil() predicate.Asset {
+	return predicate.Asset(sql.FieldIsNull(FieldDescription))
+}
+
+// DescriptionNotNil applies the NotNil predicate on the "description" field.
+func DescriptionNotNil() predicate.Asset {
+	return predicate.Asset(sql.FieldNotNull(FieldDescription))
+}
+
+// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
+func DescriptionEqualFold(v string) predicate.Asset {
+	return predicate.Asset(sql.FieldEqualFold(FieldDescription, v))
+}
+
+// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
+func DescriptionContainsFold(v string) predicate.Asset {
+	return predicate.Asset(sql.FieldContainsFold(FieldDescription, v))
+}
+
 // CurrencyEQ applies the EQ predicate on the "currency" field.
 func CurrencyEQ(v string) predicate.Asset {
 	return predicate.Asset(sql.FieldEQ(FieldCurrency, v))
@@ -469,81 +544,6 @@ func ValueLT(v float64) predicate.Asset {
 // ValueLTE applies the LTE predicate on the "value" field.
 func ValueLTE(v float64) predicate.Asset {
 	return predicate.Asset(sql.FieldLTE(FieldValue, v))
-}
-
-// DescriptionEQ applies the EQ predicate on the "description" field.
-func DescriptionEQ(v string) predicate.Asset {
-	return predicate.Asset(sql.FieldEQ(FieldDescription, v))
-}
-
-// DescriptionNEQ applies the NEQ predicate on the "description" field.
-func DescriptionNEQ(v string) predicate.Asset {
-	return predicate.Asset(sql.FieldNEQ(FieldDescription, v))
-}
-
-// DescriptionIn applies the In predicate on the "description" field.
-func DescriptionIn(vs ...string) predicate.Asset {
-	return predicate.Asset(sql.FieldIn(FieldDescription, vs...))
-}
-
-// DescriptionNotIn applies the NotIn predicate on the "description" field.
-func DescriptionNotIn(vs ...string) predicate.Asset {
-	return predicate.Asset(sql.FieldNotIn(FieldDescription, vs...))
-}
-
-// DescriptionGT applies the GT predicate on the "description" field.
-func DescriptionGT(v string) predicate.Asset {
-	return predicate.Asset(sql.FieldGT(FieldDescription, v))
-}
-
-// DescriptionGTE applies the GTE predicate on the "description" field.
-func DescriptionGTE(v string) predicate.Asset {
-	return predicate.Asset(sql.FieldGTE(FieldDescription, v))
-}
-
-// DescriptionLT applies the LT predicate on the "description" field.
-func DescriptionLT(v string) predicate.Asset {
-	return predicate.Asset(sql.FieldLT(FieldDescription, v))
-}
-
-// DescriptionLTE applies the LTE predicate on the "description" field.
-func DescriptionLTE(v string) predicate.Asset {
-	return predicate.Asset(sql.FieldLTE(FieldDescription, v))
-}
-
-// DescriptionContains applies the Contains predicate on the "description" field.
-func DescriptionContains(v string) predicate.Asset {
-	return predicate.Asset(sql.FieldContains(FieldDescription, v))
-}
-
-// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
-func DescriptionHasPrefix(v string) predicate.Asset {
-	return predicate.Asset(sql.FieldHasPrefix(FieldDescription, v))
-}
-
-// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
-func DescriptionHasSuffix(v string) predicate.Asset {
-	return predicate.Asset(sql.FieldHasSuffix(FieldDescription, v))
-}
-
-// DescriptionIsNil applies the IsNil predicate on the "description" field.
-func DescriptionIsNil() predicate.Asset {
-	return predicate.Asset(sql.FieldIsNull(FieldDescription))
-}
-
-// DescriptionNotNil applies the NotNil predicate on the "description" field.
-func DescriptionNotNil() predicate.Asset {
-	return predicate.Asset(sql.FieldNotNull(FieldDescription))
-}
-
-// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
-func DescriptionEqualFold(v string) predicate.Asset {
-	return predicate.Asset(sql.FieldEqualFold(FieldDescription, v))
-}
-
-// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
-func DescriptionContainsFold(v string) predicate.Asset {
-	return predicate.Asset(sql.FieldContainsFold(FieldDescription, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

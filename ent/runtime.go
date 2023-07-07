@@ -30,11 +30,11 @@ func init() {
 	// assetDescSheet is the schema descriptor for sheet field.
 	assetDescSheet := assetFields[2].Descriptor()
 	// asset.DefaultSheet holds the default value on creation for the sheet field.
-	asset.DefaultSheet = assetDescSheet.Default.(int)
+	asset.DefaultSheet = assetDescSheet.Default.(int32)
 	// assetDescSection is the schema descriptor for section field.
 	assetDescSection := assetFields[3].Descriptor()
 	// asset.DefaultSection holds the default value on creation for the section field.
-	asset.DefaultSection = assetDescSection.Default.(int)
+	asset.DefaultSection = assetDescSection.Default.(int32)
 	// assetDescType is the schema descriptor for type field.
 	assetDescType := assetFields[4].Descriptor()
 	// asset.DefaultType holds the default value on creation for the type field.

@@ -21,8 +21,8 @@ func (Asset) Fields() []ent.Field {
 			return id
 		}).Immutable(),
 		field.UUID("user_id", uuid.UUID{}).Optional(),
-		field.Int("sheet").Optional().Default(-1),
-		field.Int("section").Optional().Default(-1),
+		field.Int32("sheet").Optional().Default(-1),
+		field.Int32("section").Optional().Default(-1),
 		field.String("type").Default("manual"),
 		field.String("provider_name").Default("manual"),
 		field.String("description").Optional().Nillable(),

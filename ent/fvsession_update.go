@@ -57,14 +57,14 @@ func (fsu *FvSessionUpdate) SetAccessToken(s string) *FvSessionUpdate {
 }
 
 // SetExpiresIn sets the "expires_in" field.
-func (fsu *FvSessionUpdate) SetExpiresIn(i int) *FvSessionUpdate {
+func (fsu *FvSessionUpdate) SetExpiresIn(i int32) *FvSessionUpdate {
 	fsu.mutation.ResetExpiresIn()
 	fsu.mutation.SetExpiresIn(i)
 	return fsu
 }
 
 // AddExpiresIn adds i to the "expires_in" field.
-func (fsu *FvSessionUpdate) AddExpiresIn(i int) *FvSessionUpdate {
+func (fsu *FvSessionUpdate) AddExpiresIn(i int32) *FvSessionUpdate {
 	fsu.mutation.AddExpiresIn(i)
 	return fsu
 }
@@ -152,10 +152,10 @@ func (fsu *FvSessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(fvsession.FieldAccessToken, field.TypeString, value)
 	}
 	if value, ok := fsu.mutation.ExpiresIn(); ok {
-		_spec.SetField(fvsession.FieldExpiresIn, field.TypeInt, value)
+		_spec.SetField(fvsession.FieldExpiresIn, field.TypeInt32, value)
 	}
 	if value, ok := fsu.mutation.AddedExpiresIn(); ok {
-		_spec.AddField(fvsession.FieldExpiresIn, field.TypeInt, value)
+		_spec.AddField(fvsession.FieldExpiresIn, field.TypeInt32, value)
 	}
 	if value, ok := fsu.mutation.IssuedAt(); ok {
 		_spec.SetField(fvsession.FieldIssuedAt, field.TypeString, value)
@@ -242,14 +242,14 @@ func (fsuo *FvSessionUpdateOne) SetAccessToken(s string) *FvSessionUpdateOne {
 }
 
 // SetExpiresIn sets the "expires_in" field.
-func (fsuo *FvSessionUpdateOne) SetExpiresIn(i int) *FvSessionUpdateOne {
+func (fsuo *FvSessionUpdateOne) SetExpiresIn(i int32) *FvSessionUpdateOne {
 	fsuo.mutation.ResetExpiresIn()
 	fsuo.mutation.SetExpiresIn(i)
 	return fsuo
 }
 
 // AddExpiresIn adds i to the "expires_in" field.
-func (fsuo *FvSessionUpdateOne) AddExpiresIn(i int) *FvSessionUpdateOne {
+func (fsuo *FvSessionUpdateOne) AddExpiresIn(i int32) *FvSessionUpdateOne {
 	fsuo.mutation.AddExpiresIn(i)
 	return fsuo
 }
@@ -367,10 +367,10 @@ func (fsuo *FvSessionUpdateOne) sqlSave(ctx context.Context) (_node *FvSession, 
 		_spec.SetField(fvsession.FieldAccessToken, field.TypeString, value)
 	}
 	if value, ok := fsuo.mutation.ExpiresIn(); ok {
-		_spec.SetField(fvsession.FieldExpiresIn, field.TypeInt, value)
+		_spec.SetField(fvsession.FieldExpiresIn, field.TypeInt32, value)
 	}
 	if value, ok := fsuo.mutation.AddedExpiresIn(); ok {
-		_spec.AddField(fvsession.FieldExpiresIn, field.TypeInt, value)
+		_spec.AddField(fvsession.FieldExpiresIn, field.TypeInt32, value)
 	}
 	if value, ok := fsuo.mutation.IssuedAt(); ok {
 		_spec.SetField(fvsession.FieldIssuedAt, field.TypeString, value)

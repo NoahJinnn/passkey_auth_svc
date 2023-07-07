@@ -67,7 +67,7 @@ func AccessToken(v string) predicate.FvSession {
 }
 
 // ExpiresIn applies equality check predicate on the "expires_in" field. It's identical to ExpiresInEQ.
-func ExpiresIn(v int) predicate.FvSession {
+func ExpiresIn(v int32) predicate.FvSession {
 	return predicate.FvSession(sql.FieldEQ(FieldExpiresIn, v))
 }
 
@@ -187,42 +187,42 @@ func AccessTokenContainsFold(v string) predicate.FvSession {
 }
 
 // ExpiresInEQ applies the EQ predicate on the "expires_in" field.
-func ExpiresInEQ(v int) predicate.FvSession {
+func ExpiresInEQ(v int32) predicate.FvSession {
 	return predicate.FvSession(sql.FieldEQ(FieldExpiresIn, v))
 }
 
 // ExpiresInNEQ applies the NEQ predicate on the "expires_in" field.
-func ExpiresInNEQ(v int) predicate.FvSession {
+func ExpiresInNEQ(v int32) predicate.FvSession {
 	return predicate.FvSession(sql.FieldNEQ(FieldExpiresIn, v))
 }
 
 // ExpiresInIn applies the In predicate on the "expires_in" field.
-func ExpiresInIn(vs ...int) predicate.FvSession {
+func ExpiresInIn(vs ...int32) predicate.FvSession {
 	return predicate.FvSession(sql.FieldIn(FieldExpiresIn, vs...))
 }
 
 // ExpiresInNotIn applies the NotIn predicate on the "expires_in" field.
-func ExpiresInNotIn(vs ...int) predicate.FvSession {
+func ExpiresInNotIn(vs ...int32) predicate.FvSession {
 	return predicate.FvSession(sql.FieldNotIn(FieldExpiresIn, vs...))
 }
 
 // ExpiresInGT applies the GT predicate on the "expires_in" field.
-func ExpiresInGT(v int) predicate.FvSession {
+func ExpiresInGT(v int32) predicate.FvSession {
 	return predicate.FvSession(sql.FieldGT(FieldExpiresIn, v))
 }
 
 // ExpiresInGTE applies the GTE predicate on the "expires_in" field.
-func ExpiresInGTE(v int) predicate.FvSession {
+func ExpiresInGTE(v int32) predicate.FvSession {
 	return predicate.FvSession(sql.FieldGTE(FieldExpiresIn, v))
 }
 
 // ExpiresInLT applies the LT predicate on the "expires_in" field.
-func ExpiresInLT(v int) predicate.FvSession {
+func ExpiresInLT(v int32) predicate.FvSession {
 	return predicate.FvSession(sql.FieldLT(FieldExpiresIn, v))
 }
 
 // ExpiresInLTE applies the LTE predicate on the "expires_in" field.
-func ExpiresInLTE(v int) predicate.FvSession {
+func ExpiresInLTE(v int32) predicate.FvSession {
 	return predicate.FvSession(sql.FieldLTE(FieldExpiresIn, v))
 }
 
