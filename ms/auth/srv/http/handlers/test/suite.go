@@ -38,26 +38,46 @@ var (
 			Timeout: 60000,
 		},
 	}
+	sharedCfg = sharedconfig.Shared{
+		Session: sharedconfig.Session{
+			Lifespan: "1h",
+			Cookie: sharedconfig.Cookie{
+				HttpOnly: true,
+				SameSite: "strict",
+				Secure:   true,
+			},
+			EnableAuthTokenHeader: true,
+		},
+		Secrets: sharedconfig.Secrets{
+			Keys: []string{"needsToBeAtLeast16Test"},
+		},
+	}
+	userId = "ec4ef049-5b88-4321-a173-21b0eff06a04"
+	uId, _ = uuid.FromString(userId)
+	emails = []*ent.Email{
+		{
+			ID:      uId,
+			UserID:  &uId,
+			Address: "john.doe@example.com",
+		},
+	}
+	users = []*ent.User{
+		func() *ent.User {
+			user := &ent.User{
+				ID:        uId,
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			}
+			primE := &ent.PrimaryEmail{ID: uId, UserID: &uId}
+			primE.Edges.Email = emails[0]
+			user.Edges.PrimaryEmail = primE
+			user.Edges.Emails = emails
+			return user
+		}(),
+	}
 )
 
-var sharedCfg = sharedconfig.Shared{
-	Session: sharedconfig.Session{
-		Lifespan: "1h",
-		Cookie: sharedconfig.Cookie{
-			HttpOnly: true,
-			SameSite: "strict",
-			Secure:   true,
-		},
-		EnableAuthTokenHeader: true,
-	},
-	Secrets: sharedconfig.Secrets{
-		Keys: []string{"needsToBeAtLeast16Test"},
-	},
-}
-
 type sessionManager struct{}
-
-var userId = "ec4ef049-5b88-4321-a173-21b0eff06a04"
 
 func (s sessionManager) GenerateJWT(uuid string) (string, error) {
 	return userId, nil
@@ -86,31 +106,6 @@ func (s sessionManager) DeleteCookie() (*http.Cookie, error) {
 
 func (s sessionManager) Verify(token string) (jwt.Token, error) {
 	return nil, nil
-}
-
-var uId, _ = uuid.FromString(userId)
-
-var emails = []*ent.Email{
-	{
-		ID:      uId,
-		UserID:  &uId,
-		Address: "john.doe@example.com",
-	},
-}
-
-var users = []*ent.User{
-	func() *ent.User {
-		user := &ent.User{
-			ID:        uId,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		}
-		primE := &ent.PrimaryEmail{ID: uId, UserID: &uId}
-		primE.Edges.Email = emails[0]
-		user.Edges.PrimaryEmail = primE
-		user.Edges.Emails = emails
-		return user
-	}(),
 }
 
 type Suite struct {
