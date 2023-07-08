@@ -51,14 +51,14 @@ func (au *AssetUpdate) ClearUserID() *AssetUpdate {
 }
 
 // SetSheet sets the "sheet" field.
-func (au *AssetUpdate) SetSheet(i int) *AssetUpdate {
+func (au *AssetUpdate) SetSheet(i int32) *AssetUpdate {
 	au.mutation.ResetSheet()
 	au.mutation.SetSheet(i)
 	return au
 }
 
 // SetNillableSheet sets the "sheet" field if the given value is not nil.
-func (au *AssetUpdate) SetNillableSheet(i *int) *AssetUpdate {
+func (au *AssetUpdate) SetNillableSheet(i *int32) *AssetUpdate {
 	if i != nil {
 		au.SetSheet(*i)
 	}
@@ -66,7 +66,7 @@ func (au *AssetUpdate) SetNillableSheet(i *int) *AssetUpdate {
 }
 
 // AddSheet adds i to the "sheet" field.
-func (au *AssetUpdate) AddSheet(i int) *AssetUpdate {
+func (au *AssetUpdate) AddSheet(i int32) *AssetUpdate {
 	au.mutation.AddSheet(i)
 	return au
 }
@@ -78,14 +78,14 @@ func (au *AssetUpdate) ClearSheet() *AssetUpdate {
 }
 
 // SetSection sets the "section" field.
-func (au *AssetUpdate) SetSection(i int) *AssetUpdate {
+func (au *AssetUpdate) SetSection(i int32) *AssetUpdate {
 	au.mutation.ResetSection()
 	au.mutation.SetSection(i)
 	return au
 }
 
 // SetNillableSection sets the "section" field if the given value is not nil.
-func (au *AssetUpdate) SetNillableSection(i *int) *AssetUpdate {
+func (au *AssetUpdate) SetNillableSection(i *int32) *AssetUpdate {
 	if i != nil {
 		au.SetSection(*i)
 	}
@@ -93,7 +93,7 @@ func (au *AssetUpdate) SetNillableSection(i *int) *AssetUpdate {
 }
 
 // AddSection adds i to the "section" field.
-func (au *AssetUpdate) AddSection(i int) *AssetUpdate {
+func (au *AssetUpdate) AddSection(i int32) *AssetUpdate {
 	au.mutation.AddSection(i)
 	return au
 }
@@ -132,25 +132,6 @@ func (au *AssetUpdate) SetNillableProviderName(s *string) *AssetUpdate {
 	return au
 }
 
-// SetCurrency sets the "currency" field.
-func (au *AssetUpdate) SetCurrency(s string) *AssetUpdate {
-	au.mutation.SetCurrency(s)
-	return au
-}
-
-// SetValue sets the "value" field.
-func (au *AssetUpdate) SetValue(f float64) *AssetUpdate {
-	au.mutation.ResetValue()
-	au.mutation.SetValue(f)
-	return au
-}
-
-// AddValue adds f to the "value" field.
-func (au *AssetUpdate) AddValue(f float64) *AssetUpdate {
-	au.mutation.AddValue(f)
-	return au
-}
-
 // SetDescription sets the "description" field.
 func (au *AssetUpdate) SetDescription(s string) *AssetUpdate {
 	au.mutation.SetDescription(s)
@@ -168,6 +149,33 @@ func (au *AssetUpdate) SetNillableDescription(s *string) *AssetUpdate {
 // ClearDescription clears the value of the "description" field.
 func (au *AssetUpdate) ClearDescription() *AssetUpdate {
 	au.mutation.ClearDescription()
+	return au
+}
+
+// SetCurrency sets the "currency" field.
+func (au *AssetUpdate) SetCurrency(s string) *AssetUpdate {
+	au.mutation.SetCurrency(s)
+	return au
+}
+
+// SetNillableCurrency sets the "currency" field if the given value is not nil.
+func (au *AssetUpdate) SetNillableCurrency(s *string) *AssetUpdate {
+	if s != nil {
+		au.SetCurrency(*s)
+	}
+	return au
+}
+
+// SetValue sets the "value" field.
+func (au *AssetUpdate) SetValue(f float64) *AssetUpdate {
+	au.mutation.ResetValue()
+	au.mutation.SetValue(f)
+	return au
+}
+
+// AddValue adds f to the "value" field.
+func (au *AssetUpdate) AddValue(f float64) *AssetUpdate {
+	au.mutation.AddValue(f)
 	return au
 }
 
@@ -239,28 +247,34 @@ func (au *AssetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := au.mutation.Sheet(); ok {
-		_spec.SetField(asset.FieldSheet, field.TypeInt, value)
+		_spec.SetField(asset.FieldSheet, field.TypeInt32, value)
 	}
 	if value, ok := au.mutation.AddedSheet(); ok {
-		_spec.AddField(asset.FieldSheet, field.TypeInt, value)
+		_spec.AddField(asset.FieldSheet, field.TypeInt32, value)
 	}
 	if au.mutation.SheetCleared() {
-		_spec.ClearField(asset.FieldSheet, field.TypeInt)
+		_spec.ClearField(asset.FieldSheet, field.TypeInt32)
 	}
 	if value, ok := au.mutation.Section(); ok {
-		_spec.SetField(asset.FieldSection, field.TypeInt, value)
+		_spec.SetField(asset.FieldSection, field.TypeInt32, value)
 	}
 	if value, ok := au.mutation.AddedSection(); ok {
-		_spec.AddField(asset.FieldSection, field.TypeInt, value)
+		_spec.AddField(asset.FieldSection, field.TypeInt32, value)
 	}
 	if au.mutation.SectionCleared() {
-		_spec.ClearField(asset.FieldSection, field.TypeInt)
+		_spec.ClearField(asset.FieldSection, field.TypeInt32)
 	}
 	if value, ok := au.mutation.GetType(); ok {
 		_spec.SetField(asset.FieldType, field.TypeString, value)
 	}
 	if value, ok := au.mutation.ProviderName(); ok {
 		_spec.SetField(asset.FieldProviderName, field.TypeString, value)
+	}
+	if value, ok := au.mutation.Description(); ok {
+		_spec.SetField(asset.FieldDescription, field.TypeString, value)
+	}
+	if au.mutation.DescriptionCleared() {
+		_spec.ClearField(asset.FieldDescription, field.TypeString)
 	}
 	if value, ok := au.mutation.Currency(); ok {
 		_spec.SetField(asset.FieldCurrency, field.TypeString, value)
@@ -270,12 +284,6 @@ func (au *AssetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := au.mutation.AddedValue(); ok {
 		_spec.AddField(asset.FieldValue, field.TypeFloat64, value)
-	}
-	if value, ok := au.mutation.Description(); ok {
-		_spec.SetField(asset.FieldDescription, field.TypeString, value)
-	}
-	if au.mutation.DescriptionCleared() {
-		_spec.ClearField(asset.FieldDescription, field.TypeString)
 	}
 	if value, ok := au.mutation.UpdatedAt(); ok {
 		_spec.SetField(asset.FieldUpdatedAt, field.TypeTime, value)
@@ -350,14 +358,14 @@ func (auo *AssetUpdateOne) ClearUserID() *AssetUpdateOne {
 }
 
 // SetSheet sets the "sheet" field.
-func (auo *AssetUpdateOne) SetSheet(i int) *AssetUpdateOne {
+func (auo *AssetUpdateOne) SetSheet(i int32) *AssetUpdateOne {
 	auo.mutation.ResetSheet()
 	auo.mutation.SetSheet(i)
 	return auo
 }
 
 // SetNillableSheet sets the "sheet" field if the given value is not nil.
-func (auo *AssetUpdateOne) SetNillableSheet(i *int) *AssetUpdateOne {
+func (auo *AssetUpdateOne) SetNillableSheet(i *int32) *AssetUpdateOne {
 	if i != nil {
 		auo.SetSheet(*i)
 	}
@@ -365,7 +373,7 @@ func (auo *AssetUpdateOne) SetNillableSheet(i *int) *AssetUpdateOne {
 }
 
 // AddSheet adds i to the "sheet" field.
-func (auo *AssetUpdateOne) AddSheet(i int) *AssetUpdateOne {
+func (auo *AssetUpdateOne) AddSheet(i int32) *AssetUpdateOne {
 	auo.mutation.AddSheet(i)
 	return auo
 }
@@ -377,14 +385,14 @@ func (auo *AssetUpdateOne) ClearSheet() *AssetUpdateOne {
 }
 
 // SetSection sets the "section" field.
-func (auo *AssetUpdateOne) SetSection(i int) *AssetUpdateOne {
+func (auo *AssetUpdateOne) SetSection(i int32) *AssetUpdateOne {
 	auo.mutation.ResetSection()
 	auo.mutation.SetSection(i)
 	return auo
 }
 
 // SetNillableSection sets the "section" field if the given value is not nil.
-func (auo *AssetUpdateOne) SetNillableSection(i *int) *AssetUpdateOne {
+func (auo *AssetUpdateOne) SetNillableSection(i *int32) *AssetUpdateOne {
 	if i != nil {
 		auo.SetSection(*i)
 	}
@@ -392,7 +400,7 @@ func (auo *AssetUpdateOne) SetNillableSection(i *int) *AssetUpdateOne {
 }
 
 // AddSection adds i to the "section" field.
-func (auo *AssetUpdateOne) AddSection(i int) *AssetUpdateOne {
+func (auo *AssetUpdateOne) AddSection(i int32) *AssetUpdateOne {
 	auo.mutation.AddSection(i)
 	return auo
 }
@@ -431,25 +439,6 @@ func (auo *AssetUpdateOne) SetNillableProviderName(s *string) *AssetUpdateOne {
 	return auo
 }
 
-// SetCurrency sets the "currency" field.
-func (auo *AssetUpdateOne) SetCurrency(s string) *AssetUpdateOne {
-	auo.mutation.SetCurrency(s)
-	return auo
-}
-
-// SetValue sets the "value" field.
-func (auo *AssetUpdateOne) SetValue(f float64) *AssetUpdateOne {
-	auo.mutation.ResetValue()
-	auo.mutation.SetValue(f)
-	return auo
-}
-
-// AddValue adds f to the "value" field.
-func (auo *AssetUpdateOne) AddValue(f float64) *AssetUpdateOne {
-	auo.mutation.AddValue(f)
-	return auo
-}
-
 // SetDescription sets the "description" field.
 func (auo *AssetUpdateOne) SetDescription(s string) *AssetUpdateOne {
 	auo.mutation.SetDescription(s)
@@ -467,6 +456,33 @@ func (auo *AssetUpdateOne) SetNillableDescription(s *string) *AssetUpdateOne {
 // ClearDescription clears the value of the "description" field.
 func (auo *AssetUpdateOne) ClearDescription() *AssetUpdateOne {
 	auo.mutation.ClearDescription()
+	return auo
+}
+
+// SetCurrency sets the "currency" field.
+func (auo *AssetUpdateOne) SetCurrency(s string) *AssetUpdateOne {
+	auo.mutation.SetCurrency(s)
+	return auo
+}
+
+// SetNillableCurrency sets the "currency" field if the given value is not nil.
+func (auo *AssetUpdateOne) SetNillableCurrency(s *string) *AssetUpdateOne {
+	if s != nil {
+		auo.SetCurrency(*s)
+	}
+	return auo
+}
+
+// SetValue sets the "value" field.
+func (auo *AssetUpdateOne) SetValue(f float64) *AssetUpdateOne {
+	auo.mutation.ResetValue()
+	auo.mutation.SetValue(f)
+	return auo
+}
+
+// AddValue adds f to the "value" field.
+func (auo *AssetUpdateOne) AddValue(f float64) *AssetUpdateOne {
+	auo.mutation.AddValue(f)
 	return auo
 }
 
@@ -568,28 +584,34 @@ func (auo *AssetUpdateOne) sqlSave(ctx context.Context) (_node *Asset, err error
 		}
 	}
 	if value, ok := auo.mutation.Sheet(); ok {
-		_spec.SetField(asset.FieldSheet, field.TypeInt, value)
+		_spec.SetField(asset.FieldSheet, field.TypeInt32, value)
 	}
 	if value, ok := auo.mutation.AddedSheet(); ok {
-		_spec.AddField(asset.FieldSheet, field.TypeInt, value)
+		_spec.AddField(asset.FieldSheet, field.TypeInt32, value)
 	}
 	if auo.mutation.SheetCleared() {
-		_spec.ClearField(asset.FieldSheet, field.TypeInt)
+		_spec.ClearField(asset.FieldSheet, field.TypeInt32)
 	}
 	if value, ok := auo.mutation.Section(); ok {
-		_spec.SetField(asset.FieldSection, field.TypeInt, value)
+		_spec.SetField(asset.FieldSection, field.TypeInt32, value)
 	}
 	if value, ok := auo.mutation.AddedSection(); ok {
-		_spec.AddField(asset.FieldSection, field.TypeInt, value)
+		_spec.AddField(asset.FieldSection, field.TypeInt32, value)
 	}
 	if auo.mutation.SectionCleared() {
-		_spec.ClearField(asset.FieldSection, field.TypeInt)
+		_spec.ClearField(asset.FieldSection, field.TypeInt32)
 	}
 	if value, ok := auo.mutation.GetType(); ok {
 		_spec.SetField(asset.FieldType, field.TypeString, value)
 	}
 	if value, ok := auo.mutation.ProviderName(); ok {
 		_spec.SetField(asset.FieldProviderName, field.TypeString, value)
+	}
+	if value, ok := auo.mutation.Description(); ok {
+		_spec.SetField(asset.FieldDescription, field.TypeString, value)
+	}
+	if auo.mutation.DescriptionCleared() {
+		_spec.ClearField(asset.FieldDescription, field.TypeString)
 	}
 	if value, ok := auo.mutation.Currency(); ok {
 		_spec.SetField(asset.FieldCurrency, field.TypeString, value)
@@ -599,12 +621,6 @@ func (auo *AssetUpdateOne) sqlSave(ctx context.Context) (_node *Asset, err error
 	}
 	if value, ok := auo.mutation.AddedValue(); ok {
 		_spec.AddField(asset.FieldValue, field.TypeFloat64, value)
-	}
-	if value, ok := auo.mutation.Description(); ok {
-		_spec.SetField(asset.FieldDescription, field.TypeString, value)
-	}
-	if auo.mutation.DescriptionCleared() {
-		_spec.ClearField(asset.FieldDescription, field.TypeString)
 	}
 	if value, ok := auo.mutation.UpdatedAt(); ok {
 		_spec.SetField(asset.FieldUpdatedAt, field.TypeTime, value)

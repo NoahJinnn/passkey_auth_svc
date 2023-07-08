@@ -38,12 +38,12 @@ func (svc *UserSvc) Create(ctx Ctx, address string) (newU *ent.User, emailID uui
 	if err := svc.repo.WithTx(ctx, func(ctx Ctx, client *ent.Client) error {
 		newU, err = client.User.Create().Save(ctx)
 		if err != nil {
-			return fmt.Errorf("failed creating user: %w", err)
+			return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		// Query email by email address
 		email, err := client.Email.Query().Where(email.Address(address)).Only(ctx)
 		if err != nil && !ent.IsNotFound(err) {
-			return fmt.Errorf("failed querying email by address: %w", err)
+			return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		if email != nil {
 			if !email.UserID.IsNil() {
@@ -57,21 +57,21 @@ func (svc *UserSvc) Create(ctx Ctx, address string) (newU *ent.User, emailID uui
 					SetAddress(address).
 					Save(ctx)
 				if err != nil {
-					return fmt.Errorf("failed creating email: %w", err)
+					return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 				}
 				_, err = client.PrimaryEmail.Create().
 					SetUserID(newU.ID).
 					SetEmailID(email.ID).
 					Save(ctx)
 				if err != nil {
-					return fmt.Errorf("failed to store primary email: %w", err)
+					return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 				}
 			} else {
 				email, err = client.Email.Create().
 					SetAddress(address).
 					Save(ctx)
 				if err != nil {
-					return fmt.Errorf("failed creating email: %w", err)
+					return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 				}
 			}
 		}
@@ -87,7 +87,7 @@ func (svc *UserSvc) Create(ctx Ctx, address string) (newU *ent.User, emailID uui
 func (svc *UserSvc) GetById(ctx Ctx, userID uuid.UUID) (*ent.User, *string, error) {
 	user, err := svc.repo.GetUserRepo().GetById(ctx, userID)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get user: %w", err)
+		return nil, nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	if user == nil {
@@ -98,7 +98,7 @@ func (svc *UserSvc) GetById(ctx Ctx, userID uuid.UUID) (*ent.User, *string, erro
 	if e := user.Edges.PrimaryEmail; e != nil {
 		model, err := e.QueryEmail().Only(ctx)
 		if err != nil {
-			return nil, nil, fmt.Errorf("failed to get email address of primary email: %w", err)
+			return nil, nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		emailAddress = &model.Address
 	}
@@ -108,7 +108,7 @@ func (svc *UserSvc) GetById(ctx Ctx, userID uuid.UUID) (*ent.User, *string, erro
 func (svc *UserSvc) GetUserIdByEmail(ctx Ctx, addresss string) (*ent.Email, bool, error) {
 	email, err := svc.repo.GetEmailRepo().GetByAddress(ctx, addresss)
 	if err != nil {
-		return nil, false, fmt.Errorf("failed to get user: %w", err)
+		return nil, false, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	if email == nil || email.UserID == nil {
@@ -117,7 +117,7 @@ func (svc *UserSvc) GetUserIdByEmail(ctx Ctx, addresss string) (*ent.Email, bool
 
 	credentials, err := svc.repo.GetWebauthnCredentialRepo().ListByUser(ctx, *email.UserID)
 	if err != nil {
-		return nil, false, fmt.Errorf("failed to get webauthn credentials: %w", err)
+		return nil, false, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	hasCredentials := len(credentials) > 0

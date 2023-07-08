@@ -21,7 +21,7 @@ func (Asset) Fields() []ent.Field {
 			return id
 		}).Immutable(),
 		field.UUID("institution_id", uuid.UUID{}).Optional(),
-		field.String("data").Optional().Nillable(),
+		field.String("data"),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}

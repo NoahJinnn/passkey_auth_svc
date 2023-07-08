@@ -22,7 +22,7 @@ func (FvSession) Fields() []ent.Field {
 		}).Immutable(),
 		field.UUID("user_id", uuid.UUID{}).Optional().Unique(),
 		field.String("access_token"),
-		field.Int("expires_in"),
+		field.Int32("expires_in"),
 		field.String("issued_at"),
 		field.String("token_type"),
 		field.Time("created_at").Default(time.Now).Immutable(),

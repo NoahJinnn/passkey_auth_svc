@@ -25,12 +25,12 @@ const (
 	FieldType = "type"
 	// FieldProviderName holds the string denoting the provider_name field in the database.
 	FieldProviderName = "provider_name"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// FieldCurrency holds the string denoting the currency field in the database.
 	FieldCurrency = "currency"
 	// FieldValue holds the string denoting the value field in the database.
 	FieldValue = "value"
-	// FieldDescription holds the string denoting the description field in the database.
-	FieldDescription = "description"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -56,9 +56,9 @@ var Columns = []string{
 	FieldSection,
 	FieldType,
 	FieldProviderName,
+	FieldDescription,
 	FieldCurrency,
 	FieldValue,
-	FieldDescription,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
@@ -75,13 +75,17 @@ func ValidColumn(column string) bool {
 
 var (
 	// DefaultSheet holds the default value on creation for the "sheet" field.
-	DefaultSheet int
+	DefaultSheet int32
 	// DefaultSection holds the default value on creation for the "section" field.
-	DefaultSection int
+	DefaultSection int32
 	// DefaultType holds the default value on creation for the "type" field.
 	DefaultType string
 	// DefaultProviderName holds the default value on creation for the "provider_name" field.
 	DefaultProviderName string
+	// DefaultDescription holds the default value on creation for the "description" field.
+	DefaultDescription string
+	// DefaultCurrency holds the default value on creation for the "currency" field.
+	DefaultCurrency string
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -125,6 +129,11 @@ func ByProviderName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProviderName, opts...).ToFunc()
 }
 
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
 // ByCurrency orders the results by the currency field.
 func ByCurrency(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCurrency, opts...).ToFunc()
@@ -133,11 +142,6 @@ func ByCurrency(opts ...sql.OrderTermOption) OrderOption {
 // ByValue orders the results by the value field.
 func ByValue(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldValue, opts...).ToFunc()
-}
-
-// ByDescription orders the results by the description field.
-func ByDescription(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.

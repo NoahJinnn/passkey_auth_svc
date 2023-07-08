@@ -11,13 +11,13 @@ var (
 	// AssetsColumns holds the columns for the "assets" table.
 	AssetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "sheet", Type: field.TypeInt, Nullable: true, Default: -1},
-		{Name: "section", Type: field.TypeInt, Nullable: true, Default: -1},
+		{Name: "sheet", Type: field.TypeInt32, Nullable: true, Default: -1},
+		{Name: "section", Type: field.TypeInt32, Nullable: true, Default: -1},
 		{Name: "type", Type: field.TypeString, Default: "manual"},
 		{Name: "provider_name", Type: field.TypeString, Default: "manual"},
-		{Name: "currency", Type: field.TypeString},
-		{Name: "value", Type: field.TypeFloat64, SchemaType: map[string]string{"postgres": "numeric(19,4)"}},
-		{Name: "description", Type: field.TypeString, Nullable: true},
+		{Name: "description", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "currency", Type: field.TypeString, Default: "SGD"},
+		{Name: "value", Type: field.TypeFloat64, SchemaType: map[string]string{"postgres": "numeric(19,6)"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
@@ -63,7 +63,7 @@ var (
 	FvSessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "access_token", Type: field.TypeString},
-		{Name: "expires_in", Type: field.TypeInt},
+		{Name: "expires_in", Type: field.TypeInt32},
 		{Name: "issued_at", Type: field.TypeString},
 		{Name: "token_type", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},

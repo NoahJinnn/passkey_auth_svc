@@ -19,6 +19,7 @@ import (
 	"github.com/hellohq/hqservice/ms/auth/dal"
 	server "github.com/hellohq/hqservice/ms/auth/srv/http"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/handlers"
+	"github.com/hellohq/hqservice/ms/auth/srv/mail"
 	testDal "github.com/hellohq/hqservice/ms/auth/test/mock/dal"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
@@ -38,26 +39,46 @@ var (
 			Timeout: 60000,
 		},
 	}
+	sharedCfg = sharedconfig.Shared{
+		Session: sharedconfig.Session{
+			Lifespan: "1h",
+			Cookie: sharedconfig.Cookie{
+				HttpOnly: true,
+				SameSite: "strict",
+				Secure:   true,
+			},
+			EnableAuthTokenHeader: true,
+		},
+		Secrets: sharedconfig.Secrets{
+			Keys: []string{"needsToBeAtLeast16Test"},
+		},
+	}
+	userId = "ec4ef049-5b88-4321-a173-21b0eff06a04"
+	uId, _ = uuid.FromString(userId)
+	emails = []*ent.Email{
+		{
+			ID:      uId,
+			UserID:  &uId,
+			Address: "john.doe@example.com",
+		},
+	}
+	users = []*ent.User{
+		func() *ent.User {
+			user := &ent.User{
+				ID:        uId,
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			}
+			primE := &ent.PrimaryEmail{ID: uId, UserID: &uId}
+			primE.Edges.Email = emails[0]
+			user.Edges.PrimaryEmail = primE
+			user.Edges.Emails = emails
+			return user
+		}(),
+	}
 )
 
-var sharedCfg = sharedconfig.Shared{
-	Session: sharedconfig.Session{
-		Lifespan: "1h",
-		Cookie: sharedconfig.Cookie{
-			HttpOnly: true,
-			SameSite: "strict",
-			Secure:   true,
-		},
-		EnableAuthTokenHeader: true,
-	},
-	Secrets: sharedconfig.Secrets{
-		Keys: []string{"needsToBeAtLeast16Test"},
-	},
-}
-
 type sessionManager struct{}
-
-var userId = "ec4ef049-5b88-4321-a173-21b0eff06a04"
 
 func (s sessionManager) GenerateJWT(uuid string) (string, error) {
 	return userId, nil
@@ -88,29 +109,24 @@ func (s sessionManager) Verify(token string) (jwt.Token, error) {
 	return nil, nil
 }
 
-var uId, _ = uuid.FromString(userId)
+type mailer struct{}
 
-var emails = []*ent.Email{
-	{
-		ID:      uId,
-		UserID:  &uId,
-		Address: "john.doe@example.com",
-	},
+var renderer, _ = mail.NewRenderer()
+
+func passcodes() []*ent.Passcode {
+	now := time.Now()
+	return []*ent.Passcode{{
+		ID:        uuid.FromStringOrNil("08ee61aa-0946-4ecf-a8bd-e14c604329e2"),
+		UserID:    uuid.FromStringOrNil(userId),
+		TTL:       300,
+		Code:      "$2a$12$gBPH9jnbXFmwAGwZMSzYkeXx7oOTElzhvHfiDgj.D7G8q4znvHpMK",
+		CreatedAt: now,
+		UpdatedAt: now,
+	}}
 }
 
-var users = []*ent.User{
-	func() *ent.User {
-		user := &ent.User{
-			ID:        uId,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		}
-		primE := &ent.PrimaryEmail{ID: uId, UserID: &uId}
-		primE.Edges.Email = emails[0]
-		user.Edges.PrimaryEmail = primE
-		user.Edges.Emails = emails
-		return user
-	}(),
+func (m mailer) Send(email []string, subject string, body string) error {
+	return nil
 }
 
 type Suite struct {
@@ -143,7 +159,7 @@ func (s *Suite) SetupSuite() {
 	s.repo = repo
 	s.sessionManager = sessionManager
 	s.testDb = testDb
-	s.app = app.New(nil, nil, &defaultCfg, repo)
+	s.app = app.New(mailer{}, renderer, &defaultCfg, repo)
 	s.srv = &handlers.HttpDeps{
 		Appl:      s.app,
 		Cfg:       &defaultCfg,

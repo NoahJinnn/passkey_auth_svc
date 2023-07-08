@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/hellohq/hqservice/ms/networth/app"
 	"github.com/hellohq/hqservice/ms/networth/app/saltedge"
 	"github.com/hellohq/hqservice/ms/networth/config"
-	test "github.com/hellohq/hqservice/ms/networth/test/mock/app"
 	testRepo "github.com/hellohq/hqservice/ms/networth/test/mock/dal"
 	"github.com/stretchr/testify/assert"
 )
@@ -42,7 +42,7 @@ func TestSeAccountInfoHandler_Create_DeleteCustomer(t *testing.T) {
 	}
 
 	repo := testRepo.NewRepo(nil)
-	appl := test.NewApp(&defaultCfg, repo)
+	appl := app.New(&defaultCfg, repo)
 	for _, tt := range tests {
 		created, err := appl.GetSeAccountInfoSvc().CreateCustomer(ctx, tt.give)
 		assert.NoError(t, err)
@@ -71,7 +71,7 @@ func TestSeAccountInfoHandler_ShowCustomer_CreateConnectSession(t *testing.T) {
 		},
 	}
 	repo := testRepo.NewRepo(nil)
-	appl := test.NewApp(&defaultCfg, repo)
+	appl := app.New(&defaultCfg, repo)
 
 	c, err := appl.GetSeAccountInfoSvc().Customer(ctx, tests.give.CustomerId)
 	assert.NoError(t, err)

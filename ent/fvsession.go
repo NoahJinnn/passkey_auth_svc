@@ -24,7 +24,7 @@ type FvSession struct {
 	// AccessToken holds the value of the "access_token" field.
 	AccessToken string `json:"access_token,omitempty"`
 	// ExpiresIn holds the value of the "expires_in" field.
-	ExpiresIn int `json:"expires_in,omitempty"`
+	ExpiresIn int32 `json:"expires_in,omitempty"`
 	// IssuedAt holds the value of the "issued_at" field.
 	IssuedAt string `json:"issued_at,omitempty"`
 	// TokenType holds the value of the "token_type" field.
@@ -111,7 +111,7 @@ func (fs *FvSession) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field expires_in", values[i])
 			} else if value.Valid {
-				fs.ExpiresIn = int(value.Int64)
+				fs.ExpiresIn = int32(value.Int64)
 			}
 		case fvsession.FieldIssuedAt:
 			if value, ok := values[i].(*sql.NullString); !ok {

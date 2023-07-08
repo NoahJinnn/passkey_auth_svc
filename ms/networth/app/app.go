@@ -22,7 +22,6 @@ type Appl interface {
 // App implements interface Appl.
 type App struct {
 	cfg              *config.Config
-	repo             *dal.NwRepo
 	assetSvc         *asset.AssetSvc
 	providerSvc      *provider.ProviderSvc
 	seAccountInfoSvc *saltedge.SeAccountInfoSvc
@@ -31,7 +30,7 @@ type App struct {
 }
 
 // New creates and returns new App.
-func New(cfg *config.Config, repo *dal.NwRepo) *App {
+func New(cfg *config.Config, repo dal.INwRepo) *App {
 	assetSvc := asset.NewAssetSvc(cfg, repo)
 	providerSvc := provider.NewProviderSvc()
 	seAccountInfoSvc := saltedge.NewSeAccountInfoSvc(cfg)
@@ -40,7 +39,6 @@ func New(cfg *config.Config, repo *dal.NwRepo) *App {
 
 	return &App{
 		cfg:              cfg,
-		repo:             repo,
 		assetSvc:         assetSvc,
 		providerSvc:      providerSvc,
 		seAccountInfoSvc: seAccountInfoSvc,

@@ -37,13 +37,13 @@ func (ac *AssetCreate) SetNillableUserID(u *uuid.UUID) *AssetCreate {
 }
 
 // SetSheet sets the "sheet" field.
-func (ac *AssetCreate) SetSheet(i int) *AssetCreate {
+func (ac *AssetCreate) SetSheet(i int32) *AssetCreate {
 	ac.mutation.SetSheet(i)
 	return ac
 }
 
 // SetNillableSheet sets the "sheet" field if the given value is not nil.
-func (ac *AssetCreate) SetNillableSheet(i *int) *AssetCreate {
+func (ac *AssetCreate) SetNillableSheet(i *int32) *AssetCreate {
 	if i != nil {
 		ac.SetSheet(*i)
 	}
@@ -51,13 +51,13 @@ func (ac *AssetCreate) SetNillableSheet(i *int) *AssetCreate {
 }
 
 // SetSection sets the "section" field.
-func (ac *AssetCreate) SetSection(i int) *AssetCreate {
+func (ac *AssetCreate) SetSection(i int32) *AssetCreate {
 	ac.mutation.SetSection(i)
 	return ac
 }
 
 // SetNillableSection sets the "section" field if the given value is not nil.
-func (ac *AssetCreate) SetNillableSection(i *int) *AssetCreate {
+func (ac *AssetCreate) SetNillableSection(i *int32) *AssetCreate {
 	if i != nil {
 		ac.SetSection(*i)
 	}
@@ -92,18 +92,6 @@ func (ac *AssetCreate) SetNillableProviderName(s *string) *AssetCreate {
 	return ac
 }
 
-// SetCurrency sets the "currency" field.
-func (ac *AssetCreate) SetCurrency(s string) *AssetCreate {
-	ac.mutation.SetCurrency(s)
-	return ac
-}
-
-// SetValue sets the "value" field.
-func (ac *AssetCreate) SetValue(f float64) *AssetCreate {
-	ac.mutation.SetValue(f)
-	return ac
-}
-
 // SetDescription sets the "description" field.
 func (ac *AssetCreate) SetDescription(s string) *AssetCreate {
 	ac.mutation.SetDescription(s)
@@ -115,6 +103,26 @@ func (ac *AssetCreate) SetNillableDescription(s *string) *AssetCreate {
 	if s != nil {
 		ac.SetDescription(*s)
 	}
+	return ac
+}
+
+// SetCurrency sets the "currency" field.
+func (ac *AssetCreate) SetCurrency(s string) *AssetCreate {
+	ac.mutation.SetCurrency(s)
+	return ac
+}
+
+// SetNillableCurrency sets the "currency" field if the given value is not nil.
+func (ac *AssetCreate) SetNillableCurrency(s *string) *AssetCreate {
+	if s != nil {
+		ac.SetCurrency(*s)
+	}
+	return ac
+}
+
+// SetValue sets the "value" field.
+func (ac *AssetCreate) SetValue(f float64) *AssetCreate {
+	ac.mutation.SetValue(f)
 	return ac
 }
 
@@ -216,6 +224,14 @@ func (ac *AssetCreate) defaults() {
 		v := asset.DefaultProviderName
 		ac.mutation.SetProviderName(v)
 	}
+	if _, ok := ac.mutation.Description(); !ok {
+		v := asset.DefaultDescription
+		ac.mutation.SetDescription(v)
+	}
+	if _, ok := ac.mutation.Currency(); !ok {
+		v := asset.DefaultCurrency
+		ac.mutation.SetCurrency(v)
+	}
 	if _, ok := ac.mutation.CreatedAt(); !ok {
 		v := asset.DefaultCreatedAt()
 		ac.mutation.SetCreatedAt(v)
@@ -286,11 +302,11 @@ func (ac *AssetCreate) createSpec() (*Asset, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = &id
 	}
 	if value, ok := ac.mutation.Sheet(); ok {
-		_spec.SetField(asset.FieldSheet, field.TypeInt, value)
+		_spec.SetField(asset.FieldSheet, field.TypeInt32, value)
 		_node.Sheet = value
 	}
 	if value, ok := ac.mutation.Section(); ok {
-		_spec.SetField(asset.FieldSection, field.TypeInt, value)
+		_spec.SetField(asset.FieldSection, field.TypeInt32, value)
 		_node.Section = value
 	}
 	if value, ok := ac.mutation.GetType(); ok {
@@ -301,6 +317,10 @@ func (ac *AssetCreate) createSpec() (*Asset, *sqlgraph.CreateSpec) {
 		_spec.SetField(asset.FieldProviderName, field.TypeString, value)
 		_node.ProviderName = value
 	}
+	if value, ok := ac.mutation.Description(); ok {
+		_spec.SetField(asset.FieldDescription, field.TypeString, value)
+		_node.Description = value
+	}
 	if value, ok := ac.mutation.Currency(); ok {
 		_spec.SetField(asset.FieldCurrency, field.TypeString, value)
 		_node.Currency = value
@@ -308,10 +328,6 @@ func (ac *AssetCreate) createSpec() (*Asset, *sqlgraph.CreateSpec) {
 	if value, ok := ac.mutation.Value(); ok {
 		_spec.SetField(asset.FieldValue, field.TypeFloat64, value)
 		_node.Value = value
-	}
-	if value, ok := ac.mutation.Description(); ok {
-		_spec.SetField(asset.FieldDescription, field.TypeString, value)
-		_node.Description = &value
 	}
 	if value, ok := ac.mutation.CreatedAt(); ok {
 		_spec.SetField(asset.FieldCreatedAt, field.TypeTime, value)

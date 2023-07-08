@@ -39,7 +39,7 @@ func (svc *EmailSvc) ListByUser(ctx Ctx, userId uuid.UUID) ([]*ent.Email, error)
 func (svc *EmailSvc) Create(ctx Ctx, userId uuid.UUID, address string) (*ent.Email, error) {
 	emailCount, err := svc.repo.GetEmailRepo().CountByUserId(ctx, userId)
 	if err != nil {
-		return nil, fmt.Errorf("failed to count user emails: %w", err)
+		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	if emailCount >= svc.cfg.MaxEmailAddresses {
@@ -51,7 +51,7 @@ func (svc *EmailSvc) Create(ctx Ctx, userId uuid.UUID, address string) (*ent.Ema
 		// Query email by email address
 		email, err := client.Email.Query().Where(email.Address(address)).Only(ctx)
 		if err != nil && !ent.IsNotFound(err) {
-			return fmt.Errorf("failed querying email by address: %w", err)
+			return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 		if email != nil {
 			if !email.UserID.IsNil() {
@@ -64,7 +64,7 @@ func (svc *EmailSvc) Create(ctx Ctx, userId uuid.UUID, address string) (*ent.Ema
 				SetUserID(userId).
 				Save(ctx)
 			if err != nil {
-				return fmt.Errorf("failed creating email: %w", err)
+				return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
 		}
 
@@ -79,7 +79,7 @@ func (svc *EmailSvc) Create(ctx Ctx, userId uuid.UUID, address string) (*ent.Ema
 func (svc *EmailSvc) SetPrimaryEmail(ctx Ctx, userId uuid.UUID, emailId uuid.UUID) error {
 	user, err := svc.repo.GetUserRepo().GetById(ctx, userId)
 	if err != nil {
-		return fmt.Errorf("failed to fetch user from db: %w", err)
+		return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	if emailId == user.Edges.PrimaryEmail.EmailID {
@@ -89,7 +89,7 @@ func (svc *EmailSvc) SetPrimaryEmail(ctx Ctx, userId uuid.UUID, emailId uuid.UUI
 	return svc.repo.WithTx(ctx, func(ctx Ctx, client *ent.Client) error {
 		primaryEmail, err := svc.repo.GetEmailRepo().GetPrimary(ctx, userId)
 		if err != nil {
-			return fmt.Errorf("failed to fetch primary email from db: %w", err)
+			return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
 		if primaryEmail == nil {
@@ -104,7 +104,7 @@ func (svc *EmailSvc) SetPrimaryEmail(ctx Ctx, userId uuid.UUID, emailId uuid.UUI
 			primaryEmail.EmailID = emailId
 			err = svc.repo.GetEmailRepo().UpdatePrimary(ctx, *primaryEmail)
 			if err != nil {
-				return fmt.Errorf("failed to change primary email: %w", err)
+				return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 			}
 		}
 
@@ -115,7 +115,7 @@ func (svc *EmailSvc) SetPrimaryEmail(ctx Ctx, userId uuid.UUID, emailId uuid.UUI
 func (svc *EmailSvc) Delete(ctx Ctx, userId uuid.UUID, emailId uuid.UUID) error {
 	user, err := svc.repo.GetUserRepo().GetById(ctx, userId)
 	if err != nil {
-		return fmt.Errorf("failed to fetch user from db: %w", err)
+		return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	var emailToBeDeleted *ent.Email
@@ -129,5 +129,9 @@ func (svc *EmailSvc) Delete(ctx Ctx, userId uuid.UUID, emailId uuid.UUID) error 
 		return errors.New("email with given emailId not available")
 	}
 
-	return svc.repo.GetEmailRepo().Delete(ctx, emailToBeDeleted)
+	err = svc.repo.GetEmailRepo().Delete(ctx, emailToBeDeleted)
+	if err != nil {
+		return errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	return nil
 }

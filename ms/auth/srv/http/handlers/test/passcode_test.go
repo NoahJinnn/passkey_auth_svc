@@ -6,217 +6,171 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/internal/http/errorhandler"
-	"github.com/hellohq/hqservice/internal/http/validator"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/dto"
-	"github.com/hellohq/hqservice/ms/auth/srv/http/handlers"
-	"github.com/hellohq/hqservice/ms/auth/srv/mail"
-	test "github.com/hellohq/hqservice/ms/auth/test/mock/app"
-	testRepo "github.com/hellohq/hqservice/ms/auth/test/mock/dal"
-	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
+	"golang.org/x/crypto/bcrypt"
 )
 
-type mailer struct{}
-
-var renderer, _ = mail.NewRenderer()
-
-func passcodes() []*ent.Passcode {
-	now := time.Now()
-	return []*ent.Passcode{{
-		ID:        uuid.FromStringOrNil("08ee61aa-0946-4ecf-a8bd-e14c604329e2"),
-		UserID:    uuid.FromStringOrNil(userId),
-		TTL:       300,
-		Code:      "$2a$12$gBPH9jnbXFmwAGwZMSzYkeXx7oOTElzhvHfiDgj.D7G8q4znvHpMK",
-		CreatedAt: now,
-		UpdatedAt: now,
-	}}
+func TestPasscodeSuite(t *testing.T) {
+	suite.Run(t, new(passcodeSuite))
 }
 
-func (m mailer) Send(email []string, subject string, body string) error {
-	return nil
+type passcodeSuite struct {
+	Suite
 }
 
-func TestPasscodeHandler_Init(t *testing.T) {
-	appl := test.NewApp(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, nil, emails, nil))
-	srv := &handlers.HttpDeps{
-		Appl:      appl,
-		Cfg:       &defaultCfg,
-		SharedCfg: &sharedCfg,
+func (s *passcodeSuite) TestPasscodeHandler_Init() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
 	}
-	passcodeHandler := handlers.NewPasscodeHandler(srv, sessionManager{})
+	err := s.LoadFixtures("../../../../test/fixtures/passcode")
+	s.Require().NoError(err)
 
-	body := dto.PasscodeInitRequest{
-		UserId: userId,
+	emailId := "51b7c175-ceb6-45ba-aae6-0092221c1b84"
+	unknownEmailId := "83618f24-2db8-4ea2-b370-ac8335f782d8"
+	tests := []struct {
+		name               string
+		body               dto.PasscodeInitRequest
+		expectedStatusCode int
+	}{
+		{
+			name: "with userID and emailID",
+			body: dto.PasscodeInitRequest{
+				UserId:  "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5",
+				EmailId: &emailId,
+			},
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name: "with user id",
+			body: dto.PasscodeInitRequest{
+				UserId: "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5",
+			},
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name: "unknown user id",
+			body: dto.PasscodeInitRequest{
+				UserId: unknownEmailId,
+			},
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name: "with unknown emailID",
+			body: dto.PasscodeInitRequest{
+				UserId:  "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5",
+				EmailId: &unknownEmailId,
+			},
+			expectedStatusCode: http.StatusBadRequest,
+		},
 	}
-	bodyJson, err := json.Marshal(body)
-	require.NoError(t, err)
 
-	e := echo.New()
-	e.Validator = validator.NewCustomValidator()
-	req := httptest.NewRequest(http.MethodPost, "/passcode/login/initialize", bytes.NewReader(bodyJson))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	if assert.NoError(t, passcodeHandler.Init(c)) {
-		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
-	}
-}
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			bodyJson, err := json.Marshal(tt.body)
+			s.NoError(err)
 
-func TestPasscodeHandler_Init_UnknownUserId(t *testing.T) {
-	appl := test.NewApp(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, nil, emails, nil))
-	srv := &handlers.HttpDeps{
-		Appl:      appl,
-		Cfg:       &defaultCfg,
-		SharedCfg: &sharedCfg,
-	}
-	passcodeHandler := handlers.NewPasscodeHandler(srv, sessionManager{})
+			req := httptest.NewRequest(http.MethodPost, "/passcode/login/initialize", bytes.NewReader(bodyJson))
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+			s.e.ServeHTTP(rec, req)
 
-	body := dto.PasscodeInitRequest{
-		UserId: "04603148-036d-403b-bf34-cfe237974ef9",
-	}
-	bodyJson, err := json.Marshal(body)
-	require.NoError(t, err)
-
-	e := echo.New()
-	e.Validator = validator.NewCustomValidator()
-	req := httptest.NewRequest(http.MethodPost, "/passcode/login/initialize", bytes.NewReader(bodyJson))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	passcodeHandler.Init(c)
-	assert.Equal(t, http.StatusBadRequest, rec.Code)
-}
-
-func TestPasscodeHandler_Finish(t *testing.T) {
-	appl := test.NewApp(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, passcodes(), emails, nil))
-	srv := &handlers.HttpDeps{
-		Appl:      appl,
-		Cfg:       &defaultCfg,
-		SharedCfg: &sharedCfg,
-	}
-	passcodeHandler := handlers.NewPasscodeHandler(srv, sessionManager{})
-
-	body := dto.PasscodeFinishRequest{
-		Id:   "08ee61aa-0946-4ecf-a8bd-e14c604329e2",
-		Code: "123456",
-	}
-	bodyJson, err := json.Marshal(body)
-	require.NoError(t, err)
-
-	e := echo.New()
-	e.Validator = validator.NewCustomValidator()
-	req := httptest.NewRequest(http.MethodPost, "/passcode/login/finalize", bytes.NewReader(bodyJson))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	if assert.NoError(t, passcodeHandler.Finish(c)) {
-		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
+			s.Equal(tt.expectedStatusCode, rec.Code)
+		})
 	}
 }
 
-func TestPasscodeHandler_Finish_WrongCode(t *testing.T) {
-	appl := test.NewApp(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, passcodes(), emails, nil))
-	srv := &handlers.HttpDeps{
-		Appl:      appl,
-		Cfg:       &defaultCfg,
-		SharedCfg: &sharedCfg,
+func (s *passcodeSuite) TestPasscodeHandler_Finish() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
 	}
-	passcodeHandler := handlers.NewPasscodeHandler(srv, sessionManager{})
+	err := s.LoadFixtures("../../../../test/fixtures/passcode")
+	s.Require().NoError(err)
 
-	body := dto.PasscodeFinishRequest{
-		Id:   "08ee61aa-0946-4ecf-a8bd-e14c604329e2",
-		Code: "012345",
+	hashedPasscode, err := bcrypt.GenerateFromPassword([]byte("123456"), 12)
+	s.Require().NoError(err)
+
+	passcode := ent.Passcode{
+		UserID:   uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"),
+		EmailID:  uuid.FromStringOrNil("51b7c175-ceb6-45ba-aae6-0092221c1b84"),
+		TTL:      300,
+		Code:     string(hashedPasscode),
+		TryCount: 0,
 	}
-	bodyJson, err := json.Marshal(body)
-	require.NoError(t, err)
 
-	e := echo.New()
-	e.Validator = validator.NewCustomValidator()
-	req := httptest.NewRequest(http.MethodPost, "/passcode/login/finalize", bytes.NewReader(bodyJson))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	err = passcodeHandler.Finish(c)
-	if assert.Error(t, err) {
-		httpError := errorhandler.ToHttpError(err)
-		assert.Equal(t, http.StatusUnauthorized, httpError.Code)
+	passcodeWithExpiredTimeout := ent.Passcode{
+		UserID:   uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"),
+		EmailID:  uuid.FromStringOrNil("51b7c175-ceb6-45ba-aae6-0092221c1b84"),
+		TTL:      0,
+		Code:     string(hashedPasscode),
+		TryCount: 0,
 	}
-}
 
-func TestPasscodeHandler_Finish_WrongCode_3_Times(t *testing.T) {
-	appl := test.NewApp(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, passcodes(), emails, nil))
-	srv := &handlers.HttpDeps{
-		Appl:      appl,
-		Cfg:       &defaultCfg,
-		SharedCfg: &sharedCfg,
+	tests := []struct {
+		name               string
+		passcodeId         string
+		retryCount         int
+		passcode           ent.Passcode
+		code               string
+		expectedStatusCode int
+	}{
+		{
+			name:               "finish successful",
+			passcodeId:         "a2383922-dea3-46c8-be17-85b267c0d135",
+			passcode:           passcode,
+			code:               "123456",
+			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name:               "with wrong code",
+			passcodeId:         "a2383922-dea3-46c8-be17-85b267c0d135",
+			passcode:           passcode,
+			code:               "654321",
+			expectedStatusCode: http.StatusUnauthorized,
+		},
+		{
+			name:               "with wrong code 3 times",
+			passcodeId:         "a2383922-dea3-46c8-be17-85b267c0d135",
+			retryCount:         2,
+			passcode:           passcode,
+			code:               "654321",
+			expectedStatusCode: http.StatusGone,
+		},
+		{
+			name:               "after passcode expired",
+			passcodeId:         "a2383922-dea3-46c8-be17-85b267c0d135",
+			passcode:           passcodeWithExpiredTimeout,
+			code:               "123456",
+			expectedStatusCode: http.StatusRequestTimeout,
+		},
 	}
-	passcodeHandler := handlers.NewPasscodeHandler(srv, sessionManager{})
 
-	body := dto.PasscodeFinishRequest{
-		Id:   "08ee61aa-0946-4ecf-a8bd-e14c604329e2",
-		Code: "012345",
-	}
-	bodyJson, err := json.Marshal(body)
-	require.NoError(t, err)
-
-	e := echo.New()
-	e.Validator = validator.NewCustomValidator()
-	for i := 0; i < 3; i++ {
-		req := httptest.NewRequest(http.MethodPost, "/passcode/login/finalize", bytes.NewReader(bodyJson))
-		req.Header.Set("Content-Type", "application/json")
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-
-		err = passcodeHandler.Finish(c)
-		if i < 2 {
-			if assert.Error(t, err) {
-				httpError := errorhandler.ToHttpError(err)
-				assert.Equal(t, http.StatusUnauthorized, httpError.Code)
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			pc, err := s.repo.GetPasscodeRepo().Create(ctx, &tt.passcode)
+			s.Require().NoError(err)
+			body := dto.PasscodeFinishRequest{
+				Id:   pc.ID.String(),
+				Code: tt.code,
 			}
-		} else {
-			if assert.Error(t, err) {
-				httpError := errorhandler.ToHttpError(err)
-				assert.Equal(t, http.StatusGone, httpError.Code)
+			bodyJson, err := json.Marshal(body)
+			s.Require().NoError(err)
+
+			responseCode := 0
+			for i := 0; i <= tt.retryCount; i++ {
+				req := httptest.NewRequest(http.MethodPost, "/passcode/login/finalize", bytes.NewReader(bodyJson))
+				req.Header.Set("Content-Type", "application/json")
+				rec := httptest.NewRecorder()
+
+				s.e.ServeHTTP(rec, req)
+				responseCode = rec.Code
 			}
-		}
-	}
-}
 
-func TestPasscodeHandler_Finish_WrongId(t *testing.T) {
-	appl := test.NewApp(&mailer{}, renderer, &defaultCfg, testRepo.NewRepo(nil, users, nil, nil, passcodes(), emails, nil))
-	srv := &handlers.HttpDeps{
-		Appl:      appl,
-		Cfg:       &defaultCfg,
-		SharedCfg: &sharedCfg,
-	}
-	passcodeHandler := handlers.NewPasscodeHandler(srv, sessionManager{})
-
-	body := dto.PasscodeFinishRequest{
-		Id:   "1bc9a074-577d-497e-87da-8eaf50f32a26",
-		Code: "123456",
-	}
-	bodyJson, err := json.Marshal(body)
-	require.NoError(t, err)
-
-	e := echo.New()
-	e.Validator = validator.NewCustomValidator()
-	req := httptest.NewRequest(http.MethodPost, "/passcode/login/finalize", bytes.NewReader(bodyJson))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	err = passcodeHandler.Finish(c)
-	if assert.Error(t, err) {
-		httpError := errorhandler.ToHttpError(err)
-		assert.Equal(t, http.StatusUnauthorized, httpError.Code)
+			s.Equal(tt.expectedStatusCode, responseCode)
+			s.repo.GetPasscodeRepo().Delete(ctx, pc)
+		})
 	}
 }

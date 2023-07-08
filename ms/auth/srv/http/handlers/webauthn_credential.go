@@ -58,8 +58,7 @@ func (h *WebauthnHandler) UpdateCredential(c echo.Context) error {
 
 	err = (&echo.DefaultBinder{}).BindBody(c, &body)
 	if err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	return h.GetWebauthnSvc().UpdateCredential(c.Request().Context(), userId, credentialID, body.Name)

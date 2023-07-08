@@ -43,7 +43,7 @@ func (r *assetRepo) Create(ctx context.Context, userID uuid.UUID, asset *ent.Ass
 		SetSection(asset.Section).
 		SetType(asset.Type).
 		SetProviderName(asset.ProviderName).
-		SetDescription(*asset.Description).
+		SetDescription(asset.Description).
 		SetCurrency(asset.Currency).
 		SetValue(asset.Value).
 		SetType(asset.Type).
@@ -68,7 +68,7 @@ func (r *assetRepo) Update(ctx context.Context, userID uuid.UUID, uAsset *ent.As
 		SetSection(uAsset.Section).
 		SetType(uAsset.Type).
 		SetProviderName(uAsset.ProviderName).
-		SetDescription(*uAsset.Description).
+		SetDescription(uAsset.Description).
 		SetCurrency(uAsset.Currency).
 		SetValue(uAsset.Value).
 		SetType(uAsset.Type).

@@ -51,13 +51,11 @@ func (h *AssetHandler) Create(c echo.Context) error {
 
 	var body dto.AssetBodyRequest
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	if err := c.Validate(body); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	result, err := h.GetAssetSvc().Create(c.Request().Context(), userId, body)
@@ -81,13 +79,11 @@ func (h *AssetHandler) Update(c echo.Context) error {
 
 	var body dto.AssetBodyRequest
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	if err := c.Validate(body); err != nil {
-		httperr := errorhandler.ToHttpError(err)
-		return c.JSON(httperr.Code, httperr)
+		return errorhandler.ToHttpError(err)
 	}
 
 	err = h.GetAssetSvc().Update(c.Request().Context(), userId, body)
