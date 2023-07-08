@@ -125,7 +125,7 @@ jobs:
       - uses: google-github-actions/release-please-action@v3
         id: release
         with:
-          release-type: node
+          release-type: go
           default-branch: main
           pull-request-header: "Bot (:robot:) requested to create a new release on ${{ github.ref_name }}"
           commit-search-depth: 100
