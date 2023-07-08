@@ -55,9 +55,9 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 
 	nw := e.Group(
 		"/networth",
-		// session.Session(sessionManager), TODO: Enable back when finish nw service
+		session.Session(sessionManager),
 	)
-	se := nw.Group("/se", session.Session(sessionManager))
+	se := nw.Group("/se")
 	seAccountInfo := handlers.NewSeAccountInfoHandler(srv)
 	se.GET("/customers/:customer_id", seAccountInfo.Customer)
 	se.POST("/customers", seAccountInfo.CreateCustomer)
@@ -67,7 +67,7 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 	se.GET("/accounts", seAccountInfo.GetAccountByConnectionId)
 	se.GET("/transactions", seAccountInfo.GetTxByConnectionIdAndAccountId)
 
-	fv := nw.Group("/fv", session.Session(sessionManager))
+	fv := nw.Group("/fv")
 	fvAuth := handlers.NewFvAuthHandler(srv)
 	fv.POST("/customer/token", fvAuth.CreateCustomerToken)
 	fv.POST("/link/token", fvAuth.CreateLinkToken)
@@ -79,11 +79,11 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 	fv.GET("/transactions", fvData.AllTransaction)
 	fv.GET("/balance_history/:accountId", fvData.GetBalanceHistoryByAccountId)
 
-	asset := nw.Group("/asset", session.Session(sessionManager))
+	asset := nw.Group("/assets")
 	assetHandler := handlers.NewAssetHandler(srv)
 	asset.GET("", assetHandler.ListByUser)
-	asset.POST("", assetHandler.Create)
-	asset.PUT("", assetHandler.Update)
+	asset.POST("/asset", assetHandler.Create)
+	asset.PUT("/asset", assetHandler.Update)
 	asset.DELETE("/:id", assetHandler.Delete)
 	return e, nil
 }

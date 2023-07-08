@@ -43,6 +43,14 @@ func init() {
 	assetDescProviderName := assetFields[5].Descriptor()
 	// asset.DefaultProviderName holds the default value on creation for the provider_name field.
 	asset.DefaultProviderName = assetDescProviderName.Default.(string)
+	// assetDescDescription is the schema descriptor for description field.
+	assetDescDescription := assetFields[6].Descriptor()
+	// asset.DefaultDescription holds the default value on creation for the description field.
+	asset.DefaultDescription = assetDescDescription.Default.(string)
+	// assetDescCurrency is the schema descriptor for currency field.
+	assetDescCurrency := assetFields[7].Descriptor()
+	// asset.DefaultCurrency holds the default value on creation for the currency field.
+	asset.DefaultCurrency = assetDescCurrency.Default.(string)
 	// assetDescCreatedAt is the schema descriptor for created_at field.
 	assetDescCreatedAt := assetFields[9].Descriptor()
 	// asset.DefaultCreatedAt holds the default value on creation for the created_at field.

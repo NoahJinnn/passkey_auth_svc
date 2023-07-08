@@ -458,7 +458,7 @@ func (m *AssetMutation) Description() (r string, exists bool) {
 // OldDescription returns the old "description" field's value of the Asset entity.
 // If the Asset object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AssetMutation) OldDescription(ctx context.Context) (v *string, err error) {
+func (m *AssetMutation) OldDescription(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
 	}

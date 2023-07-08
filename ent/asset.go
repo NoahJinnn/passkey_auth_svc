@@ -30,7 +30,7 @@ type Asset struct {
 	// ProviderName holds the value of the "provider_name" field.
 	ProviderName string `json:"provider_name,omitempty"`
 	// Description holds the value of the "description" field.
-	Description *string `json:"description,omitempty"`
+	Description string `json:"description,omitempty"`
 	// Currency holds the value of the "currency" field.
 	Currency string `json:"currency,omitempty"`
 	// Value holds the value of the "value" field.
@@ -137,8 +137,7 @@ func (a *Asset) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
-				a.Description = new(string)
-				*a.Description = value.String
+				a.Description = value.String
 			}
 		case asset.FieldCurrency:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -220,10 +219,8 @@ func (a *Asset) String() string {
 	builder.WriteString("provider_name=")
 	builder.WriteString(a.ProviderName)
 	builder.WriteString(", ")
-	if v := a.Description; v != nil {
-		builder.WriteString("description=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("description=")
+	builder.WriteString(a.Description)
 	builder.WriteString(", ")
 	builder.WriteString("currency=")
 	builder.WriteString(a.Currency)

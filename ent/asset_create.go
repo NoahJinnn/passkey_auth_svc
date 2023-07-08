@@ -112,6 +112,14 @@ func (ac *AssetCreate) SetCurrency(s string) *AssetCreate {
 	return ac
 }
 
+// SetNillableCurrency sets the "currency" field if the given value is not nil.
+func (ac *AssetCreate) SetNillableCurrency(s *string) *AssetCreate {
+	if s != nil {
+		ac.SetCurrency(*s)
+	}
+	return ac
+}
+
 // SetValue sets the "value" field.
 func (ac *AssetCreate) SetValue(f float64) *AssetCreate {
 	ac.mutation.SetValue(f)
@@ -216,6 +224,14 @@ func (ac *AssetCreate) defaults() {
 		v := asset.DefaultProviderName
 		ac.mutation.SetProviderName(v)
 	}
+	if _, ok := ac.mutation.Description(); !ok {
+		v := asset.DefaultDescription
+		ac.mutation.SetDescription(v)
+	}
+	if _, ok := ac.mutation.Currency(); !ok {
+		v := asset.DefaultCurrency
+		ac.mutation.SetCurrency(v)
+	}
 	if _, ok := ac.mutation.CreatedAt(); !ok {
 		v := asset.DefaultCreatedAt()
 		ac.mutation.SetCreatedAt(v)
@@ -303,7 +319,7 @@ func (ac *AssetCreate) createSpec() (*Asset, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := ac.mutation.Description(); ok {
 		_spec.SetField(asset.FieldDescription, field.TypeString, value)
-		_node.Description = &value
+		_node.Description = value
 	}
 	if value, ok := ac.mutation.Currency(); ok {
 		_spec.SetField(asset.FieldCurrency, field.TypeString, value)

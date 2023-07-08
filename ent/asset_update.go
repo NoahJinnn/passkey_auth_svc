@@ -158,6 +158,14 @@ func (au *AssetUpdate) SetCurrency(s string) *AssetUpdate {
 	return au
 }
 
+// SetNillableCurrency sets the "currency" field if the given value is not nil.
+func (au *AssetUpdate) SetNillableCurrency(s *string) *AssetUpdate {
+	if s != nil {
+		au.SetCurrency(*s)
+	}
+	return au
+}
+
 // SetValue sets the "value" field.
 func (au *AssetUpdate) SetValue(f float64) *AssetUpdate {
 	au.mutation.ResetValue()
@@ -454,6 +462,14 @@ func (auo *AssetUpdateOne) ClearDescription() *AssetUpdateOne {
 // SetCurrency sets the "currency" field.
 func (auo *AssetUpdateOne) SetCurrency(s string) *AssetUpdateOne {
 	auo.mutation.SetCurrency(s)
+	return auo
+}
+
+// SetNillableCurrency sets the "currency" field if the given value is not nil.
+func (auo *AssetUpdateOne) SetNillableCurrency(s *string) *AssetUpdateOne {
+	if s != nil {
+		auo.SetCurrency(*s)
+	}
 	return auo
 }
 
