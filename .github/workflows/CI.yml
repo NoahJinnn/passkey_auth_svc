@@ -117,6 +117,7 @@ jobs:
           ./bin/task scripts:build:binary
 
   release:
+    needs: build
     runs-on: ubuntu-latest
     outputs:
       build: ${{ steps.release.outputs.release_created }}
