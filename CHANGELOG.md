@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/HelloHQ/hqservice/compare/v1.0.1...v1.0.2) (2023-07-09)
+
+
+### Bug Fixes
+
+* **github:** Decapitalize repo name ([f989058](https://github.com/HelloHQ/hqservice/commit/f989058b44e11640d441031f6b14042f29fced62))
+
 ## 1.0.0 (2023-07-09)
 
 
