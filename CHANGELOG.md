@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/HelloHQ/hqservice/compare/v1.0.2...v1.0.3) (2023-07-09)
+
+
+### Bug Fixes
+
+* **github:** Fix directory of docker context ([9745860](https://github.com/HelloHQ/hqservice/commit/9745860265f1312e3bf8e243c5cdd03ca2875636))
+
 ## [1.0.2](https://github.com/HelloHQ/hqservice/compare/v1.0.1...v1.0.2) (2023-07-09)
 
 
