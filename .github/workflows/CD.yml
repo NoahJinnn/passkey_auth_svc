@@ -14,7 +14,7 @@ env:
     # Use docker.io for Docker Hub if empty
     REGISTRY: ghcr.io
     # github.repository as <account>/<repo>
-    REPO_NAME: HelloHQ/hqservice
+    REPO_NAME: hellohq/hqservice
     PKG_NAME: core
 
 jobs:
