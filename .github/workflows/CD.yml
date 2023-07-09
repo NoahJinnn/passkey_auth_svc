@@ -60,6 +60,6 @@ jobs:
             id: build-and-push-app
             uses: docker/build-push-action@v3
             with:
-              context: .
+              context: ./docker
               push: true
               tags: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:latest, ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:${{ needs.release.outputs.tag_name }}
