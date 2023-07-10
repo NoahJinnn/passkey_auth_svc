@@ -5,13 +5,13 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/ent/asset"
+	"github.com/hellohq/hqservice/ent/assettable"
 )
 
 type IAssetRepo interface {
-	ListByUser(ctx context.Context, userID uuid.UUID) ([]*ent.Asset, error)
-	Create(ctx context.Context, userID uuid.UUID, asset *ent.Asset) (*ent.Asset, error)
-	Update(ctx context.Context, userID uuid.UUID, uAsset *ent.Asset) error
+	ListByUser(ctx context.Context, userID uuid.UUID) ([]*ent.AssetTable, error)
+	Create(ctx context.Context, userID uuid.UUID, asset *ent.AssetTable) (*ent.AssetTable, error)
+	Update(ctx context.Context, userID uuid.UUID, uAsset *ent.AssetTable) error
 	Delete(ctx context.Context, userID uuid.UUID, assetID uuid.UUID) error
 }
 
@@ -23,10 +23,10 @@ func NewAssetRepo(pgsql *ent.Client) *assetRepo {
 	return &assetRepo{pgsql: pgsql}
 }
 
-func (r *assetRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]*ent.Asset, error) {
-	s, err := r.pgsql.Asset.
+func (r *assetRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]*ent.AssetTable, error) {
+	s, err := r.pgsql.AssetTable.
 		Query().
-		Where(asset.UserID(userID)).
+		Where(assettable.UserID(userID)).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -35,18 +35,13 @@ func (r *assetRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]*ent.As
 	return s, nil
 }
 
-func (r *assetRepo) Create(ctx context.Context, userID uuid.UUID, asset *ent.Asset) (*ent.Asset, error) {
-	newAsset, err := r.pgsql.Asset.
+func (r *assetRepo) Create(ctx context.Context, userID uuid.UUID, assettable *ent.AssetTable) (*ent.AssetTable, error) {
+	newAsset, err := r.pgsql.AssetTable.
 		Create().
 		SetUserID(userID).
-		SetSheet(asset.Sheet).
-		SetSection(asset.Section).
-		SetType(asset.Type).
-		SetProviderName(asset.ProviderName).
-		SetDescription(asset.Description).
-		SetCurrency(asset.Currency).
-		SetValue(asset.Value).
-		SetType(asset.Type).
+		SetSheet(assettable.Sheet).
+		SetSection(assettable.Section).
+		SetDescription(assettable.Description).
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -55,23 +50,18 @@ func (r *assetRepo) Create(ctx context.Context, userID uuid.UUID, asset *ent.Ass
 	return newAsset, nil
 }
 
-func (r *assetRepo) Update(ctx context.Context, userID uuid.UUID, uAsset *ent.Asset) error {
-	_, err := r.pgsql.Asset.
+func (r *assetRepo) Update(ctx context.Context, userID uuid.UUID, uAsset *ent.AssetTable) error {
+	_, err := r.pgsql.AssetTable.
 		Update().
 		Where(
-			asset.And(
-				asset.ID(uAsset.ID),
-				asset.UserID(userID),
+			assettable.And(
+				assettable.ID(uAsset.ID),
+				assettable.UserID(userID),
 			),
 		).
 		SetSheet(uAsset.Sheet).
 		SetSection(uAsset.Section).
-		SetType(uAsset.Type).
-		SetProviderName(uAsset.ProviderName).
 		SetDescription(uAsset.Description).
-		SetCurrency(uAsset.Currency).
-		SetValue(uAsset.Value).
-		SetType(uAsset.Type).
 		Save(ctx)
 	if err != nil {
 		return err
@@ -81,12 +71,12 @@ func (r *assetRepo) Update(ctx context.Context, userID uuid.UUID, uAsset *ent.As
 }
 
 func (r *assetRepo) Delete(ctx context.Context, userID uuid.UUID, assetID uuid.UUID) error {
-	_, err := r.pgsql.Asset.
+	_, err := r.pgsql.AssetTable.
 		Delete().
 		Where(
-			asset.And(
-				asset.ID(assetID),
-				asset.UserID(userID),
+			assettable.And(
+				assettable.ID(assetID),
+				assettable.UserID(userID),
 			),
 		).
 		Exec(ctx)

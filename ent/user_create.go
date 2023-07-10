@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/ent/asset"
+	"github.com/hellohq/hqservice/ent/assettable"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/passcode"
@@ -114,19 +114,19 @@ func (uc *UserCreate) AddWebauthnCredentials(w ...*WebauthnCredential) *UserCrea
 	return uc.AddWebauthnCredentialIDs(ids...)
 }
 
-// AddAssetIDs adds the "assets" edge to the Asset entity by IDs.
-func (uc *UserCreate) AddAssetIDs(ids ...uuid.UUID) *UserCreate {
-	uc.mutation.AddAssetIDs(ids...)
+// AddAssetTableIDs adds the "asset_tables" edge to the AssetTable entity by IDs.
+func (uc *UserCreate) AddAssetTableIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddAssetTableIDs(ids...)
 	return uc
 }
 
-// AddAssets adds the "assets" edges to the Asset entity.
-func (uc *UserCreate) AddAssets(a ...*Asset) *UserCreate {
+// AddAssetTables adds the "asset_tables" edges to the AssetTable entity.
+func (uc *UserCreate) AddAssetTables(a ...*AssetTable) *UserCreate {
 	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
-	return uc.AddAssetIDs(ids...)
+	return uc.AddAssetTableIDs(ids...)
 }
 
 // SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID.
@@ -315,15 +315,15 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.AssetsIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.AssetTablesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.AssetsTable,
-			Columns: []string{user.AssetsColumn},
+			Table:   user.AssetTablesTable,
+			Columns: []string{user.AssetTablesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(asset.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(assettable.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

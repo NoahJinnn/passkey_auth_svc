@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/ent/asset"
+	"github.com/hellohq/hqservice/ent/assettable"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/identity"
@@ -36,7 +36,7 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeAsset                                = "Asset"
+	TypeAssetTable                           = "AssetTable"
 	TypeEmail                                = "Email"
 	TypeFvSession                            = "FvSession"
 	TypeIdentity                             = "Identity"
@@ -50,8 +50,8 @@ const (
 	TypeWebauthnSessionDataAllowedCredential = "WebauthnSessionDataAllowedCredential"
 )
 
-// AssetMutation represents an operation that mutates the Asset nodes in the graph.
-type AssetMutation struct {
+// AssetTableMutation represents an operation that mutates the AssetTable nodes in the graph.
+type AssetTableMutation struct {
 	config
 	op            Op
 	typ           string
@@ -60,33 +60,28 @@ type AssetMutation struct {
 	addsheet      *int32
 	section       *int32
 	addsection    *int32
-	_type         *string
-	provider_name *string
 	description   *string
-	currency      *string
-	value         *float64
-	addvalue      *float64
 	created_at    *time.Time
 	updated_at    *time.Time
 	clearedFields map[string]struct{}
 	user          *uuid.UUID
 	cleareduser   bool
 	done          bool
-	oldValue      func(context.Context) (*Asset, error)
-	predicates    []predicate.Asset
+	oldValue      func(context.Context) (*AssetTable, error)
+	predicates    []predicate.AssetTable
 }
 
-var _ ent.Mutation = (*AssetMutation)(nil)
+var _ ent.Mutation = (*AssetTableMutation)(nil)
 
-// assetOption allows management of the mutation configuration using functional options.
-type assetOption func(*AssetMutation)
+// assettableOption allows management of the mutation configuration using functional options.
+type assettableOption func(*AssetTableMutation)
 
-// newAssetMutation creates new mutation for the Asset entity.
-func newAssetMutation(c config, op Op, opts ...assetOption) *AssetMutation {
-	m := &AssetMutation{
+// newAssetTableMutation creates new mutation for the AssetTable entity.
+func newAssetTableMutation(c config, op Op, opts ...assettableOption) *AssetTableMutation {
+	m := &AssetTableMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeAsset,
+		typ:           TypeAssetTable,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -95,20 +90,20 @@ func newAssetMutation(c config, op Op, opts ...assetOption) *AssetMutation {
 	return m
 }
 
-// withAssetID sets the ID field of the mutation.
-func withAssetID(id uuid.UUID) assetOption {
-	return func(m *AssetMutation) {
+// withAssetTableID sets the ID field of the mutation.
+func withAssetTableID(id uuid.UUID) assettableOption {
+	return func(m *AssetTableMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *Asset
+			value *AssetTable
 		)
-		m.oldValue = func(ctx context.Context) (*Asset, error) {
+		m.oldValue = func(ctx context.Context) (*AssetTable, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().Asset.Get(ctx, id)
+					value, err = m.Client().AssetTable.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -117,10 +112,10 @@ func withAssetID(id uuid.UUID) assetOption {
 	}
 }
 
-// withAsset sets the old Asset of the mutation.
-func withAsset(node *Asset) assetOption {
-	return func(m *AssetMutation) {
-		m.oldValue = func(context.Context) (*Asset, error) {
+// withAssetTable sets the old AssetTable of the mutation.
+func withAssetTable(node *AssetTable) assettableOption {
+	return func(m *AssetTableMutation) {
+		m.oldValue = func(context.Context) (*AssetTable, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -129,7 +124,7 @@ func withAsset(node *Asset) assetOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m AssetMutation) Client() *Client {
+func (m AssetTableMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -137,7 +132,7 @@ func (m AssetMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m AssetMutation) Tx() (*Tx, error) {
+func (m AssetTableMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -147,14 +142,14 @@ func (m AssetMutation) Tx() (*Tx, error) {
 }
 
 // SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Asset entities.
-func (m *AssetMutation) SetID(id uuid.UUID) {
+// operation is only accepted on creation of AssetTable entities.
+func (m *AssetTableMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *AssetMutation) ID() (id uuid.UUID, exists bool) {
+func (m *AssetTableMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -165,7 +160,7 @@ func (m *AssetMutation) ID() (id uuid.UUID, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *AssetMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+func (m *AssetTableMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -174,19 +169,19 @@ func (m *AssetMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().Asset.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().AssetTable.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
 // SetUserID sets the "user_id" field.
-func (m *AssetMutation) SetUserID(u uuid.UUID) {
+func (m *AssetTableMutation) SetUserID(u uuid.UUID) {
 	m.user = &u
 }
 
 // UserID returns the value of the "user_id" field in the mutation.
-func (m *AssetMutation) UserID() (r uuid.UUID, exists bool) {
+func (m *AssetTableMutation) UserID() (r uuid.UUID, exists bool) {
 	v := m.user
 	if v == nil {
 		return
@@ -194,10 +189,10 @@ func (m *AssetMutation) UserID() (r uuid.UUID, exists bool) {
 	return *v, true
 }
 
-// OldUserID returns the old "user_id" field's value of the Asset entity.
-// If the Asset object wasn't provided to the builder, the object is fetched from the database.
+// OldUserID returns the old "user_id" field's value of the AssetTable entity.
+// If the AssetTable object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AssetMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+func (m *AssetTableMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
 	}
@@ -212,31 +207,31 @@ func (m *AssetMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) 
 }
 
 // ClearUserID clears the value of the "user_id" field.
-func (m *AssetMutation) ClearUserID() {
+func (m *AssetTableMutation) ClearUserID() {
 	m.user = nil
-	m.clearedFields[asset.FieldUserID] = struct{}{}
+	m.clearedFields[assettable.FieldUserID] = struct{}{}
 }
 
 // UserIDCleared returns if the "user_id" field was cleared in this mutation.
-func (m *AssetMutation) UserIDCleared() bool {
-	_, ok := m.clearedFields[asset.FieldUserID]
+func (m *AssetTableMutation) UserIDCleared() bool {
+	_, ok := m.clearedFields[assettable.FieldUserID]
 	return ok
 }
 
 // ResetUserID resets all changes to the "user_id" field.
-func (m *AssetMutation) ResetUserID() {
+func (m *AssetTableMutation) ResetUserID() {
 	m.user = nil
-	delete(m.clearedFields, asset.FieldUserID)
+	delete(m.clearedFields, assettable.FieldUserID)
 }
 
 // SetSheet sets the "sheet" field.
-func (m *AssetMutation) SetSheet(i int32) {
+func (m *AssetTableMutation) SetSheet(i int32) {
 	m.sheet = &i
 	m.addsheet = nil
 }
 
 // Sheet returns the value of the "sheet" field in the mutation.
-func (m *AssetMutation) Sheet() (r int32, exists bool) {
+func (m *AssetTableMutation) Sheet() (r int32, exists bool) {
 	v := m.sheet
 	if v == nil {
 		return
@@ -244,10 +239,10 @@ func (m *AssetMutation) Sheet() (r int32, exists bool) {
 	return *v, true
 }
 
-// OldSheet returns the old "sheet" field's value of the Asset entity.
-// If the Asset object wasn't provided to the builder, the object is fetched from the database.
+// OldSheet returns the old "sheet" field's value of the AssetTable entity.
+// If the AssetTable object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AssetMutation) OldSheet(ctx context.Context) (v int32, err error) {
+func (m *AssetTableMutation) OldSheet(ctx context.Context) (v int32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldSheet is only allowed on UpdateOne operations")
 	}
@@ -262,7 +257,7 @@ func (m *AssetMutation) OldSheet(ctx context.Context) (v int32, err error) {
 }
 
 // AddSheet adds i to the "sheet" field.
-func (m *AssetMutation) AddSheet(i int32) {
+func (m *AssetTableMutation) AddSheet(i int32) {
 	if m.addsheet != nil {
 		*m.addsheet += i
 	} else {
@@ -271,7 +266,7 @@ func (m *AssetMutation) AddSheet(i int32) {
 }
 
 // AddedSheet returns the value that was added to the "sheet" field in this mutation.
-func (m *AssetMutation) AddedSheet() (r int32, exists bool) {
+func (m *AssetTableMutation) AddedSheet() (r int32, exists bool) {
 	v := m.addsheet
 	if v == nil {
 		return
@@ -280,33 +275,33 @@ func (m *AssetMutation) AddedSheet() (r int32, exists bool) {
 }
 
 // ClearSheet clears the value of the "sheet" field.
-func (m *AssetMutation) ClearSheet() {
+func (m *AssetTableMutation) ClearSheet() {
 	m.sheet = nil
 	m.addsheet = nil
-	m.clearedFields[asset.FieldSheet] = struct{}{}
+	m.clearedFields[assettable.FieldSheet] = struct{}{}
 }
 
 // SheetCleared returns if the "sheet" field was cleared in this mutation.
-func (m *AssetMutation) SheetCleared() bool {
-	_, ok := m.clearedFields[asset.FieldSheet]
+func (m *AssetTableMutation) SheetCleared() bool {
+	_, ok := m.clearedFields[assettable.FieldSheet]
 	return ok
 }
 
 // ResetSheet resets all changes to the "sheet" field.
-func (m *AssetMutation) ResetSheet() {
+func (m *AssetTableMutation) ResetSheet() {
 	m.sheet = nil
 	m.addsheet = nil
-	delete(m.clearedFields, asset.FieldSheet)
+	delete(m.clearedFields, assettable.FieldSheet)
 }
 
 // SetSection sets the "section" field.
-func (m *AssetMutation) SetSection(i int32) {
+func (m *AssetTableMutation) SetSection(i int32) {
 	m.section = &i
 	m.addsection = nil
 }
 
 // Section returns the value of the "section" field in the mutation.
-func (m *AssetMutation) Section() (r int32, exists bool) {
+func (m *AssetTableMutation) Section() (r int32, exists bool) {
 	v := m.section
 	if v == nil {
 		return
@@ -314,10 +309,10 @@ func (m *AssetMutation) Section() (r int32, exists bool) {
 	return *v, true
 }
 
-// OldSection returns the old "section" field's value of the Asset entity.
-// If the Asset object wasn't provided to the builder, the object is fetched from the database.
+// OldSection returns the old "section" field's value of the AssetTable entity.
+// If the AssetTable object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AssetMutation) OldSection(ctx context.Context) (v int32, err error) {
+func (m *AssetTableMutation) OldSection(ctx context.Context) (v int32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldSection is only allowed on UpdateOne operations")
 	}
@@ -332,7 +327,7 @@ func (m *AssetMutation) OldSection(ctx context.Context) (v int32, err error) {
 }
 
 // AddSection adds i to the "section" field.
-func (m *AssetMutation) AddSection(i int32) {
+func (m *AssetTableMutation) AddSection(i int32) {
 	if m.addsection != nil {
 		*m.addsection += i
 	} else {
@@ -341,7 +336,7 @@ func (m *AssetMutation) AddSection(i int32) {
 }
 
 // AddedSection returns the value that was added to the "section" field in this mutation.
-func (m *AssetMutation) AddedSection() (r int32, exists bool) {
+func (m *AssetTableMutation) AddedSection() (r int32, exists bool) {
 	v := m.addsection
 	if v == nil {
 		return
@@ -350,104 +345,32 @@ func (m *AssetMutation) AddedSection() (r int32, exists bool) {
 }
 
 // ClearSection clears the value of the "section" field.
-func (m *AssetMutation) ClearSection() {
+func (m *AssetTableMutation) ClearSection() {
 	m.section = nil
 	m.addsection = nil
-	m.clearedFields[asset.FieldSection] = struct{}{}
+	m.clearedFields[assettable.FieldSection] = struct{}{}
 }
 
 // SectionCleared returns if the "section" field was cleared in this mutation.
-func (m *AssetMutation) SectionCleared() bool {
-	_, ok := m.clearedFields[asset.FieldSection]
+func (m *AssetTableMutation) SectionCleared() bool {
+	_, ok := m.clearedFields[assettable.FieldSection]
 	return ok
 }
 
 // ResetSection resets all changes to the "section" field.
-func (m *AssetMutation) ResetSection() {
+func (m *AssetTableMutation) ResetSection() {
 	m.section = nil
 	m.addsection = nil
-	delete(m.clearedFields, asset.FieldSection)
-}
-
-// SetType sets the "type" field.
-func (m *AssetMutation) SetType(s string) {
-	m._type = &s
-}
-
-// GetType returns the value of the "type" field in the mutation.
-func (m *AssetMutation) GetType() (r string, exists bool) {
-	v := m._type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldType returns the old "type" field's value of the Asset entity.
-// If the Asset object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AssetMutation) OldType(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldType is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldType requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldType: %w", err)
-	}
-	return oldValue.Type, nil
-}
-
-// ResetType resets all changes to the "type" field.
-func (m *AssetMutation) ResetType() {
-	m._type = nil
-}
-
-// SetProviderName sets the "provider_name" field.
-func (m *AssetMutation) SetProviderName(s string) {
-	m.provider_name = &s
-}
-
-// ProviderName returns the value of the "provider_name" field in the mutation.
-func (m *AssetMutation) ProviderName() (r string, exists bool) {
-	v := m.provider_name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldProviderName returns the old "provider_name" field's value of the Asset entity.
-// If the Asset object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AssetMutation) OldProviderName(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldProviderName is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldProviderName requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldProviderName: %w", err)
-	}
-	return oldValue.ProviderName, nil
-}
-
-// ResetProviderName resets all changes to the "provider_name" field.
-func (m *AssetMutation) ResetProviderName() {
-	m.provider_name = nil
+	delete(m.clearedFields, assettable.FieldSection)
 }
 
 // SetDescription sets the "description" field.
-func (m *AssetMutation) SetDescription(s string) {
+func (m *AssetTableMutation) SetDescription(s string) {
 	m.description = &s
 }
 
 // Description returns the value of the "description" field in the mutation.
-func (m *AssetMutation) Description() (r string, exists bool) {
+func (m *AssetTableMutation) Description() (r string, exists bool) {
 	v := m.description
 	if v == nil {
 		return
@@ -455,10 +378,10 @@ func (m *AssetMutation) Description() (r string, exists bool) {
 	return *v, true
 }
 
-// OldDescription returns the old "description" field's value of the Asset entity.
-// If the Asset object wasn't provided to the builder, the object is fetched from the database.
+// OldDescription returns the old "description" field's value of the AssetTable entity.
+// If the AssetTable object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AssetMutation) OldDescription(ctx context.Context) (v string, err error) {
+func (m *AssetTableMutation) OldDescription(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
 	}
@@ -473,122 +396,30 @@ func (m *AssetMutation) OldDescription(ctx context.Context) (v string, err error
 }
 
 // ClearDescription clears the value of the "description" field.
-func (m *AssetMutation) ClearDescription() {
+func (m *AssetTableMutation) ClearDescription() {
 	m.description = nil
-	m.clearedFields[asset.FieldDescription] = struct{}{}
+	m.clearedFields[assettable.FieldDescription] = struct{}{}
 }
 
 // DescriptionCleared returns if the "description" field was cleared in this mutation.
-func (m *AssetMutation) DescriptionCleared() bool {
-	_, ok := m.clearedFields[asset.FieldDescription]
+func (m *AssetTableMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[assettable.FieldDescription]
 	return ok
 }
 
 // ResetDescription resets all changes to the "description" field.
-func (m *AssetMutation) ResetDescription() {
+func (m *AssetTableMutation) ResetDescription() {
 	m.description = nil
-	delete(m.clearedFields, asset.FieldDescription)
-}
-
-// SetCurrency sets the "currency" field.
-func (m *AssetMutation) SetCurrency(s string) {
-	m.currency = &s
-}
-
-// Currency returns the value of the "currency" field in the mutation.
-func (m *AssetMutation) Currency() (r string, exists bool) {
-	v := m.currency
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCurrency returns the old "currency" field's value of the Asset entity.
-// If the Asset object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AssetMutation) OldCurrency(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCurrency is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCurrency requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCurrency: %w", err)
-	}
-	return oldValue.Currency, nil
-}
-
-// ResetCurrency resets all changes to the "currency" field.
-func (m *AssetMutation) ResetCurrency() {
-	m.currency = nil
-}
-
-// SetValue sets the "value" field.
-func (m *AssetMutation) SetValue(f float64) {
-	m.value = &f
-	m.addvalue = nil
-}
-
-// Value returns the value of the "value" field in the mutation.
-func (m *AssetMutation) Value() (r float64, exists bool) {
-	v := m.value
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldValue returns the old "value" field's value of the Asset entity.
-// If the Asset object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AssetMutation) OldValue(ctx context.Context) (v float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldValue is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldValue requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldValue: %w", err)
-	}
-	return oldValue.Value, nil
-}
-
-// AddValue adds f to the "value" field.
-func (m *AssetMutation) AddValue(f float64) {
-	if m.addvalue != nil {
-		*m.addvalue += f
-	} else {
-		m.addvalue = &f
-	}
-}
-
-// AddedValue returns the value that was added to the "value" field in this mutation.
-func (m *AssetMutation) AddedValue() (r float64, exists bool) {
-	v := m.addvalue
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetValue resets all changes to the "value" field.
-func (m *AssetMutation) ResetValue() {
-	m.value = nil
-	m.addvalue = nil
+	delete(m.clearedFields, assettable.FieldDescription)
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (m *AssetMutation) SetCreatedAt(t time.Time) {
+func (m *AssetTableMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
 }
 
 // CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *AssetMutation) CreatedAt() (r time.Time, exists bool) {
+func (m *AssetTableMutation) CreatedAt() (r time.Time, exists bool) {
 	v := m.created_at
 	if v == nil {
 		return
@@ -596,10 +427,10 @@ func (m *AssetMutation) CreatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old "created_at" field's value of the Asset entity.
-// If the Asset object wasn't provided to the builder, the object is fetched from the database.
+// OldCreatedAt returns the old "created_at" field's value of the AssetTable entity.
+// If the AssetTable object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AssetMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *AssetTableMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
 	}
@@ -614,17 +445,17 @@ func (m *AssetMutation) OldCreatedAt(ctx context.Context) (v time.Time, err erro
 }
 
 // ResetCreatedAt resets all changes to the "created_at" field.
-func (m *AssetMutation) ResetCreatedAt() {
+func (m *AssetTableMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (m *AssetMutation) SetUpdatedAt(t time.Time) {
+func (m *AssetTableMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
 }
 
 // UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *AssetMutation) UpdatedAt() (r time.Time, exists bool) {
+func (m *AssetTableMutation) UpdatedAt() (r time.Time, exists bool) {
 	v := m.updated_at
 	if v == nil {
 		return
@@ -632,10 +463,10 @@ func (m *AssetMutation) UpdatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldUpdatedAt returns the old "updated_at" field's value of the Asset entity.
-// If the Asset object wasn't provided to the builder, the object is fetched from the database.
+// OldUpdatedAt returns the old "updated_at" field's value of the AssetTable entity.
+// If the AssetTable object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AssetMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *AssetTableMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
 	}
@@ -650,24 +481,24 @@ func (m *AssetMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err erro
 }
 
 // ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *AssetMutation) ResetUpdatedAt() {
+func (m *AssetTableMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (m *AssetMutation) ClearUser() {
+func (m *AssetTableMutation) ClearUser() {
 	m.cleareduser = true
 }
 
 // UserCleared reports if the "user" edge to the User entity was cleared.
-func (m *AssetMutation) UserCleared() bool {
+func (m *AssetTableMutation) UserCleared() bool {
 	return m.UserIDCleared() || m.cleareduser
 }
 
 // UserIDs returns the "user" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // UserID instead. It exists only for internal usage by the builders.
-func (m *AssetMutation) UserIDs() (ids []uuid.UUID) {
+func (m *AssetTableMutation) UserIDs() (ids []uuid.UUID) {
 	if id := m.user; id != nil {
 		ids = append(ids, *id)
 	}
@@ -675,20 +506,20 @@ func (m *AssetMutation) UserIDs() (ids []uuid.UUID) {
 }
 
 // ResetUser resets all changes to the "user" edge.
-func (m *AssetMutation) ResetUser() {
+func (m *AssetTableMutation) ResetUser() {
 	m.user = nil
 	m.cleareduser = false
 }
 
-// Where appends a list predicates to the AssetMutation builder.
-func (m *AssetMutation) Where(ps ...predicate.Asset) {
+// Where appends a list predicates to the AssetTableMutation builder.
+func (m *AssetTableMutation) Where(ps ...predicate.AssetTable) {
 	m.predicates = append(m.predicates, ps...)
 }
 
-// WhereP appends storage-level predicates to the AssetMutation builder. Using this method,
+// WhereP appends storage-level predicates to the AssetTableMutation builder. Using this method,
 // users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *AssetMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.Asset, len(ps))
+func (m *AssetTableMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AssetTable, len(ps))
 	for i := range ps {
 		p[i] = ps[i]
 	}
@@ -696,54 +527,42 @@ func (m *AssetMutation) WhereP(ps ...func(*sql.Selector)) {
 }
 
 // Op returns the operation name.
-func (m *AssetMutation) Op() Op {
+func (m *AssetTableMutation) Op() Op {
 	return m.op
 }
 
 // SetOp allows setting the mutation operation.
-func (m *AssetMutation) SetOp(op Op) {
+func (m *AssetTableMutation) SetOp(op Op) {
 	m.op = op
 }
 
-// Type returns the node type of this mutation (Asset).
-func (m *AssetMutation) Type() string {
+// Type returns the node type of this mutation (AssetTable).
+func (m *AssetTableMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *AssetMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+func (m *AssetTableMutation) Fields() []string {
+	fields := make([]string, 0, 6)
 	if m.user != nil {
-		fields = append(fields, asset.FieldUserID)
+		fields = append(fields, assettable.FieldUserID)
 	}
 	if m.sheet != nil {
-		fields = append(fields, asset.FieldSheet)
+		fields = append(fields, assettable.FieldSheet)
 	}
 	if m.section != nil {
-		fields = append(fields, asset.FieldSection)
-	}
-	if m._type != nil {
-		fields = append(fields, asset.FieldType)
-	}
-	if m.provider_name != nil {
-		fields = append(fields, asset.FieldProviderName)
+		fields = append(fields, assettable.FieldSection)
 	}
 	if m.description != nil {
-		fields = append(fields, asset.FieldDescription)
-	}
-	if m.currency != nil {
-		fields = append(fields, asset.FieldCurrency)
-	}
-	if m.value != nil {
-		fields = append(fields, asset.FieldValue)
+		fields = append(fields, assettable.FieldDescription)
 	}
 	if m.created_at != nil {
-		fields = append(fields, asset.FieldCreatedAt)
+		fields = append(fields, assettable.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
-		fields = append(fields, asset.FieldUpdatedAt)
+		fields = append(fields, assettable.FieldUpdatedAt)
 	}
 	return fields
 }
@@ -751,27 +570,19 @@ func (m *AssetMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *AssetMutation) Field(name string) (ent.Value, bool) {
+func (m *AssetTableMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case asset.FieldUserID:
+	case assettable.FieldUserID:
 		return m.UserID()
-	case asset.FieldSheet:
+	case assettable.FieldSheet:
 		return m.Sheet()
-	case asset.FieldSection:
+	case assettable.FieldSection:
 		return m.Section()
-	case asset.FieldType:
-		return m.GetType()
-	case asset.FieldProviderName:
-		return m.ProviderName()
-	case asset.FieldDescription:
+	case assettable.FieldDescription:
 		return m.Description()
-	case asset.FieldCurrency:
-		return m.Currency()
-	case asset.FieldValue:
-		return m.Value()
-	case asset.FieldCreatedAt:
+	case assettable.FieldCreatedAt:
 		return m.CreatedAt()
-	case asset.FieldUpdatedAt:
+	case assettable.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
 	return nil, false
@@ -780,101 +591,65 @@ func (m *AssetMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *AssetMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *AssetTableMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case asset.FieldUserID:
+	case assettable.FieldUserID:
 		return m.OldUserID(ctx)
-	case asset.FieldSheet:
+	case assettable.FieldSheet:
 		return m.OldSheet(ctx)
-	case asset.FieldSection:
+	case assettable.FieldSection:
 		return m.OldSection(ctx)
-	case asset.FieldType:
-		return m.OldType(ctx)
-	case asset.FieldProviderName:
-		return m.OldProviderName(ctx)
-	case asset.FieldDescription:
+	case assettable.FieldDescription:
 		return m.OldDescription(ctx)
-	case asset.FieldCurrency:
-		return m.OldCurrency(ctx)
-	case asset.FieldValue:
-		return m.OldValue(ctx)
-	case asset.FieldCreatedAt:
+	case assettable.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
-	case asset.FieldUpdatedAt:
+	case assettable.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
-	return nil, fmt.Errorf("unknown Asset field %s", name)
+	return nil, fmt.Errorf("unknown AssetTable field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *AssetMutation) SetField(name string, value ent.Value) error {
+func (m *AssetTableMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case asset.FieldUserID:
+	case assettable.FieldUserID:
 		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUserID(v)
 		return nil
-	case asset.FieldSheet:
+	case assettable.FieldSheet:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSheet(v)
 		return nil
-	case asset.FieldSection:
+	case assettable.FieldSection:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSection(v)
 		return nil
-	case asset.FieldType:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetType(v)
-		return nil
-	case asset.FieldProviderName:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetProviderName(v)
-		return nil
-	case asset.FieldDescription:
+	case assettable.FieldDescription:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDescription(v)
 		return nil
-	case asset.FieldCurrency:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCurrency(v)
-		return nil
-	case asset.FieldValue:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetValue(v)
-		return nil
-	case asset.FieldCreatedAt:
+	case assettable.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
 		return nil
-	case asset.FieldUpdatedAt:
+	case assettable.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -882,21 +657,18 @@ func (m *AssetMutation) SetField(name string, value ent.Value) error {
 		m.SetUpdatedAt(v)
 		return nil
 	}
-	return fmt.Errorf("unknown Asset field %s", name)
+	return fmt.Errorf("unknown AssetTable field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *AssetMutation) AddedFields() []string {
+func (m *AssetTableMutation) AddedFields() []string {
 	var fields []string
 	if m.addsheet != nil {
-		fields = append(fields, asset.FieldSheet)
+		fields = append(fields, assettable.FieldSheet)
 	}
 	if m.addsection != nil {
-		fields = append(fields, asset.FieldSection)
-	}
-	if m.addvalue != nil {
-		fields = append(fields, asset.FieldValue)
+		fields = append(fields, assettable.FieldSection)
 	}
 	return fields
 }
@@ -904,14 +676,12 @@ func (m *AssetMutation) AddedFields() []string {
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *AssetMutation) AddedField(name string) (ent.Value, bool) {
+func (m *AssetTableMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case asset.FieldSheet:
+	case assettable.FieldSheet:
 		return m.AddedSheet()
-	case asset.FieldSection:
+	case assettable.FieldSection:
 		return m.AddedSection()
-	case asset.FieldValue:
-		return m.AddedValue()
 	}
 	return nil, false
 }
@@ -919,131 +689,112 @@ func (m *AssetMutation) AddedField(name string) (ent.Value, bool) {
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *AssetMutation) AddField(name string, value ent.Value) error {
+func (m *AssetTableMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case asset.FieldSheet:
+	case assettable.FieldSheet:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddSheet(v)
 		return nil
-	case asset.FieldSection:
+	case assettable.FieldSection:
 		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddSection(v)
 		return nil
-	case asset.FieldValue:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddValue(v)
-		return nil
 	}
-	return fmt.Errorf("unknown Asset numeric field %s", name)
+	return fmt.Errorf("unknown AssetTable numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *AssetMutation) ClearedFields() []string {
+func (m *AssetTableMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(asset.FieldUserID) {
-		fields = append(fields, asset.FieldUserID)
+	if m.FieldCleared(assettable.FieldUserID) {
+		fields = append(fields, assettable.FieldUserID)
 	}
-	if m.FieldCleared(asset.FieldSheet) {
-		fields = append(fields, asset.FieldSheet)
+	if m.FieldCleared(assettable.FieldSheet) {
+		fields = append(fields, assettable.FieldSheet)
 	}
-	if m.FieldCleared(asset.FieldSection) {
-		fields = append(fields, asset.FieldSection)
+	if m.FieldCleared(assettable.FieldSection) {
+		fields = append(fields, assettable.FieldSection)
 	}
-	if m.FieldCleared(asset.FieldDescription) {
-		fields = append(fields, asset.FieldDescription)
+	if m.FieldCleared(assettable.FieldDescription) {
+		fields = append(fields, assettable.FieldDescription)
 	}
 	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *AssetMutation) FieldCleared(name string) bool {
+func (m *AssetTableMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *AssetMutation) ClearField(name string) error {
+func (m *AssetTableMutation) ClearField(name string) error {
 	switch name {
-	case asset.FieldUserID:
+	case assettable.FieldUserID:
 		m.ClearUserID()
 		return nil
-	case asset.FieldSheet:
+	case assettable.FieldSheet:
 		m.ClearSheet()
 		return nil
-	case asset.FieldSection:
+	case assettable.FieldSection:
 		m.ClearSection()
 		return nil
-	case asset.FieldDescription:
+	case assettable.FieldDescription:
 		m.ClearDescription()
 		return nil
 	}
-	return fmt.Errorf("unknown Asset nullable field %s", name)
+	return fmt.Errorf("unknown AssetTable nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *AssetMutation) ResetField(name string) error {
+func (m *AssetTableMutation) ResetField(name string) error {
 	switch name {
-	case asset.FieldUserID:
+	case assettable.FieldUserID:
 		m.ResetUserID()
 		return nil
-	case asset.FieldSheet:
+	case assettable.FieldSheet:
 		m.ResetSheet()
 		return nil
-	case asset.FieldSection:
+	case assettable.FieldSection:
 		m.ResetSection()
 		return nil
-	case asset.FieldType:
-		m.ResetType()
-		return nil
-	case asset.FieldProviderName:
-		m.ResetProviderName()
-		return nil
-	case asset.FieldDescription:
+	case assettable.FieldDescription:
 		m.ResetDescription()
 		return nil
-	case asset.FieldCurrency:
-		m.ResetCurrency()
-		return nil
-	case asset.FieldValue:
-		m.ResetValue()
-		return nil
-	case asset.FieldCreatedAt:
+	case assettable.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
-	case asset.FieldUpdatedAt:
+	case assettable.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
 	}
-	return fmt.Errorf("unknown Asset field %s", name)
+	return fmt.Errorf("unknown AssetTable field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *AssetMutation) AddedEdges() []string {
+func (m *AssetTableMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
 	if m.user != nil {
-		edges = append(edges, asset.EdgeUser)
+		edges = append(edges, assettable.EdgeUser)
 	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *AssetMutation) AddedIDs(name string) []ent.Value {
+func (m *AssetTableMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case asset.EdgeUser:
+	case assettable.EdgeUser:
 		if id := m.user; id != nil {
 			return []ent.Value{*id}
 		}
@@ -1052,31 +803,31 @@ func (m *AssetMutation) AddedIDs(name string) []ent.Value {
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *AssetMutation) RemovedEdges() []string {
+func (m *AssetTableMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *AssetMutation) RemovedIDs(name string) []ent.Value {
+func (m *AssetTableMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *AssetMutation) ClearedEdges() []string {
+func (m *AssetTableMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
 	if m.cleareduser {
-		edges = append(edges, asset.EdgeUser)
+		edges = append(edges, assettable.EdgeUser)
 	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *AssetMutation) EdgeCleared(name string) bool {
+func (m *AssetTableMutation) EdgeCleared(name string) bool {
 	switch name {
-	case asset.EdgeUser:
+	case assettable.EdgeUser:
 		return m.cleareduser
 	}
 	return false
@@ -1084,24 +835,24 @@ func (m *AssetMutation) EdgeCleared(name string) bool {
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *AssetMutation) ClearEdge(name string) error {
+func (m *AssetTableMutation) ClearEdge(name string) error {
 	switch name {
-	case asset.EdgeUser:
+	case assettable.EdgeUser:
 		m.ClearUser()
 		return nil
 	}
-	return fmt.Errorf("unknown Asset unique edge %s", name)
+	return fmt.Errorf("unknown AssetTable unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *AssetMutation) ResetEdge(name string) error {
+func (m *AssetTableMutation) ResetEdge(name string) error {
 	switch name {
-	case asset.EdgeUser:
+	case assettable.EdgeUser:
 		m.ResetUser()
 		return nil
 	}
-	return fmt.Errorf("unknown Asset edge %s", name)
+	return fmt.Errorf("unknown AssetTable edge %s", name)
 }
 
 // EmailMutation represents an operation that mutates the Email nodes in the graph.
@@ -5318,9 +5069,9 @@ type UserMutation struct {
 	webauthn_credentials        map[string]struct{}
 	removedwebauthn_credentials map[string]struct{}
 	clearedwebauthn_credentials bool
-	assets                      map[uuid.UUID]struct{}
-	removedassets               map[uuid.UUID]struct{}
-	clearedassets               bool
+	asset_tables                map[uuid.UUID]struct{}
+	removedasset_tables         map[uuid.UUID]struct{}
+	clearedasset_tables         bool
 	primary_email               *uuid.UUID
 	clearedprimary_email        bool
 	fv_session                  *uuid.UUID
@@ -5668,58 +5419,58 @@ func (m *UserMutation) ResetWebauthnCredentials() {
 	m.removedwebauthn_credentials = nil
 }
 
-// AddAssetIDs adds the "assets" edge to the Asset entity by ids.
-func (m *UserMutation) AddAssetIDs(ids ...uuid.UUID) {
-	if m.assets == nil {
-		m.assets = make(map[uuid.UUID]struct{})
+// AddAssetTableIDs adds the "asset_tables" edge to the AssetTable entity by ids.
+func (m *UserMutation) AddAssetTableIDs(ids ...uuid.UUID) {
+	if m.asset_tables == nil {
+		m.asset_tables = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.assets[ids[i]] = struct{}{}
+		m.asset_tables[ids[i]] = struct{}{}
 	}
 }
 
-// ClearAssets clears the "assets" edge to the Asset entity.
-func (m *UserMutation) ClearAssets() {
-	m.clearedassets = true
+// ClearAssetTables clears the "asset_tables" edge to the AssetTable entity.
+func (m *UserMutation) ClearAssetTables() {
+	m.clearedasset_tables = true
 }
 
-// AssetsCleared reports if the "assets" edge to the Asset entity was cleared.
-func (m *UserMutation) AssetsCleared() bool {
-	return m.clearedassets
+// AssetTablesCleared reports if the "asset_tables" edge to the AssetTable entity was cleared.
+func (m *UserMutation) AssetTablesCleared() bool {
+	return m.clearedasset_tables
 }
 
-// RemoveAssetIDs removes the "assets" edge to the Asset entity by IDs.
-func (m *UserMutation) RemoveAssetIDs(ids ...uuid.UUID) {
-	if m.removedassets == nil {
-		m.removedassets = make(map[uuid.UUID]struct{})
+// RemoveAssetTableIDs removes the "asset_tables" edge to the AssetTable entity by IDs.
+func (m *UserMutation) RemoveAssetTableIDs(ids ...uuid.UUID) {
+	if m.removedasset_tables == nil {
+		m.removedasset_tables = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.assets, ids[i])
-		m.removedassets[ids[i]] = struct{}{}
+		delete(m.asset_tables, ids[i])
+		m.removedasset_tables[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedAssets returns the removed IDs of the "assets" edge to the Asset entity.
-func (m *UserMutation) RemovedAssetsIDs() (ids []uuid.UUID) {
-	for id := range m.removedassets {
+// RemovedAssetTables returns the removed IDs of the "asset_tables" edge to the AssetTable entity.
+func (m *UserMutation) RemovedAssetTablesIDs() (ids []uuid.UUID) {
+	for id := range m.removedasset_tables {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// AssetsIDs returns the "assets" edge IDs in the mutation.
-func (m *UserMutation) AssetsIDs() (ids []uuid.UUID) {
-	for id := range m.assets {
+// AssetTablesIDs returns the "asset_tables" edge IDs in the mutation.
+func (m *UserMutation) AssetTablesIDs() (ids []uuid.UUID) {
+	for id := range m.asset_tables {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetAssets resets all changes to the "assets" edge.
-func (m *UserMutation) ResetAssets() {
-	m.assets = nil
-	m.clearedassets = false
-	m.removedassets = nil
+// ResetAssetTables resets all changes to the "asset_tables" edge.
+func (m *UserMutation) ResetAssetTables() {
+	m.asset_tables = nil
+	m.clearedasset_tables = false
+	m.removedasset_tables = nil
 }
 
 // SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by id.
@@ -5960,8 +5711,8 @@ func (m *UserMutation) AddedEdges() []string {
 	if m.webauthn_credentials != nil {
 		edges = append(edges, user.EdgeWebauthnCredentials)
 	}
-	if m.assets != nil {
-		edges = append(edges, user.EdgeAssets)
+	if m.asset_tables != nil {
+		edges = append(edges, user.EdgeAssetTables)
 	}
 	if m.primary_email != nil {
 		edges = append(edges, user.EdgePrimaryEmail)
@@ -5994,9 +5745,9 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeAssets:
-		ids := make([]ent.Value, 0, len(m.assets))
-		for id := range m.assets {
+	case user.EdgeAssetTables:
+		ids := make([]ent.Value, 0, len(m.asset_tables))
+		for id := range m.asset_tables {
 			ids = append(ids, id)
 		}
 		return ids
@@ -6024,8 +5775,8 @@ func (m *UserMutation) RemovedEdges() []string {
 	if m.removedwebauthn_credentials != nil {
 		edges = append(edges, user.EdgeWebauthnCredentials)
 	}
-	if m.removedassets != nil {
-		edges = append(edges, user.EdgeAssets)
+	if m.removedasset_tables != nil {
+		edges = append(edges, user.EdgeAssetTables)
 	}
 	return edges
 }
@@ -6052,9 +5803,9 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeAssets:
-		ids := make([]ent.Value, 0, len(m.removedassets))
-		for id := range m.removedassets {
+	case user.EdgeAssetTables:
+		ids := make([]ent.Value, 0, len(m.removedasset_tables))
+		for id := range m.removedasset_tables {
 			ids = append(ids, id)
 		}
 		return ids
@@ -6074,8 +5825,8 @@ func (m *UserMutation) ClearedEdges() []string {
 	if m.clearedwebauthn_credentials {
 		edges = append(edges, user.EdgeWebauthnCredentials)
 	}
-	if m.clearedassets {
-		edges = append(edges, user.EdgeAssets)
+	if m.clearedasset_tables {
+		edges = append(edges, user.EdgeAssetTables)
 	}
 	if m.clearedprimary_email {
 		edges = append(edges, user.EdgePrimaryEmail)
@@ -6096,8 +5847,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedpasscodes
 	case user.EdgeWebauthnCredentials:
 		return m.clearedwebauthn_credentials
-	case user.EdgeAssets:
-		return m.clearedassets
+	case user.EdgeAssetTables:
+		return m.clearedasset_tables
 	case user.EdgePrimaryEmail:
 		return m.clearedprimary_email
 	case user.EdgeFvSession:
@@ -6133,8 +5884,8 @@ func (m *UserMutation) ResetEdge(name string) error {
 	case user.EdgeWebauthnCredentials:
 		m.ResetWebauthnCredentials()
 		return nil
-	case user.EdgeAssets:
-		m.ResetAssets()
+	case user.EdgeAssetTables:
+		m.ResetAssetTables()
 		return nil
 	case user.EdgePrimaryEmail:
 		m.ResetPrimaryEmail()

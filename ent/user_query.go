@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/ent/asset"
+	"github.com/hellohq/hqservice/ent/assettable"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/passcode"
@@ -32,7 +32,7 @@ type UserQuery struct {
 	withEmails              *EmailQuery
 	withPasscodes           *PasscodeQuery
 	withWebauthnCredentials *WebauthnCredentialQuery
-	withAssets              *AssetQuery
+	withAssetTables         *AssetTableQuery
 	withPrimaryEmail        *PrimaryEmailQuery
 	withFvSession           *FvSessionQuery
 	// intermediate query (i.e. traversal path).
@@ -137,9 +137,9 @@ func (uq *UserQuery) QueryWebauthnCredentials() *WebauthnCredentialQuery {
 	return query
 }
 
-// QueryAssets chains the current query on the "assets" edge.
-func (uq *UserQuery) QueryAssets() *AssetQuery {
-	query := (&AssetClient{config: uq.config}).Query()
+// QueryAssetTables chains the current query on the "asset_tables" edge.
+func (uq *UserQuery) QueryAssetTables() *AssetTableQuery {
+	query := (&AssetTableClient{config: uq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -150,8 +150,8 @@ func (uq *UserQuery) QueryAssets() *AssetQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(asset.Table, asset.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.AssetsTable, user.AssetsColumn),
+			sqlgraph.To(assettable.Table, assettable.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.AssetTablesTable, user.AssetTablesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -398,7 +398,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withEmails:              uq.withEmails.Clone(),
 		withPasscodes:           uq.withPasscodes.Clone(),
 		withWebauthnCredentials: uq.withWebauthnCredentials.Clone(),
-		withAssets:              uq.withAssets.Clone(),
+		withAssetTables:         uq.withAssetTables.Clone(),
 		withPrimaryEmail:        uq.withPrimaryEmail.Clone(),
 		withFvSession:           uq.withFvSession.Clone(),
 		// clone intermediate query.
@@ -440,14 +440,14 @@ func (uq *UserQuery) WithWebauthnCredentials(opts ...func(*WebauthnCredentialQue
 	return uq
 }
 
-// WithAssets tells the query-builder to eager-load the nodes that are connected to
-// the "assets" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithAssets(opts ...func(*AssetQuery)) *UserQuery {
-	query := (&AssetClient{config: uq.config}).Query()
+// WithAssetTables tells the query-builder to eager-load the nodes that are connected to
+// the "asset_tables" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithAssetTables(opts ...func(*AssetTableQuery)) *UserQuery {
+	query := (&AssetTableClient{config: uq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withAssets = query
+	uq.withAssetTables = query
 	return uq
 }
 
@@ -555,7 +555,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			uq.withEmails != nil,
 			uq.withPasscodes != nil,
 			uq.withWebauthnCredentials != nil,
-			uq.withAssets != nil,
+			uq.withAssetTables != nil,
 			uq.withPrimaryEmail != nil,
 			uq.withFvSession != nil,
 		}
@@ -601,10 +601,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
-	if query := uq.withAssets; query != nil {
-		if err := uq.loadAssets(ctx, query, nodes,
-			func(n *User) { n.Edges.Assets = []*Asset{} },
-			func(n *User, e *Asset) { n.Edges.Assets = append(n.Edges.Assets, e) }); err != nil {
+	if query := uq.withAssetTables; query != nil {
+		if err := uq.loadAssetTables(ctx, query, nodes,
+			func(n *User) { n.Edges.AssetTables = []*AssetTable{} },
+			func(n *User, e *AssetTable) { n.Edges.AssetTables = append(n.Edges.AssetTables, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -716,7 +716,7 @@ func (uq *UserQuery) loadWebauthnCredentials(ctx context.Context, query *Webauth
 	}
 	return nil
 }
-func (uq *UserQuery) loadAssets(ctx context.Context, query *AssetQuery, nodes []*User, init func(*User), assign func(*User, *Asset)) error {
+func (uq *UserQuery) loadAssetTables(ctx context.Context, query *AssetTableQuery, nodes []*User, init func(*User), assign func(*User, *AssetTable)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*User)
 	for i := range nodes {
@@ -727,10 +727,10 @@ func (uq *UserQuery) loadAssets(ctx context.Context, query *AssetQuery, nodes []
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(asset.FieldUserID)
+		query.ctx.AppendFieldOnce(assettable.FieldUserID)
 	}
-	query.Where(predicate.Asset(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.AssetsColumn), fks...))
+	query.Where(predicate.AssetTable(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.AssetTablesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

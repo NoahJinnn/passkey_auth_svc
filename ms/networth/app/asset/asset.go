@@ -11,8 +11,8 @@ import (
 )
 
 type IAssetSvc interface {
-	ListByUser(ctx context.Context, userID string) ([]*ent.Asset, error)
-	Create(ctx context.Context, userID string, body dto.AssetBodyRequest) (*ent.Asset, error)
+	ListByUser(ctx context.Context, userID string) ([]*ent.AssetTable, error)
+	Create(ctx context.Context, userID string, body dto.AssetBodyRequest) (*ent.AssetTable, error)
 	Update(ctx context.Context, userID string, body dto.AssetBodyRequest) error
 	Delete(ctx context.Context, userID string, assetID string) error
 }
@@ -26,33 +26,25 @@ func NewAssetSvc(cfg *config.Config, repo dal.INwRepo) *AssetSvc {
 	return &AssetSvc{config: cfg, repo: repo}
 }
 
-func (svc *AssetSvc) ListByUser(ctx context.Context, userID uuid.UUID) ([]*ent.Asset, error) {
+func (svc *AssetSvc) ListByUser(ctx context.Context, userID uuid.UUID) ([]*ent.AssetTable, error) {
 	return svc.repo.GetAssetRepo().ListByUser(ctx, userID)
 }
 
-func (svc *AssetSvc) Create(ctx context.Context, userID uuid.UUID, body dto.AssetBodyRequest) (*ent.Asset, error) {
-	asset := &ent.Asset{
-		Sheet:        body.Sheet,
-		Section:      body.Section,
-		Type:         body.Type,
-		ProviderName: body.ProviderName,
-		Currency:     body.Currency,
-		Value:        body.Value,
-		Description:  body.Description,
+func (svc *AssetSvc) Create(ctx context.Context, userID uuid.UUID, body dto.AssetBodyRequest) (*ent.AssetTable, error) {
+	asset := &ent.AssetTable{
+		Sheet:       body.Sheet,
+		Section:     body.Section,
+		Description: body.Description,
 	}
 
 	return svc.repo.GetAssetRepo().Create(ctx, userID, asset)
 }
 
 func (svc *AssetSvc) Update(ctx context.Context, userID uuid.UUID, body dto.AssetBodyRequest) error {
-	asset := &ent.Asset{
-		Sheet:        body.Sheet,
-		Section:      body.Section,
-		Type:         body.Type,
-		ProviderName: body.ProviderName,
-		Currency:     body.Currency,
-		Value:        body.Value,
-		Description:  body.Description,
+	asset := &ent.AssetTable{
+		Sheet:       body.Sheet,
+		Section:     body.Section,
+		Description: body.Description,
 	}
 
 	return svc.repo.GetAssetRepo().Update(ctx, userID, asset)
