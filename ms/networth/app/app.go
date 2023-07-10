@@ -2,7 +2,7 @@
 package app
 
 import (
-	"github.com/hellohq/hqservice/ms/networth/app/asset"
+	"github.com/hellohq/hqservice/ms/networth/app/asset_table"
 	"github.com/hellohq/hqservice/ms/networth/app/finverse"
 	"github.com/hellohq/hqservice/ms/networth/app/provider"
 	"github.com/hellohq/hqservice/ms/networth/app/saltedge"
@@ -12,7 +12,7 @@ import (
 
 // Appl provides application features (use cases) service.
 type Appl interface {
-	GetAssetSvc() *asset.AssetSvc
+	GetAssetSvc() *asset_table.AssetTableSvc
 	GetProviderSvc() *provider.ProviderSvc
 	GetFvAuthSvc() *finverse.FvAuthSvc
 	GetFvDataSvc() *finverse.FvDataSvc
@@ -22,7 +22,7 @@ type Appl interface {
 // App implements interface Appl.
 type App struct {
 	cfg              *config.Config
-	assetSvc         *asset.AssetSvc
+	assetSvc         *asset_table.AssetTableSvc
 	providerSvc      *provider.ProviderSvc
 	seAccountInfoSvc *saltedge.SeAccountInfoSvc
 	fvAuthSvc        *finverse.FvAuthSvc
@@ -31,7 +31,7 @@ type App struct {
 
 // New creates and returns new App.
 func New(cfg *config.Config, repo dal.INwRepo) *App {
-	assetSvc := asset.NewAssetSvc(cfg, repo)
+	assetSvc := asset_table.NewAssetTableSvc(cfg, repo)
 	providerSvc := provider.NewProviderSvc()
 	seAccountInfoSvc := saltedge.NewSeAccountInfoSvc(cfg)
 	fvAuthSvc := finverse.NewFvAuthSvc(cfg, repo)
@@ -47,7 +47,7 @@ func New(cfg *config.Config, repo dal.INwRepo) *App {
 	}
 }
 
-func (a App) GetAssetSvc() *asset.AssetSvc {
+func (a App) GetAssetSvc() *asset_table.AssetTableSvc {
 	return a.assetSvc
 }
 

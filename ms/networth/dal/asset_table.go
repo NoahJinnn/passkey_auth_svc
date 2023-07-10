@@ -8,22 +8,22 @@ import (
 	"github.com/hellohq/hqservice/ent/assettable"
 )
 
-type IAssetRepo interface {
+type IAssetTableRepo interface {
 	ListByUser(ctx context.Context, userID uuid.UUID) ([]*ent.AssetTable, error)
 	Create(ctx context.Context, userID uuid.UUID, asset *ent.AssetTable) (*ent.AssetTable, error)
 	Update(ctx context.Context, userID uuid.UUID, uAsset *ent.AssetTable) error
 	Delete(ctx context.Context, userID uuid.UUID, assetID uuid.UUID) error
 }
 
-type assetRepo struct {
+type assetTableRepo struct {
 	pgsql *ent.Client
 }
 
-func NewAssetRepo(pgsql *ent.Client) *assetRepo {
-	return &assetRepo{pgsql: pgsql}
+func NewAssetRepo(pgsql *ent.Client) *assetTableRepo {
+	return &assetTableRepo{pgsql: pgsql}
 }
 
-func (r *assetRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]*ent.AssetTable, error) {
+func (r *assetTableRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]*ent.AssetTable, error) {
 	s, err := r.pgsql.AssetTable.
 		Query().
 		Where(assettable.UserID(userID)).
@@ -35,7 +35,7 @@ func (r *assetRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]*ent.As
 	return s, nil
 }
 
-func (r *assetRepo) Create(ctx context.Context, userID uuid.UUID, assettable *ent.AssetTable) (*ent.AssetTable, error) {
+func (r *assetTableRepo) Create(ctx context.Context, userID uuid.UUID, assettable *ent.AssetTable) (*ent.AssetTable, error) {
 	newAsset, err := r.pgsql.AssetTable.
 		Create().
 		SetUserID(userID).
@@ -50,7 +50,7 @@ func (r *assetRepo) Create(ctx context.Context, userID uuid.UUID, assettable *en
 	return newAsset, nil
 }
 
-func (r *assetRepo) Update(ctx context.Context, userID uuid.UUID, uAsset *ent.AssetTable) error {
+func (r *assetTableRepo) Update(ctx context.Context, userID uuid.UUID, uAsset *ent.AssetTable) error {
 	_, err := r.pgsql.AssetTable.
 		Update().
 		Where(
@@ -70,7 +70,7 @@ func (r *assetRepo) Update(ctx context.Context, userID uuid.UUID, uAsset *ent.As
 	return nil
 }
 
-func (r *assetRepo) Delete(ctx context.Context, userID uuid.UUID, assetID uuid.UUID) error {
+func (r *assetTableRepo) Delete(ctx context.Context, userID uuid.UUID, assetID uuid.UUID) error {
 	_, err := r.pgsql.AssetTable.
 		Delete().
 		Where(
