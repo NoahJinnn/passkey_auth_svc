@@ -32,7 +32,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("emails", Email.Type),
 		edge.To("passcodes", Passcode.Type),
 		edge.To("webauthn_credentials", WebauthnCredential.Type),
-		edge.To("assets", Asset.Type),
+		edge.To("asset_tables", AssetTable.Type),
 		edge.To("primary_email", PrimaryEmail.Type).Unique(),
 		edge.To("fv_session", FvSession.Type).Unique(),
 	}

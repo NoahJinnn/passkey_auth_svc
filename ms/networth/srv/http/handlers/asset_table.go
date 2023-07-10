@@ -49,7 +49,7 @@ func (h *AssetHandler) Create(c echo.Context) error {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	var body dto.AssetBodyRequest
+	var body dto.AssetTableRequest
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
 		return errorhandler.ToHttpError(err)
 	}
@@ -77,7 +77,7 @@ func (h *AssetHandler) Update(c echo.Context) error {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	var body dto.AssetBodyRequest
+	var body dto.AssetTableRequest
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
 		return errorhandler.ToHttpError(err)
 	}

@@ -21,9 +21,8 @@ type IFvDataSvc interface {
 }
 
 type FvDataSvc struct {
-	config *config.Config
-	req    *httpx.Req
-	repo   dal.INwRepo
+	req  *httpx.Req
+	repo dal.INwRepo
 }
 
 func NewFvDataSvc(cfg *config.Config, repo dal.INwRepo) *FvDataSvc {
@@ -31,7 +30,7 @@ func NewFvDataSvc(cfg *config.Config, repo dal.INwRepo) *FvDataSvc {
 		"Content-Type": "application/json",
 	}, nil)
 
-	return &FvDataSvc{config: cfg, req: req, repo: repo}
+	return &FvDataSvc{req: req, repo: repo}
 }
 
 func (svc *FvDataSvc) AllInstitution(ctx context.Context, userId uuid.UUID) ([]interface{}, error) {

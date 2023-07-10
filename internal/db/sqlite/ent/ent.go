@@ -13,9 +13,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/asset"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/income"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -77,9 +78,10 @@ func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			account.Table:     account.ValidColumn,
-			asset.Table:       asset.ValidColumn,
 			connection.Table:  connection.ValidColumn,
+			income.Table:      income.ValidColumn,
 			institution.Table: institution.ValidColumn,
+			transaction.Table: transaction.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

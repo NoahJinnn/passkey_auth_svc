@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -14,16 +15,18 @@ import (
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/predicate"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
 )
 
 // AccountQuery is the builder for querying Account entities.
 type AccountQuery struct {
 	config
-	ctx             *QueryContext
-	order           []account.OrderOption
-	inters          []Interceptor
-	predicates      []predicate.Account
-	withInstitution *InstitutionQuery
+	ctx              *QueryContext
+	order            []account.OrderOption
+	inters           []Interceptor
+	predicates       []predicate.Account
+	withInstitution  *InstitutionQuery
+	withTransactions *TransactionQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -75,6 +78,28 @@ func (aq *AccountQuery) QueryInstitution() *InstitutionQuery {
 			sqlgraph.From(account.Table, account.FieldID, selector),
 			sqlgraph.To(institution.Table, institution.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, account.InstitutionTable, account.InstitutionColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTransactions chains the current query on the "transactions" edge.
+func (aq *AccountQuery) QueryTransactions() *TransactionQuery {
+	query := (&TransactionClient{config: aq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := aq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, selector),
+			sqlgraph.To(transaction.Table, transaction.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.TransactionsTable, account.TransactionsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -269,12 +294,13 @@ func (aq *AccountQuery) Clone() *AccountQuery {
 		return nil
 	}
 	return &AccountQuery{
-		config:          aq.config,
-		ctx:             aq.ctx.Clone(),
-		order:           append([]account.OrderOption{}, aq.order...),
-		inters:          append([]Interceptor{}, aq.inters...),
-		predicates:      append([]predicate.Account{}, aq.predicates...),
-		withInstitution: aq.withInstitution.Clone(),
+		config:           aq.config,
+		ctx:              aq.ctx.Clone(),
+		order:            append([]account.OrderOption{}, aq.order...),
+		inters:           append([]Interceptor{}, aq.inters...),
+		predicates:       append([]predicate.Account{}, aq.predicates...),
+		withInstitution:  aq.withInstitution.Clone(),
+		withTransactions: aq.withTransactions.Clone(),
 		// clone intermediate query.
 		sql:  aq.sql.Clone(),
 		path: aq.path,
@@ -289,6 +315,17 @@ func (aq *AccountQuery) WithInstitution(opts ...func(*InstitutionQuery)) *Accoun
 		opt(query)
 	}
 	aq.withInstitution = query
+	return aq
+}
+
+// WithTransactions tells the query-builder to eager-load the nodes that are connected to
+// the "transactions" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *AccountQuery) WithTransactions(opts ...func(*TransactionQuery)) *AccountQuery {
+	query := (&TransactionClient{config: aq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withTransactions = query
 	return aq
 }
 
@@ -370,8 +407,9 @@ func (aq *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 	var (
 		nodes       = []*Account{}
 		_spec       = aq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			aq.withInstitution != nil,
+			aq.withTransactions != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -395,6 +433,13 @@ func (aq *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 	if query := aq.withInstitution; query != nil {
 		if err := aq.loadInstitution(ctx, query, nodes, nil,
 			func(n *Account, e *Institution) { n.Edges.Institution = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := aq.withTransactions; query != nil {
+		if err := aq.loadTransactions(ctx, query, nodes,
+			func(n *Account) { n.Edges.Transactions = []*Transaction{} },
+			func(n *Account, e *Transaction) { n.Edges.Transactions = append(n.Edges.Transactions, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -427,6 +472,36 @@ func (aq *AccountQuery) loadInstitution(ctx context.Context, query *InstitutionQ
 		for i := range nodes {
 			assign(nodes[i], n)
 		}
+	}
+	return nil
+}
+func (aq *AccountQuery) loadTransactions(ctx context.Context, query *TransactionQuery, nodes []*Account, init func(*Account), assign func(*Account, *Transaction)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Account)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(transaction.FieldAccountID)
+	}
+	query.Where(predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(account.TransactionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.AccountID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "account_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
 	}
 	return nil
 }

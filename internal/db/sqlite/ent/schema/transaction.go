@@ -10,29 +10,29 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-type Asset struct {
+type Transaction struct {
 	ent.Schema
 }
 
-func (Asset) Fields() []ent.Field {
+func (Transaction) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Default(func() uuid.UUID {
 			id, _ := uuid.NewV4()
 			return id
 		}).Immutable(),
-		field.UUID("institution_id", uuid.UUID{}).Optional(),
+		field.UUID("account_id", uuid.UUID{}).Optional(),
 		field.String("data"),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 
-func (Asset) Edges() []ent.Edge {
+func (Transaction) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("institution", Institution.Type).Ref("assets").Unique().Field("institution_id"),
+		edge.From("account", Account.Type).Ref("transactions").Unique().Field("account_id"),
 	}
 }
 
-func (Asset) Annotations() []schema.Annotation {
+func (Transaction) Annotations() []schema.Annotation {
 	return nil
 }

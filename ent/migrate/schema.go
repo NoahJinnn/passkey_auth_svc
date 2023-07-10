@@ -8,29 +8,25 @@ import (
 )
 
 var (
-	// AssetsColumns holds the columns for the "assets" table.
-	AssetsColumns = []*schema.Column{
+	// AssetTablesColumns holds the columns for the "asset_tables" table.
+	AssetTablesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "sheet", Type: field.TypeInt32, Nullable: true, Default: -1},
-		{Name: "section", Type: field.TypeInt32, Nullable: true, Default: -1},
-		{Name: "type", Type: field.TypeString, Default: "manual"},
-		{Name: "provider_name", Type: field.TypeString, Default: "manual"},
+		{Name: "sheet", Type: field.TypeInt32, Nullable: true, Default: 0},
+		{Name: "section", Type: field.TypeInt32, Nullable: true, Default: 0},
 		{Name: "description", Type: field.TypeString, Nullable: true, Default: ""},
-		{Name: "currency", Type: field.TypeString, Default: "SGD"},
-		{Name: "value", Type: field.TypeFloat64, SchemaType: map[string]string{"postgres": "numeric(19,6)"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
 	}
-	// AssetsTable holds the schema information for the "assets" table.
-	AssetsTable = &schema.Table{
-		Name:       "assets",
-		Columns:    AssetsColumns,
-		PrimaryKey: []*schema.Column{AssetsColumns[0]},
+	// AssetTablesTable holds the schema information for the "asset_tables" table.
+	AssetTablesTable = &schema.Table{
+		Name:       "asset_tables",
+		Columns:    AssetTablesColumns,
+		PrimaryKey: []*schema.Column{AssetTablesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "assets_users_assets",
-				Columns:    []*schema.Column{AssetsColumns[10]},
+				Symbol:     "asset_tables_users_asset_tables",
+				Columns:    []*schema.Column{AssetTablesColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -280,7 +276,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		AssetsTable,
+		AssetTablesTable,
 		EmailsTable,
 		FvSessionsTable,
 		IdentitiesTable,
@@ -296,7 +292,7 @@ var (
 )
 
 func init() {
-	AssetsTable.ForeignKeys[0].RefTable = UsersTable
+	AssetTablesTable.ForeignKeys[0].RefTable = UsersTable
 	EmailsTable.ForeignKeys[0].RefTable = UsersTable
 	FvSessionsTable.ForeignKeys[0].RefTable = UsersTable
 	IdentitiesTable.ForeignKeys[0].RefTable = EmailsTable

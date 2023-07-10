@@ -22,7 +22,7 @@ type Institution struct {
 	// ProviderName holds the value of the "provider_name" field.
 	ProviderName string `json:"provider_name,omitempty"`
 	// Data holds the value of the "data" field.
-	Data *string `json:"data,omitempty"`
+	Data string `json:"data,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -39,8 +39,8 @@ type InstitutionEdges struct {
 	Connection *Connection `json:"connection,omitempty"`
 	// Accounts holds the value of the accounts edge.
 	Accounts []*Account `json:"accounts,omitempty"`
-	// Assets holds the value of the assets edge.
-	Assets []*Asset `json:"assets,omitempty"`
+	// Incomes holds the value of the incomes edge.
+	Incomes []*Income `json:"incomes,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -68,13 +68,13 @@ func (e InstitutionEdges) AccountsOrErr() ([]*Account, error) {
 	return nil, &NotLoadedError{edge: "accounts"}
 }
 
-// AssetsOrErr returns the Assets value or an error if the edge
+// IncomesOrErr returns the Incomes value or an error if the edge
 // was not loaded in eager-loading.
-func (e InstitutionEdges) AssetsOrErr() ([]*Asset, error) {
+func (e InstitutionEdges) IncomesOrErr() ([]*Income, error) {
 	if e.loadedTypes[2] {
-		return e.Assets, nil
+		return e.Incomes, nil
 	}
-	return nil, &NotLoadedError{edge: "assets"}
+	return nil, &NotLoadedError{edge: "incomes"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -119,8 +119,7 @@ func (i *Institution) assignValues(columns []string, values []any) error {
 			if value, ok := values[j].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field data", values[j])
 			} else if value.Valid {
-				i.Data = new(string)
-				*i.Data = value.String
+				i.Data = value.String
 			}
 		case institution.FieldCreatedAt:
 			if value, ok := values[j].(*sql.NullTime); !ok {
@@ -157,9 +156,9 @@ func (i *Institution) QueryAccounts() *AccountQuery {
 	return NewInstitutionClient(i.config).QueryAccounts(i)
 }
 
-// QueryAssets queries the "assets" edge of the Institution entity.
-func (i *Institution) QueryAssets() *AssetQuery {
-	return NewInstitutionClient(i.config).QueryAssets(i)
+// QueryIncomes queries the "incomes" edge of the Institution entity.
+func (i *Institution) QueryIncomes() *IncomeQuery {
+	return NewInstitutionClient(i.config).QueryIncomes(i)
 }
 
 // Update returns a builder for updating this Institution.
@@ -188,10 +187,8 @@ func (i *Institution) String() string {
 	builder.WriteString("provider_name=")
 	builder.WriteString(i.ProviderName)
 	builder.WriteString(", ")
-	if v := i.Data; v != nil {
-		builder.WriteString("data=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("data=")
+	builder.WriteString(i.Data)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(i.CreatedAt.Format(time.ANSIC))

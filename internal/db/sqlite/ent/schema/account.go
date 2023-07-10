@@ -30,6 +30,7 @@ func (Account) Fields() []ent.Field {
 func (Account) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("institution", Institution.Type).Ref("accounts").Unique().Field("institution_id"),
+		edge.To("transactions", Transaction.Type),
 	}
 }
 

@@ -9,16 +9,16 @@ import (
 	"github.com/hellohq/hqservice/ent"
 )
 
-// The AssetFunc type is an adapter to allow the use of ordinary
-// function as Asset mutator.
-type AssetFunc func(context.Context, *ent.AssetMutation) (ent.Value, error)
+// The AssetTableFunc type is an adapter to allow the use of ordinary
+// function as AssetTable mutator.
+type AssetTableFunc func(context.Context, *ent.AssetTableMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f AssetFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.AssetMutation); ok {
+func (f AssetTableFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AssetTableMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AssetMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AssetTableMutation", m)
 }
 
 // The EmailFunc type is an adapter to allow the use of ordinary

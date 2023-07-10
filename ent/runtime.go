@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/ent/asset"
+	"github.com/hellohq/hqservice/ent/assettable"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/identity"
@@ -25,46 +25,34 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	assetFields := schema.Asset{}.Fields()
-	_ = assetFields
-	// assetDescSheet is the schema descriptor for sheet field.
-	assetDescSheet := assetFields[2].Descriptor()
-	// asset.DefaultSheet holds the default value on creation for the sheet field.
-	asset.DefaultSheet = assetDescSheet.Default.(int32)
-	// assetDescSection is the schema descriptor for section field.
-	assetDescSection := assetFields[3].Descriptor()
-	// asset.DefaultSection holds the default value on creation for the section field.
-	asset.DefaultSection = assetDescSection.Default.(int32)
-	// assetDescType is the schema descriptor for type field.
-	assetDescType := assetFields[4].Descriptor()
-	// asset.DefaultType holds the default value on creation for the type field.
-	asset.DefaultType = assetDescType.Default.(string)
-	// assetDescProviderName is the schema descriptor for provider_name field.
-	assetDescProviderName := assetFields[5].Descriptor()
-	// asset.DefaultProviderName holds the default value on creation for the provider_name field.
-	asset.DefaultProviderName = assetDescProviderName.Default.(string)
-	// assetDescDescription is the schema descriptor for description field.
-	assetDescDescription := assetFields[6].Descriptor()
-	// asset.DefaultDescription holds the default value on creation for the description field.
-	asset.DefaultDescription = assetDescDescription.Default.(string)
-	// assetDescCurrency is the schema descriptor for currency field.
-	assetDescCurrency := assetFields[7].Descriptor()
-	// asset.DefaultCurrency holds the default value on creation for the currency field.
-	asset.DefaultCurrency = assetDescCurrency.Default.(string)
-	// assetDescCreatedAt is the schema descriptor for created_at field.
-	assetDescCreatedAt := assetFields[9].Descriptor()
-	// asset.DefaultCreatedAt holds the default value on creation for the created_at field.
-	asset.DefaultCreatedAt = assetDescCreatedAt.Default.(func() time.Time)
-	// assetDescUpdatedAt is the schema descriptor for updated_at field.
-	assetDescUpdatedAt := assetFields[10].Descriptor()
-	// asset.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	asset.DefaultUpdatedAt = assetDescUpdatedAt.Default.(func() time.Time)
-	// asset.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	asset.UpdateDefaultUpdatedAt = assetDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// assetDescID is the schema descriptor for id field.
-	assetDescID := assetFields[0].Descriptor()
-	// asset.DefaultID holds the default value on creation for the id field.
-	asset.DefaultID = assetDescID.Default.(func() uuid.UUID)
+	assettableFields := schema.AssetTable{}.Fields()
+	_ = assettableFields
+	// assettableDescSheet is the schema descriptor for sheet field.
+	assettableDescSheet := assettableFields[2].Descriptor()
+	// assettable.DefaultSheet holds the default value on creation for the sheet field.
+	assettable.DefaultSheet = assettableDescSheet.Default.(int32)
+	// assettableDescSection is the schema descriptor for section field.
+	assettableDescSection := assettableFields[3].Descriptor()
+	// assettable.DefaultSection holds the default value on creation for the section field.
+	assettable.DefaultSection = assettableDescSection.Default.(int32)
+	// assettableDescDescription is the schema descriptor for description field.
+	assettableDescDescription := assettableFields[4].Descriptor()
+	// assettable.DefaultDescription holds the default value on creation for the description field.
+	assettable.DefaultDescription = assettableDescDescription.Default.(string)
+	// assettableDescCreatedAt is the schema descriptor for created_at field.
+	assettableDescCreatedAt := assettableFields[5].Descriptor()
+	// assettable.DefaultCreatedAt holds the default value on creation for the created_at field.
+	assettable.DefaultCreatedAt = assettableDescCreatedAt.Default.(func() time.Time)
+	// assettableDescUpdatedAt is the schema descriptor for updated_at field.
+	assettableDescUpdatedAt := assettableFields[6].Descriptor()
+	// assettable.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	assettable.DefaultUpdatedAt = assettableDescUpdatedAt.Default.(func() time.Time)
+	// assettable.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	assettable.UpdateDefaultUpdatedAt = assettableDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// assettableDescID is the schema descriptor for id field.
+	assettableDescID := assettableFields[0].Descriptor()
+	// assettable.DefaultID holds the default value on creation for the id field.
+	assettable.DefaultID = assettableDescID.Default.(func() uuid.UUID)
 	emailFields := schema.Email{}.Fields()
 	_ = emailFields
 	// emailDescVerified is the schema descriptor for verified field.

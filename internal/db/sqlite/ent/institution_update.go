@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/asset"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/income"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/predicate"
 )
@@ -41,20 +41,6 @@ func (iu *InstitutionUpdate) SetProviderName(s string) *InstitutionUpdate {
 // SetData sets the "data" field.
 func (iu *InstitutionUpdate) SetData(s string) *InstitutionUpdate {
 	iu.mutation.SetData(s)
-	return iu
-}
-
-// SetNillableData sets the "data" field if the given value is not nil.
-func (iu *InstitutionUpdate) SetNillableData(s *string) *InstitutionUpdate {
-	if s != nil {
-		iu.SetData(*s)
-	}
-	return iu
-}
-
-// ClearData clears the value of the "data" field.
-func (iu *InstitutionUpdate) ClearData() *InstitutionUpdate {
-	iu.mutation.ClearData()
 	return iu
 }
 
@@ -98,19 +84,19 @@ func (iu *InstitutionUpdate) AddAccounts(a ...*Account) *InstitutionUpdate {
 	return iu.AddAccountIDs(ids...)
 }
 
-// AddAssetIDs adds the "assets" edge to the Asset entity by IDs.
-func (iu *InstitutionUpdate) AddAssetIDs(ids ...uuid.UUID) *InstitutionUpdate {
-	iu.mutation.AddAssetIDs(ids...)
+// AddIncomeIDs adds the "incomes" edge to the Income entity by IDs.
+func (iu *InstitutionUpdate) AddIncomeIDs(ids ...uuid.UUID) *InstitutionUpdate {
+	iu.mutation.AddIncomeIDs(ids...)
 	return iu
 }
 
-// AddAssets adds the "assets" edges to the Asset entity.
-func (iu *InstitutionUpdate) AddAssets(a ...*Asset) *InstitutionUpdate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+// AddIncomes adds the "incomes" edges to the Income entity.
+func (iu *InstitutionUpdate) AddIncomes(i ...*Income) *InstitutionUpdate {
+	ids := make([]uuid.UUID, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
 	}
-	return iu.AddAssetIDs(ids...)
+	return iu.AddIncomeIDs(ids...)
 }
 
 // Mutation returns the InstitutionMutation object of the builder.
@@ -145,25 +131,25 @@ func (iu *InstitutionUpdate) RemoveAccounts(a ...*Account) *InstitutionUpdate {
 	return iu.RemoveAccountIDs(ids...)
 }
 
-// ClearAssets clears all "assets" edges to the Asset entity.
-func (iu *InstitutionUpdate) ClearAssets() *InstitutionUpdate {
-	iu.mutation.ClearAssets()
+// ClearIncomes clears all "incomes" edges to the Income entity.
+func (iu *InstitutionUpdate) ClearIncomes() *InstitutionUpdate {
+	iu.mutation.ClearIncomes()
 	return iu
 }
 
-// RemoveAssetIDs removes the "assets" edge to Asset entities by IDs.
-func (iu *InstitutionUpdate) RemoveAssetIDs(ids ...uuid.UUID) *InstitutionUpdate {
-	iu.mutation.RemoveAssetIDs(ids...)
+// RemoveIncomeIDs removes the "incomes" edge to Income entities by IDs.
+func (iu *InstitutionUpdate) RemoveIncomeIDs(ids ...uuid.UUID) *InstitutionUpdate {
+	iu.mutation.RemoveIncomeIDs(ids...)
 	return iu
 }
 
-// RemoveAssets removes "assets" edges to Asset entities.
-func (iu *InstitutionUpdate) RemoveAssets(a ...*Asset) *InstitutionUpdate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+// RemoveIncomes removes "incomes" edges to Income entities.
+func (iu *InstitutionUpdate) RemoveIncomes(i ...*Income) *InstitutionUpdate {
+	ids := make([]uuid.UUID, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
 	}
-	return iu.RemoveAssetIDs(ids...)
+	return iu.RemoveIncomeIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -216,9 +202,6 @@ func (iu *InstitutionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := iu.mutation.Data(); ok {
 		_spec.SetField(institution.FieldData, field.TypeString, value)
-	}
-	if iu.mutation.DataCleared() {
-		_spec.ClearField(institution.FieldData, field.TypeString)
 	}
 	if value, ok := iu.mutation.UpdatedAt(); ok {
 		_spec.SetField(institution.FieldUpdatedAt, field.TypeTime, value)
@@ -297,28 +280,28 @@ func (iu *InstitutionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if iu.mutation.AssetsCleared() {
+	if iu.mutation.IncomesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   institution.AssetsTable,
-			Columns: []string{institution.AssetsColumn},
+			Table:   institution.IncomesTable,
+			Columns: []string{institution.IncomesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(asset.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(income.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := iu.mutation.RemovedAssetsIDs(); len(nodes) > 0 && !iu.mutation.AssetsCleared() {
+	if nodes := iu.mutation.RemovedIncomesIDs(); len(nodes) > 0 && !iu.mutation.IncomesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   institution.AssetsTable,
-			Columns: []string{institution.AssetsColumn},
+			Table:   institution.IncomesTable,
+			Columns: []string{institution.IncomesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(asset.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(income.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -326,15 +309,15 @@ func (iu *InstitutionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := iu.mutation.AssetsIDs(); len(nodes) > 0 {
+	if nodes := iu.mutation.IncomesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   institution.AssetsTable,
-			Columns: []string{institution.AssetsColumn},
+			Table:   institution.IncomesTable,
+			Columns: []string{institution.IncomesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(asset.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(income.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -371,20 +354,6 @@ func (iuo *InstitutionUpdateOne) SetProviderName(s string) *InstitutionUpdateOne
 // SetData sets the "data" field.
 func (iuo *InstitutionUpdateOne) SetData(s string) *InstitutionUpdateOne {
 	iuo.mutation.SetData(s)
-	return iuo
-}
-
-// SetNillableData sets the "data" field if the given value is not nil.
-func (iuo *InstitutionUpdateOne) SetNillableData(s *string) *InstitutionUpdateOne {
-	if s != nil {
-		iuo.SetData(*s)
-	}
-	return iuo
-}
-
-// ClearData clears the value of the "data" field.
-func (iuo *InstitutionUpdateOne) ClearData() *InstitutionUpdateOne {
-	iuo.mutation.ClearData()
 	return iuo
 }
 
@@ -428,19 +397,19 @@ func (iuo *InstitutionUpdateOne) AddAccounts(a ...*Account) *InstitutionUpdateOn
 	return iuo.AddAccountIDs(ids...)
 }
 
-// AddAssetIDs adds the "assets" edge to the Asset entity by IDs.
-func (iuo *InstitutionUpdateOne) AddAssetIDs(ids ...uuid.UUID) *InstitutionUpdateOne {
-	iuo.mutation.AddAssetIDs(ids...)
+// AddIncomeIDs adds the "incomes" edge to the Income entity by IDs.
+func (iuo *InstitutionUpdateOne) AddIncomeIDs(ids ...uuid.UUID) *InstitutionUpdateOne {
+	iuo.mutation.AddIncomeIDs(ids...)
 	return iuo
 }
 
-// AddAssets adds the "assets" edges to the Asset entity.
-func (iuo *InstitutionUpdateOne) AddAssets(a ...*Asset) *InstitutionUpdateOne {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+// AddIncomes adds the "incomes" edges to the Income entity.
+func (iuo *InstitutionUpdateOne) AddIncomes(i ...*Income) *InstitutionUpdateOne {
+	ids := make([]uuid.UUID, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
 	}
-	return iuo.AddAssetIDs(ids...)
+	return iuo.AddIncomeIDs(ids...)
 }
 
 // Mutation returns the InstitutionMutation object of the builder.
@@ -475,25 +444,25 @@ func (iuo *InstitutionUpdateOne) RemoveAccounts(a ...*Account) *InstitutionUpdat
 	return iuo.RemoveAccountIDs(ids...)
 }
 
-// ClearAssets clears all "assets" edges to the Asset entity.
-func (iuo *InstitutionUpdateOne) ClearAssets() *InstitutionUpdateOne {
-	iuo.mutation.ClearAssets()
+// ClearIncomes clears all "incomes" edges to the Income entity.
+func (iuo *InstitutionUpdateOne) ClearIncomes() *InstitutionUpdateOne {
+	iuo.mutation.ClearIncomes()
 	return iuo
 }
 
-// RemoveAssetIDs removes the "assets" edge to Asset entities by IDs.
-func (iuo *InstitutionUpdateOne) RemoveAssetIDs(ids ...uuid.UUID) *InstitutionUpdateOne {
-	iuo.mutation.RemoveAssetIDs(ids...)
+// RemoveIncomeIDs removes the "incomes" edge to Income entities by IDs.
+func (iuo *InstitutionUpdateOne) RemoveIncomeIDs(ids ...uuid.UUID) *InstitutionUpdateOne {
+	iuo.mutation.RemoveIncomeIDs(ids...)
 	return iuo
 }
 
-// RemoveAssets removes "assets" edges to Asset entities.
-func (iuo *InstitutionUpdateOne) RemoveAssets(a ...*Asset) *InstitutionUpdateOne {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+// RemoveIncomes removes "incomes" edges to Income entities.
+func (iuo *InstitutionUpdateOne) RemoveIncomes(i ...*Income) *InstitutionUpdateOne {
+	ids := make([]uuid.UUID, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
 	}
-	return iuo.RemoveAssetIDs(ids...)
+	return iuo.RemoveIncomeIDs(ids...)
 }
 
 // Where appends a list predicates to the InstitutionUpdate builder.
@@ -577,9 +546,6 @@ func (iuo *InstitutionUpdateOne) sqlSave(ctx context.Context) (_node *Institutio
 	if value, ok := iuo.mutation.Data(); ok {
 		_spec.SetField(institution.FieldData, field.TypeString, value)
 	}
-	if iuo.mutation.DataCleared() {
-		_spec.ClearField(institution.FieldData, field.TypeString)
-	}
 	if value, ok := iuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(institution.FieldUpdatedAt, field.TypeTime, value)
 	}
@@ -657,28 +623,28 @@ func (iuo *InstitutionUpdateOne) sqlSave(ctx context.Context) (_node *Institutio
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if iuo.mutation.AssetsCleared() {
+	if iuo.mutation.IncomesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   institution.AssetsTable,
-			Columns: []string{institution.AssetsColumn},
+			Table:   institution.IncomesTable,
+			Columns: []string{institution.IncomesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(asset.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(income.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := iuo.mutation.RemovedAssetsIDs(); len(nodes) > 0 && !iuo.mutation.AssetsCleared() {
+	if nodes := iuo.mutation.RemovedIncomesIDs(); len(nodes) > 0 && !iuo.mutation.IncomesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   institution.AssetsTable,
-			Columns: []string{institution.AssetsColumn},
+			Table:   institution.IncomesTable,
+			Columns: []string{institution.IncomesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(asset.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(income.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -686,15 +652,15 @@ func (iuo *InstitutionUpdateOne) sqlSave(ctx context.Context) (_node *Institutio
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := iuo.mutation.AssetsIDs(); len(nodes) > 0 {
+	if nodes := iuo.mutation.IncomesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   institution.AssetsTable,
-			Columns: []string{institution.AssetsColumn},
+			Table:   institution.IncomesTable,
+			Columns: []string{institution.IncomesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(asset.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(income.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

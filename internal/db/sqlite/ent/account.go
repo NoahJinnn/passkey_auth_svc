@@ -22,7 +22,7 @@ type Account struct {
 	// InstitutionID holds the value of the "institution_id" field.
 	InstitutionID uuid.UUID `json:"institution_id,omitempty"`
 	// Data holds the value of the "data" field.
-	Data *string `json:"data,omitempty"`
+	Data string `json:"data,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -37,9 +37,11 @@ type Account struct {
 type AccountEdges struct {
 	// Institution holds the value of the institution edge.
 	Institution *Institution `json:"institution,omitempty"`
+	// Transactions holds the value of the transactions edge.
+	Transactions []*Transaction `json:"transactions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // InstitutionOrErr returns the Institution value or an error if the edge
@@ -53,6 +55,15 @@ func (e AccountEdges) InstitutionOrErr() (*Institution, error) {
 		return e.Institution, nil
 	}
 	return nil, &NotLoadedError{edge: "institution"}
+}
+
+// TransactionsOrErr returns the Transactions value or an error if the edge
+// was not loaded in eager-loading.
+func (e AccountEdges) TransactionsOrErr() ([]*Transaction, error) {
+	if e.loadedTypes[1] {
+		return e.Transactions, nil
+	}
+	return nil, &NotLoadedError{edge: "transactions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -97,8 +108,7 @@ func (a *Account) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field data", values[i])
 			} else if value.Valid {
-				a.Data = new(string)
-				*a.Data = value.String
+				a.Data = value.String
 			}
 		case account.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -130,6 +140,11 @@ func (a *Account) QueryInstitution() *InstitutionQuery {
 	return NewAccountClient(a.config).QueryInstitution(a)
 }
 
+// QueryTransactions queries the "transactions" edge of the Account entity.
+func (a *Account) QueryTransactions() *TransactionQuery {
+	return NewAccountClient(a.config).QueryTransactions(a)
+}
+
 // Update returns a builder for updating this Account.
 // Note that you need to call Account.Unwrap() before calling this method if this Account
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -156,10 +171,8 @@ func (a *Account) String() string {
 	builder.WriteString("institution_id=")
 	builder.WriteString(fmt.Sprintf("%v", a.InstitutionID))
 	builder.WriteString(", ")
-	if v := a.Data; v != nil {
-		builder.WriteString("data=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("data=")
+	builder.WriteString(a.Data)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(a.CreatedAt.Format(time.ANSIC))
