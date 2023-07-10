@@ -72,7 +72,7 @@ func (s *Suite) SetupSuite() {
 		s.T().Skip("skipping test in short mode.")
 	}
 	dialect := "postgres"
-	testDb, err := testDal.StartDB("integration_test", dialect)
+	testDb, err := testDal.StartDB("integration_test_networth", dialect)
 	s.NoError(err)
 	pgClient := pgsql.NewPgClient(testDb.DatabaseUrl)
 
