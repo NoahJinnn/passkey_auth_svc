@@ -31,7 +31,7 @@ func (Institution) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("connection", Connection.Type).Unique(),
 		edge.To("accounts", Account.Type),
-		edge.To("assets", Asset.Type),
+		edge.To("incomes", Income.Type),
 	}
 }
 

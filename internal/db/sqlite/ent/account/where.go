@@ -161,16 +161,6 @@ func DataHasSuffix(v string) predicate.Account {
 	return predicate.Account(sql.FieldHasSuffix(FieldData, v))
 }
 
-// DataIsNil applies the IsNil predicate on the "data" field.
-func DataIsNil() predicate.Account {
-	return predicate.Account(sql.FieldIsNull(FieldData))
-}
-
-// DataNotNil applies the NotNil predicate on the "data" field.
-func DataNotNil() predicate.Account {
-	return predicate.Account(sql.FieldNotNull(FieldData))
-}
-
 // DataEqualFold applies the EqualFold predicate on the "data" field.
 func DataEqualFold(v string) predicate.Account {
 	return predicate.Account(sql.FieldEqualFold(FieldData, v))
@@ -276,6 +266,29 @@ func HasInstitution() predicate.Account {
 func HasInstitutionWith(preds ...predicate.Institution) predicate.Account {
 	return predicate.Account(func(s *sql.Selector) {
 		step := newInstitutionStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasTransactions applies the HasEdge predicate on the "transactions" edge.
+func HasTransactions() predicate.Account {
+	return predicate.Account(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, TransactionsTable, TransactionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTransactionsWith applies the HasEdge predicate on the "transactions" edge with a given conditions (other predicates).
+func HasTransactionsWith(preds ...predicate.Transaction) predicate.Account {
+	return predicate.Account(func(s *sql.Selector) {
+		step := newTransactionsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

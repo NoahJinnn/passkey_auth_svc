@@ -196,16 +196,6 @@ func DataHasSuffix(v string) predicate.Institution {
 	return predicate.Institution(sql.FieldHasSuffix(FieldData, v))
 }
 
-// DataIsNil applies the IsNil predicate on the "data" field.
-func DataIsNil() predicate.Institution {
-	return predicate.Institution(sql.FieldIsNull(FieldData))
-}
-
-// DataNotNil applies the NotNil predicate on the "data" field.
-func DataNotNil() predicate.Institution {
-	return predicate.Institution(sql.FieldNotNull(FieldData))
-}
-
 // DataEqualFold applies the EqualFold predicate on the "data" field.
 func DataEqualFold(v string) predicate.Institution {
 	return predicate.Institution(sql.FieldEqualFold(FieldData, v))
@@ -342,21 +332,21 @@ func HasAccountsWith(preds ...predicate.Account) predicate.Institution {
 	})
 }
 
-// HasAssets applies the HasEdge predicate on the "assets" edge.
-func HasAssets() predicate.Institution {
+// HasIncomes applies the HasEdge predicate on the "incomes" edge.
+func HasIncomes() predicate.Institution {
 	return predicate.Institution(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, AssetsTable, AssetsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, IncomesTable, IncomesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasAssetsWith applies the HasEdge predicate on the "assets" edge with a given conditions (other predicates).
-func HasAssetsWith(preds ...predicate.Asset) predicate.Institution {
+// HasIncomesWith applies the HasEdge predicate on the "incomes" edge with a given conditions (other predicates).
+func HasIncomesWith(preds ...predicate.Income) predicate.Institution {
 	return predicate.Institution(func(s *sql.Selector) {
-		step := newAssetsStep()
+		step := newIncomesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

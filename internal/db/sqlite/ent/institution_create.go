@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/asset"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/income"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 )
 
@@ -33,14 +33,6 @@ func (ic *InstitutionCreate) SetProviderName(s string) *InstitutionCreate {
 // SetData sets the "data" field.
 func (ic *InstitutionCreate) SetData(s string) *InstitutionCreate {
 	ic.mutation.SetData(s)
-	return ic
-}
-
-// SetNillableData sets the "data" field if the given value is not nil.
-func (ic *InstitutionCreate) SetNillableData(s *string) *InstitutionCreate {
-	if s != nil {
-		ic.SetData(*s)
-	}
 	return ic
 }
 
@@ -120,19 +112,19 @@ func (ic *InstitutionCreate) AddAccounts(a ...*Account) *InstitutionCreate {
 	return ic.AddAccountIDs(ids...)
 }
 
-// AddAssetIDs adds the "assets" edge to the Asset entity by IDs.
-func (ic *InstitutionCreate) AddAssetIDs(ids ...uuid.UUID) *InstitutionCreate {
-	ic.mutation.AddAssetIDs(ids...)
+// AddIncomeIDs adds the "incomes" edge to the Income entity by IDs.
+func (ic *InstitutionCreate) AddIncomeIDs(ids ...uuid.UUID) *InstitutionCreate {
+	ic.mutation.AddIncomeIDs(ids...)
 	return ic
 }
 
-// AddAssets adds the "assets" edges to the Asset entity.
-func (ic *InstitutionCreate) AddAssets(a ...*Asset) *InstitutionCreate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+// AddIncomes adds the "incomes" edges to the Income entity.
+func (ic *InstitutionCreate) AddIncomes(i ...*Income) *InstitutionCreate {
+	ids := make([]uuid.UUID, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
 	}
-	return ic.AddAssetIDs(ids...)
+	return ic.AddIncomeIDs(ids...)
 }
 
 // Mutation returns the InstitutionMutation object of the builder.
@@ -189,6 +181,9 @@ func (ic *InstitutionCreate) check() error {
 	if _, ok := ic.mutation.ProviderName(); !ok {
 		return &ValidationError{Name: "provider_name", err: errors.New(`ent: missing required field "Institution.provider_name"`)}
 	}
+	if _, ok := ic.mutation.Data(); !ok {
+		return &ValidationError{Name: "data", err: errors.New(`ent: missing required field "Institution.data"`)}
+	}
 	if _, ok := ic.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Institution.created_at"`)}
 	}
@@ -236,7 +231,7 @@ func (ic *InstitutionCreate) createSpec() (*Institution, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := ic.mutation.Data(); ok {
 		_spec.SetField(institution.FieldData, field.TypeString, value)
-		_node.Data = &value
+		_node.Data = value
 	}
 	if value, ok := ic.mutation.CreatedAt(); ok {
 		_spec.SetField(institution.FieldCreatedAt, field.TypeTime, value)
@@ -278,15 +273,15 @@ func (ic *InstitutionCreate) createSpec() (*Institution, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ic.mutation.AssetsIDs(); len(nodes) > 0 {
+	if nodes := ic.mutation.IncomesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   institution.AssetsTable,
-			Columns: []string{institution.AssetsColumn},
+			Table:   institution.IncomesTable,
+			Columns: []string{institution.IncomesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(asset.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(income.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

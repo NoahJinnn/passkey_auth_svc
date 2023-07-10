@@ -13,6 +13,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
 )
 
 // AccountCreate is the builder for creating a Account entity.
@@ -39,14 +40,6 @@ func (ac *AccountCreate) SetNillableInstitutionID(u *uuid.UUID) *AccountCreate {
 // SetData sets the "data" field.
 func (ac *AccountCreate) SetData(s string) *AccountCreate {
 	ac.mutation.SetData(s)
-	return ac
-}
-
-// SetNillableData sets the "data" field if the given value is not nil.
-func (ac *AccountCreate) SetNillableData(s *string) *AccountCreate {
-	if s != nil {
-		ac.SetData(*s)
-	}
 	return ac
 }
 
@@ -95,6 +88,21 @@ func (ac *AccountCreate) SetNillableID(u *uuid.UUID) *AccountCreate {
 // SetInstitution sets the "institution" edge to the Institution entity.
 func (ac *AccountCreate) SetInstitution(i *Institution) *AccountCreate {
 	return ac.SetInstitutionID(i.ID)
+}
+
+// AddTransactionIDs adds the "transactions" edge to the Transaction entity by IDs.
+func (ac *AccountCreate) AddTransactionIDs(ids ...uuid.UUID) *AccountCreate {
+	ac.mutation.AddTransactionIDs(ids...)
+	return ac
+}
+
+// AddTransactions adds the "transactions" edges to the Transaction entity.
+func (ac *AccountCreate) AddTransactions(t ...*Transaction) *AccountCreate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return ac.AddTransactionIDs(ids...)
 }
 
 // Mutation returns the AccountMutation object of the builder.
@@ -148,6 +156,9 @@ func (ac *AccountCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (ac *AccountCreate) check() error {
+	if _, ok := ac.mutation.Data(); !ok {
+		return &ValidationError{Name: "data", err: errors.New(`ent: missing required field "Account.data"`)}
+	}
 	if _, ok := ac.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Account.created_at"`)}
 	}
@@ -191,7 +202,7 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := ac.mutation.Data(); ok {
 		_spec.SetField(account.FieldData, field.TypeString, value)
-		_node.Data = &value
+		_node.Data = value
 	}
 	if value, ok := ac.mutation.CreatedAt(); ok {
 		_spec.SetField(account.FieldCreatedAt, field.TypeTime, value)
@@ -216,6 +227,22 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.InstitutionID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ac.mutation.TransactionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.TransactionsTable,
+			Columns: []string{account.TransactionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

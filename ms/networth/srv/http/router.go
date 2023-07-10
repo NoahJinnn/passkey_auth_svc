@@ -73,6 +73,7 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 	fv.POST("/link/token", fvAuth.CreateLinkToken)
 	fv.POST("/auth/token", fvAuth.ExchangeAccessToken)
 
+	// TODO: Leave the following routes for FE testing purposes only
 	fvData := handlers.NewFvDataHandler(srv)
 	fv.GET("/institutions", fvData.AllInstitution)
 	fv.GET("/accounts", fvData.AllAccount)

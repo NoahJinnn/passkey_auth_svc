@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/asset"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/income"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/predicate"
 )
@@ -28,7 +28,7 @@ type InstitutionQuery struct {
 	predicates     []predicate.Institution
 	withConnection *ConnectionQuery
 	withAccounts   *AccountQuery
-	withAssets     *AssetQuery
+	withIncomes    *IncomeQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -109,9 +109,9 @@ func (iq *InstitutionQuery) QueryAccounts() *AccountQuery {
 	return query
 }
 
-// QueryAssets chains the current query on the "assets" edge.
-func (iq *InstitutionQuery) QueryAssets() *AssetQuery {
-	query := (&AssetClient{config: iq.config}).Query()
+// QueryIncomes chains the current query on the "incomes" edge.
+func (iq *InstitutionQuery) QueryIncomes() *IncomeQuery {
+	query := (&IncomeClient{config: iq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := iq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -122,8 +122,8 @@ func (iq *InstitutionQuery) QueryAssets() *AssetQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(institution.Table, institution.FieldID, selector),
-			sqlgraph.To(asset.Table, asset.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, institution.AssetsTable, institution.AssetsColumn),
+			sqlgraph.To(income.Table, income.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, institution.IncomesTable, institution.IncomesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(iq.driver.Dialect(), step)
 		return fromU, nil
@@ -325,7 +325,7 @@ func (iq *InstitutionQuery) Clone() *InstitutionQuery {
 		predicates:     append([]predicate.Institution{}, iq.predicates...),
 		withConnection: iq.withConnection.Clone(),
 		withAccounts:   iq.withAccounts.Clone(),
-		withAssets:     iq.withAssets.Clone(),
+		withIncomes:    iq.withIncomes.Clone(),
 		// clone intermediate query.
 		sql:  iq.sql.Clone(),
 		path: iq.path,
@@ -354,14 +354,14 @@ func (iq *InstitutionQuery) WithAccounts(opts ...func(*AccountQuery)) *Instituti
 	return iq
 }
 
-// WithAssets tells the query-builder to eager-load the nodes that are connected to
-// the "assets" edge. The optional arguments are used to configure the query builder of the edge.
-func (iq *InstitutionQuery) WithAssets(opts ...func(*AssetQuery)) *InstitutionQuery {
-	query := (&AssetClient{config: iq.config}).Query()
+// WithIncomes tells the query-builder to eager-load the nodes that are connected to
+// the "incomes" edge. The optional arguments are used to configure the query builder of the edge.
+func (iq *InstitutionQuery) WithIncomes(opts ...func(*IncomeQuery)) *InstitutionQuery {
+	query := (&IncomeClient{config: iq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	iq.withAssets = query
+	iq.withIncomes = query
 	return iq
 }
 
@@ -446,7 +446,7 @@ func (iq *InstitutionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		loadedTypes = [3]bool{
 			iq.withConnection != nil,
 			iq.withAccounts != nil,
-			iq.withAssets != nil,
+			iq.withIncomes != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -480,10 +480,10 @@ func (iq *InstitutionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 			return nil, err
 		}
 	}
-	if query := iq.withAssets; query != nil {
-		if err := iq.loadAssets(ctx, query, nodes,
-			func(n *Institution) { n.Edges.Assets = []*Asset{} },
-			func(n *Institution, e *Asset) { n.Edges.Assets = append(n.Edges.Assets, e) }); err != nil {
+	if query := iq.withIncomes; query != nil {
+		if err := iq.loadIncomes(ctx, query, nodes,
+			func(n *Institution) { n.Edges.Incomes = []*Income{} },
+			func(n *Institution, e *Income) { n.Edges.Incomes = append(n.Edges.Incomes, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -550,7 +550,7 @@ func (iq *InstitutionQuery) loadAccounts(ctx context.Context, query *AccountQuer
 	}
 	return nil
 }
-func (iq *InstitutionQuery) loadAssets(ctx context.Context, query *AssetQuery, nodes []*Institution, init func(*Institution), assign func(*Institution, *Asset)) error {
+func (iq *InstitutionQuery) loadIncomes(ctx context.Context, query *IncomeQuery, nodes []*Institution, init func(*Institution), assign func(*Institution, *Income)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Institution)
 	for i := range nodes {
@@ -561,10 +561,10 @@ func (iq *InstitutionQuery) loadAssets(ctx context.Context, query *AssetQuery, n
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(asset.FieldInstitutionID)
+		query.ctx.AppendFieldOnce(income.FieldInstitutionID)
 	}
-	query.Where(predicate.Asset(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(institution.AssetsColumn), fks...))
+	query.Where(predicate.Income(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(institution.IncomesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

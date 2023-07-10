@@ -10,11 +10,11 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-type Account struct {
+type Income struct {
 	ent.Schema
 }
 
-func (Account) Fields() []ent.Field {
+func (Income) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Default(func() uuid.UUID {
 			id, _ := uuid.NewV4()
@@ -27,13 +27,12 @@ func (Account) Fields() []ent.Field {
 	}
 }
 
-func (Account) Edges() []ent.Edge {
+func (Income) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("institution", Institution.Type).Ref("accounts").Unique().Field("institution_id"),
-		edge.To("transactions", Transaction.Type),
+		edge.From("institution", Institution.Type).Ref("incomes").Unique().Field("institution_id"),
 	}
 }
 
-func (Account) Annotations() []schema.Annotation {
+func (Income) Annotations() []schema.Annotation {
 	return nil
 }

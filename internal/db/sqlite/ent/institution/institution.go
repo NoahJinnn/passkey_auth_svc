@@ -27,8 +27,8 @@ const (
 	EdgeConnection = "connection"
 	// EdgeAccounts holds the string denoting the accounts edge name in mutations.
 	EdgeAccounts = "accounts"
-	// EdgeAssets holds the string denoting the assets edge name in mutations.
-	EdgeAssets = "assets"
+	// EdgeIncomes holds the string denoting the incomes edge name in mutations.
+	EdgeIncomes = "incomes"
 	// Table holds the table name of the institution in the database.
 	Table = "institutions"
 	// ConnectionTable is the table that holds the connection relation/edge.
@@ -45,13 +45,13 @@ const (
 	AccountsInverseTable = "accounts"
 	// AccountsColumn is the table column denoting the accounts relation/edge.
 	AccountsColumn = "institution_id"
-	// AssetsTable is the table that holds the assets relation/edge.
-	AssetsTable = "assets"
-	// AssetsInverseTable is the table name for the Asset entity.
-	// It exists in this package in order to avoid circular dependency with the "asset" package.
-	AssetsInverseTable = "assets"
-	// AssetsColumn is the table column denoting the assets relation/edge.
-	AssetsColumn = "institution_id"
+	// IncomesTable is the table that holds the incomes relation/edge.
+	IncomesTable = "incomes"
+	// IncomesInverseTable is the table name for the Income entity.
+	// It exists in this package in order to avoid circular dependency with the "income" package.
+	IncomesInverseTable = "incomes"
+	// IncomesColumn is the table column denoting the incomes relation/edge.
+	IncomesColumn = "institution_id"
 )
 
 // Columns holds all SQL columns for institution fields.
@@ -133,17 +133,17 @@ func ByAccounts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByAssetsCount orders the results by assets count.
-func ByAssetsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByIncomesCount orders the results by incomes count.
+func ByIncomesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newAssetsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newIncomesStep(), opts...)
 	}
 }
 
-// ByAssets orders the results by assets terms.
-func ByAssets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByIncomes orders the results by incomes terms.
+func ByIncomes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newAssetsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newIncomesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newConnectionStep() *sqlgraph.Step {
@@ -160,10 +160,10 @@ func newAccountsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, AccountsTable, AccountsColumn),
 	)
 }
-func newAssetsStep() *sqlgraph.Step {
+func newIncomesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(AssetsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, AssetsTable, AssetsColumn),
+		sqlgraph.To(IncomesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, IncomesTable, IncomesColumn),
 	)
 }

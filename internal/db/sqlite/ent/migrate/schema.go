@@ -11,7 +11,7 @@ var (
 	// AccountsColumns holds the columns for the "accounts" table.
 	AccountsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "data", Type: field.TypeString, Nullable: true},
+		{Name: "data", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "institution_id", Type: field.TypeUUID, Nullable: true},
@@ -25,28 +25,6 @@ var (
 			{
 				Symbol:     "accounts_institutions_accounts",
 				Columns:    []*schema.Column{AccountsColumns[4]},
-				RefColumns: []*schema.Column{InstitutionsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
-	// AssetsColumns holds the columns for the "assets" table.
-	AssetsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "data", Type: field.TypeString, Nullable: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "institution_id", Type: field.TypeUUID, Nullable: true},
-	}
-	// AssetsTable holds the schema information for the "assets" table.
-	AssetsTable = &schema.Table{
-		Name:       "assets",
-		Columns:    AssetsColumns,
-		PrimaryKey: []*schema.Column{AssetsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "assets_institutions_assets",
-				Columns:    []*schema.Column{AssetsColumns[4]},
 				RefColumns: []*schema.Column{InstitutionsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -75,11 +53,33 @@ var (
 			},
 		},
 	}
+	// IncomesColumns holds the columns for the "incomes" table.
+	IncomesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "data", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "institution_id", Type: field.TypeUUID, Nullable: true},
+	}
+	// IncomesTable holds the schema information for the "incomes" table.
+	IncomesTable = &schema.Table{
+		Name:       "incomes",
+		Columns:    IncomesColumns,
+		PrimaryKey: []*schema.Column{IncomesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "incomes_institutions_incomes",
+				Columns:    []*schema.Column{IncomesColumns[4]},
+				RefColumns: []*schema.Column{InstitutionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// InstitutionsColumns holds the columns for the "institutions" table.
 	InstitutionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "provider_name", Type: field.TypeString},
-		{Name: "data", Type: field.TypeString, Nullable: true},
+		{Name: "data", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
@@ -89,17 +89,41 @@ var (
 		Columns:    InstitutionsColumns,
 		PrimaryKey: []*schema.Column{InstitutionsColumns[0]},
 	}
+	// TransactionsColumns holds the columns for the "transactions" table.
+	TransactionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "data", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "account_id", Type: field.TypeUUID, Nullable: true},
+	}
+	// TransactionsTable holds the schema information for the "transactions" table.
+	TransactionsTable = &schema.Table{
+		Name:       "transactions",
+		Columns:    TransactionsColumns,
+		PrimaryKey: []*schema.Column{TransactionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "transactions_accounts_transactions",
+				Columns:    []*schema.Column{TransactionsColumns[4]},
+				RefColumns: []*schema.Column{AccountsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AccountsTable,
-		AssetsTable,
 		ConnectionsTable,
+		IncomesTable,
 		InstitutionsTable,
+		TransactionsTable,
 	}
 )
 
 func init() {
 	AccountsTable.ForeignKeys[0].RefTable = InstitutionsTable
-	AssetsTable.ForeignKeys[0].RefTable = InstitutionsTable
 	ConnectionsTable.ForeignKeys[0].RefTable = InstitutionsTable
+	IncomesTable.ForeignKeys[0].RefTable = InstitutionsTable
+	TransactionsTable.ForeignKeys[0].RefTable = AccountsTable
 }

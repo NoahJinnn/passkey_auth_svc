@@ -21,18 +21,6 @@ func (f AccountFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AccountMutation", m)
 }
 
-// The AssetFunc type is an adapter to allow the use of ordinary
-// function as Asset mutator.
-type AssetFunc func(context.Context, *ent.AssetMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f AssetFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.AssetMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AssetMutation", m)
-}
-
 // The ConnectionFunc type is an adapter to allow the use of ordinary
 // function as Connection mutator.
 type ConnectionFunc func(context.Context, *ent.ConnectionMutation) (ent.Value, error)
@@ -45,6 +33,18 @@ func (f ConnectionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ConnectionMutation", m)
 }
 
+// The IncomeFunc type is an adapter to allow the use of ordinary
+// function as Income mutator.
+type IncomeFunc func(context.Context, *ent.IncomeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f IncomeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.IncomeMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IncomeMutation", m)
+}
+
 // The InstitutionFunc type is an adapter to allow the use of ordinary
 // function as Institution mutator.
 type InstitutionFunc func(context.Context, *ent.InstitutionMutation) (ent.Value, error)
@@ -55,6 +55,18 @@ func (f InstitutionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.InstitutionMutation", m)
+}
+
+// The TransactionFunc type is an adapter to allow the use of ordinary
+// function as Transaction mutator.
+type TransactionFunc func(context.Context, *ent.TransactionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TransactionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TransactionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TransactionMutation", m)
 }
 
 // Condition is a hook condition function.
