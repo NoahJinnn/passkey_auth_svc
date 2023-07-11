@@ -9,6 +9,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/http/errorhandler"
+	"github.com/hellohq/hqservice/ms/networth/app/provider"
 	"github.com/hellohq/hqservice/ms/networth/config"
 	"github.com/hellohq/hqservice/ms/networth/dal"
 	"github.com/hellohq/hqservice/pkg/httpx"
@@ -24,12 +25,13 @@ type IFvAuthSvc interface {
 }
 
 type FvAuthSvc struct {
-	config *config.Config
-	req    *httpx.Req
-	repo   dal.INwRepo
+	config   *config.Config
+	req      *httpx.Req
+	repo     dal.INwRepo
+	provider *provider.ProviderSvc
 }
 
-func NewFvAuthSvc(cfg *config.Config, repo dal.INwRepo) *FvAuthSvc {
+func NewFvAuthSvc(cfg *config.Config, provider *provider.ProviderSvc, repo dal.INwRepo) *FvAuthSvc {
 	req := httpx.NewReq("https://api.sandbox.finverse.net/", map[string]string{
 		"Content-Type": "application/json",
 	}, nil)

@@ -23,18 +23,17 @@ func (p *ProviderSvc) NewConnect(userId string) {
 	dns := sqliteDns(userId)
 	if p.userStorage == nil {
 		p.userStorage = make(map[string]*ent.Client)
-		p.userStorage[dns] = sqlite.NewSqliteClient(dns)
+		p.userStorage[userId] = sqlite.NewSqliteClient(dns)
 	} else {
-		if p.userStorage[dns] != nil {
+		if p.userStorage[userId] != nil {
 			return
 		}
-		p.userStorage[dns] = sqlite.NewSqliteClient(dns)
+		p.userStorage[userId] = sqlite.NewSqliteClient(dns)
 	}
 }
 
 func (p *ProviderSvc) ListInstitution(ctx context.Context, userId string) ([]*ent.Institution, error) {
-	dns := sqliteDns(userId)
-	storage := p.userStorage[dns]
+	storage := p.userStorage[userId]
 	instis, err := storage.Institution.Query().All(ctx)
 	if err != nil {
 		return nil, err
@@ -44,8 +43,7 @@ func (p *ProviderSvc) ListInstitution(ctx context.Context, userId string) ([]*en
 }
 
 func (p *ProviderSvc) ListConnection(ctx context.Context, userId string) ([]*ent.Connection, error) {
-	dns := sqliteDns(userId)
-	storage := p.userStorage[dns]
+	storage := p.userStorage[userId]
 	conns, err := storage.Connection.Query().All(ctx)
 	if err != nil {
 		return nil, err
@@ -55,8 +53,7 @@ func (p *ProviderSvc) ListConnection(ctx context.Context, userId string) ([]*ent
 }
 
 func (p *ProviderSvc) SaveConnection(ctx context.Context, userId string, env string, data interface{}) error {
-	dns := sqliteDns(userId)
-	storage := p.userStorage[dns]
+	storage := p.userStorage[userId]
 	json := toJSON(data)
 	_, err := storage.Connection.Create().
 		SetData(json).
@@ -70,6 +67,10 @@ func (p *ProviderSvc) SaveConnection(ctx context.Context, userId string, env str
 }
 
 func sqliteDns(userId string) string {
+	if userId == "test_id" {
+		return "file:" + userId + "file:ent?mode=memory&_fk=1"
+
+	}
 	return "file:" + userId + ".db?cache=shared&_fk=1"
 }
 
