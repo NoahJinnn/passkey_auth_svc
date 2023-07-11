@@ -1,3 +1,4 @@
+# TODO: Re-implement when need to deploy
 name: CD
 
 on:
@@ -5,61 +6,61 @@ on:
     branches: [main]
     tags: [v*]
 
-permissions:
-  contents: write
-  pull-requests: write
-  packages: write
-env:
-    # Use docker.io for Docker Hub if empty
-    REGISTRY: ghcr.io
-    # github.repository as <account>/<repo>
-    REPO_NAME: hellohq/hqservice
-    PKG_NAME: core
+# permissions:
+#   contents: write
+#   pull-requests: write
+#   packages: write
+# env:
+#     # Use docker.io for Docker Hub if empty
+#     REGISTRY: ghcr.io
+#     # github.repository as <account>/<repo>
+#     REPO_NAME: hellohq/hqservice
+#     PKG_NAME: core
 
 jobs:
     release:
         runs-on: ubuntu-latest
-        outputs:
-          build: ${{ steps.release.outputs.release_created }}
-          tag_name: ${{ steps.release.outputs.tag_name }}
-        steps:
-          - uses: google-github-actions/release-please-action@v3
-            id: release
-            with:
-              release-type: go
-              default-branch: main
-              pull-request-header: "(:robot:) create a new release PR on ${{ github.ref_name }}"
-              commit-search-depth: 100
+#         outputs:
+#           build: ${{ steps.release.outputs.release_created }}
+#           tag_name: ${{ steps.release.outputs.tag_name }}
+#         steps:
+#           - uses: google-github-actions/release-please-action@v3
+#             id: release
+#             with:
+#               release-type: go
+#               default-branch: main
+#               pull-request-header: "(:robot:) create a new release PR on ${{ github.ref_name }}"
+#               commit-search-depth: 100
     
-    build_package:
-        if: ${{ needs.release.outputs.build == 'true' }}
-        needs: [release]
-        runs-on: ubuntu-latest
-        steps:
-          - name: Checkout repository
-            uses: actions/checkout@v3
+#     build_package:
+#         if: ${{ needs.release.outputs.build == 'true' }}
+#         needs: [release]
+#         runs-on: ubuntu-latest
+#         steps:
+#           - name: Checkout repository
+#             uses: actions/checkout@v3
     
-          # Workaround: https://github.com/docker/build-push-action/issues/461
-          - name: Setup Docker buildx
-            uses: docker/setup-buildx-action@v2
-            with:
-              version: v0.9.1
+#           # Workaround: https://github.com/docker/build-push-action/issues/461
+#           - name: Setup Docker buildx
+#             uses: docker/setup-buildx-action@v2
+#             with:
+#               version: v0.9.1
     
-          # Login against a Docker registry except on PR
-          # https://github.com/docker/login-action
-          - name: Log into registry ${{ env.REGISTRY }}
-            uses: docker/login-action@v2
-            with:
-              registry: ${{ env.REGISTRY }}
-              username: ${{ github.repository }}
-              password: ${{ secrets.GITHUB_TOKEN }}
+#           # Login against a Docker registry except on PR
+#           # https://github.com/docker/login-action
+#           - name: Log into registry ${{ env.REGISTRY }}
+#             uses: docker/login-action@v2
+#             with:
+#               registry: ${{ env.REGISTRY }}
+#               username: ${{ github.repository }}
+#               password: ${{ secrets.GITHUB_TOKEN }}
     
-          # Build and push Docker image with Buildx (don't push on PR)
-          # https://github.com/docker/build-push-action
-          - name: Build and push image for app
-            id: build-and-push-app
-            uses: docker/build-push-action@v3
-            with:
-              context: ./docker
-              push: true
-              tags: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:latest, ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:${{ needs.release.outputs.tag_name }}
+#           # Build and push Docker image with Buildx (don't push on PR)
+#           # https://github.com/docker/build-push-action
+#           - name: Build and push image for app
+#             id: build-and-push-app
+#             uses: docker/build-push-action@v3
+#             with:
+#               context: ./docker
+#               push: true
+#               tags: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:latest, ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:${{ needs.release.outputs.tag_name }}
