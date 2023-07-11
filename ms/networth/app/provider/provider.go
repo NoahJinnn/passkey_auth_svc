@@ -7,6 +7,7 @@ import (
 
 	"github.com/hellohq/hqservice/internal/db/sqlite"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
 )
 
@@ -59,13 +60,12 @@ func (p *ProviderSvc) ConnectionByProviderName(ctx context.Context, userId strin
 	return conn, nil
 }
 
-func (p *ProviderSvc) SaveConnection(ctx context.Context, providerName string, env string, userId string, data interface{}) error {
+func (p *ProviderSvc) SaveConnection(ctx context.Context, providerName string, userId string, data interface{}) error {
 	storage := p.GetSqliteConnect(userId)
 
 	json := toJSON(data)
 	_, err := storage.Connection.Create().
 		SetProviderName(providerName).
-		SetEnv(env).
 		SetData(json).
 		Save(ctx)
 	if err != nil {
@@ -73,6 +73,31 @@ func (p *ProviderSvc) SaveConnection(ctx context.Context, providerName string, e
 	}
 
 	return nil
+}
+
+func (p *ProviderSvc) SaveAccount(ctx context.Context, providerName string, userId string, data interface{}) error {
+	storage := p.GetSqliteConnect(userId)
+
+	json := toJSON(data)
+	_, err := storage.Account.Create().
+		SetProviderName(providerName).
+		SetData(json).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *ProviderSvc) AccountByProviderName(ctx context.Context, userId string, providerName string) (*ent.Account, error) {
+	storage := p.GetSqliteConnect(userId)
+	a, err := storage.Account.Query().Where(account.ProviderName(providerName)).First(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return a, nil
 }
 
 func sqliteDns(userId string) string {

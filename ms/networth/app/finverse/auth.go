@@ -15,9 +15,6 @@ import (
 	"github.com/hellohq/hqservice/pkg/httpx"
 )
 
-// We store the access_token in memory - in production, store it in a secure persistent data store.
-var inMemToken string
-
 type IFvAuthSvc interface {
 	CreateCustomerToken(ctx context.Context, cct *CreateCustomerToken) (*CustomerToken, error)
 	CreateLinkToken(ctx context.Context, clt *CreateLinkToken) (*LinkToken, error)
@@ -135,8 +132,7 @@ func (svc *FvAuthSvc) ExchangeAccessToken(ctx context.Context, exchangeCode stri
 			NewHTTPError(http.StatusInternalServerError).
 			SetInternal(fmt.Errorf("failed to get fv exchange token: %w", err))
 	}
-	inMemToken = result.AccessToken
-	err = svc.provider.SaveConnection(ctx, "finverse", "dev", userId.String(), result)
+	err = svc.provider.SaveConnection(ctx, "finverse", userId.String(), result)
 	if err != nil {
 		return nil, errorhandler.
 			NewHTTPError(http.StatusInternalServerError).

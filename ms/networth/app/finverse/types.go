@@ -4,6 +4,15 @@ import "time"
 
 const PROVIDER_NAME = "finverse"
 
+type Accounts struct {
+	Accounts []Account `json:"accounts"`
+}
+
+type Account struct {
+	AccountID string                 `json:"account_id"`
+	Other     map[string]interface{} `json:"-"`
+}
+
 // Request payload types
 type CreateCustomerToken struct {
 	ClientID     string `json:"client_id"  validate:"required"`

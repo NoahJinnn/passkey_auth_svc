@@ -35,7 +35,7 @@ func NewFvDataSvc(cfg *config.Config, provider *provider.ProviderSvc, repo dal.I
 	return &FvDataSvc{req: req, repo: repo, provider: provider}
 }
 
-func (svc *FvDataSvc) AllInstitution(ctx context.Context, userId uuid.UUID) ([]interface{}, error) {
+func (svc *FvDataSvc) AllInstitution(ctx context.Context, userId uuid.UUID) ([]byte, error) {
 	fvSession, err := svc.repo.GetFvSessionRepo().GetByUserId(ctx, userId)
 	if err != nil {
 		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -52,13 +52,7 @@ func (svc *FvDataSvc) AllInstitution(ctx context.Context, userId uuid.UUID) ([]i
 		return nil, err
 	}
 
-	var result []interface{}
-	err = json.Unmarshal(resp.Body(), &result)
-	if err != nil {
-		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to get fv institutions: %w", err))
-	}
-
-	return result, nil
+	return resp.Body(), nil
 }
 
 func (svc *FvDataSvc) GetAccessToken(ctx context.Context, providerName string, userId uuid.UUID) (*AccessToken, error) {
@@ -75,7 +69,7 @@ func (svc *FvDataSvc) GetAccessToken(ctx context.Context, providerName string, u
 	return accessToken, nil
 }
 
-func (svc *FvDataSvc) AllAccount(ctx context.Context, userId uuid.UUID) (interface{}, error) {
+func (svc *FvDataSvc) AllAccount(ctx context.Context, userId uuid.UUID) ([]byte, error) {
 	accessToken, err := svc.GetAccessToken(ctx, PROVIDER_NAME, userId)
 	if err != nil {
 		return nil, err
@@ -92,16 +86,10 @@ func (svc *FvDataSvc) AllAccount(ctx context.Context, userId uuid.UUID) (interfa
 		return nil, err
 	}
 
-	var result interface{}
-	err = json.Unmarshal(resp.Body(), &result)
-	if err != nil {
-		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to get fv accounts: %w", err))
-	}
-
-	return result, nil
+	return resp.Body(), nil
 }
 
-func (svc *FvDataSvc) AllTransactions(ctx context.Context, offset string, limit string, userId uuid.UUID) (interface{}, error) {
+func (svc *FvDataSvc) AllTransactions(ctx context.Context, offset string, limit string, userId uuid.UUID) ([]byte, error) {
 	var queryStr = ""
 	if offset != "" && limit != "" {
 		queryStr = fmt.Sprintf("?offset=%s&limit=%s", offset, limit)
@@ -127,16 +115,10 @@ func (svc *FvDataSvc) AllTransactions(ctx context.Context, offset string, limit 
 		return nil, err
 	}
 
-	var result interface{}
-	err = json.Unmarshal(resp.Body(), &result)
-	if err != nil {
-		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to get fv balance history: %w", err))
-	}
-
-	return result, nil
+	return resp.Body(), nil
 }
 
-func (svc *FvDataSvc) GetBalanceHistoryByAccountId(ctx context.Context, accountId string, userId uuid.UUID) (interface{}, error) {
+func (svc *FvDataSvc) GetBalanceHistoryByAccountId(ctx context.Context, accountId string, userId uuid.UUID) ([]byte, error) {
 	accessToken, err := svc.GetAccessToken(ctx, PROVIDER_NAME, userId)
 	if err != nil {
 		return nil, err
@@ -153,11 +135,15 @@ func (svc *FvDataSvc) GetBalanceHistoryByAccountId(ctx context.Context, accountI
 		return nil, err
 	}
 
-	var result interface{}
-	err = json.Unmarshal(resp.Body(), &result)
-	if err != nil {
-		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to get fv balance history: %w", err))
-	}
-
-	return result, nil
+	return resp.Body(), nil
 }
+
+// func (svc *FvDataSvc) AggregateAccountBalances(ctx context.Context, userId uuid.UUID) (interface{}, error) {
+// 	allAccount, err := svc.AllAccount(ctx, userId)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	var accounts *Accounts
+// 	err = json.Unmarshal([]byte(allAccount.(string)), &accounts)
+// }
