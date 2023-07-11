@@ -36,7 +36,6 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "provider_name", Type: field.TypeString},
 		{Name: "data", Type: field.TypeString},
-		{Name: "env", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 	}

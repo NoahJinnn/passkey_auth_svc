@@ -65,11 +65,6 @@ func Data(v string) predicate.Connection {
 	return predicate.Connection(sql.FieldEQ(FieldData, v))
 }
 
-// Env applies equality check predicate on the "env" field. It's identical to EnvEQ.
-func Env(v string) predicate.Connection {
-	return predicate.Connection(sql.FieldEQ(FieldEnv, v))
-}
-
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Connection {
 	return predicate.Connection(sql.FieldEQ(FieldCreatedAt, v))
@@ -208,71 +203,6 @@ func DataEqualFold(v string) predicate.Connection {
 // DataContainsFold applies the ContainsFold predicate on the "data" field.
 func DataContainsFold(v string) predicate.Connection {
 	return predicate.Connection(sql.FieldContainsFold(FieldData, v))
-}
-
-// EnvEQ applies the EQ predicate on the "env" field.
-func EnvEQ(v string) predicate.Connection {
-	return predicate.Connection(sql.FieldEQ(FieldEnv, v))
-}
-
-// EnvNEQ applies the NEQ predicate on the "env" field.
-func EnvNEQ(v string) predicate.Connection {
-	return predicate.Connection(sql.FieldNEQ(FieldEnv, v))
-}
-
-// EnvIn applies the In predicate on the "env" field.
-func EnvIn(vs ...string) predicate.Connection {
-	return predicate.Connection(sql.FieldIn(FieldEnv, vs...))
-}
-
-// EnvNotIn applies the NotIn predicate on the "env" field.
-func EnvNotIn(vs ...string) predicate.Connection {
-	return predicate.Connection(sql.FieldNotIn(FieldEnv, vs...))
-}
-
-// EnvGT applies the GT predicate on the "env" field.
-func EnvGT(v string) predicate.Connection {
-	return predicate.Connection(sql.FieldGT(FieldEnv, v))
-}
-
-// EnvGTE applies the GTE predicate on the "env" field.
-func EnvGTE(v string) predicate.Connection {
-	return predicate.Connection(sql.FieldGTE(FieldEnv, v))
-}
-
-// EnvLT applies the LT predicate on the "env" field.
-func EnvLT(v string) predicate.Connection {
-	return predicate.Connection(sql.FieldLT(FieldEnv, v))
-}
-
-// EnvLTE applies the LTE predicate on the "env" field.
-func EnvLTE(v string) predicate.Connection {
-	return predicate.Connection(sql.FieldLTE(FieldEnv, v))
-}
-
-// EnvContains applies the Contains predicate on the "env" field.
-func EnvContains(v string) predicate.Connection {
-	return predicate.Connection(sql.FieldContains(FieldEnv, v))
-}
-
-// EnvHasPrefix applies the HasPrefix predicate on the "env" field.
-func EnvHasPrefix(v string) predicate.Connection {
-	return predicate.Connection(sql.FieldHasPrefix(FieldEnv, v))
-}
-
-// EnvHasSuffix applies the HasSuffix predicate on the "env" field.
-func EnvHasSuffix(v string) predicate.Connection {
-	return predicate.Connection(sql.FieldHasSuffix(FieldEnv, v))
-}
-
-// EnvEqualFold applies the EqualFold predicate on the "env" field.
-func EnvEqualFold(v string) predicate.Connection {
-	return predicate.Connection(sql.FieldEqualFold(FieldEnv, v))
-}
-
-// EnvContainsFold applies the ContainsFold predicate on the "env" field.
-func EnvContainsFold(v string) predicate.Connection {
-	return predicate.Connection(sql.FieldContainsFold(FieldEnv, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

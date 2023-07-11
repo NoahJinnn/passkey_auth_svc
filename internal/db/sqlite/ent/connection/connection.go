@@ -18,8 +18,6 @@ const (
 	FieldProviderName = "provider_name"
 	// FieldData holds the string denoting the data field in the database.
 	FieldData = "data"
-	// FieldEnv holds the string denoting the env field in the database.
-	FieldEnv = "env"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -33,7 +31,6 @@ var Columns = []string{
 	FieldID,
 	FieldProviderName,
 	FieldData,
-	FieldEnv,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
@@ -75,11 +72,6 @@ func ByProviderName(opts ...sql.OrderTermOption) OrderOption {
 // ByData orders the results by the data field.
 func ByData(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldData, opts...).ToFunc()
-}
-
-// ByEnv orders the results by the env field.
-func ByEnv(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldEnv, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.

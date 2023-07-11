@@ -33,12 +33,6 @@ func (cc *ConnectionCreate) SetData(s string) *ConnectionCreate {
 	return cc
 }
 
-// SetEnv sets the "env" field.
-func (cc *ConnectionCreate) SetEnv(s string) *ConnectionCreate {
-	cc.mutation.SetEnv(s)
-	return cc
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (cc *ConnectionCreate) SetCreatedAt(t time.Time) *ConnectionCreate {
 	cc.mutation.SetCreatedAt(t)
@@ -138,9 +132,6 @@ func (cc *ConnectionCreate) check() error {
 	if _, ok := cc.mutation.Data(); !ok {
 		return &ValidationError{Name: "data", err: errors.New(`ent: missing required field "Connection.data"`)}
 	}
-	if _, ok := cc.mutation.Env(); !ok {
-		return &ValidationError{Name: "env", err: errors.New(`ent: missing required field "Connection.env"`)}
-	}
 	if _, ok := cc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Connection.created_at"`)}
 	}
@@ -189,10 +180,6 @@ func (cc *ConnectionCreate) createSpec() (*Connection, *sqlgraph.CreateSpec) {
 	if value, ok := cc.mutation.Data(); ok {
 		_spec.SetField(connection.FieldData, field.TypeString, value)
 		_node.Data = value
-	}
-	if value, ok := cc.mutation.Env(); ok {
-		_spec.SetField(connection.FieldEnv, field.TypeString, value)
-		_node.Env = value
 	}
 	if value, ok := cc.mutation.CreatedAt(); ok {
 		_spec.SetField(connection.FieldCreatedAt, field.TypeTime, value)

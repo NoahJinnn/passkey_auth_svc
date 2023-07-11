@@ -21,7 +21,6 @@ func (Connection) Fields() []ent.Field {
 		}).Immutable(),
 		field.String("provider_name"),
 		field.String("data"),
-		field.String("env"),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
