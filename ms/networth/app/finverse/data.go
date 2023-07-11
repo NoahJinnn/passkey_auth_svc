@@ -27,7 +27,7 @@ type FvDataSvc struct {
 	provider *provider.ProviderSvc
 }
 
-func NewFvDataSvc(cfg *config.Config, repo dal.INwRepo, provider *provider.ProviderSvc) *FvDataSvc {
+func NewFvDataSvc(cfg *config.Config, provider *provider.ProviderSvc, repo dal.INwRepo) *FvDataSvc {
 	req := httpx.NewReq("https://api.sandbox.finverse.net/", map[string]string{
 		"Content-Type": "application/json",
 	}, nil)
@@ -76,7 +76,6 @@ func (svc *FvDataSvc) GetAccessToken(ctx context.Context, providerName string, u
 }
 
 func (svc *FvDataSvc) AllAccount(ctx context.Context, userId uuid.UUID) (interface{}, error) {
-
 	accessToken, err := svc.GetAccessToken(ctx, PROVIDER_NAME, userId)
 	if err != nil {
 		return nil, err
@@ -112,11 +111,16 @@ func (svc *FvDataSvc) AllTransactions(ctx context.Context, offset string, limit 
 		queryStr = fmt.Sprintf("?offset=%s", offset)
 	}
 
+	accessToken, err := svc.GetAccessToken(ctx, PROVIDER_NAME, userId)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := svc.req.
 		InitReq(ctx, "GET", "/transactions"+queryStr, nil).
 		WithDefaultOpts().
 		WithHeaders(map[string]string{
-			"Authorization": "Bearer " + inMemToken,
+			"Authorization": "Bearer " + accessToken.AccessToken,
 		}).
 		Send()
 	if err != nil {
@@ -133,11 +137,16 @@ func (svc *FvDataSvc) AllTransactions(ctx context.Context, offset string, limit 
 }
 
 func (svc *FvDataSvc) GetBalanceHistoryByAccountId(ctx context.Context, accountId string, userId uuid.UUID) (interface{}, error) {
+	accessToken, err := svc.GetAccessToken(ctx, PROVIDER_NAME, userId)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := svc.req.
 		InitReq(ctx, "GET", "/balance_history/"+accountId, nil).
 		WithDefaultOpts().
 		WithHeaders(map[string]string{
-			"Authorization": "Bearer " + inMemToken,
+			"Authorization": "Bearer " + accessToken.AccessToken,
 		}).
 		Send()
 	if err != nil {

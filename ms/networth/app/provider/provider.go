@@ -20,21 +20,27 @@ func NewProviderSvc() *ProviderSvc {
 	}
 }
 
-func (p *ProviderSvc) NewSqliteConnect(userId string) {
+func (p *ProviderSvc) NewSqliteConnect(userId string) *ent.Client {
 	dns := sqliteDns(userId)
 	if p.userStorage == nil {
 		p.userStorage = make(map[string]*ent.Client)
-		p.userStorage[userId] = sqlite.NewSqliteClient(dns)
-	} else {
-		if p.userStorage[userId] != nil {
-			return
-		}
+	}
+	if p.userStorage[userId] == nil {
 		p.userStorage[userId] = sqlite.NewSqliteClient(dns)
 	}
+	return p.userStorage[userId]
+}
+
+func (p *ProviderSvc) GetSqliteConnect(userId string) *ent.Client {
+	storage := p.userStorage[userId]
+	if storage == nil {
+		storage = p.NewSqliteConnect(userId)
+	}
+	return storage
 }
 
 func (p *ProviderSvc) ListConnection(ctx context.Context, userId string) ([]*ent.Connection, error) {
-	storage := p.userStorage[userId]
+	storage := p.GetSqliteConnect(userId)
 	conns, err := storage.Connection.Query().All(ctx)
 	if err != nil {
 		return nil, err
@@ -44,7 +50,7 @@ func (p *ProviderSvc) ListConnection(ctx context.Context, userId string) ([]*ent
 }
 
 func (p *ProviderSvc) ConnectionByProviderName(ctx context.Context, userId string, providerName string) (*ent.Connection, error) {
-	storage := p.userStorage[userId]
+	storage := p.GetSqliteConnect(userId)
 	conn, err := storage.Connection.Query().Where(connection.ProviderName(providerName)).First(ctx)
 	if err != nil {
 		return nil, err
@@ -54,7 +60,8 @@ func (p *ProviderSvc) ConnectionByProviderName(ctx context.Context, userId strin
 }
 
 func (p *ProviderSvc) SaveConnection(ctx context.Context, providerName string, env string, userId string, data interface{}) error {
-	storage := p.userStorage[userId]
+	storage := p.GetSqliteConnect(userId)
+
 	json := toJSON(data)
 	_, err := storage.Connection.Create().
 		SetProviderName(providerName).

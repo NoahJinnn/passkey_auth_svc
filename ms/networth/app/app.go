@@ -35,7 +35,7 @@ func New(cfg *config.Config, repo dal.INwRepo) *App {
 	assetTableSvc := asset_table.NewAssetTableSvc(cfg, repo)
 	seAccountInfoSvc := saltedge.NewSeAccountInfoSvc(cfg)
 	fvAuthSvc := finverse.NewFvAuthSvc(cfg, providerSvc, repo)
-	fvDataSvc := finverse.NewFvDataSvc(cfg, repo)
+	fvDataSvc := finverse.NewFvDataSvc(cfg, providerSvc, repo)
 
 	return &App{
 		cfg:              cfg,
