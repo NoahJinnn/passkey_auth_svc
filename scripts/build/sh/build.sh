@@ -3,11 +3,19 @@ set -x -e -o pipefail
 scriptsdir=$( dirname -- "$0"; )
 export CGO_ENABLED=0
 
+gitver() {
+	local ver branch rev dirty
+	ver="$(git tag -l --sort=-version:refname --merged HEAD 'v*' | head -n 1)"
+	branch="$(git rev-parse --abbrev-ref HEAD)"
+	rev="$(git log -1 --format='%h')"
+
+	echo "${ver:+$ver }${branch:+$branch } $(date -u +"%F_%T")"
+}
 
 build() {
 	rm -rf $scriptsdir/../../../bin/
 	mkdir $scriptsdir/../../../bin/
-	GOOS=$1 GOARCH=$2 go build -ldflags="-s -w" -a -o $scriptsdir/../../../bin/hq "$@" $scriptsdir/../../../main.go
+	GOOS=$1 GOARCH=$2 go build -ldflags="-X '$(go list -m)/pkg/def.ver=$(gitver)' -s -w" -a -o $scriptsdir/../../../bin/hq "$@" $scriptsdir/../../../main.go
 }
 
 build_debug() {

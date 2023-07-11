@@ -26,7 +26,7 @@ func NewRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:           def.ProgName,
 		Short:         "Monolith with embedded microservices",
-		Version:       fmt.Sprintf("%s", runtime.Version()),
+		Version:       fmt.Sprintf("%s %s", def.Version(), runtime.Version()),
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		RunE:          RequireFlagOrCommand,
