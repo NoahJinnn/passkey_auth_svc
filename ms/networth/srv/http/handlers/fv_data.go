@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/http/errorhandler"
+	"github.com/hellohq/hqservice/ms/networth/app/finverse"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
@@ -56,18 +57,18 @@ func (h *FvDataHandler) AllAccount(c echo.Context) error {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	as, err := h.GetFvDataSvc().AllAccount(c.Request().Context(), userId)
+	_, err = h.GetFvDataSvc().AggregateAccountBalances(c.Request().Context(), userId)
 	if err != nil {
 		return err
 	}
 
-	var result interface{}
-	err = json.Unmarshal(as, &result)
+	// Get account data from sqlite db
+	a, err := h.GetProviderSvc().AccountByProviderName(c.Request().Context(), userId.String(), finverse.PROVIDER_NAME)
 	if err != nil {
-		return errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(err)
+		return err
 	}
 
-	return c.JSON(http.StatusOK, result)
+	return c.JSON(http.StatusOK, a.Data)
 }
 
 func (h *FvDataHandler) AllTransaction(c echo.Context) error {

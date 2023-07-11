@@ -53,10 +53,9 @@ func (p *ProviderSvc) ListConnection(ctx context.Context, userId string) ([]*ent
 func (p *ProviderSvc) ConnectionByProviderName(ctx context.Context, userId string, providerName string) (*ent.Connection, error) {
 	storage := p.GetSqliteConnect(userId)
 	conn, err := storage.Connection.Query().Where(connection.ProviderName(providerName)).First(ctx)
-	if err != nil {
+	if err != nil && !ent.IsNotFound(err) {
 		return nil, err
 	}
-
 	return conn, nil
 }
 

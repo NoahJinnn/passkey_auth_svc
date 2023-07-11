@@ -61,6 +61,11 @@ func (svc *FvDataSvc) GetAccessToken(ctx context.Context, providerName string, u
 	if err != nil {
 		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to get fv connection: %w", err))
 	}
+
+	if accessTokenPayload == nil {
+		return nil, errorhandler.NewHTTPError(http.StatusNotFound, "confidential connection not found")
+	}
+
 	err = json.Unmarshal([]byte(accessTokenPayload.Data), &accessToken)
 
 	if err != nil {
@@ -138,12 +143,41 @@ func (svc *FvDataSvc) GetBalanceHistoryByAccountId(ctx context.Context, accountI
 	return resp.Body(), nil
 }
 
-// func (svc *FvDataSvc) AggregateAccountBalances(ctx context.Context, userId uuid.UUID) (interface{}, error) {
-// 	allAccount, err := svc.AllAccount(ctx, userId)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+/** ===== Aggregator ===== **/
+func (svc *FvDataSvc) AggregateAccountBalances(ctx context.Context, userId uuid.UUID) ([]interface{}, error) {
+	allAccount, err := svc.AllAccount(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
 
-// 	var accounts *Accounts
-// 	err = json.Unmarshal([]byte(allAccount.(string)), &accounts)
-// }
+	var accounts *Accounts
+	err = json.Unmarshal(allAccount, &accounts)
+	if err != nil {
+		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	var accountBalances []interface{}
+	for _, account := range accounts.Accounts {
+		bh, err := svc.GetBalanceHistoryByAccountId(ctx, account.AccountID, userId)
+		if err != nil {
+			return nil, err
+		}
+
+		var balance interface{}
+		err = json.Unmarshal(bh, &balance)
+		if err != nil {
+			return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		accountBalances = append(accountBalances, balance)
+	}
+
+	err = svc.provider.SaveAccount(ctx, "finverse", userId.String(), accountBalances)
+	if err != nil {
+		return nil, errorhandler.
+			NewHTTPError(http.StatusInternalServerError).
+			SetInternal(fmt.Errorf("failed to save fv exchange token to sqlite: %w", err))
+	}
+
+	return accountBalances, nil
+}
