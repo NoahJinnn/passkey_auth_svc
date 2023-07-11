@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/http/errorhandler"
+	"github.com/hellohq/hqservice/ms/networth/app/provider"
 	"github.com/hellohq/hqservice/ms/networth/config"
 	"github.com/hellohq/hqservice/ms/networth/dal"
 	"github.com/hellohq/hqservice/pkg/httpx"
@@ -21,22 +22,23 @@ type IFvDataSvc interface {
 }
 
 type FvDataSvc struct {
-	req  *httpx.Req
-	repo dal.INwRepo
+	req      *httpx.Req
+	repo     dal.INwRepo
+	provider *provider.ProviderSvc
 }
 
-func NewFvDataSvc(cfg *config.Config, repo dal.INwRepo) *FvDataSvc {
+func NewFvDataSvc(cfg *config.Config, repo dal.INwRepo, provider *provider.ProviderSvc) *FvDataSvc {
 	req := httpx.NewReq("https://api.sandbox.finverse.net/", map[string]string{
 		"Content-Type": "application/json",
 	}, nil)
 
-	return &FvDataSvc{req: req, repo: repo}
+	return &FvDataSvc{req: req, repo: repo, provider: provider}
 }
 
 func (svc *FvDataSvc) AllInstitution(ctx context.Context, userId uuid.UUID) ([]interface{}, error) {
 	fvSession, err := svc.repo.GetFvSessionRepo().GetByUserId(ctx, userId)
 	if err != nil {
-		return nil, err
+		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	resp, err := svc.req.
@@ -59,12 +61,32 @@ func (svc *FvDataSvc) AllInstitution(ctx context.Context, userId uuid.UUID) ([]i
 	return result, nil
 }
 
+func (svc *FvDataSvc) GetAccessToken(ctx context.Context, providerName string, userId uuid.UUID) (*AccessToken, error) {
+	var accessToken *AccessToken
+	accessTokenPayload, err := svc.provider.ConnectionByProviderName(ctx, userId.String(), providerName)
+	if err != nil {
+		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to get fv connection: %w", err))
+	}
+	err = json.Unmarshal([]byte(accessTokenPayload.Data), &accessToken)
+
+	if err != nil {
+		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	return accessToken, nil
+}
+
 func (svc *FvDataSvc) AllAccount(ctx context.Context, userId uuid.UUID) (interface{}, error) {
+
+	accessToken, err := svc.GetAccessToken(ctx, PROVIDER_NAME, userId)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := svc.req.
 		InitReq(ctx, "GET", "/accounts", nil).
 		WithDefaultOpts().
 		WithHeaders(map[string]string{
-			"Authorization": "Bearer " + accessToken,
+			"Authorization": "Bearer " + accessToken.AccessToken,
 		}).
 		Send()
 	if err != nil {
@@ -94,7 +116,7 @@ func (svc *FvDataSvc) AllTransactions(ctx context.Context, offset string, limit 
 		InitReq(ctx, "GET", "/transactions"+queryStr, nil).
 		WithDefaultOpts().
 		WithHeaders(map[string]string{
-			"Authorization": "Bearer " + accessToken,
+			"Authorization": "Bearer " + inMemToken,
 		}).
 		Send()
 	if err != nil {
@@ -115,7 +137,7 @@ func (svc *FvDataSvc) GetBalanceHistoryByAccountId(ctx context.Context, accountI
 		InitReq(ctx, "GET", "/balance_history/"+accountId, nil).
 		WithDefaultOpts().
 		WithHeaders(map[string]string{
-			"Authorization": "Bearer " + accessToken,
+			"Authorization": "Bearer " + inMemToken,
 		}).
 		Send()
 	if err != nil {

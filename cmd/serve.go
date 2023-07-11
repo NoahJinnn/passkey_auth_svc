@@ -14,7 +14,6 @@ import (
 	"github.com/hellohq/hqservice/ms/auth"
 	"github.com/hellohq/hqservice/ms/networth"
 	"github.com/hellohq/hqservice/pkg/concurrent"
-	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/powerman/appcfg"
 	"github.com/powerman/structlog"
 	"github.com/spf13/cobra"
@@ -44,8 +43,8 @@ func NewServeCmd(cfg *sharedconfig.Shared) *cobra.Command {
 		Short: "Starts ALL embedded microservices",
 		Args:  cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			Log.Info("started", "version", def.Version())
-			defer Log.Info("finished", "version", def.Version())
+			Log.Info("started", "version")
+			defer Log.Info("finished", "version")
 
 			ctxStartupCmdServe, cancel := context.WithTimeout(context.Background(), serveStartupTimeout.Value(nil))
 			defer cancel()
@@ -61,7 +60,7 @@ func NewServeCmd(cfg *sharedconfig.Shared) *cobra.Command {
 			go func() {
 				<-ctxShutdownCmdServe.Done()
 				time.Sleep(serveShutdownTimeout.Value(nil))
-				Log.PrintErr("failed to graceful shutdown", "version", def.Version())
+				Log.PrintErr("failed to graceful shutdown", "version")
 				os.Exit(1)
 			}()
 

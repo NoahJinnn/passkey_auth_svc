@@ -7,6 +7,7 @@ import (
 
 	"github.com/hellohq/hqservice/internal/db/sqlite"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
 )
 
 type ProviderSvc struct {
@@ -19,7 +20,7 @@ func NewProviderSvc() *ProviderSvc {
 	}
 }
 
-func (p *ProviderSvc) NewConnect(userId string) {
+func (p *ProviderSvc) NewSqliteConnect(userId string) {
 	dns := sqliteDns(userId)
 	if p.userStorage == nil {
 		p.userStorage = make(map[string]*ent.Client)
@@ -32,16 +33,6 @@ func (p *ProviderSvc) NewConnect(userId string) {
 	}
 }
 
-func (p *ProviderSvc) ListInstitution(ctx context.Context, userId string) ([]*ent.Institution, error) {
-	storage := p.userStorage[userId]
-	instis, err := storage.Institution.Query().All(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer storage.Close()
-	return instis, nil
-}
-
 func (p *ProviderSvc) ListConnection(ctx context.Context, userId string) ([]*ent.Connection, error) {
 	storage := p.userStorage[userId]
 	conns, err := storage.Connection.Query().All(ctx)
@@ -52,12 +43,23 @@ func (p *ProviderSvc) ListConnection(ctx context.Context, userId string) ([]*ent
 	return conns, nil
 }
 
-func (p *ProviderSvc) SaveConnection(ctx context.Context, userId string, env string, data interface{}) error {
+func (p *ProviderSvc) ConnectionByProviderName(ctx context.Context, userId string, providerName string) (*ent.Connection, error) {
+	storage := p.userStorage[userId]
+	conn, err := storage.Connection.Query().Where(connection.ProviderName(providerName)).First(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return conn, nil
+}
+
+func (p *ProviderSvc) SaveConnection(ctx context.Context, providerName string, env string, userId string, data interface{}) error {
 	storage := p.userStorage[userId]
 	json := toJSON(data)
 	_, err := storage.Connection.Create().
-		SetData(json).
+		SetProviderName(providerName).
 		SetEnv(env).
+		SetData(json).
 		Save(ctx)
 	if err != nil {
 		return err

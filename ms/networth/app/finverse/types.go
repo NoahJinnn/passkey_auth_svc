@@ -2,6 +2,8 @@ package finverse
 
 import "time"
 
+const PROVIDER_NAME = "finverse"
+
 // Request payload types
 type CreateCustomerToken struct {
 	ClientID     string `json:"client_id"  validate:"required"`
