@@ -29,8 +29,9 @@ type Institution struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the InstitutionQuery when eager-loading is set.
-	Edges        InstitutionEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges                  InstitutionEdges `json:"edges"`
+	institution_connection *uuid.UUID
+	selectValues           sql.SelectValues
 }
 
 // InstitutionEdges holds the relations/edges for other nodes in the graph.
@@ -88,6 +89,8 @@ func (*Institution) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case institution.FieldID:
 			values[i] = new(uuid.UUID)
+		case institution.ForeignKeys[0]: // institution_connection
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -132,6 +135,13 @@ func (i *Institution) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[j])
 			} else if value.Valid {
 				i.UpdatedAt = value.Time
+			}
+		case institution.ForeignKeys[0]:
+			if value, ok := values[j].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field institution_connection", values[j])
+			} else if value.Valid {
+				i.institution_connection = new(uuid.UUID)
+				*i.institution_connection = *value.S.(*uuid.UUID)
 			}
 		default:
 			i.selectValues.Set(columns[j], values[j])

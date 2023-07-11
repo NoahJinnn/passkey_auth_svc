@@ -29,6 +29,7 @@ type InstitutionQuery struct {
 	withConnection *ConnectionQuery
 	withAccounts   *AccountQuery
 	withIncomes    *IncomeQuery
+	withFKs        bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -79,7 +80,7 @@ func (iq *InstitutionQuery) QueryConnection() *ConnectionQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(institution.Table, institution.FieldID, selector),
 			sqlgraph.To(connection.Table, connection.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, institution.ConnectionTable, institution.ConnectionColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, institution.ConnectionTable, institution.ConnectionColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(iq.driver.Dialect(), step)
 		return fromU, nil
@@ -442,6 +443,7 @@ func (iq *InstitutionQuery) prepareQuery(ctx context.Context) error {
 func (iq *InstitutionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Institution, error) {
 	var (
 		nodes       = []*Institution{}
+		withFKs     = iq.withFKs
 		_spec       = iq.querySpec()
 		loadedTypes = [3]bool{
 			iq.withConnection != nil,
@@ -449,6 +451,12 @@ func (iq *InstitutionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 			iq.withIncomes != nil,
 		}
 	)
+	if iq.withConnection != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, institution.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Institution).scanValues(nil, columns)
 	}
@@ -491,32 +499,34 @@ func (iq *InstitutionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 }
 
 func (iq *InstitutionQuery) loadConnection(ctx context.Context, query *ConnectionQuery, nodes []*Institution, init func(*Institution), assign func(*Institution, *Connection)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*Institution)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Institution)
 	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
+		if nodes[i].institution_connection == nil {
+			continue
+		}
+		fk := *nodes[i].institution_connection
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(connection.FieldInstitutionID)
+	if len(ids) == 0 {
+		return nil
 	}
-	query.Where(predicate.Connection(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(institution.ConnectionColumn), fks...))
-	}))
+	query.Where(connection.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.InstitutionID
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "institution_id" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "institution_id" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "institution_connection" returned %v`, n.ID)
 		}
-		assign(node, n)
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
 	}
 	return nil
 }
@@ -530,9 +540,7 @@ func (iq *InstitutionQuery) loadAccounts(ctx context.Context, query *AccountQuer
 			init(nodes[i])
 		}
 	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(account.FieldInstitutionID)
-	}
+	query.withFKs = true
 	query.Where(predicate.Account(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(institution.AccountsColumn), fks...))
 	}))
@@ -541,10 +549,13 @@ func (iq *InstitutionQuery) loadAccounts(ctx context.Context, query *AccountQuer
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.InstitutionID
-		node, ok := nodeids[fk]
+		fk := n.institution_accounts
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "institution_accounts" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "institution_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "institution_accounts" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -560,9 +571,7 @@ func (iq *InstitutionQuery) loadIncomes(ctx context.Context, query *IncomeQuery,
 			init(nodes[i])
 		}
 	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(income.FieldInstitutionID)
-	}
+	query.withFKs = true
 	query.Where(predicate.Income(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(institution.IncomesColumn), fks...))
 	}))
@@ -571,10 +580,13 @@ func (iq *InstitutionQuery) loadIncomes(ctx context.Context, query *IncomeQuery,
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.InstitutionID
-		node, ok := nodeids[fk]
+		fk := n.institution_incomes
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "institution_incomes" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "institution_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "institution_incomes" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

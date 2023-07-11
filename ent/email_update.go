@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
-	"github.com/hellohq/hqservice/ent/identity"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/predicate"
 	"github.com/hellohq/hqservice/ent/primaryemail"
@@ -84,21 +83,6 @@ func (eu *EmailUpdate) SetUser(u *User) *EmailUpdate {
 	return eu.SetUserID(u.ID)
 }
 
-// AddIdentityIDs adds the "identities" edge to the Identity entity by IDs.
-func (eu *EmailUpdate) AddIdentityIDs(ids ...uuid.UUID) *EmailUpdate {
-	eu.mutation.AddIdentityIDs(ids...)
-	return eu
-}
-
-// AddIdentities adds the "identities" edges to the Identity entity.
-func (eu *EmailUpdate) AddIdentities(i ...*Identity) *EmailUpdate {
-	ids := make([]uuid.UUID, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
-	}
-	return eu.AddIdentityIDs(ids...)
-}
-
 // AddPasscodeIDs adds the "passcodes" edge to the Passcode entity by IDs.
 func (eu *EmailUpdate) AddPasscodeIDs(ids ...uuid.UUID) *EmailUpdate {
 	eu.mutation.AddPasscodeIDs(ids...)
@@ -142,27 +126,6 @@ func (eu *EmailUpdate) Mutation() *EmailMutation {
 func (eu *EmailUpdate) ClearUser() *EmailUpdate {
 	eu.mutation.ClearUser()
 	return eu
-}
-
-// ClearIdentities clears all "identities" edges to the Identity entity.
-func (eu *EmailUpdate) ClearIdentities() *EmailUpdate {
-	eu.mutation.ClearIdentities()
-	return eu
-}
-
-// RemoveIdentityIDs removes the "identities" edge to Identity entities by IDs.
-func (eu *EmailUpdate) RemoveIdentityIDs(ids ...uuid.UUID) *EmailUpdate {
-	eu.mutation.RemoveIdentityIDs(ids...)
-	return eu
-}
-
-// RemoveIdentities removes "identities" edges to Identity entities.
-func (eu *EmailUpdate) RemoveIdentities(i ...*Identity) *EmailUpdate {
-	ids := make([]uuid.UUID, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
-	}
-	return eu.RemoveIdentityIDs(ids...)
 }
 
 // ClearPasscodes clears all "passcodes" edges to the Passcode entity.
@@ -268,51 +231,6 @@ func (eu *EmailUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if eu.mutation.IdentitiesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   email.IdentitiesTable,
-			Columns: []string{email.IdentitiesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(identity.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := eu.mutation.RemovedIdentitiesIDs(); len(nodes) > 0 && !eu.mutation.IdentitiesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   email.IdentitiesTable,
-			Columns: []string{email.IdentitiesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(identity.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := eu.mutation.IdentitiesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   email.IdentitiesTable,
-			Columns: []string{email.IdentitiesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(identity.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -465,21 +383,6 @@ func (euo *EmailUpdateOne) SetUser(u *User) *EmailUpdateOne {
 	return euo.SetUserID(u.ID)
 }
 
-// AddIdentityIDs adds the "identities" edge to the Identity entity by IDs.
-func (euo *EmailUpdateOne) AddIdentityIDs(ids ...uuid.UUID) *EmailUpdateOne {
-	euo.mutation.AddIdentityIDs(ids...)
-	return euo
-}
-
-// AddIdentities adds the "identities" edges to the Identity entity.
-func (euo *EmailUpdateOne) AddIdentities(i ...*Identity) *EmailUpdateOne {
-	ids := make([]uuid.UUID, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
-	}
-	return euo.AddIdentityIDs(ids...)
-}
-
 // AddPasscodeIDs adds the "passcodes" edge to the Passcode entity by IDs.
 func (euo *EmailUpdateOne) AddPasscodeIDs(ids ...uuid.UUID) *EmailUpdateOne {
 	euo.mutation.AddPasscodeIDs(ids...)
@@ -523,27 +426,6 @@ func (euo *EmailUpdateOne) Mutation() *EmailMutation {
 func (euo *EmailUpdateOne) ClearUser() *EmailUpdateOne {
 	euo.mutation.ClearUser()
 	return euo
-}
-
-// ClearIdentities clears all "identities" edges to the Identity entity.
-func (euo *EmailUpdateOne) ClearIdentities() *EmailUpdateOne {
-	euo.mutation.ClearIdentities()
-	return euo
-}
-
-// RemoveIdentityIDs removes the "identities" edge to Identity entities by IDs.
-func (euo *EmailUpdateOne) RemoveIdentityIDs(ids ...uuid.UUID) *EmailUpdateOne {
-	euo.mutation.RemoveIdentityIDs(ids...)
-	return euo
-}
-
-// RemoveIdentities removes "identities" edges to Identity entities.
-func (euo *EmailUpdateOne) RemoveIdentities(i ...*Identity) *EmailUpdateOne {
-	ids := make([]uuid.UUID, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
-	}
-	return euo.RemoveIdentityIDs(ids...)
 }
 
 // ClearPasscodes clears all "passcodes" edges to the Passcode entity.
@@ -679,51 +561,6 @@ func (euo *EmailUpdateOne) sqlSave(ctx context.Context) (_node *Email, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if euo.mutation.IdentitiesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   email.IdentitiesTable,
-			Columns: []string{email.IdentitiesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(identity.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := euo.mutation.RemovedIdentitiesIDs(); len(nodes) > 0 && !euo.mutation.IdentitiesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   email.IdentitiesTable,
-			Columns: []string{email.IdentitiesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(identity.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := euo.mutation.IdentitiesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   email.IdentitiesTable,
-			Columns: []string{email.IdentitiesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(identity.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

@@ -322,22 +322,6 @@ func (c *AccountClient) GetX(ctx context.Context, id uuid.UUID) *Account {
 	return obj
 }
 
-// QueryInstitution queries the institution edge of a Account.
-func (c *AccountClient) QueryInstitution(a *Account) *InstitutionQuery {
-	query := (&InstitutionClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := a.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(account.Table, account.FieldID, id),
-			sqlgraph.To(institution.Table, institution.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, account.InstitutionTable, account.InstitutionColumn),
-		)
-		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryTransactions queries the transactions edge of a Account.
 func (c *AccountClient) QueryTransactions(a *Account) *TransactionQuery {
 	query := (&TransactionClient{config: c.config}).Query()
@@ -472,22 +456,6 @@ func (c *ConnectionClient) GetX(ctx context.Context, id uuid.UUID) *Connection {
 	return obj
 }
 
-// QueryInstitution queries the institution edge of a Connection.
-func (c *ConnectionClient) QueryInstitution(co *Connection) *InstitutionQuery {
-	query := (&InstitutionClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := co.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(connection.Table, connection.FieldID, id),
-			sqlgraph.To(institution.Table, institution.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, connection.InstitutionTable, connection.InstitutionColumn),
-		)
-		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
 func (c *ConnectionClient) Hooks() []Hook {
 	return c.hooks.Connection
@@ -604,22 +572,6 @@ func (c *IncomeClient) GetX(ctx context.Context, id uuid.UUID) *Income {
 		panic(err)
 	}
 	return obj
-}
-
-// QueryInstitution queries the institution edge of a Income.
-func (c *IncomeClient) QueryInstitution(i *Income) *InstitutionQuery {
-	query := (&InstitutionClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := i.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(income.Table, income.FieldID, id),
-			sqlgraph.To(institution.Table, institution.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, income.InstitutionTable, income.InstitutionColumn),
-		)
-		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
 }
 
 // Hooks returns the client hooks.
@@ -748,7 +700,7 @@ func (c *InstitutionClient) QueryConnection(i *Institution) *ConnectionQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(institution.Table, institution.FieldID, id),
 			sqlgraph.To(connection.Table, connection.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, institution.ConnectionTable, institution.ConnectionColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, institution.ConnectionTable, institution.ConnectionColumn),
 		)
 		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
 		return fromV, nil

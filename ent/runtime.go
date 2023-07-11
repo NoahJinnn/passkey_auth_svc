@@ -9,7 +9,6 @@ import (
 	"github.com/hellohq/hqservice/ent/assettable"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
-	"github.com/hellohq/hqservice/ent/identity"
 	"github.com/hellohq/hqservice/ent/jwk"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/primaryemail"
@@ -89,22 +88,6 @@ func init() {
 	fvsessionDescID := fvsessionFields[0].Descriptor()
 	// fvsession.DefaultID holds the default value on creation for the id field.
 	fvsession.DefaultID = fvsessionDescID.Default.(func() uuid.UUID)
-	identityFields := schema.Identity{}.Fields()
-	_ = identityFields
-	// identityDescCreatedAt is the schema descriptor for created_at field.
-	identityDescCreatedAt := identityFields[5].Descriptor()
-	// identity.DefaultCreatedAt holds the default value on creation for the created_at field.
-	identity.DefaultCreatedAt = identityDescCreatedAt.Default.(func() time.Time)
-	// identityDescUpdatedAt is the schema descriptor for updated_at field.
-	identityDescUpdatedAt := identityFields[6].Descriptor()
-	// identity.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	identity.DefaultUpdatedAt = identityDescUpdatedAt.Default.(func() time.Time)
-	// identity.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	identity.UpdateDefaultUpdatedAt = identityDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// identityDescID is the schema descriptor for id field.
-	identityDescID := identityFields[0].Descriptor()
-	// identity.DefaultID holds the default value on creation for the id field.
-	identity.DefaultID = identityDescID.Default.(func() uuid.UUID)
 	jwkFields := schema.Jwk{}.Fields()
 	_ = jwkFields
 	// jwkDescCreatedAt is the schema descriptor for created_at field.

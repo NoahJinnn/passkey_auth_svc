@@ -12,18 +12,16 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/predicate"
 )
 
 // ConnectionQuery is the builder for querying Connection entities.
 type ConnectionQuery struct {
 	config
-	ctx             *QueryContext
-	order           []connection.OrderOption
-	inters          []Interceptor
-	predicates      []predicate.Connection
-	withInstitution *InstitutionQuery
+	ctx        *QueryContext
+	order      []connection.OrderOption
+	inters     []Interceptor
+	predicates []predicate.Connection
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -58,28 +56,6 @@ func (cq *ConnectionQuery) Unique(unique bool) *ConnectionQuery {
 func (cq *ConnectionQuery) Order(o ...connection.OrderOption) *ConnectionQuery {
 	cq.order = append(cq.order, o...)
 	return cq
-}
-
-// QueryInstitution chains the current query on the "institution" edge.
-func (cq *ConnectionQuery) QueryInstitution() *InstitutionQuery {
-	query := (&InstitutionClient{config: cq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := cq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := cq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(connection.Table, connection.FieldID, selector),
-			sqlgraph.To(institution.Table, institution.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, connection.InstitutionTable, connection.InstitutionColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // First returns the first Connection entity from the query.
@@ -269,27 +245,15 @@ func (cq *ConnectionQuery) Clone() *ConnectionQuery {
 		return nil
 	}
 	return &ConnectionQuery{
-		config:          cq.config,
-		ctx:             cq.ctx.Clone(),
-		order:           append([]connection.OrderOption{}, cq.order...),
-		inters:          append([]Interceptor{}, cq.inters...),
-		predicates:      append([]predicate.Connection{}, cq.predicates...),
-		withInstitution: cq.withInstitution.Clone(),
+		config:     cq.config,
+		ctx:        cq.ctx.Clone(),
+		order:      append([]connection.OrderOption{}, cq.order...),
+		inters:     append([]Interceptor{}, cq.inters...),
+		predicates: append([]predicate.Connection{}, cq.predicates...),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,
 	}
-}
-
-// WithInstitution tells the query-builder to eager-load the nodes that are connected to
-// the "institution" edge. The optional arguments are used to configure the query builder of the edge.
-func (cq *ConnectionQuery) WithInstitution(opts ...func(*InstitutionQuery)) *ConnectionQuery {
-	query := (&InstitutionClient{config: cq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	cq.withInstitution = query
-	return cq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -298,12 +262,12 @@ func (cq *ConnectionQuery) WithInstitution(opts ...func(*InstitutionQuery)) *Con
 // Example:
 //
 //	var v []struct {
-//		InstitutionID uuid.UUID `json:"institution_id,omitempty"`
+//		ProviderName string `json:"provider_name,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Connection.Query().
-//		GroupBy(connection.FieldInstitutionID).
+//		GroupBy(connection.FieldProviderName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (cq *ConnectionQuery) GroupBy(field string, fields ...string) *ConnectionGroupBy {
@@ -321,11 +285,11 @@ func (cq *ConnectionQuery) GroupBy(field string, fields ...string) *ConnectionGr
 // Example:
 //
 //	var v []struct {
-//		InstitutionID uuid.UUID `json:"institution_id,omitempty"`
+//		ProviderName string `json:"provider_name,omitempty"`
 //	}
 //
 //	client.Connection.Query().
-//		Select(connection.FieldInstitutionID).
+//		Select(connection.FieldProviderName).
 //		Scan(ctx, &v)
 func (cq *ConnectionQuery) Select(fields ...string) *ConnectionSelect {
 	cq.ctx.Fields = append(cq.ctx.Fields, fields...)
@@ -368,11 +332,8 @@ func (cq *ConnectionQuery) prepareQuery(ctx context.Context) error {
 
 func (cq *ConnectionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Connection, error) {
 	var (
-		nodes       = []*Connection{}
-		_spec       = cq.querySpec()
-		loadedTypes = [1]bool{
-			cq.withInstitution != nil,
-		}
+		nodes = []*Connection{}
+		_spec = cq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Connection).scanValues(nil, columns)
@@ -380,7 +341,6 @@ func (cq *ConnectionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*C
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Connection{config: cq.config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -392,46 +352,7 @@ func (cq *ConnectionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*C
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := cq.withInstitution; query != nil {
-		if err := cq.loadInstitution(ctx, query, nodes, nil,
-			func(n *Connection, e *Institution) { n.Edges.Institution = e }); err != nil {
-			return nil, err
-		}
-	}
 	return nodes, nil
-}
-
-func (cq *ConnectionQuery) loadInstitution(ctx context.Context, query *InstitutionQuery, nodes []*Connection, init func(*Connection), assign func(*Connection, *Institution)) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*Connection)
-	for i := range nodes {
-		if nodes[i].InstitutionID == nil {
-			continue
-		}
-		fk := *nodes[i].InstitutionID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(institution.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "institution_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
 }
 
 func (cq *ConnectionQuery) sqlCount(ctx context.Context) (int, error) {
@@ -458,9 +379,6 @@ func (cq *ConnectionQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != connection.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
-		}
-		if cq.withInstitution != nil {
-			_spec.Node.AddColumnOnce(connection.FieldInstitutionID)
 		}
 	}
 	if ps := cq.predicates; len(ps) > 0 {

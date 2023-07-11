@@ -32,26 +32,26 @@ const (
 	// Table holds the table name of the institution in the database.
 	Table = "institutions"
 	// ConnectionTable is the table that holds the connection relation/edge.
-	ConnectionTable = "connections"
+	ConnectionTable = "institutions"
 	// ConnectionInverseTable is the table name for the Connection entity.
 	// It exists in this package in order to avoid circular dependency with the "connection" package.
 	ConnectionInverseTable = "connections"
 	// ConnectionColumn is the table column denoting the connection relation/edge.
-	ConnectionColumn = "institution_id"
+	ConnectionColumn = "institution_connection"
 	// AccountsTable is the table that holds the accounts relation/edge.
 	AccountsTable = "accounts"
 	// AccountsInverseTable is the table name for the Account entity.
 	// It exists in this package in order to avoid circular dependency with the "account" package.
 	AccountsInverseTable = "accounts"
 	// AccountsColumn is the table column denoting the accounts relation/edge.
-	AccountsColumn = "institution_id"
+	AccountsColumn = "institution_accounts"
 	// IncomesTable is the table that holds the incomes relation/edge.
 	IncomesTable = "incomes"
 	// IncomesInverseTable is the table name for the Income entity.
 	// It exists in this package in order to avoid circular dependency with the "income" package.
 	IncomesInverseTable = "incomes"
 	// IncomesColumn is the table column denoting the incomes relation/edge.
-	IncomesColumn = "institution_id"
+	IncomesColumn = "institution_incomes"
 )
 
 // Columns holds all SQL columns for institution fields.
@@ -63,10 +63,21 @@ var Columns = []string{
 	FieldUpdatedAt,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "institutions"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"institution_connection",
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -150,7 +161,7 @@ func newConnectionStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ConnectionInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, ConnectionTable, ConnectionColumn),
+		sqlgraph.Edge(sqlgraph.M2O, false, ConnectionTable, ConnectionColumn),
 	)
 }
 func newAccountsStep() *sqlgraph.Step {

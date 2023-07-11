@@ -27,8 +27,6 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
-	// EdgeIdentities holds the string denoting the identities edge name in mutations.
-	EdgeIdentities = "identities"
 	// EdgePasscodes holds the string denoting the passcodes edge name in mutations.
 	EdgePasscodes = "passcodes"
 	// EdgePrimaryEmail holds the string denoting the primary_email edge name in mutations.
@@ -42,13 +40,6 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_id"
-	// IdentitiesTable is the table that holds the identities relation/edge.
-	IdentitiesTable = "identities"
-	// IdentitiesInverseTable is the table name for the Identity entity.
-	// It exists in this package in order to avoid circular dependency with the "identity" package.
-	IdentitiesInverseTable = "identities"
-	// IdentitiesColumn is the table column denoting the identities relation/edge.
-	IdentitiesColumn = "email_id"
 	// PasscodesTable is the table that holds the passcodes relation/edge.
 	PasscodesTable = "passcodes"
 	// PasscodesInverseTable is the table name for the Passcode entity.
@@ -138,20 +129,6 @@ func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByIdentitiesCount orders the results by identities count.
-func ByIdentitiesCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newIdentitiesStep(), opts...)
-	}
-}
-
-// ByIdentities orders the results by identities terms.
-func ByIdentities(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newIdentitiesStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
 // ByPasscodesCount orders the results by passcodes count.
 func ByPasscodesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -177,13 +154,6 @@ func newUserStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
-	)
-}
-func newIdentitiesStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(IdentitiesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, IdentitiesTable, IdentitiesColumn),
 	)
 }
 func newPasscodesStep() *sqlgraph.Step {

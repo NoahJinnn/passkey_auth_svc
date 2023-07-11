@@ -12,18 +12,17 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/income"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/predicate"
 )
 
 // IncomeQuery is the builder for querying Income entities.
 type IncomeQuery struct {
 	config
-	ctx             *QueryContext
-	order           []income.OrderOption
-	inters          []Interceptor
-	predicates      []predicate.Income
-	withInstitution *InstitutionQuery
+	ctx        *QueryContext
+	order      []income.OrderOption
+	inters     []Interceptor
+	predicates []predicate.Income
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -58,28 +57,6 @@ func (iq *IncomeQuery) Unique(unique bool) *IncomeQuery {
 func (iq *IncomeQuery) Order(o ...income.OrderOption) *IncomeQuery {
 	iq.order = append(iq.order, o...)
 	return iq
-}
-
-// QueryInstitution chains the current query on the "institution" edge.
-func (iq *IncomeQuery) QueryInstitution() *InstitutionQuery {
-	query := (&InstitutionClient{config: iq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := iq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := iq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(income.Table, income.FieldID, selector),
-			sqlgraph.To(institution.Table, institution.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, income.InstitutionTable, income.InstitutionColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(iq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // First returns the first Income entity from the query.
@@ -269,27 +246,15 @@ func (iq *IncomeQuery) Clone() *IncomeQuery {
 		return nil
 	}
 	return &IncomeQuery{
-		config:          iq.config,
-		ctx:             iq.ctx.Clone(),
-		order:           append([]income.OrderOption{}, iq.order...),
-		inters:          append([]Interceptor{}, iq.inters...),
-		predicates:      append([]predicate.Income{}, iq.predicates...),
-		withInstitution: iq.withInstitution.Clone(),
+		config:     iq.config,
+		ctx:        iq.ctx.Clone(),
+		order:      append([]income.OrderOption{}, iq.order...),
+		inters:     append([]Interceptor{}, iq.inters...),
+		predicates: append([]predicate.Income{}, iq.predicates...),
 		// clone intermediate query.
 		sql:  iq.sql.Clone(),
 		path: iq.path,
 	}
-}
-
-// WithInstitution tells the query-builder to eager-load the nodes that are connected to
-// the "institution" edge. The optional arguments are used to configure the query builder of the edge.
-func (iq *IncomeQuery) WithInstitution(opts ...func(*InstitutionQuery)) *IncomeQuery {
-	query := (&InstitutionClient{config: iq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	iq.withInstitution = query
-	return iq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -298,12 +263,12 @@ func (iq *IncomeQuery) WithInstitution(opts ...func(*InstitutionQuery)) *IncomeQ
 // Example:
 //
 //	var v []struct {
-//		InstitutionID uuid.UUID `json:"institution_id,omitempty"`
+//		ProviderName string `json:"provider_name,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Income.Query().
-//		GroupBy(income.FieldInstitutionID).
+//		GroupBy(income.FieldProviderName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (iq *IncomeQuery) GroupBy(field string, fields ...string) *IncomeGroupBy {
@@ -321,11 +286,11 @@ func (iq *IncomeQuery) GroupBy(field string, fields ...string) *IncomeGroupBy {
 // Example:
 //
 //	var v []struct {
-//		InstitutionID uuid.UUID `json:"institution_id,omitempty"`
+//		ProviderName string `json:"provider_name,omitempty"`
 //	}
 //
 //	client.Income.Query().
-//		Select(income.FieldInstitutionID).
+//		Select(income.FieldProviderName).
 //		Scan(ctx, &v)
 func (iq *IncomeQuery) Select(fields ...string) *IncomeSelect {
 	iq.ctx.Fields = append(iq.ctx.Fields, fields...)
@@ -368,19 +333,19 @@ func (iq *IncomeQuery) prepareQuery(ctx context.Context) error {
 
 func (iq *IncomeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Income, error) {
 	var (
-		nodes       = []*Income{}
-		_spec       = iq.querySpec()
-		loadedTypes = [1]bool{
-			iq.withInstitution != nil,
-		}
+		nodes   = []*Income{}
+		withFKs = iq.withFKs
+		_spec   = iq.querySpec()
 	)
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, income.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Income).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Income{config: iq.config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -392,43 +357,7 @@ func (iq *IncomeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Incom
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := iq.withInstitution; query != nil {
-		if err := iq.loadInstitution(ctx, query, nodes, nil,
-			func(n *Income, e *Institution) { n.Edges.Institution = e }); err != nil {
-			return nil, err
-		}
-	}
 	return nodes, nil
-}
-
-func (iq *IncomeQuery) loadInstitution(ctx context.Context, query *InstitutionQuery, nodes []*Income, init func(*Income), assign func(*Income, *Institution)) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*Income)
-	for i := range nodes {
-		fk := nodes[i].InstitutionID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(institution.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "institution_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
 }
 
 func (iq *IncomeQuery) sqlCount(ctx context.Context) (int, error) {
@@ -455,9 +384,6 @@ func (iq *IncomeQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != income.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
-		}
-		if iq.withInstitution != nil {
-			_spec.Node.AddColumnOnce(income.FieldInstitutionID)
 		}
 	}
 	if ps := iq.predicates; len(ps) > 0 {

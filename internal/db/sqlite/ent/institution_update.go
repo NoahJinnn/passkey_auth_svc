@@ -208,7 +208,7 @@ func (iu *InstitutionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if iu.mutation.ConnectionCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   institution.ConnectionTable,
 			Columns: []string{institution.ConnectionColumn},
@@ -221,7 +221,7 @@ func (iu *InstitutionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := iu.mutation.ConnectionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   institution.ConnectionTable,
 			Columns: []string{institution.ConnectionColumn},
@@ -551,7 +551,7 @@ func (iuo *InstitutionUpdateOne) sqlSave(ctx context.Context) (_node *Institutio
 	}
 	if iuo.mutation.ConnectionCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   institution.ConnectionTable,
 			Columns: []string{institution.ConnectionColumn},
@@ -564,7 +564,7 @@ func (iuo *InstitutionUpdateOne) sqlSave(ctx context.Context) (_node *Institutio
 	}
 	if nodes := iuo.mutation.ConnectionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   institution.ConnectionTable,
 			Columns: []string{institution.ConnectionColumn},

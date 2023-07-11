@@ -61,6 +61,11 @@ func AccountID(v uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(sql.FieldEQ(FieldAccountID, v))
 }
 
+// ProviderName applies equality check predicate on the "provider_name" field. It's identical to ProviderNameEQ.
+func ProviderName(v string) predicate.Transaction {
+	return predicate.Transaction(sql.FieldEQ(FieldProviderName, v))
+}
+
 // Data applies equality check predicate on the "data" field. It's identical to DataEQ.
 func Data(v string) predicate.Transaction {
 	return predicate.Transaction(sql.FieldEQ(FieldData, v))
@@ -104,6 +109,71 @@ func AccountIDIsNil() predicate.Transaction {
 // AccountIDNotNil applies the NotNil predicate on the "account_id" field.
 func AccountIDNotNil() predicate.Transaction {
 	return predicate.Transaction(sql.FieldNotNull(FieldAccountID))
+}
+
+// ProviderNameEQ applies the EQ predicate on the "provider_name" field.
+func ProviderNameEQ(v string) predicate.Transaction {
+	return predicate.Transaction(sql.FieldEQ(FieldProviderName, v))
+}
+
+// ProviderNameNEQ applies the NEQ predicate on the "provider_name" field.
+func ProviderNameNEQ(v string) predicate.Transaction {
+	return predicate.Transaction(sql.FieldNEQ(FieldProviderName, v))
+}
+
+// ProviderNameIn applies the In predicate on the "provider_name" field.
+func ProviderNameIn(vs ...string) predicate.Transaction {
+	return predicate.Transaction(sql.FieldIn(FieldProviderName, vs...))
+}
+
+// ProviderNameNotIn applies the NotIn predicate on the "provider_name" field.
+func ProviderNameNotIn(vs ...string) predicate.Transaction {
+	return predicate.Transaction(sql.FieldNotIn(FieldProviderName, vs...))
+}
+
+// ProviderNameGT applies the GT predicate on the "provider_name" field.
+func ProviderNameGT(v string) predicate.Transaction {
+	return predicate.Transaction(sql.FieldGT(FieldProviderName, v))
+}
+
+// ProviderNameGTE applies the GTE predicate on the "provider_name" field.
+func ProviderNameGTE(v string) predicate.Transaction {
+	return predicate.Transaction(sql.FieldGTE(FieldProviderName, v))
+}
+
+// ProviderNameLT applies the LT predicate on the "provider_name" field.
+func ProviderNameLT(v string) predicate.Transaction {
+	return predicate.Transaction(sql.FieldLT(FieldProviderName, v))
+}
+
+// ProviderNameLTE applies the LTE predicate on the "provider_name" field.
+func ProviderNameLTE(v string) predicate.Transaction {
+	return predicate.Transaction(sql.FieldLTE(FieldProviderName, v))
+}
+
+// ProviderNameContains applies the Contains predicate on the "provider_name" field.
+func ProviderNameContains(v string) predicate.Transaction {
+	return predicate.Transaction(sql.FieldContains(FieldProviderName, v))
+}
+
+// ProviderNameHasPrefix applies the HasPrefix predicate on the "provider_name" field.
+func ProviderNameHasPrefix(v string) predicate.Transaction {
+	return predicate.Transaction(sql.FieldHasPrefix(FieldProviderName, v))
+}
+
+// ProviderNameHasSuffix applies the HasSuffix predicate on the "provider_name" field.
+func ProviderNameHasSuffix(v string) predicate.Transaction {
+	return predicate.Transaction(sql.FieldHasSuffix(FieldProviderName, v))
+}
+
+// ProviderNameEqualFold applies the EqualFold predicate on the "provider_name" field.
+func ProviderNameEqualFold(v string) predicate.Transaction {
+	return predicate.Transaction(sql.FieldEqualFold(FieldProviderName, v))
+}
+
+// ProviderNameContainsFold applies the ContainsFold predicate on the "provider_name" field.
+func ProviderNameContainsFold(v string) predicate.Transaction {
+	return predicate.Transaction(sql.FieldContainsFold(FieldProviderName, v))
 }
 
 // DataEQ applies the EQ predicate on the "data" field.

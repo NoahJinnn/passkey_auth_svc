@@ -17,6 +17,8 @@ const (
 	FieldID = "id"
 	// FieldAccountID holds the string denoting the account_id field in the database.
 	FieldAccountID = "account_id"
+	// FieldProviderName holds the string denoting the provider_name field in the database.
+	FieldProviderName = "provider_name"
 	// FieldData holds the string denoting the data field in the database.
 	FieldData = "data"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -40,6 +42,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldAccountID,
+	FieldProviderName,
 	FieldData,
 	FieldCreatedAt,
 	FieldUpdatedAt,
@@ -77,6 +80,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByAccountID orders the results by the account_id field.
 func ByAccountID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAccountID, opts...).ToFunc()
+}
+
+// ByProviderName orders the results by the provider_name field.
+func ByProviderName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProviderName, opts...).ToFunc()
 }
 
 // ByData orders the results by the data field.

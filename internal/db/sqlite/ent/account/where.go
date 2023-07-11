@@ -56,9 +56,9 @@ func IDLTE(id uuid.UUID) predicate.Account {
 	return predicate.Account(sql.FieldLTE(FieldID, id))
 }
 
-// InstitutionID applies equality check predicate on the "institution_id" field. It's identical to InstitutionIDEQ.
-func InstitutionID(v uuid.UUID) predicate.Account {
-	return predicate.Account(sql.FieldEQ(FieldInstitutionID, v))
+// ProviderName applies equality check predicate on the "provider_name" field. It's identical to ProviderNameEQ.
+func ProviderName(v string) predicate.Account {
+	return predicate.Account(sql.FieldEQ(FieldProviderName, v))
 }
 
 // Data applies equality check predicate on the "data" field. It's identical to DataEQ.
@@ -76,34 +76,69 @@ func UpdatedAt(v time.Time) predicate.Account {
 	return predicate.Account(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
-// InstitutionIDEQ applies the EQ predicate on the "institution_id" field.
-func InstitutionIDEQ(v uuid.UUID) predicate.Account {
-	return predicate.Account(sql.FieldEQ(FieldInstitutionID, v))
+// ProviderNameEQ applies the EQ predicate on the "provider_name" field.
+func ProviderNameEQ(v string) predicate.Account {
+	return predicate.Account(sql.FieldEQ(FieldProviderName, v))
 }
 
-// InstitutionIDNEQ applies the NEQ predicate on the "institution_id" field.
-func InstitutionIDNEQ(v uuid.UUID) predicate.Account {
-	return predicate.Account(sql.FieldNEQ(FieldInstitutionID, v))
+// ProviderNameNEQ applies the NEQ predicate on the "provider_name" field.
+func ProviderNameNEQ(v string) predicate.Account {
+	return predicate.Account(sql.FieldNEQ(FieldProviderName, v))
 }
 
-// InstitutionIDIn applies the In predicate on the "institution_id" field.
-func InstitutionIDIn(vs ...uuid.UUID) predicate.Account {
-	return predicate.Account(sql.FieldIn(FieldInstitutionID, vs...))
+// ProviderNameIn applies the In predicate on the "provider_name" field.
+func ProviderNameIn(vs ...string) predicate.Account {
+	return predicate.Account(sql.FieldIn(FieldProviderName, vs...))
 }
 
-// InstitutionIDNotIn applies the NotIn predicate on the "institution_id" field.
-func InstitutionIDNotIn(vs ...uuid.UUID) predicate.Account {
-	return predicate.Account(sql.FieldNotIn(FieldInstitutionID, vs...))
+// ProviderNameNotIn applies the NotIn predicate on the "provider_name" field.
+func ProviderNameNotIn(vs ...string) predicate.Account {
+	return predicate.Account(sql.FieldNotIn(FieldProviderName, vs...))
 }
 
-// InstitutionIDIsNil applies the IsNil predicate on the "institution_id" field.
-func InstitutionIDIsNil() predicate.Account {
-	return predicate.Account(sql.FieldIsNull(FieldInstitutionID))
+// ProviderNameGT applies the GT predicate on the "provider_name" field.
+func ProviderNameGT(v string) predicate.Account {
+	return predicate.Account(sql.FieldGT(FieldProviderName, v))
 }
 
-// InstitutionIDNotNil applies the NotNil predicate on the "institution_id" field.
-func InstitutionIDNotNil() predicate.Account {
-	return predicate.Account(sql.FieldNotNull(FieldInstitutionID))
+// ProviderNameGTE applies the GTE predicate on the "provider_name" field.
+func ProviderNameGTE(v string) predicate.Account {
+	return predicate.Account(sql.FieldGTE(FieldProviderName, v))
+}
+
+// ProviderNameLT applies the LT predicate on the "provider_name" field.
+func ProviderNameLT(v string) predicate.Account {
+	return predicate.Account(sql.FieldLT(FieldProviderName, v))
+}
+
+// ProviderNameLTE applies the LTE predicate on the "provider_name" field.
+func ProviderNameLTE(v string) predicate.Account {
+	return predicate.Account(sql.FieldLTE(FieldProviderName, v))
+}
+
+// ProviderNameContains applies the Contains predicate on the "provider_name" field.
+func ProviderNameContains(v string) predicate.Account {
+	return predicate.Account(sql.FieldContains(FieldProviderName, v))
+}
+
+// ProviderNameHasPrefix applies the HasPrefix predicate on the "provider_name" field.
+func ProviderNameHasPrefix(v string) predicate.Account {
+	return predicate.Account(sql.FieldHasPrefix(FieldProviderName, v))
+}
+
+// ProviderNameHasSuffix applies the HasSuffix predicate on the "provider_name" field.
+func ProviderNameHasSuffix(v string) predicate.Account {
+	return predicate.Account(sql.FieldHasSuffix(FieldProviderName, v))
+}
+
+// ProviderNameEqualFold applies the EqualFold predicate on the "provider_name" field.
+func ProviderNameEqualFold(v string) predicate.Account {
+	return predicate.Account(sql.FieldEqualFold(FieldProviderName, v))
+}
+
+// ProviderNameContainsFold applies the ContainsFold predicate on the "provider_name" field.
+func ProviderNameContainsFold(v string) predicate.Account {
+	return predicate.Account(sql.FieldContainsFold(FieldProviderName, v))
 }
 
 // DataEQ applies the EQ predicate on the "data" field.
@@ -249,29 +284,6 @@ func UpdatedAtLT(v time.Time) predicate.Account {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.Account {
 	return predicate.Account(sql.FieldLTE(FieldUpdatedAt, v))
-}
-
-// HasInstitution applies the HasEdge predicate on the "institution" edge.
-func HasInstitution() predicate.Account {
-	return predicate.Account(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, InstitutionTable, InstitutionColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasInstitutionWith applies the HasEdge predicate on the "institution" edge with a given conditions (other predicates).
-func HasInstitutionWith(preds ...predicate.Institution) predicate.Account {
-	return predicate.Account(func(s *sql.Selector) {
-		step := newInstitutionStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
 }
 
 // HasTransactions applies the HasEdge predicate on the "transactions" edge.

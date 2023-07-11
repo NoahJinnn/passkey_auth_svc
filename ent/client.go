@@ -18,7 +18,6 @@ import (
 	"github.com/hellohq/hqservice/ent/assettable"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
-	"github.com/hellohq/hqservice/ent/identity"
 	"github.com/hellohq/hqservice/ent/jwk"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/primaryemail"
@@ -40,8 +39,6 @@ type Client struct {
 	Email *EmailClient
 	// FvSession is the client for interacting with the FvSession builders.
 	FvSession *FvSessionClient
-	// Identity is the client for interacting with the Identity builders.
-	Identity *IdentityClient
 	// Jwk is the client for interacting with the Jwk builders.
 	Jwk *JwkClient
 	// Passcode is the client for interacting with the Passcode builders.
@@ -74,7 +71,6 @@ func (c *Client) init() {
 	c.AssetTable = NewAssetTableClient(c.config)
 	c.Email = NewEmailClient(c.config)
 	c.FvSession = NewFvSessionClient(c.config)
-	c.Identity = NewIdentityClient(c.config)
 	c.Jwk = NewJwkClient(c.config)
 	c.Passcode = NewPasscodeClient(c.config)
 	c.PrimaryEmail = NewPrimaryEmailClient(c.config)
@@ -168,7 +164,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		AssetTable:                           NewAssetTableClient(cfg),
 		Email:                                NewEmailClient(cfg),
 		FvSession:                            NewFvSessionClient(cfg),
-		Identity:                             NewIdentityClient(cfg),
 		Jwk:                                  NewJwkClient(cfg),
 		Passcode:                             NewPasscodeClient(cfg),
 		PrimaryEmail:                         NewPrimaryEmailClient(cfg),
@@ -199,7 +194,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		AssetTable:                           NewAssetTableClient(cfg),
 		Email:                                NewEmailClient(cfg),
 		FvSession:                            NewFvSessionClient(cfg),
-		Identity:                             NewIdentityClient(cfg),
 		Jwk:                                  NewJwkClient(cfg),
 		Passcode:                             NewPasscodeClient(cfg),
 		PrimaryEmail:                         NewPrimaryEmailClient(cfg),
@@ -237,9 +231,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.AssetTable, c.Email, c.FvSession, c.Identity, c.Jwk, c.Passcode,
-		c.PrimaryEmail, c.User, c.WebauthnCredential, c.WebauthnCredentialTransport,
-		c.WebauthnSessionData, c.WebauthnSessionDataAllowedCredential,
+		c.AssetTable, c.Email, c.FvSession, c.Jwk, c.Passcode, c.PrimaryEmail, c.User,
+		c.WebauthnCredential, c.WebauthnCredentialTransport, c.WebauthnSessionData,
+		c.WebauthnSessionDataAllowedCredential,
 	} {
 		n.Use(hooks...)
 	}
@@ -249,9 +243,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.AssetTable, c.Email, c.FvSession, c.Identity, c.Jwk, c.Passcode,
-		c.PrimaryEmail, c.User, c.WebauthnCredential, c.WebauthnCredentialTransport,
-		c.WebauthnSessionData, c.WebauthnSessionDataAllowedCredential,
+		c.AssetTable, c.Email, c.FvSession, c.Jwk, c.Passcode, c.PrimaryEmail, c.User,
+		c.WebauthnCredential, c.WebauthnCredentialTransport, c.WebauthnSessionData,
+		c.WebauthnSessionDataAllowedCredential,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -266,8 +260,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Email.mutate(ctx, m)
 	case *FvSessionMutation:
 		return c.FvSession.mutate(ctx, m)
-	case *IdentityMutation:
-		return c.Identity.mutate(ctx, m)
 	case *JwkMutation:
 		return c.Jwk.mutate(ctx, m)
 	case *PasscodeMutation:
@@ -532,22 +524,6 @@ func (c *EmailClient) QueryUser(e *Email) *UserQuery {
 	return query
 }
 
-// QueryIdentities queries the identities edge of a Email.
-func (c *EmailClient) QueryIdentities(e *Email) *IdentityQuery {
-	query := (&IdentityClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := e.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(email.Table, email.FieldID, id),
-			sqlgraph.To(identity.Table, identity.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, email.IdentitiesTable, email.IdentitiesColumn),
-		)
-		fromV = sqlgraph.Neighbors(e.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryPasscodes queries the passcodes edge of a Email.
 func (c *EmailClient) QueryPasscodes(e *Email) *PasscodeQuery {
 	query := (&PasscodeClient{config: c.config}).Query()
@@ -736,140 +712,6 @@ func (c *FvSessionClient) mutate(ctx context.Context, m *FvSessionMutation) (Val
 		return (&FvSessionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown FvSession mutation op: %q", m.Op())
-	}
-}
-
-// IdentityClient is a client for the Identity schema.
-type IdentityClient struct {
-	config
-}
-
-// NewIdentityClient returns a client for the Identity from the given config.
-func NewIdentityClient(c config) *IdentityClient {
-	return &IdentityClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `identity.Hooks(f(g(h())))`.
-func (c *IdentityClient) Use(hooks ...Hook) {
-	c.hooks.Identity = append(c.hooks.Identity, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `identity.Intercept(f(g(h())))`.
-func (c *IdentityClient) Intercept(interceptors ...Interceptor) {
-	c.inters.Identity = append(c.inters.Identity, interceptors...)
-}
-
-// Create returns a builder for creating a Identity entity.
-func (c *IdentityClient) Create() *IdentityCreate {
-	mutation := newIdentityMutation(c.config, OpCreate)
-	return &IdentityCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of Identity entities.
-func (c *IdentityClient) CreateBulk(builders ...*IdentityCreate) *IdentityCreateBulk {
-	return &IdentityCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Identity.
-func (c *IdentityClient) Update() *IdentityUpdate {
-	mutation := newIdentityMutation(c.config, OpUpdate)
-	return &IdentityUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *IdentityClient) UpdateOne(i *Identity) *IdentityUpdateOne {
-	mutation := newIdentityMutation(c.config, OpUpdateOne, withIdentity(i))
-	return &IdentityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *IdentityClient) UpdateOneID(id uuid.UUID) *IdentityUpdateOne {
-	mutation := newIdentityMutation(c.config, OpUpdateOne, withIdentityID(id))
-	return &IdentityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Identity.
-func (c *IdentityClient) Delete() *IdentityDelete {
-	mutation := newIdentityMutation(c.config, OpDelete)
-	return &IdentityDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *IdentityClient) DeleteOne(i *Identity) *IdentityDeleteOne {
-	return c.DeleteOneID(i.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *IdentityClient) DeleteOneID(id uuid.UUID) *IdentityDeleteOne {
-	builder := c.Delete().Where(identity.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &IdentityDeleteOne{builder}
-}
-
-// Query returns a query builder for Identity.
-func (c *IdentityClient) Query() *IdentityQuery {
-	return &IdentityQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeIdentity},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a Identity entity by its id.
-func (c *IdentityClient) Get(ctx context.Context, id uuid.UUID) (*Identity, error) {
-	return c.Query().Where(identity.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *IdentityClient) GetX(ctx context.Context, id uuid.UUID) *Identity {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryEmail queries the email edge of a Identity.
-func (c *IdentityClient) QueryEmail(i *Identity) *EmailQuery {
-	query := (&EmailClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := i.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(identity.Table, identity.FieldID, id),
-			sqlgraph.To(email.Table, email.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, identity.EmailTable, identity.EmailColumn),
-		)
-		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *IdentityClient) Hooks() []Hook {
-	return c.hooks.Identity
-}
-
-// Interceptors returns the client interceptors.
-func (c *IdentityClient) Interceptors() []Interceptor {
-	return c.inters.Identity
-}
-
-func (c *IdentityClient) mutate(ctx context.Context, m *IdentityMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&IdentityCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&IdentityUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&IdentityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&IdentityDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown Identity mutation op: %q", m.Op())
 	}
 }
 
@@ -2060,12 +1902,12 @@ func (c *WebauthnSessionDataAllowedCredentialClient) mutate(ctx context.Context,
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		AssetTable, Email, FvSession, Identity, Jwk, Passcode, PrimaryEmail, User,
+		AssetTable, Email, FvSession, Jwk, Passcode, PrimaryEmail, User,
 		WebauthnCredential, WebauthnCredentialTransport, WebauthnSessionData,
 		WebauthnSessionDataAllowedCredential []ent.Hook
 	}
 	inters struct {
-		AssetTable, Email, FvSession, Identity, Jwk, Passcode, PrimaryEmail, User,
+		AssetTable, Email, FvSession, Jwk, Passcode, PrimaryEmail, User,
 		WebauthnCredential, WebauthnCredentialTransport, WebauthnSessionData,
 		WebauthnSessionDataAllowedCredential []ent.Interceptor
 	}

@@ -11,9 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/predicate"
 )
 
@@ -30,23 +28,9 @@ func (cu *ConnectionUpdate) Where(ps ...predicate.Connection) *ConnectionUpdate 
 	return cu
 }
 
-// SetInstitutionID sets the "institution_id" field.
-func (cu *ConnectionUpdate) SetInstitutionID(u uuid.UUID) *ConnectionUpdate {
-	cu.mutation.SetInstitutionID(u)
-	return cu
-}
-
-// SetNillableInstitutionID sets the "institution_id" field if the given value is not nil.
-func (cu *ConnectionUpdate) SetNillableInstitutionID(u *uuid.UUID) *ConnectionUpdate {
-	if u != nil {
-		cu.SetInstitutionID(*u)
-	}
-	return cu
-}
-
-// ClearInstitutionID clears the value of the "institution_id" field.
-func (cu *ConnectionUpdate) ClearInstitutionID() *ConnectionUpdate {
-	cu.mutation.ClearInstitutionID()
+// SetProviderName sets the "provider_name" field.
+func (cu *ConnectionUpdate) SetProviderName(s string) *ConnectionUpdate {
+	cu.mutation.SetProviderName(s)
 	return cu
 }
 
@@ -68,20 +52,9 @@ func (cu *ConnectionUpdate) SetUpdatedAt(t time.Time) *ConnectionUpdate {
 	return cu
 }
 
-// SetInstitution sets the "institution" edge to the Institution entity.
-func (cu *ConnectionUpdate) SetInstitution(i *Institution) *ConnectionUpdate {
-	return cu.SetInstitutionID(i.ID)
-}
-
 // Mutation returns the ConnectionMutation object of the builder.
 func (cu *ConnectionUpdate) Mutation() *ConnectionMutation {
 	return cu.mutation
-}
-
-// ClearInstitution clears the "institution" edge to the Institution entity.
-func (cu *ConnectionUpdate) ClearInstitution() *ConnectionUpdate {
-	cu.mutation.ClearInstitution()
-	return cu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -129,6 +102,9 @@ func (cu *ConnectionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := cu.mutation.ProviderName(); ok {
+		_spec.SetField(connection.FieldProviderName, field.TypeString, value)
+	}
 	if value, ok := cu.mutation.Data(); ok {
 		_spec.SetField(connection.FieldData, field.TypeString, value)
 	}
@@ -137,35 +113,6 @@ func (cu *ConnectionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := cu.mutation.UpdatedAt(); ok {
 		_spec.SetField(connection.FieldUpdatedAt, field.TypeTime, value)
-	}
-	if cu.mutation.InstitutionCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   connection.InstitutionTable,
-			Columns: []string{connection.InstitutionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(institution.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cu.mutation.InstitutionIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   connection.InstitutionTable,
-			Columns: []string{connection.InstitutionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(institution.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -187,23 +134,9 @@ type ConnectionUpdateOne struct {
 	mutation *ConnectionMutation
 }
 
-// SetInstitutionID sets the "institution_id" field.
-func (cuo *ConnectionUpdateOne) SetInstitutionID(u uuid.UUID) *ConnectionUpdateOne {
-	cuo.mutation.SetInstitutionID(u)
-	return cuo
-}
-
-// SetNillableInstitutionID sets the "institution_id" field if the given value is not nil.
-func (cuo *ConnectionUpdateOne) SetNillableInstitutionID(u *uuid.UUID) *ConnectionUpdateOne {
-	if u != nil {
-		cuo.SetInstitutionID(*u)
-	}
-	return cuo
-}
-
-// ClearInstitutionID clears the value of the "institution_id" field.
-func (cuo *ConnectionUpdateOne) ClearInstitutionID() *ConnectionUpdateOne {
-	cuo.mutation.ClearInstitutionID()
+// SetProviderName sets the "provider_name" field.
+func (cuo *ConnectionUpdateOne) SetProviderName(s string) *ConnectionUpdateOne {
+	cuo.mutation.SetProviderName(s)
 	return cuo
 }
 
@@ -225,20 +158,9 @@ func (cuo *ConnectionUpdateOne) SetUpdatedAt(t time.Time) *ConnectionUpdateOne {
 	return cuo
 }
 
-// SetInstitution sets the "institution" edge to the Institution entity.
-func (cuo *ConnectionUpdateOne) SetInstitution(i *Institution) *ConnectionUpdateOne {
-	return cuo.SetInstitutionID(i.ID)
-}
-
 // Mutation returns the ConnectionMutation object of the builder.
 func (cuo *ConnectionUpdateOne) Mutation() *ConnectionMutation {
 	return cuo.mutation
-}
-
-// ClearInstitution clears the "institution" edge to the Institution entity.
-func (cuo *ConnectionUpdateOne) ClearInstitution() *ConnectionUpdateOne {
-	cuo.mutation.ClearInstitution()
-	return cuo
 }
 
 // Where appends a list predicates to the ConnectionUpdate builder.
@@ -316,6 +238,9 @@ func (cuo *ConnectionUpdateOne) sqlSave(ctx context.Context) (_node *Connection,
 			}
 		}
 	}
+	if value, ok := cuo.mutation.ProviderName(); ok {
+		_spec.SetField(connection.FieldProviderName, field.TypeString, value)
+	}
 	if value, ok := cuo.mutation.Data(); ok {
 		_spec.SetField(connection.FieldData, field.TypeString, value)
 	}
@@ -324,35 +249,6 @@ func (cuo *ConnectionUpdateOne) sqlSave(ctx context.Context) (_node *Connection,
 	}
 	if value, ok := cuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(connection.FieldUpdatedAt, field.TypeTime, value)
-	}
-	if cuo.mutation.InstitutionCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   connection.InstitutionTable,
-			Columns: []string{connection.InstitutionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(institution.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cuo.mutation.InstitutionIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   connection.InstitutionTable,
-			Columns: []string{connection.InstitutionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(institution.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Connection{config: cuo.config}
 	_spec.Assign = _node.assignValues

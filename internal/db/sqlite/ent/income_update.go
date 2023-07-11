@@ -11,9 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/income"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/predicate"
 )
 
@@ -30,23 +28,9 @@ func (iu *IncomeUpdate) Where(ps ...predicate.Income) *IncomeUpdate {
 	return iu
 }
 
-// SetInstitutionID sets the "institution_id" field.
-func (iu *IncomeUpdate) SetInstitutionID(u uuid.UUID) *IncomeUpdate {
-	iu.mutation.SetInstitutionID(u)
-	return iu
-}
-
-// SetNillableInstitutionID sets the "institution_id" field if the given value is not nil.
-func (iu *IncomeUpdate) SetNillableInstitutionID(u *uuid.UUID) *IncomeUpdate {
-	if u != nil {
-		iu.SetInstitutionID(*u)
-	}
-	return iu
-}
-
-// ClearInstitutionID clears the value of the "institution_id" field.
-func (iu *IncomeUpdate) ClearInstitutionID() *IncomeUpdate {
-	iu.mutation.ClearInstitutionID()
+// SetProviderName sets the "provider_name" field.
+func (iu *IncomeUpdate) SetProviderName(s string) *IncomeUpdate {
+	iu.mutation.SetProviderName(s)
 	return iu
 }
 
@@ -62,20 +46,9 @@ func (iu *IncomeUpdate) SetUpdatedAt(t time.Time) *IncomeUpdate {
 	return iu
 }
 
-// SetInstitution sets the "institution" edge to the Institution entity.
-func (iu *IncomeUpdate) SetInstitution(i *Institution) *IncomeUpdate {
-	return iu.SetInstitutionID(i.ID)
-}
-
 // Mutation returns the IncomeMutation object of the builder.
 func (iu *IncomeUpdate) Mutation() *IncomeMutation {
 	return iu.mutation
-}
-
-// ClearInstitution clears the "institution" edge to the Institution entity.
-func (iu *IncomeUpdate) ClearInstitution() *IncomeUpdate {
-	iu.mutation.ClearInstitution()
-	return iu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -123,40 +96,14 @@ func (iu *IncomeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := iu.mutation.ProviderName(); ok {
+		_spec.SetField(income.FieldProviderName, field.TypeString, value)
+	}
 	if value, ok := iu.mutation.Data(); ok {
 		_spec.SetField(income.FieldData, field.TypeString, value)
 	}
 	if value, ok := iu.mutation.UpdatedAt(); ok {
 		_spec.SetField(income.FieldUpdatedAt, field.TypeTime, value)
-	}
-	if iu.mutation.InstitutionCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   income.InstitutionTable,
-			Columns: []string{income.InstitutionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(institution.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := iu.mutation.InstitutionIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   income.InstitutionTable,
-			Columns: []string{income.InstitutionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(institution.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, iu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -178,23 +125,9 @@ type IncomeUpdateOne struct {
 	mutation *IncomeMutation
 }
 
-// SetInstitutionID sets the "institution_id" field.
-func (iuo *IncomeUpdateOne) SetInstitutionID(u uuid.UUID) *IncomeUpdateOne {
-	iuo.mutation.SetInstitutionID(u)
-	return iuo
-}
-
-// SetNillableInstitutionID sets the "institution_id" field if the given value is not nil.
-func (iuo *IncomeUpdateOne) SetNillableInstitutionID(u *uuid.UUID) *IncomeUpdateOne {
-	if u != nil {
-		iuo.SetInstitutionID(*u)
-	}
-	return iuo
-}
-
-// ClearInstitutionID clears the value of the "institution_id" field.
-func (iuo *IncomeUpdateOne) ClearInstitutionID() *IncomeUpdateOne {
-	iuo.mutation.ClearInstitutionID()
+// SetProviderName sets the "provider_name" field.
+func (iuo *IncomeUpdateOne) SetProviderName(s string) *IncomeUpdateOne {
+	iuo.mutation.SetProviderName(s)
 	return iuo
 }
 
@@ -210,20 +143,9 @@ func (iuo *IncomeUpdateOne) SetUpdatedAt(t time.Time) *IncomeUpdateOne {
 	return iuo
 }
 
-// SetInstitution sets the "institution" edge to the Institution entity.
-func (iuo *IncomeUpdateOne) SetInstitution(i *Institution) *IncomeUpdateOne {
-	return iuo.SetInstitutionID(i.ID)
-}
-
 // Mutation returns the IncomeMutation object of the builder.
 func (iuo *IncomeUpdateOne) Mutation() *IncomeMutation {
 	return iuo.mutation
-}
-
-// ClearInstitution clears the "institution" edge to the Institution entity.
-func (iuo *IncomeUpdateOne) ClearInstitution() *IncomeUpdateOne {
-	iuo.mutation.ClearInstitution()
-	return iuo
 }
 
 // Where appends a list predicates to the IncomeUpdate builder.
@@ -301,40 +223,14 @@ func (iuo *IncomeUpdateOne) sqlSave(ctx context.Context) (_node *Income, err err
 			}
 		}
 	}
+	if value, ok := iuo.mutation.ProviderName(); ok {
+		_spec.SetField(income.FieldProviderName, field.TypeString, value)
+	}
 	if value, ok := iuo.mutation.Data(); ok {
 		_spec.SetField(income.FieldData, field.TypeString, value)
 	}
 	if value, ok := iuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(income.FieldUpdatedAt, field.TypeTime, value)
-	}
-	if iuo.mutation.InstitutionCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   income.InstitutionTable,
-			Columns: []string{income.InstitutionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(institution.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := iuo.mutation.InstitutionIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   income.InstitutionTable,
-			Columns: []string{income.InstitutionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(institution.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Income{config: iuo.config}
 	_spec.Assign = _node.assignValues

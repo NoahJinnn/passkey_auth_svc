@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 )
 
 // Connection is the model entity for the Connection schema.
@@ -19,8 +18,8 @@ type Connection struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// InstitutionID holds the value of the "institution_id" field.
-	InstitutionID *uuid.UUID `json:"institution_id,omitempty"`
+	// ProviderName holds the value of the "provider_name" field.
+	ProviderName string `json:"provider_name,omitempty"`
 	// Data holds the value of the "data" field.
 	Data string `json:"data,omitempty"`
 	// Env holds the value of the "env" field.
@@ -28,33 +27,8 @@ type Connection struct {
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the ConnectionQuery when eager-loading is set.
-	Edges        ConnectionEdges `json:"edges"`
+	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
-}
-
-// ConnectionEdges holds the relations/edges for other nodes in the graph.
-type ConnectionEdges struct {
-	// Institution holds the value of the institution edge.
-	Institution *Institution `json:"institution,omitempty"`
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
-}
-
-// InstitutionOrErr returns the Institution value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e ConnectionEdges) InstitutionOrErr() (*Institution, error) {
-	if e.loadedTypes[0] {
-		if e.Institution == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: institution.Label}
-		}
-		return e.Institution, nil
-	}
-	return nil, &NotLoadedError{edge: "institution"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -62,9 +36,7 @@ func (*Connection) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case connection.FieldInstitutionID:
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case connection.FieldData, connection.FieldEnv:
+		case connection.FieldProviderName, connection.FieldData, connection.FieldEnv:
 			values[i] = new(sql.NullString)
 		case connection.FieldCreatedAt, connection.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -91,12 +63,11 @@ func (c *Connection) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				c.ID = *value
 			}
-		case connection.FieldInstitutionID:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field institution_id", values[i])
+		case connection.FieldProviderName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field provider_name", values[i])
 			} else if value.Valid {
-				c.InstitutionID = new(uuid.UUID)
-				*c.InstitutionID = *value.S.(*uuid.UUID)
+				c.ProviderName = value.String
 			}
 		case connection.FieldData:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -135,11 +106,6 @@ func (c *Connection) Value(name string) (ent.Value, error) {
 	return c.selectValues.Get(name)
 }
 
-// QueryInstitution queries the "institution" edge of the Connection entity.
-func (c *Connection) QueryInstitution() *InstitutionQuery {
-	return NewConnectionClient(c.config).QueryInstitution(c)
-}
-
 // Update returns a builder for updating this Connection.
 // Note that you need to call Connection.Unwrap() before calling this method if this Connection
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -163,10 +129,8 @@ func (c *Connection) String() string {
 	var builder strings.Builder
 	builder.WriteString("Connection(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
-	if v := c.InstitutionID; v != nil {
-		builder.WriteString("institution_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("provider_name=")
+	builder.WriteString(c.ProviderName)
 	builder.WriteString(", ")
 	builder.WriteString("data=")
 	builder.WriteString(c.Data)

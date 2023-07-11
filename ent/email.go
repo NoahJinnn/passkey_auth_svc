@@ -40,15 +40,13 @@ type Email struct {
 type EmailEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
-	// Identities holds the value of the identities edge.
-	Identities []*Identity `json:"identities,omitempty"`
 	// Passcodes holds the value of the passcodes edge.
 	Passcodes []*Passcode `json:"passcodes,omitempty"`
 	// PrimaryEmail holds the value of the primary_email edge.
 	PrimaryEmail *PrimaryEmail `json:"primary_email,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [3]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -64,19 +62,10 @@ func (e EmailEdges) UserOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "user"}
 }
 
-// IdentitiesOrErr returns the Identities value or an error if the edge
-// was not loaded in eager-loading.
-func (e EmailEdges) IdentitiesOrErr() ([]*Identity, error) {
-	if e.loadedTypes[1] {
-		return e.Identities, nil
-	}
-	return nil, &NotLoadedError{edge: "identities"}
-}
-
 // PasscodesOrErr returns the Passcodes value or an error if the edge
 // was not loaded in eager-loading.
 func (e EmailEdges) PasscodesOrErr() ([]*Passcode, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[1] {
 		return e.Passcodes, nil
 	}
 	return nil, &NotLoadedError{edge: "passcodes"}
@@ -85,7 +74,7 @@ func (e EmailEdges) PasscodesOrErr() ([]*Passcode, error) {
 // PrimaryEmailOrErr returns the PrimaryEmail value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e EmailEdges) PrimaryEmailOrErr() (*PrimaryEmail, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[2] {
 		if e.PrimaryEmail == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: primaryemail.Label}
@@ -178,11 +167,6 @@ func (e *Email) Value(name string) (ent.Value, error) {
 // QueryUser queries the "user" edge of the Email entity.
 func (e *Email) QueryUser() *UserQuery {
 	return NewEmailClient(e.config).QueryUser(e)
-}
-
-// QueryIdentities queries the "identities" edge of the Email entity.
-func (e *Email) QueryIdentities() *IdentityQuery {
-	return NewEmailClient(e.config).QueryIdentities(e)
 }
 
 // QueryPasscodes queries the "passcodes" edge of the Email entity.

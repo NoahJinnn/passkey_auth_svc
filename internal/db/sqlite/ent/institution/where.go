@@ -291,7 +291,7 @@ func HasConnection() predicate.Institution {
 	return predicate.Institution(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, ConnectionTable, ConnectionColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, ConnectionTable, ConnectionColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

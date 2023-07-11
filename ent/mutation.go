@@ -15,7 +15,6 @@ import (
 	"github.com/hellohq/hqservice/ent/assettable"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
-	"github.com/hellohq/hqservice/ent/identity"
 	"github.com/hellohq/hqservice/ent/jwk"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/predicate"
@@ -39,7 +38,6 @@ const (
 	TypeAssetTable                           = "AssetTable"
 	TypeEmail                                = "Email"
 	TypeFvSession                            = "FvSession"
-	TypeIdentity                             = "Identity"
 	TypeJwk                                  = "Jwk"
 	TypePasscode                             = "Passcode"
 	TypePrimaryEmail                         = "PrimaryEmail"
@@ -868,9 +866,6 @@ type EmailMutation struct {
 	clearedFields        map[string]struct{}
 	user                 *uuid.UUID
 	cleareduser          bool
-	identities           map[uuid.UUID]struct{}
-	removedidentities    map[uuid.UUID]struct{}
-	clearedidentities    bool
 	passcodes            map[uuid.UUID]struct{}
 	removedpasscodes     map[uuid.UUID]struct{}
 	clearedpasscodes     bool
@@ -1204,60 +1199,6 @@ func (m *EmailMutation) ResetUser() {
 	m.cleareduser = false
 }
 
-// AddIdentityIDs adds the "identities" edge to the Identity entity by ids.
-func (m *EmailMutation) AddIdentityIDs(ids ...uuid.UUID) {
-	if m.identities == nil {
-		m.identities = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.identities[ids[i]] = struct{}{}
-	}
-}
-
-// ClearIdentities clears the "identities" edge to the Identity entity.
-func (m *EmailMutation) ClearIdentities() {
-	m.clearedidentities = true
-}
-
-// IdentitiesCleared reports if the "identities" edge to the Identity entity was cleared.
-func (m *EmailMutation) IdentitiesCleared() bool {
-	return m.clearedidentities
-}
-
-// RemoveIdentityIDs removes the "identities" edge to the Identity entity by IDs.
-func (m *EmailMutation) RemoveIdentityIDs(ids ...uuid.UUID) {
-	if m.removedidentities == nil {
-		m.removedidentities = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m.identities, ids[i])
-		m.removedidentities[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedIdentities returns the removed IDs of the "identities" edge to the Identity entity.
-func (m *EmailMutation) RemovedIdentitiesIDs() (ids []uuid.UUID) {
-	for id := range m.removedidentities {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// IdentitiesIDs returns the "identities" edge IDs in the mutation.
-func (m *EmailMutation) IdentitiesIDs() (ids []uuid.UUID) {
-	for id := range m.identities {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetIdentities resets all changes to the "identities" edge.
-func (m *EmailMutation) ResetIdentities() {
-	m.identities = nil
-	m.clearedidentities = false
-	m.removedidentities = nil
-}
-
 // AddPasscodeIDs adds the "passcodes" edge to the Passcode entity by ids.
 func (m *EmailMutation) AddPasscodeIDs(ids ...uuid.UUID) {
 	if m.passcodes == nil {
@@ -1561,12 +1502,9 @@ func (m *EmailMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *EmailMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 3)
 	if m.user != nil {
 		edges = append(edges, email.EdgeUser)
-	}
-	if m.identities != nil {
-		edges = append(edges, email.EdgeIdentities)
 	}
 	if m.passcodes != nil {
 		edges = append(edges, email.EdgePasscodes)
@@ -1585,12 +1523,6 @@ func (m *EmailMutation) AddedIDs(name string) []ent.Value {
 		if id := m.user; id != nil {
 			return []ent.Value{*id}
 		}
-	case email.EdgeIdentities:
-		ids := make([]ent.Value, 0, len(m.identities))
-		for id := range m.identities {
-			ids = append(ids, id)
-		}
-		return ids
 	case email.EdgePasscodes:
 		ids := make([]ent.Value, 0, len(m.passcodes))
 		for id := range m.passcodes {
@@ -1607,10 +1539,7 @@ func (m *EmailMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *EmailMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
-	if m.removedidentities != nil {
-		edges = append(edges, email.EdgeIdentities)
-	}
+	edges := make([]string, 0, 3)
 	if m.removedpasscodes != nil {
 		edges = append(edges, email.EdgePasscodes)
 	}
@@ -1621,12 +1550,6 @@ func (m *EmailMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *EmailMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case email.EdgeIdentities:
-		ids := make([]ent.Value, 0, len(m.removedidentities))
-		for id := range m.removedidentities {
-			ids = append(ids, id)
-		}
-		return ids
 	case email.EdgePasscodes:
 		ids := make([]ent.Value, 0, len(m.removedpasscodes))
 		for id := range m.removedpasscodes {
@@ -1639,12 +1562,9 @@ func (m *EmailMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *EmailMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 3)
 	if m.cleareduser {
 		edges = append(edges, email.EdgeUser)
-	}
-	if m.clearedidentities {
-		edges = append(edges, email.EdgeIdentities)
 	}
 	if m.clearedpasscodes {
 		edges = append(edges, email.EdgePasscodes)
@@ -1661,8 +1581,6 @@ func (m *EmailMutation) EdgeCleared(name string) bool {
 	switch name {
 	case email.EdgeUser:
 		return m.cleareduser
-	case email.EdgeIdentities:
-		return m.clearedidentities
 	case email.EdgePasscodes:
 		return m.clearedpasscodes
 	case email.EdgePrimaryEmail:
@@ -1691,9 +1609,6 @@ func (m *EmailMutation) ResetEdge(name string) error {
 	switch name {
 	case email.EdgeUser:
 		m.ResetUser()
-		return nil
-	case email.EdgeIdentities:
-		m.ResetIdentities()
 		return nil
 	case email.EdgePasscodes:
 		m.ResetPasscodes()
@@ -2470,702 +2385,6 @@ func (m *FvSessionMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown FvSession edge %s", name)
-}
-
-// IdentityMutation represents an operation that mutates the Identity nodes in the graph.
-type IdentityMutation struct {
-	config
-	op            Op
-	typ           string
-	id            *uuid.UUID
-	provider_id   *string
-	provider_name *string
-	data          *string
-	created_at    *time.Time
-	updated_at    *time.Time
-	clearedFields map[string]struct{}
-	email         *uuid.UUID
-	clearedemail  bool
-	done          bool
-	oldValue      func(context.Context) (*Identity, error)
-	predicates    []predicate.Identity
-}
-
-var _ ent.Mutation = (*IdentityMutation)(nil)
-
-// identityOption allows management of the mutation configuration using functional options.
-type identityOption func(*IdentityMutation)
-
-// newIdentityMutation creates new mutation for the Identity entity.
-func newIdentityMutation(c config, op Op, opts ...identityOption) *IdentityMutation {
-	m := &IdentityMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeIdentity,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withIdentityID sets the ID field of the mutation.
-func withIdentityID(id uuid.UUID) identityOption {
-	return func(m *IdentityMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *Identity
-		)
-		m.oldValue = func(ctx context.Context) (*Identity, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().Identity.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withIdentity sets the old Identity of the mutation.
-func withIdentity(node *Identity) identityOption {
-	return func(m *IdentityMutation) {
-		m.oldValue = func(context.Context) (*Identity, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m IdentityMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m IdentityMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Identity entities.
-func (m *IdentityMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *IdentityMutation) ID() (id uuid.UUID, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *IdentityMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []uuid.UUID{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().Identity.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetProviderID sets the "provider_id" field.
-func (m *IdentityMutation) SetProviderID(s string) {
-	m.provider_id = &s
-}
-
-// ProviderID returns the value of the "provider_id" field in the mutation.
-func (m *IdentityMutation) ProviderID() (r string, exists bool) {
-	v := m.provider_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldProviderID returns the old "provider_id" field's value of the Identity entity.
-// If the Identity object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *IdentityMutation) OldProviderID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldProviderID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldProviderID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldProviderID: %w", err)
-	}
-	return oldValue.ProviderID, nil
-}
-
-// ResetProviderID resets all changes to the "provider_id" field.
-func (m *IdentityMutation) ResetProviderID() {
-	m.provider_id = nil
-}
-
-// SetProviderName sets the "provider_name" field.
-func (m *IdentityMutation) SetProviderName(s string) {
-	m.provider_name = &s
-}
-
-// ProviderName returns the value of the "provider_name" field in the mutation.
-func (m *IdentityMutation) ProviderName() (r string, exists bool) {
-	v := m.provider_name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldProviderName returns the old "provider_name" field's value of the Identity entity.
-// If the Identity object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *IdentityMutation) OldProviderName(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldProviderName is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldProviderName requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldProviderName: %w", err)
-	}
-	return oldValue.ProviderName, nil
-}
-
-// ResetProviderName resets all changes to the "provider_name" field.
-func (m *IdentityMutation) ResetProviderName() {
-	m.provider_name = nil
-}
-
-// SetData sets the "data" field.
-func (m *IdentityMutation) SetData(s string) {
-	m.data = &s
-}
-
-// Data returns the value of the "data" field in the mutation.
-func (m *IdentityMutation) Data() (r string, exists bool) {
-	v := m.data
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldData returns the old "data" field's value of the Identity entity.
-// If the Identity object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *IdentityMutation) OldData(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldData is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldData requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldData: %w", err)
-	}
-	return oldValue.Data, nil
-}
-
-// ClearData clears the value of the "data" field.
-func (m *IdentityMutation) ClearData() {
-	m.data = nil
-	m.clearedFields[identity.FieldData] = struct{}{}
-}
-
-// DataCleared returns if the "data" field was cleared in this mutation.
-func (m *IdentityMutation) DataCleared() bool {
-	_, ok := m.clearedFields[identity.FieldData]
-	return ok
-}
-
-// ResetData resets all changes to the "data" field.
-func (m *IdentityMutation) ResetData() {
-	m.data = nil
-	delete(m.clearedFields, identity.FieldData)
-}
-
-// SetEmailID sets the "email_id" field.
-func (m *IdentityMutation) SetEmailID(u uuid.UUID) {
-	m.email = &u
-}
-
-// EmailID returns the value of the "email_id" field in the mutation.
-func (m *IdentityMutation) EmailID() (r uuid.UUID, exists bool) {
-	v := m.email
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldEmailID returns the old "email_id" field's value of the Identity entity.
-// If the Identity object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *IdentityMutation) OldEmailID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldEmailID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldEmailID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldEmailID: %w", err)
-	}
-	return oldValue.EmailID, nil
-}
-
-// ClearEmailID clears the value of the "email_id" field.
-func (m *IdentityMutation) ClearEmailID() {
-	m.email = nil
-	m.clearedFields[identity.FieldEmailID] = struct{}{}
-}
-
-// EmailIDCleared returns if the "email_id" field was cleared in this mutation.
-func (m *IdentityMutation) EmailIDCleared() bool {
-	_, ok := m.clearedFields[identity.FieldEmailID]
-	return ok
-}
-
-// ResetEmailID resets all changes to the "email_id" field.
-func (m *IdentityMutation) ResetEmailID() {
-	m.email = nil
-	delete(m.clearedFields, identity.FieldEmailID)
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *IdentityMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *IdentityMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Identity entity.
-// If the Identity object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *IdentityMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *IdentityMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *IdentityMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *IdentityMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the Identity entity.
-// If the Identity object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *IdentityMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *IdentityMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// ClearEmail clears the "email" edge to the Email entity.
-func (m *IdentityMutation) ClearEmail() {
-	m.clearedemail = true
-}
-
-// EmailCleared reports if the "email" edge to the Email entity was cleared.
-func (m *IdentityMutation) EmailCleared() bool {
-	return m.EmailIDCleared() || m.clearedemail
-}
-
-// EmailIDs returns the "email" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// EmailID instead. It exists only for internal usage by the builders.
-func (m *IdentityMutation) EmailIDs() (ids []uuid.UUID) {
-	if id := m.email; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetEmail resets all changes to the "email" edge.
-func (m *IdentityMutation) ResetEmail() {
-	m.email = nil
-	m.clearedemail = false
-}
-
-// Where appends a list predicates to the IdentityMutation builder.
-func (m *IdentityMutation) Where(ps ...predicate.Identity) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the IdentityMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *IdentityMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.Identity, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *IdentityMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *IdentityMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (Identity).
-func (m *IdentityMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *IdentityMutation) Fields() []string {
-	fields := make([]string, 0, 6)
-	if m.provider_id != nil {
-		fields = append(fields, identity.FieldProviderID)
-	}
-	if m.provider_name != nil {
-		fields = append(fields, identity.FieldProviderName)
-	}
-	if m.data != nil {
-		fields = append(fields, identity.FieldData)
-	}
-	if m.email != nil {
-		fields = append(fields, identity.FieldEmailID)
-	}
-	if m.created_at != nil {
-		fields = append(fields, identity.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, identity.FieldUpdatedAt)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *IdentityMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case identity.FieldProviderID:
-		return m.ProviderID()
-	case identity.FieldProviderName:
-		return m.ProviderName()
-	case identity.FieldData:
-		return m.Data()
-	case identity.FieldEmailID:
-		return m.EmailID()
-	case identity.FieldCreatedAt:
-		return m.CreatedAt()
-	case identity.FieldUpdatedAt:
-		return m.UpdatedAt()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *IdentityMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case identity.FieldProviderID:
-		return m.OldProviderID(ctx)
-	case identity.FieldProviderName:
-		return m.OldProviderName(ctx)
-	case identity.FieldData:
-		return m.OldData(ctx)
-	case identity.FieldEmailID:
-		return m.OldEmailID(ctx)
-	case identity.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case identity.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	}
-	return nil, fmt.Errorf("unknown Identity field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *IdentityMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case identity.FieldProviderID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetProviderID(v)
-		return nil
-	case identity.FieldProviderName:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetProviderName(v)
-		return nil
-	case identity.FieldData:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetData(v)
-		return nil
-	case identity.FieldEmailID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetEmailID(v)
-		return nil
-	case identity.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case identity.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	}
-	return fmt.Errorf("unknown Identity field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *IdentityMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *IdentityMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *IdentityMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown Identity numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *IdentityMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(identity.FieldData) {
-		fields = append(fields, identity.FieldData)
-	}
-	if m.FieldCleared(identity.FieldEmailID) {
-		fields = append(fields, identity.FieldEmailID)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *IdentityMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *IdentityMutation) ClearField(name string) error {
-	switch name {
-	case identity.FieldData:
-		m.ClearData()
-		return nil
-	case identity.FieldEmailID:
-		m.ClearEmailID()
-		return nil
-	}
-	return fmt.Errorf("unknown Identity nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *IdentityMutation) ResetField(name string) error {
-	switch name {
-	case identity.FieldProviderID:
-		m.ResetProviderID()
-		return nil
-	case identity.FieldProviderName:
-		m.ResetProviderName()
-		return nil
-	case identity.FieldData:
-		m.ResetData()
-		return nil
-	case identity.FieldEmailID:
-		m.ResetEmailID()
-		return nil
-	case identity.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case identity.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	}
-	return fmt.Errorf("unknown Identity field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *IdentityMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.email != nil {
-		edges = append(edges, identity.EdgeEmail)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *IdentityMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case identity.EdgeEmail:
-		if id := m.email; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *IdentityMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *IdentityMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *IdentityMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedemail {
-		edges = append(edges, identity.EdgeEmail)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *IdentityMutation) EdgeCleared(name string) bool {
-	switch name {
-	case identity.EdgeEmail:
-		return m.clearedemail
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *IdentityMutation) ClearEdge(name string) error {
-	switch name {
-	case identity.EdgeEmail:
-		m.ClearEmail()
-		return nil
-	}
-	return fmt.Errorf("unknown Identity unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *IdentityMutation) ResetEdge(name string) error {
-	switch name {
-	case identity.EdgeEmail:
-		m.ResetEmail()
-		return nil
-	}
-	return fmt.Errorf("unknown Identity edge %s", name)
 }
 
 // JwkMutation represents an operation that mutates the Jwk nodes in the graph.
