@@ -1,7 +1,8 @@
 #!/bin/bash
 set -x -e -o pipefail
 scriptsdir=$( dirname -- "$0"; )
-export CGO_ENABLED=0
+# Use CGO 1 for sqlite3 due to this error https://github.com/mattn/go-sqlite3/issues/855
+export CGO_ENABLED=1
 
 gitver() {
 	local ver branch rev dirty
@@ -12,10 +13,11 @@ gitver() {
 	echo "${ver:+$ver }${branch:+$branch } $(date -u +"%F_%T")"
 }
 
+
 build() {
 	rm -rf $scriptsdir/../../../bin/
 	mkdir $scriptsdir/../../../bin/
-	GOOS=$1 GOARCH=$2 go build -ldflags="-X '$(go list -m)/pkg/def.ver=$(gitver)' -s -w" -a -o $scriptsdir/../../../bin/hq "$@" $scriptsdir/../../../main.go
+	go build -ldflags="-X '$(go list -m)/pkg/def.ver=$(gitver)' -s -w" -a -o $scriptsdir/../../../bin/hq "$@" $scriptsdir/../../../main.go
 }
 
 build_debug() {

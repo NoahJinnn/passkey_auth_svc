@@ -58,3 +58,4 @@ Temporary Items
 # test and build artifacts
 coverage.html
 hqservice
+.db
