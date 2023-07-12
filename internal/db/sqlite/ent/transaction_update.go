@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/predicate"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
 )
@@ -68,20 +67,9 @@ func (tu *TransactionUpdate) SetUpdatedAt(t time.Time) *TransactionUpdate {
 	return tu
 }
 
-// SetAccount sets the "account" edge to the Account entity.
-func (tu *TransactionUpdate) SetAccount(a *Account) *TransactionUpdate {
-	return tu.SetAccountID(a.ID)
-}
-
 // Mutation returns the TransactionMutation object of the builder.
 func (tu *TransactionUpdate) Mutation() *TransactionMutation {
 	return tu.mutation
-}
-
-// ClearAccount clears the "account" edge to the Account entity.
-func (tu *TransactionUpdate) ClearAccount() *TransactionUpdate {
-	tu.mutation.ClearAccount()
-	return tu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -129,6 +117,12 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := tu.mutation.AccountID(); ok {
+		_spec.SetField(transaction.FieldAccountID, field.TypeUUID, value)
+	}
+	if tu.mutation.AccountIDCleared() {
+		_spec.ClearField(transaction.FieldAccountID, field.TypeUUID)
+	}
 	if value, ok := tu.mutation.ProviderName(); ok {
 		_spec.SetField(transaction.FieldProviderName, field.TypeString, value)
 	}
@@ -137,35 +131,6 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := tu.mutation.UpdatedAt(); ok {
 		_spec.SetField(transaction.FieldUpdatedAt, field.TypeTime, value)
-	}
-	if tu.mutation.AccountCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   transaction.AccountTable,
-			Columns: []string{transaction.AccountColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tu.mutation.AccountIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   transaction.AccountTable,
-			Columns: []string{transaction.AccountColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -225,20 +190,9 @@ func (tuo *TransactionUpdateOne) SetUpdatedAt(t time.Time) *TransactionUpdateOne
 	return tuo
 }
 
-// SetAccount sets the "account" edge to the Account entity.
-func (tuo *TransactionUpdateOne) SetAccount(a *Account) *TransactionUpdateOne {
-	return tuo.SetAccountID(a.ID)
-}
-
 // Mutation returns the TransactionMutation object of the builder.
 func (tuo *TransactionUpdateOne) Mutation() *TransactionMutation {
 	return tuo.mutation
-}
-
-// ClearAccount clears the "account" edge to the Account entity.
-func (tuo *TransactionUpdateOne) ClearAccount() *TransactionUpdateOne {
-	tuo.mutation.ClearAccount()
-	return tuo
 }
 
 // Where appends a list predicates to the TransactionUpdate builder.
@@ -316,6 +270,12 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			}
 		}
 	}
+	if value, ok := tuo.mutation.AccountID(); ok {
+		_spec.SetField(transaction.FieldAccountID, field.TypeUUID, value)
+	}
+	if tuo.mutation.AccountIDCleared() {
+		_spec.ClearField(transaction.FieldAccountID, field.TypeUUID)
+	}
 	if value, ok := tuo.mutation.ProviderName(); ok {
 		_spec.SetField(transaction.FieldProviderName, field.TypeString, value)
 	}
@@ -324,35 +284,6 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	}
 	if value, ok := tuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(transaction.FieldUpdatedAt, field.TypeTime, value)
-	}
-	if tuo.mutation.AccountCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   transaction.AccountTable,
-			Columns: []string{transaction.AccountColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tuo.mutation.AccountIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   transaction.AccountTable,
-			Columns: []string{transaction.AccountColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Transaction{config: tuo.config}
 	_spec.Assign = _node.assignValues

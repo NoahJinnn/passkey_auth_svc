@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/predicate"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
 )
@@ -19,11 +18,10 @@ import (
 // TransactionQuery is the builder for querying Transaction entities.
 type TransactionQuery struct {
 	config
-	ctx         *QueryContext
-	order       []transaction.OrderOption
-	inters      []Interceptor
-	predicates  []predicate.Transaction
-	withAccount *AccountQuery
+	ctx        *QueryContext
+	order      []transaction.OrderOption
+	inters     []Interceptor
+	predicates []predicate.Transaction
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -58,28 +56,6 @@ func (tq *TransactionQuery) Unique(unique bool) *TransactionQuery {
 func (tq *TransactionQuery) Order(o ...transaction.OrderOption) *TransactionQuery {
 	tq.order = append(tq.order, o...)
 	return tq
-}
-
-// QueryAccount chains the current query on the "account" edge.
-func (tq *TransactionQuery) QueryAccount() *AccountQuery {
-	query := (&AccountClient{config: tq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := tq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(transaction.Table, transaction.FieldID, selector),
-			sqlgraph.To(account.Table, account.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, transaction.AccountTable, transaction.AccountColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // First returns the first Transaction entity from the query.
@@ -269,27 +245,15 @@ func (tq *TransactionQuery) Clone() *TransactionQuery {
 		return nil
 	}
 	return &TransactionQuery{
-		config:      tq.config,
-		ctx:         tq.ctx.Clone(),
-		order:       append([]transaction.OrderOption{}, tq.order...),
-		inters:      append([]Interceptor{}, tq.inters...),
-		predicates:  append([]predicate.Transaction{}, tq.predicates...),
-		withAccount: tq.withAccount.Clone(),
+		config:     tq.config,
+		ctx:        tq.ctx.Clone(),
+		order:      append([]transaction.OrderOption{}, tq.order...),
+		inters:     append([]Interceptor{}, tq.inters...),
+		predicates: append([]predicate.Transaction{}, tq.predicates...),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
 		path: tq.path,
 	}
-}
-
-// WithAccount tells the query-builder to eager-load the nodes that are connected to
-// the "account" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TransactionQuery) WithAccount(opts ...func(*AccountQuery)) *TransactionQuery {
-	query := (&AccountClient{config: tq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	tq.withAccount = query
-	return tq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -368,11 +332,8 @@ func (tq *TransactionQuery) prepareQuery(ctx context.Context) error {
 
 func (tq *TransactionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Transaction, error) {
 	var (
-		nodes       = []*Transaction{}
-		_spec       = tq.querySpec()
-		loadedTypes = [1]bool{
-			tq.withAccount != nil,
-		}
+		nodes = []*Transaction{}
+		_spec = tq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Transaction).scanValues(nil, columns)
@@ -380,7 +341,6 @@ func (tq *TransactionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Transaction{config: tq.config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -392,43 +352,7 @@ func (tq *TransactionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := tq.withAccount; query != nil {
-		if err := tq.loadAccount(ctx, query, nodes, nil,
-			func(n *Transaction, e *Account) { n.Edges.Account = e }); err != nil {
-			return nil, err
-		}
-	}
 	return nodes, nil
-}
-
-func (tq *TransactionQuery) loadAccount(ctx context.Context, query *AccountQuery, nodes []*Transaction, init func(*Transaction), assign func(*Transaction, *Account)) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*Transaction)
-	for i := range nodes {
-		fk := nodes[i].AccountID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(account.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "account_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
 }
 
 func (tq *TransactionQuery) sqlCount(ctx context.Context) (int, error) {
@@ -455,9 +379,6 @@ func (tq *TransactionQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != transaction.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
-		}
-		if tq.withAccount != nil {
-			_spec.Node.AddColumnOnce(transaction.FieldAccountID)
 		}
 	}
 	if ps := tq.predicates; len(ps) > 0 {

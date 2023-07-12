@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/predicate"
 )
@@ -99,6 +98,26 @@ func AccountIDIn(vs ...uuid.UUID) predicate.Transaction {
 // AccountIDNotIn applies the NotIn predicate on the "account_id" field.
 func AccountIDNotIn(vs ...uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(sql.FieldNotIn(FieldAccountID, vs...))
+}
+
+// AccountIDGT applies the GT predicate on the "account_id" field.
+func AccountIDGT(v uuid.UUID) predicate.Transaction {
+	return predicate.Transaction(sql.FieldGT(FieldAccountID, v))
+}
+
+// AccountIDGTE applies the GTE predicate on the "account_id" field.
+func AccountIDGTE(v uuid.UUID) predicate.Transaction {
+	return predicate.Transaction(sql.FieldGTE(FieldAccountID, v))
+}
+
+// AccountIDLT applies the LT predicate on the "account_id" field.
+func AccountIDLT(v uuid.UUID) predicate.Transaction {
+	return predicate.Transaction(sql.FieldLT(FieldAccountID, v))
+}
+
+// AccountIDLTE applies the LTE predicate on the "account_id" field.
+func AccountIDLTE(v uuid.UUID) predicate.Transaction {
+	return predicate.Transaction(sql.FieldLTE(FieldAccountID, v))
 }
 
 // AccountIDIsNil applies the IsNil predicate on the "account_id" field.
@@ -319,29 +338,6 @@ func UpdatedAtLT(v time.Time) predicate.Transaction {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.Transaction {
 	return predicate.Transaction(sql.FieldLTE(FieldUpdatedAt, v))
-}
-
-// HasAccount applies the HasEdge predicate on the "account" edge.
-func HasAccount() predicate.Transaction {
-	return predicate.Transaction(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, AccountTable, AccountColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasAccountWith applies the HasEdge predicate on the "account" edge with a given conditions (other predicates).
-func HasAccountWith(preds ...predicate.Account) predicate.Transaction {
-	return predicate.Transaction(func(s *sql.Selector) {
-		step := newAccountStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

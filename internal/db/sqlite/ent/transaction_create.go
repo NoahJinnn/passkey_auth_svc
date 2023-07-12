@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
 )
 
@@ -88,11 +87,6 @@ func (tc *TransactionCreate) SetNillableID(u *uuid.UUID) *TransactionCreate {
 		tc.SetID(*u)
 	}
 	return tc
-}
-
-// SetAccount sets the "account" edge to the Account entity.
-func (tc *TransactionCreate) SetAccount(a *Account) *TransactionCreate {
-	return tc.SetAccountID(a.ID)
 }
 
 // Mutation returns the TransactionMutation object of the builder.
@@ -193,6 +187,10 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
+	if value, ok := tc.mutation.AccountID(); ok {
+		_spec.SetField(transaction.FieldAccountID, field.TypeUUID, value)
+		_node.AccountID = value
+	}
 	if value, ok := tc.mutation.ProviderName(); ok {
 		_spec.SetField(transaction.FieldProviderName, field.TypeString, value)
 		_node.ProviderName = value
@@ -208,23 +206,6 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 	if value, ok := tc.mutation.UpdatedAt(); ok {
 		_spec.SetField(transaction.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
-	}
-	if nodes := tc.mutation.AccountIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   transaction.AccountTable,
-			Columns: []string{transaction.AccountColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.AccountID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

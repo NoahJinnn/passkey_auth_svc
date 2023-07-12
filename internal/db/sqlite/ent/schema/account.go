@@ -5,7 +5,6 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema"
-	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 )
@@ -24,12 +23,6 @@ func (Account) Fields() []ent.Field {
 		field.String("data"),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
-	}
-}
-
-func (Account) Edges() []ent.Edge {
-	return []ent.Edge{
-		edge.To("transactions", Transaction.Type),
 	}
 }
 

@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
 )
 
@@ -28,33 +27,8 @@ type Transaction struct {
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the TransactionQuery when eager-loading is set.
-	Edges        TransactionEdges `json:"edges"`
+	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
-}
-
-// TransactionEdges holds the relations/edges for other nodes in the graph.
-type TransactionEdges struct {
-	// Account holds the value of the account edge.
-	Account *Account `json:"account,omitempty"`
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
-}
-
-// AccountOrErr returns the Account value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e TransactionEdges) AccountOrErr() (*Account, error) {
-	if e.loadedTypes[0] {
-		if e.Account == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: account.Label}
-		}
-		return e.Account, nil
-	}
-	return nil, &NotLoadedError{edge: "account"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -130,11 +104,6 @@ func (t *Transaction) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (t *Transaction) Value(name string) (ent.Value, error) {
 	return t.selectValues.Get(name)
-}
-
-// QueryAccount queries the "account" edge of the Transaction entity.
-func (t *Transaction) QueryAccount() *AccountQuery {
-	return NewTransactionClient(t.config).QueryAccount(t)
 }
 
 // Update returns a builder for updating this Transaction.
