@@ -17,7 +17,7 @@ import (
 type IFvDataSvc interface {
 	AllInstitution(ctx context.Context, userId uuid.UUID) ([]interface{}, error)
 	AllAccount(ctx context.Context, userId uuid.UUID) (interface{}, error)
-	AllTransactions(ctx context.Context, userId uuid.UUID) (interface{}, error)
+	PagingTransactions(ctx context.Context, userId uuid.UUID) (interface{}, error)
 	GetBalanceHistoryByAccountId(ctx context.Context, accountId string, userId uuid.UUID) (interface{}, error)
 }
 
@@ -94,7 +94,7 @@ func (svc *FvDataSvc) AllAccount(ctx context.Context, userId uuid.UUID) ([]byte,
 	return resp.Body(), nil
 }
 
-func (svc *FvDataSvc) AllTransactions(ctx context.Context, offset string, limit string, userId uuid.UUID) ([]byte, error) {
+func (svc *FvDataSvc) PagingTransactions(ctx context.Context, offset string, limit string, userId uuid.UUID) ([]byte, error) {
 	var queryStr = ""
 	if offset != "" && limit != "" {
 		queryStr = fmt.Sprintf("?offset=%s&limit=%s", offset, limit)
@@ -181,3 +181,13 @@ func (svc *FvDataSvc) AggregateAccountBalances(ctx context.Context, userId uuid.
 
 	return accountBalances, nil
 }
+
+// TODO: Fetch all transactions using PaginatingTransactions api
+// TODO: Create route for get all transactions
+// func (svc *FvDataSvc) AggregateTransactions(ctx context.Context, offset string, limit string, userId uuid.UUID) ([]interface{}, error) {
+// 	txs, err := svc.PagingTransactions(ctx, offset, limit, userId)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// }

@@ -91,7 +91,7 @@ func (h *FvDataHandler) AllTransaction(c echo.Context) error {
 	offset := c.QueryParam("offset")
 	limit := c.QueryParam("limit")
 
-	txs, err := h.GetFvDataSvc().AllTransactions(c.Request().Context(), offset, limit, userId)
+	txs, err := h.GetFvDataSvc().PagingTransactions(c.Request().Context(), offset, limit, userId)
 	if err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func (h *FvDataHandler) AllTransaction(c echo.Context) error {
 	if err != nil {
 		return errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(err)
 	}
-	return c.JSON(http.StatusOK, txs)
+	return c.JSON(http.StatusOK, result)
 }
 
 func (h *FvDataHandler) GetBalanceHistoryByAccountId(c echo.Context) error {
