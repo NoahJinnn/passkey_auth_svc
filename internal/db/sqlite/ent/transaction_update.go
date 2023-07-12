@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/predicate"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
 )
@@ -26,26 +25,6 @@ type TransactionUpdate struct {
 // Where appends a list predicates to the TransactionUpdate builder.
 func (tu *TransactionUpdate) Where(ps ...predicate.Transaction) *TransactionUpdate {
 	tu.mutation.Where(ps...)
-	return tu
-}
-
-// SetAccountID sets the "account_id" field.
-func (tu *TransactionUpdate) SetAccountID(u uuid.UUID) *TransactionUpdate {
-	tu.mutation.SetAccountID(u)
-	return tu
-}
-
-// SetNillableAccountID sets the "account_id" field if the given value is not nil.
-func (tu *TransactionUpdate) SetNillableAccountID(u *uuid.UUID) *TransactionUpdate {
-	if u != nil {
-		tu.SetAccountID(*u)
-	}
-	return tu
-}
-
-// ClearAccountID clears the value of the "account_id" field.
-func (tu *TransactionUpdate) ClearAccountID() *TransactionUpdate {
-	tu.mutation.ClearAccountID()
 	return tu
 }
 
@@ -117,12 +96,6 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := tu.mutation.AccountID(); ok {
-		_spec.SetField(transaction.FieldAccountID, field.TypeUUID, value)
-	}
-	if tu.mutation.AccountIDCleared() {
-		_spec.ClearField(transaction.FieldAccountID, field.TypeUUID)
-	}
 	if value, ok := tu.mutation.ProviderName(); ok {
 		_spec.SetField(transaction.FieldProviderName, field.TypeString, value)
 	}
@@ -150,26 +123,6 @@ type TransactionUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *TransactionMutation
-}
-
-// SetAccountID sets the "account_id" field.
-func (tuo *TransactionUpdateOne) SetAccountID(u uuid.UUID) *TransactionUpdateOne {
-	tuo.mutation.SetAccountID(u)
-	return tuo
-}
-
-// SetNillableAccountID sets the "account_id" field if the given value is not nil.
-func (tuo *TransactionUpdateOne) SetNillableAccountID(u *uuid.UUID) *TransactionUpdateOne {
-	if u != nil {
-		tuo.SetAccountID(*u)
-	}
-	return tuo
-}
-
-// ClearAccountID clears the value of the "account_id" field.
-func (tuo *TransactionUpdateOne) ClearAccountID() *TransactionUpdateOne {
-	tuo.mutation.ClearAccountID()
-	return tuo
 }
 
 // SetProviderName sets the "provider_name" field.
@@ -269,12 +222,6 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := tuo.mutation.AccountID(); ok {
-		_spec.SetField(transaction.FieldAccountID, field.TypeUUID, value)
-	}
-	if tuo.mutation.AccountIDCleared() {
-		_spec.ClearField(transaction.FieldAccountID, field.TypeUUID)
 	}
 	if value, ok := tuo.mutation.ProviderName(); ok {
 		_spec.SetField(transaction.FieldProviderName, field.TypeString, value)

@@ -21,20 +21,6 @@ type TransactionCreate struct {
 	hooks    []Hook
 }
 
-// SetAccountID sets the "account_id" field.
-func (tc *TransactionCreate) SetAccountID(u uuid.UUID) *TransactionCreate {
-	tc.mutation.SetAccountID(u)
-	return tc
-}
-
-// SetNillableAccountID sets the "account_id" field if the given value is not nil.
-func (tc *TransactionCreate) SetNillableAccountID(u *uuid.UUID) *TransactionCreate {
-	if u != nil {
-		tc.SetAccountID(*u)
-	}
-	return tc
-}
-
 // SetProviderName sets the "provider_name" field.
 func (tc *TransactionCreate) SetProviderName(s string) *TransactionCreate {
 	tc.mutation.SetProviderName(s)
@@ -186,10 +172,6 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 	if id, ok := tc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
-	}
-	if value, ok := tc.mutation.AccountID(); ok {
-		_spec.SetField(transaction.FieldAccountID, field.TypeUUID, value)
-		_node.AccountID = value
 	}
 	if value, ok := tc.mutation.ProviderName(); ok {
 		_spec.SetField(transaction.FieldProviderName, field.TypeString, value)

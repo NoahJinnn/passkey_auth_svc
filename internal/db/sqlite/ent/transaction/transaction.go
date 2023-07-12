@@ -14,8 +14,6 @@ const (
 	Label = "transaction"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldAccountID holds the string denoting the account_id field in the database.
-	FieldAccountID = "account_id"
 	// FieldProviderName holds the string denoting the provider_name field in the database.
 	FieldProviderName = "provider_name"
 	// FieldData holds the string denoting the data field in the database.
@@ -31,7 +29,6 @@ const (
 // Columns holds all SQL columns for transaction fields.
 var Columns = []string{
 	FieldID,
-	FieldAccountID,
 	FieldProviderName,
 	FieldData,
 	FieldCreatedAt,
@@ -65,11 +62,6 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByAccountID orders the results by the account_id field.
-func ByAccountID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAccountID, opts...).ToFunc()
 }
 
 // ByProviderName orders the results by the provider_name field.

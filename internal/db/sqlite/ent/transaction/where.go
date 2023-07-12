@@ -55,11 +55,6 @@ func IDLTE(id uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(sql.FieldLTE(FieldID, id))
 }
 
-// AccountID applies equality check predicate on the "account_id" field. It's identical to AccountIDEQ.
-func AccountID(v uuid.UUID) predicate.Transaction {
-	return predicate.Transaction(sql.FieldEQ(FieldAccountID, v))
-}
-
 // ProviderName applies equality check predicate on the "provider_name" field. It's identical to ProviderNameEQ.
 func ProviderName(v string) predicate.Transaction {
 	return predicate.Transaction(sql.FieldEQ(FieldProviderName, v))
@@ -78,56 +73,6 @@ func CreatedAt(v time.Time) predicate.Transaction {
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.Transaction {
 	return predicate.Transaction(sql.FieldEQ(FieldUpdatedAt, v))
-}
-
-// AccountIDEQ applies the EQ predicate on the "account_id" field.
-func AccountIDEQ(v uuid.UUID) predicate.Transaction {
-	return predicate.Transaction(sql.FieldEQ(FieldAccountID, v))
-}
-
-// AccountIDNEQ applies the NEQ predicate on the "account_id" field.
-func AccountIDNEQ(v uuid.UUID) predicate.Transaction {
-	return predicate.Transaction(sql.FieldNEQ(FieldAccountID, v))
-}
-
-// AccountIDIn applies the In predicate on the "account_id" field.
-func AccountIDIn(vs ...uuid.UUID) predicate.Transaction {
-	return predicate.Transaction(sql.FieldIn(FieldAccountID, vs...))
-}
-
-// AccountIDNotIn applies the NotIn predicate on the "account_id" field.
-func AccountIDNotIn(vs ...uuid.UUID) predicate.Transaction {
-	return predicate.Transaction(sql.FieldNotIn(FieldAccountID, vs...))
-}
-
-// AccountIDGT applies the GT predicate on the "account_id" field.
-func AccountIDGT(v uuid.UUID) predicate.Transaction {
-	return predicate.Transaction(sql.FieldGT(FieldAccountID, v))
-}
-
-// AccountIDGTE applies the GTE predicate on the "account_id" field.
-func AccountIDGTE(v uuid.UUID) predicate.Transaction {
-	return predicate.Transaction(sql.FieldGTE(FieldAccountID, v))
-}
-
-// AccountIDLT applies the LT predicate on the "account_id" field.
-func AccountIDLT(v uuid.UUID) predicate.Transaction {
-	return predicate.Transaction(sql.FieldLT(FieldAccountID, v))
-}
-
-// AccountIDLTE applies the LTE predicate on the "account_id" field.
-func AccountIDLTE(v uuid.UUID) predicate.Transaction {
-	return predicate.Transaction(sql.FieldLTE(FieldAccountID, v))
-}
-
-// AccountIDIsNil applies the IsNil predicate on the "account_id" field.
-func AccountIDIsNil() predicate.Transaction {
-	return predicate.Transaction(sql.FieldIsNull(FieldAccountID))
-}
-
-// AccountIDNotNil applies the NotNil predicate on the "account_id" field.
-func AccountIDNotNil() predicate.Transaction {
-	return predicate.Transaction(sql.FieldNotNull(FieldAccountID))
 }
 
 // ProviderNameEQ applies the EQ predicate on the "provider_name" field.

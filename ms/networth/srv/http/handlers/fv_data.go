@@ -57,9 +57,16 @@ func (h *FvDataHandler) AllAccount(c echo.Context) error {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	_, err = h.GetFvDataSvc().AggregateAccountBalances(c.Request().Context(), userId)
+	exist, err := h.GetProviderSvc().CheckAccountExist(c.Request().Context(), userId.String(), finverse.PROVIDER_NAME)
 	if err != nil {
 		return err
+	}
+
+	if !exist {
+		_, err = h.GetFvDataSvc().AggregateAccountBalances(c.Request().Context(), userId)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Get account data from sqlite db

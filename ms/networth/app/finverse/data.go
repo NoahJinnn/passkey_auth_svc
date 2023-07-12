@@ -55,7 +55,7 @@ func (svc *FvDataSvc) AllInstitution(ctx context.Context, userId uuid.UUID) ([]b
 	return resp.Body(), nil
 }
 
-func (svc *FvDataSvc) GetAccessToken(ctx context.Context, providerName string, userId uuid.UUID) (*AccessToken, error) {
+func (svc *FvDataSvc) getAccessToken(ctx context.Context, providerName string, userId uuid.UUID) (*AccessToken, error) {
 	var accessToken *AccessToken
 	accessTokenPayload, err := svc.provider.ConnectionByProviderName(ctx, userId.String(), providerName)
 	if err != nil {
@@ -75,7 +75,7 @@ func (svc *FvDataSvc) GetAccessToken(ctx context.Context, providerName string, u
 }
 
 func (svc *FvDataSvc) AllAccount(ctx context.Context, userId uuid.UUID) ([]byte, error) {
-	accessToken, err := svc.GetAccessToken(ctx, PROVIDER_NAME, userId)
+	accessToken, err := svc.getAccessToken(ctx, PROVIDER_NAME, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func (svc *FvDataSvc) AllTransactions(ctx context.Context, offset string, limit 
 		queryStr = fmt.Sprintf("?offset=%s", offset)
 	}
 
-	accessToken, err := svc.GetAccessToken(ctx, PROVIDER_NAME, userId)
+	accessToken, err := svc.getAccessToken(ctx, PROVIDER_NAME, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func (svc *FvDataSvc) AllTransactions(ctx context.Context, offset string, limit 
 }
 
 func (svc *FvDataSvc) GetBalanceHistoryByAccountId(ctx context.Context, accountId string, userId uuid.UUID) ([]byte, error) {
-	accessToken, err := svc.GetAccessToken(ctx, PROVIDER_NAME, userId)
+	accessToken, err := svc.getAccessToken(ctx, PROVIDER_NAME, userId)
 	if err != nil {
 		return nil, err
 	}
