@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
-	"github.com/hellohq/hqservice/ent/identity"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/primaryemail"
 	"github.com/hellohq/hqservice/ent/user"
@@ -104,21 +103,6 @@ func (ec *EmailCreate) SetNillableID(u *uuid.UUID) *EmailCreate {
 // SetUser sets the "user" edge to the User entity.
 func (ec *EmailCreate) SetUser(u *User) *EmailCreate {
 	return ec.SetUserID(u.ID)
-}
-
-// AddIdentityIDs adds the "identities" edge to the Identity entity by IDs.
-func (ec *EmailCreate) AddIdentityIDs(ids ...uuid.UUID) *EmailCreate {
-	ec.mutation.AddIdentityIDs(ids...)
-	return ec
-}
-
-// AddIdentities adds the "identities" edges to the Identity entity.
-func (ec *EmailCreate) AddIdentities(i ...*Identity) *EmailCreate {
-	ids := make([]uuid.UUID, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
-	}
-	return ec.AddIdentityIDs(ids...)
 }
 
 // AddPasscodeIDs adds the "passcodes" edge to the Passcode entity by IDs.
@@ -288,22 +272,6 @@ func (ec *EmailCreate) createSpec() (*Email, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.UserID = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := ec.mutation.IdentitiesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   email.IdentitiesTable,
-			Columns: []string{email.IdentitiesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(identity.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := ec.mutation.PasscodesIDs(); len(nodes) > 0 {

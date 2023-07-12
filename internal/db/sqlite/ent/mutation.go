@@ -42,12 +42,11 @@ type AccountMutation struct {
 	op                  Op
 	typ                 string
 	id                  *uuid.UUID
+	provider_name       *string
 	data                *string
 	created_at          *time.Time
 	updated_at          *time.Time
 	clearedFields       map[string]struct{}
-	institution         *uuid.UUID
-	clearedinstitution  bool
 	transactions        map[uuid.UUID]struct{}
 	removedtransactions map[uuid.UUID]struct{}
 	clearedtransactions bool
@@ -160,53 +159,40 @@ func (m *AccountMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	}
 }
 
-// SetInstitutionID sets the "institution_id" field.
-func (m *AccountMutation) SetInstitutionID(u uuid.UUID) {
-	m.institution = &u
+// SetProviderName sets the "provider_name" field.
+func (m *AccountMutation) SetProviderName(s string) {
+	m.provider_name = &s
 }
 
-// InstitutionID returns the value of the "institution_id" field in the mutation.
-func (m *AccountMutation) InstitutionID() (r uuid.UUID, exists bool) {
-	v := m.institution
+// ProviderName returns the value of the "provider_name" field in the mutation.
+func (m *AccountMutation) ProviderName() (r string, exists bool) {
+	v := m.provider_name
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldInstitutionID returns the old "institution_id" field's value of the Account entity.
+// OldProviderName returns the old "provider_name" field's value of the Account entity.
 // If the Account object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AccountMutation) OldInstitutionID(ctx context.Context) (v uuid.UUID, err error) {
+func (m *AccountMutation) OldProviderName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldInstitutionID is only allowed on UpdateOne operations")
+		return v, errors.New("OldProviderName is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldInstitutionID requires an ID field in the mutation")
+		return v, errors.New("OldProviderName requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldInstitutionID: %w", err)
+		return v, fmt.Errorf("querying old value for OldProviderName: %w", err)
 	}
-	return oldValue.InstitutionID, nil
+	return oldValue.ProviderName, nil
 }
 
-// ClearInstitutionID clears the value of the "institution_id" field.
-func (m *AccountMutation) ClearInstitutionID() {
-	m.institution = nil
-	m.clearedFields[account.FieldInstitutionID] = struct{}{}
-}
-
-// InstitutionIDCleared returns if the "institution_id" field was cleared in this mutation.
-func (m *AccountMutation) InstitutionIDCleared() bool {
-	_, ok := m.clearedFields[account.FieldInstitutionID]
-	return ok
-}
-
-// ResetInstitutionID resets all changes to the "institution_id" field.
-func (m *AccountMutation) ResetInstitutionID() {
-	m.institution = nil
-	delete(m.clearedFields, account.FieldInstitutionID)
+// ResetProviderName resets all changes to the "provider_name" field.
+func (m *AccountMutation) ResetProviderName() {
+	m.provider_name = nil
 }
 
 // SetData sets the "data" field.
@@ -317,32 +303,6 @@ func (m *AccountMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// ClearInstitution clears the "institution" edge to the Institution entity.
-func (m *AccountMutation) ClearInstitution() {
-	m.clearedinstitution = true
-}
-
-// InstitutionCleared reports if the "institution" edge to the Institution entity was cleared.
-func (m *AccountMutation) InstitutionCleared() bool {
-	return m.InstitutionIDCleared() || m.clearedinstitution
-}
-
-// InstitutionIDs returns the "institution" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// InstitutionID instead. It exists only for internal usage by the builders.
-func (m *AccountMutation) InstitutionIDs() (ids []uuid.UUID) {
-	if id := m.institution; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetInstitution resets all changes to the "institution" edge.
-func (m *AccountMutation) ResetInstitution() {
-	m.institution = nil
-	m.clearedinstitution = false
-}
-
 // AddTransactionIDs adds the "transactions" edge to the Transaction entity by ids.
 func (m *AccountMutation) AddTransactionIDs(ids ...uuid.UUID) {
 	if m.transactions == nil {
@@ -432,8 +392,8 @@ func (m *AccountMutation) Type() string {
 // AddedFields().
 func (m *AccountMutation) Fields() []string {
 	fields := make([]string, 0, 4)
-	if m.institution != nil {
-		fields = append(fields, account.FieldInstitutionID)
+	if m.provider_name != nil {
+		fields = append(fields, account.FieldProviderName)
 	}
 	if m.data != nil {
 		fields = append(fields, account.FieldData)
@@ -452,8 +412,8 @@ func (m *AccountMutation) Fields() []string {
 // schema.
 func (m *AccountMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case account.FieldInstitutionID:
-		return m.InstitutionID()
+	case account.FieldProviderName:
+		return m.ProviderName()
 	case account.FieldData:
 		return m.Data()
 	case account.FieldCreatedAt:
@@ -469,8 +429,8 @@ func (m *AccountMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *AccountMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case account.FieldInstitutionID:
-		return m.OldInstitutionID(ctx)
+	case account.FieldProviderName:
+		return m.OldProviderName(ctx)
 	case account.FieldData:
 		return m.OldData(ctx)
 	case account.FieldCreatedAt:
@@ -486,12 +446,12 @@ func (m *AccountMutation) OldField(ctx context.Context, name string) (ent.Value,
 // type.
 func (m *AccountMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case account.FieldInstitutionID:
-		v, ok := value.(uuid.UUID)
+	case account.FieldProviderName:
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetInstitutionID(v)
+		m.SetProviderName(v)
 		return nil
 	case account.FieldData:
 		v, ok := value.(string)
@@ -543,11 +503,7 @@ func (m *AccountMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *AccountMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(account.FieldInstitutionID) {
-		fields = append(fields, account.FieldInstitutionID)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -560,11 +516,6 @@ func (m *AccountMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *AccountMutation) ClearField(name string) error {
-	switch name {
-	case account.FieldInstitutionID:
-		m.ClearInstitutionID()
-		return nil
-	}
 	return fmt.Errorf("unknown Account nullable field %s", name)
 }
 
@@ -572,8 +523,8 @@ func (m *AccountMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *AccountMutation) ResetField(name string) error {
 	switch name {
-	case account.FieldInstitutionID:
-		m.ResetInstitutionID()
+	case account.FieldProviderName:
+		m.ResetProviderName()
 		return nil
 	case account.FieldData:
 		m.ResetData()
@@ -590,10 +541,7 @@ func (m *AccountMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *AccountMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.institution != nil {
-		edges = append(edges, account.EdgeInstitution)
-	}
+	edges := make([]string, 0, 1)
 	if m.transactions != nil {
 		edges = append(edges, account.EdgeTransactions)
 	}
@@ -604,10 +552,6 @@ func (m *AccountMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *AccountMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case account.EdgeInstitution:
-		if id := m.institution; id != nil {
-			return []ent.Value{*id}
-		}
 	case account.EdgeTransactions:
 		ids := make([]ent.Value, 0, len(m.transactions))
 		for id := range m.transactions {
@@ -620,7 +564,7 @@ func (m *AccountMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *AccountMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 1)
 	if m.removedtransactions != nil {
 		edges = append(edges, account.EdgeTransactions)
 	}
@@ -643,10 +587,7 @@ func (m *AccountMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *AccountMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedinstitution {
-		edges = append(edges, account.EdgeInstitution)
-	}
+	edges := make([]string, 0, 1)
 	if m.clearedtransactions {
 		edges = append(edges, account.EdgeTransactions)
 	}
@@ -657,8 +598,6 @@ func (m *AccountMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *AccountMutation) EdgeCleared(name string) bool {
 	switch name {
-	case account.EdgeInstitution:
-		return m.clearedinstitution
 	case account.EdgeTransactions:
 		return m.clearedtransactions
 	}
@@ -669,9 +608,6 @@ func (m *AccountMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *AccountMutation) ClearEdge(name string) error {
 	switch name {
-	case account.EdgeInstitution:
-		m.ClearInstitution()
-		return nil
 	}
 	return fmt.Errorf("unknown Account unique edge %s", name)
 }
@@ -680,9 +616,6 @@ func (m *AccountMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *AccountMutation) ResetEdge(name string) error {
 	switch name {
-	case account.EdgeInstitution:
-		m.ResetInstitution()
-		return nil
 	case account.EdgeTransactions:
 		m.ResetTransactions()
 		return nil
@@ -693,19 +626,17 @@ func (m *AccountMutation) ResetEdge(name string) error {
 // ConnectionMutation represents an operation that mutates the Connection nodes in the graph.
 type ConnectionMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *uuid.UUID
-	data               *string
-	env                *string
-	created_at         *time.Time
-	updated_at         *time.Time
-	clearedFields      map[string]struct{}
-	institution        *uuid.UUID
-	clearedinstitution bool
-	done               bool
-	oldValue           func(context.Context) (*Connection, error)
-	predicates         []predicate.Connection
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	provider_name *string
+	data          *string
+	created_at    *time.Time
+	updated_at    *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*Connection, error)
+	predicates    []predicate.Connection
 }
 
 var _ ent.Mutation = (*ConnectionMutation)(nil)
@@ -812,53 +743,40 @@ func (m *ConnectionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	}
 }
 
-// SetInstitutionID sets the "institution_id" field.
-func (m *ConnectionMutation) SetInstitutionID(u uuid.UUID) {
-	m.institution = &u
+// SetProviderName sets the "provider_name" field.
+func (m *ConnectionMutation) SetProviderName(s string) {
+	m.provider_name = &s
 }
 
-// InstitutionID returns the value of the "institution_id" field in the mutation.
-func (m *ConnectionMutation) InstitutionID() (r uuid.UUID, exists bool) {
-	v := m.institution
+// ProviderName returns the value of the "provider_name" field in the mutation.
+func (m *ConnectionMutation) ProviderName() (r string, exists bool) {
+	v := m.provider_name
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldInstitutionID returns the old "institution_id" field's value of the Connection entity.
+// OldProviderName returns the old "provider_name" field's value of the Connection entity.
 // If the Connection object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ConnectionMutation) OldInstitutionID(ctx context.Context) (v *uuid.UUID, err error) {
+func (m *ConnectionMutation) OldProviderName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldInstitutionID is only allowed on UpdateOne operations")
+		return v, errors.New("OldProviderName is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldInstitutionID requires an ID field in the mutation")
+		return v, errors.New("OldProviderName requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldInstitutionID: %w", err)
+		return v, fmt.Errorf("querying old value for OldProviderName: %w", err)
 	}
-	return oldValue.InstitutionID, nil
+	return oldValue.ProviderName, nil
 }
 
-// ClearInstitutionID clears the value of the "institution_id" field.
-func (m *ConnectionMutation) ClearInstitutionID() {
-	m.institution = nil
-	m.clearedFields[connection.FieldInstitutionID] = struct{}{}
-}
-
-// InstitutionIDCleared returns if the "institution_id" field was cleared in this mutation.
-func (m *ConnectionMutation) InstitutionIDCleared() bool {
-	_, ok := m.clearedFields[connection.FieldInstitutionID]
-	return ok
-}
-
-// ResetInstitutionID resets all changes to the "institution_id" field.
-func (m *ConnectionMutation) ResetInstitutionID() {
-	m.institution = nil
-	delete(m.clearedFields, connection.FieldInstitutionID)
+// ResetProviderName resets all changes to the "provider_name" field.
+func (m *ConnectionMutation) ResetProviderName() {
+	m.provider_name = nil
 }
 
 // SetData sets the "data" field.
@@ -895,42 +813,6 @@ func (m *ConnectionMutation) OldData(ctx context.Context) (v string, err error) 
 // ResetData resets all changes to the "data" field.
 func (m *ConnectionMutation) ResetData() {
 	m.data = nil
-}
-
-// SetEnv sets the "env" field.
-func (m *ConnectionMutation) SetEnv(s string) {
-	m.env = &s
-}
-
-// Env returns the value of the "env" field in the mutation.
-func (m *ConnectionMutation) Env() (r string, exists bool) {
-	v := m.env
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldEnv returns the old "env" field's value of the Connection entity.
-// If the Connection object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ConnectionMutation) OldEnv(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldEnv is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldEnv requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldEnv: %w", err)
-	}
-	return oldValue.Env, nil
-}
-
-// ResetEnv resets all changes to the "env" field.
-func (m *ConnectionMutation) ResetEnv() {
-	m.env = nil
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -1005,32 +887,6 @@ func (m *ConnectionMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// ClearInstitution clears the "institution" edge to the Institution entity.
-func (m *ConnectionMutation) ClearInstitution() {
-	m.clearedinstitution = true
-}
-
-// InstitutionCleared reports if the "institution" edge to the Institution entity was cleared.
-func (m *ConnectionMutation) InstitutionCleared() bool {
-	return m.InstitutionIDCleared() || m.clearedinstitution
-}
-
-// InstitutionIDs returns the "institution" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// InstitutionID instead. It exists only for internal usage by the builders.
-func (m *ConnectionMutation) InstitutionIDs() (ids []uuid.UUID) {
-	if id := m.institution; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetInstitution resets all changes to the "institution" edge.
-func (m *ConnectionMutation) ResetInstitution() {
-	m.institution = nil
-	m.clearedinstitution = false
-}
-
 // Where appends a list predicates to the ConnectionMutation builder.
 func (m *ConnectionMutation) Where(ps ...predicate.Connection) {
 	m.predicates = append(m.predicates, ps...)
@@ -1065,15 +921,12 @@ func (m *ConnectionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ConnectionMutation) Fields() []string {
-	fields := make([]string, 0, 5)
-	if m.institution != nil {
-		fields = append(fields, connection.FieldInstitutionID)
+	fields := make([]string, 0, 4)
+	if m.provider_name != nil {
+		fields = append(fields, connection.FieldProviderName)
 	}
 	if m.data != nil {
 		fields = append(fields, connection.FieldData)
-	}
-	if m.env != nil {
-		fields = append(fields, connection.FieldEnv)
 	}
 	if m.created_at != nil {
 		fields = append(fields, connection.FieldCreatedAt)
@@ -1089,12 +942,10 @@ func (m *ConnectionMutation) Fields() []string {
 // schema.
 func (m *ConnectionMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case connection.FieldInstitutionID:
-		return m.InstitutionID()
+	case connection.FieldProviderName:
+		return m.ProviderName()
 	case connection.FieldData:
 		return m.Data()
-	case connection.FieldEnv:
-		return m.Env()
 	case connection.FieldCreatedAt:
 		return m.CreatedAt()
 	case connection.FieldUpdatedAt:
@@ -1108,12 +959,10 @@ func (m *ConnectionMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *ConnectionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case connection.FieldInstitutionID:
-		return m.OldInstitutionID(ctx)
+	case connection.FieldProviderName:
+		return m.OldProviderName(ctx)
 	case connection.FieldData:
 		return m.OldData(ctx)
-	case connection.FieldEnv:
-		return m.OldEnv(ctx)
 	case connection.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case connection.FieldUpdatedAt:
@@ -1127,12 +976,12 @@ func (m *ConnectionMutation) OldField(ctx context.Context, name string) (ent.Val
 // type.
 func (m *ConnectionMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case connection.FieldInstitutionID:
-		v, ok := value.(uuid.UUID)
+	case connection.FieldProviderName:
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetInstitutionID(v)
+		m.SetProviderName(v)
 		return nil
 	case connection.FieldData:
 		v, ok := value.(string)
@@ -1140,13 +989,6 @@ func (m *ConnectionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetData(v)
-		return nil
-	case connection.FieldEnv:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetEnv(v)
 		return nil
 	case connection.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -1191,11 +1033,7 @@ func (m *ConnectionMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *ConnectionMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(connection.FieldInstitutionID) {
-		fields = append(fields, connection.FieldInstitutionID)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1208,11 +1046,6 @@ func (m *ConnectionMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *ConnectionMutation) ClearField(name string) error {
-	switch name {
-	case connection.FieldInstitutionID:
-		m.ClearInstitutionID()
-		return nil
-	}
 	return fmt.Errorf("unknown Connection nullable field %s", name)
 }
 
@@ -1220,14 +1053,11 @@ func (m *ConnectionMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *ConnectionMutation) ResetField(name string) error {
 	switch name {
-	case connection.FieldInstitutionID:
-		m.ResetInstitutionID()
+	case connection.FieldProviderName:
+		m.ResetProviderName()
 		return nil
 	case connection.FieldData:
 		m.ResetData()
-		return nil
-	case connection.FieldEnv:
-		m.ResetEnv()
 		return nil
 	case connection.FieldCreatedAt:
 		m.ResetCreatedAt()
@@ -1241,28 +1071,19 @@ func (m *ConnectionMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ConnectionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.institution != nil {
-		edges = append(edges, connection.EdgeInstitution)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *ConnectionMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case connection.EdgeInstitution:
-		if id := m.institution; id != nil {
-			return []ent.Value{*id}
-		}
-	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ConnectionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 0)
 	return edges
 }
 
@@ -1274,60 +1095,42 @@ func (m *ConnectionMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ConnectionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedinstitution {
-		edges = append(edges, connection.EdgeInstitution)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *ConnectionMutation) EdgeCleared(name string) bool {
-	switch name {
-	case connection.EdgeInstitution:
-		return m.clearedinstitution
-	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *ConnectionMutation) ClearEdge(name string) error {
-	switch name {
-	case connection.EdgeInstitution:
-		m.ClearInstitution()
-		return nil
-	}
 	return fmt.Errorf("unknown Connection unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *ConnectionMutation) ResetEdge(name string) error {
-	switch name {
-	case connection.EdgeInstitution:
-		m.ResetInstitution()
-		return nil
-	}
 	return fmt.Errorf("unknown Connection edge %s", name)
 }
 
 // IncomeMutation represents an operation that mutates the Income nodes in the graph.
 type IncomeMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *uuid.UUID
-	data               *string
-	created_at         *time.Time
-	updated_at         *time.Time
-	clearedFields      map[string]struct{}
-	institution        *uuid.UUID
-	clearedinstitution bool
-	done               bool
-	oldValue           func(context.Context) (*Income, error)
-	predicates         []predicate.Income
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	provider_name *string
+	data          *string
+	created_at    *time.Time
+	updated_at    *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*Income, error)
+	predicates    []predicate.Income
 }
 
 var _ ent.Mutation = (*IncomeMutation)(nil)
@@ -1434,53 +1237,40 @@ func (m *IncomeMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	}
 }
 
-// SetInstitutionID sets the "institution_id" field.
-func (m *IncomeMutation) SetInstitutionID(u uuid.UUID) {
-	m.institution = &u
+// SetProviderName sets the "provider_name" field.
+func (m *IncomeMutation) SetProviderName(s string) {
+	m.provider_name = &s
 }
 
-// InstitutionID returns the value of the "institution_id" field in the mutation.
-func (m *IncomeMutation) InstitutionID() (r uuid.UUID, exists bool) {
-	v := m.institution
+// ProviderName returns the value of the "provider_name" field in the mutation.
+func (m *IncomeMutation) ProviderName() (r string, exists bool) {
+	v := m.provider_name
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldInstitutionID returns the old "institution_id" field's value of the Income entity.
+// OldProviderName returns the old "provider_name" field's value of the Income entity.
 // If the Income object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *IncomeMutation) OldInstitutionID(ctx context.Context) (v uuid.UUID, err error) {
+func (m *IncomeMutation) OldProviderName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldInstitutionID is only allowed on UpdateOne operations")
+		return v, errors.New("OldProviderName is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldInstitutionID requires an ID field in the mutation")
+		return v, errors.New("OldProviderName requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldInstitutionID: %w", err)
+		return v, fmt.Errorf("querying old value for OldProviderName: %w", err)
 	}
-	return oldValue.InstitutionID, nil
+	return oldValue.ProviderName, nil
 }
 
-// ClearInstitutionID clears the value of the "institution_id" field.
-func (m *IncomeMutation) ClearInstitutionID() {
-	m.institution = nil
-	m.clearedFields[income.FieldInstitutionID] = struct{}{}
-}
-
-// InstitutionIDCleared returns if the "institution_id" field was cleared in this mutation.
-func (m *IncomeMutation) InstitutionIDCleared() bool {
-	_, ok := m.clearedFields[income.FieldInstitutionID]
-	return ok
-}
-
-// ResetInstitutionID resets all changes to the "institution_id" field.
-func (m *IncomeMutation) ResetInstitutionID() {
-	m.institution = nil
-	delete(m.clearedFields, income.FieldInstitutionID)
+// ResetProviderName resets all changes to the "provider_name" field.
+func (m *IncomeMutation) ResetProviderName() {
+	m.provider_name = nil
 }
 
 // SetData sets the "data" field.
@@ -1591,32 +1381,6 @@ func (m *IncomeMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// ClearInstitution clears the "institution" edge to the Institution entity.
-func (m *IncomeMutation) ClearInstitution() {
-	m.clearedinstitution = true
-}
-
-// InstitutionCleared reports if the "institution" edge to the Institution entity was cleared.
-func (m *IncomeMutation) InstitutionCleared() bool {
-	return m.InstitutionIDCleared() || m.clearedinstitution
-}
-
-// InstitutionIDs returns the "institution" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// InstitutionID instead. It exists only for internal usage by the builders.
-func (m *IncomeMutation) InstitutionIDs() (ids []uuid.UUID) {
-	if id := m.institution; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetInstitution resets all changes to the "institution" edge.
-func (m *IncomeMutation) ResetInstitution() {
-	m.institution = nil
-	m.clearedinstitution = false
-}
-
 // Where appends a list predicates to the IncomeMutation builder.
 func (m *IncomeMutation) Where(ps ...predicate.Income) {
 	m.predicates = append(m.predicates, ps...)
@@ -1652,8 +1416,8 @@ func (m *IncomeMutation) Type() string {
 // AddedFields().
 func (m *IncomeMutation) Fields() []string {
 	fields := make([]string, 0, 4)
-	if m.institution != nil {
-		fields = append(fields, income.FieldInstitutionID)
+	if m.provider_name != nil {
+		fields = append(fields, income.FieldProviderName)
 	}
 	if m.data != nil {
 		fields = append(fields, income.FieldData)
@@ -1672,8 +1436,8 @@ func (m *IncomeMutation) Fields() []string {
 // schema.
 func (m *IncomeMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case income.FieldInstitutionID:
-		return m.InstitutionID()
+	case income.FieldProviderName:
+		return m.ProviderName()
 	case income.FieldData:
 		return m.Data()
 	case income.FieldCreatedAt:
@@ -1689,8 +1453,8 @@ func (m *IncomeMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *IncomeMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case income.FieldInstitutionID:
-		return m.OldInstitutionID(ctx)
+	case income.FieldProviderName:
+		return m.OldProviderName(ctx)
 	case income.FieldData:
 		return m.OldData(ctx)
 	case income.FieldCreatedAt:
@@ -1706,12 +1470,12 @@ func (m *IncomeMutation) OldField(ctx context.Context, name string) (ent.Value, 
 // type.
 func (m *IncomeMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case income.FieldInstitutionID:
-		v, ok := value.(uuid.UUID)
+	case income.FieldProviderName:
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetInstitutionID(v)
+		m.SetProviderName(v)
 		return nil
 	case income.FieldData:
 		v, ok := value.(string)
@@ -1763,11 +1527,7 @@ func (m *IncomeMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *IncomeMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(income.FieldInstitutionID) {
-		fields = append(fields, income.FieldInstitutionID)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1780,11 +1540,6 @@ func (m *IncomeMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *IncomeMutation) ClearField(name string) error {
-	switch name {
-	case income.FieldInstitutionID:
-		m.ClearInstitutionID()
-		return nil
-	}
 	return fmt.Errorf("unknown Income nullable field %s", name)
 }
 
@@ -1792,8 +1547,8 @@ func (m *IncomeMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *IncomeMutation) ResetField(name string) error {
 	switch name {
-	case income.FieldInstitutionID:
-		m.ResetInstitutionID()
+	case income.FieldProviderName:
+		m.ResetProviderName()
 		return nil
 	case income.FieldData:
 		m.ResetData()
@@ -1810,28 +1565,19 @@ func (m *IncomeMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *IncomeMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.institution != nil {
-		edges = append(edges, income.EdgeInstitution)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *IncomeMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case income.EdgeInstitution:
-		if id := m.institution; id != nil {
-			return []ent.Value{*id}
-		}
-	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *IncomeMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 0)
 	return edges
 }
 
@@ -1843,42 +1589,25 @@ func (m *IncomeMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *IncomeMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedinstitution {
-		edges = append(edges, income.EdgeInstitution)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *IncomeMutation) EdgeCleared(name string) bool {
-	switch name {
-	case income.EdgeInstitution:
-		return m.clearedinstitution
-	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *IncomeMutation) ClearEdge(name string) error {
-	switch name {
-	case income.EdgeInstitution:
-		m.ClearInstitution()
-		return nil
-	}
 	return fmt.Errorf("unknown Income unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *IncomeMutation) ResetEdge(name string) error {
-	switch name {
-	case income.EdgeInstitution:
-		m.ResetInstitution()
-		return nil
-	}
 	return fmt.Errorf("unknown Income edge %s", name)
 }
 
@@ -2617,6 +2346,7 @@ type TransactionMutation struct {
 	op             Op
 	typ            string
 	id             *uuid.UUID
+	provider_name  *string
 	data           *string
 	created_at     *time.Time
 	updated_at     *time.Time
@@ -2779,6 +2509,42 @@ func (m *TransactionMutation) AccountIDCleared() bool {
 func (m *TransactionMutation) ResetAccountID() {
 	m.account = nil
 	delete(m.clearedFields, transaction.FieldAccountID)
+}
+
+// SetProviderName sets the "provider_name" field.
+func (m *TransactionMutation) SetProviderName(s string) {
+	m.provider_name = &s
+}
+
+// ProviderName returns the value of the "provider_name" field in the mutation.
+func (m *TransactionMutation) ProviderName() (r string, exists bool) {
+	v := m.provider_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProviderName returns the old "provider_name" field's value of the Transaction entity.
+// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMutation) OldProviderName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProviderName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProviderName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProviderName: %w", err)
+	}
+	return oldValue.ProviderName, nil
+}
+
+// ResetProviderName resets all changes to the "provider_name" field.
+func (m *TransactionMutation) ResetProviderName() {
+	m.provider_name = nil
 }
 
 // SetData sets the "data" field.
@@ -2949,9 +2715,12 @@ func (m *TransactionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TransactionMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.account != nil {
 		fields = append(fields, transaction.FieldAccountID)
+	}
+	if m.provider_name != nil {
+		fields = append(fields, transaction.FieldProviderName)
 	}
 	if m.data != nil {
 		fields = append(fields, transaction.FieldData)
@@ -2972,6 +2741,8 @@ func (m *TransactionMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case transaction.FieldAccountID:
 		return m.AccountID()
+	case transaction.FieldProviderName:
+		return m.ProviderName()
 	case transaction.FieldData:
 		return m.Data()
 	case transaction.FieldCreatedAt:
@@ -2989,6 +2760,8 @@ func (m *TransactionMutation) OldField(ctx context.Context, name string) (ent.Va
 	switch name {
 	case transaction.FieldAccountID:
 		return m.OldAccountID(ctx)
+	case transaction.FieldProviderName:
+		return m.OldProviderName(ctx)
 	case transaction.FieldData:
 		return m.OldData(ctx)
 	case transaction.FieldCreatedAt:
@@ -3010,6 +2783,13 @@ func (m *TransactionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAccountID(v)
+		return nil
+	case transaction.FieldProviderName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProviderName(v)
 		return nil
 	case transaction.FieldData:
 		v, ok := value.(string)
@@ -3092,6 +2872,9 @@ func (m *TransactionMutation) ResetField(name string) error {
 	switch name {
 	case transaction.FieldAccountID:
 		m.ResetAccountID()
+		return nil
+	case transaction.FieldProviderName:
+		m.ResetProviderName()
 		return nil
 	case transaction.FieldData:
 		m.ResetData()

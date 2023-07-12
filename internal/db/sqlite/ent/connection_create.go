@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 )
 
 // ConnectionCreate is the builder for creating a Connection entity.
@@ -22,29 +21,15 @@ type ConnectionCreate struct {
 	hooks    []Hook
 }
 
-// SetInstitutionID sets the "institution_id" field.
-func (cc *ConnectionCreate) SetInstitutionID(u uuid.UUID) *ConnectionCreate {
-	cc.mutation.SetInstitutionID(u)
-	return cc
-}
-
-// SetNillableInstitutionID sets the "institution_id" field if the given value is not nil.
-func (cc *ConnectionCreate) SetNillableInstitutionID(u *uuid.UUID) *ConnectionCreate {
-	if u != nil {
-		cc.SetInstitutionID(*u)
-	}
+// SetProviderName sets the "provider_name" field.
+func (cc *ConnectionCreate) SetProviderName(s string) *ConnectionCreate {
+	cc.mutation.SetProviderName(s)
 	return cc
 }
 
 // SetData sets the "data" field.
 func (cc *ConnectionCreate) SetData(s string) *ConnectionCreate {
 	cc.mutation.SetData(s)
-	return cc
-}
-
-// SetEnv sets the "env" field.
-func (cc *ConnectionCreate) SetEnv(s string) *ConnectionCreate {
-	cc.mutation.SetEnv(s)
 	return cc
 }
 
@@ -88,11 +73,6 @@ func (cc *ConnectionCreate) SetNillableID(u *uuid.UUID) *ConnectionCreate {
 		cc.SetID(*u)
 	}
 	return cc
-}
-
-// SetInstitution sets the "institution" edge to the Institution entity.
-func (cc *ConnectionCreate) SetInstitution(i *Institution) *ConnectionCreate {
-	return cc.SetInstitutionID(i.ID)
 }
 
 // Mutation returns the ConnectionMutation object of the builder.
@@ -146,11 +126,11 @@ func (cc *ConnectionCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *ConnectionCreate) check() error {
+	if _, ok := cc.mutation.ProviderName(); !ok {
+		return &ValidationError{Name: "provider_name", err: errors.New(`ent: missing required field "Connection.provider_name"`)}
+	}
 	if _, ok := cc.mutation.Data(); !ok {
 		return &ValidationError{Name: "data", err: errors.New(`ent: missing required field "Connection.data"`)}
-	}
-	if _, ok := cc.mutation.Env(); !ok {
-		return &ValidationError{Name: "env", err: errors.New(`ent: missing required field "Connection.env"`)}
 	}
 	if _, ok := cc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Connection.created_at"`)}
@@ -193,13 +173,13 @@ func (cc *ConnectionCreate) createSpec() (*Connection, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
+	if value, ok := cc.mutation.ProviderName(); ok {
+		_spec.SetField(connection.FieldProviderName, field.TypeString, value)
+		_node.ProviderName = value
+	}
 	if value, ok := cc.mutation.Data(); ok {
 		_spec.SetField(connection.FieldData, field.TypeString, value)
 		_node.Data = value
-	}
-	if value, ok := cc.mutation.Env(); ok {
-		_spec.SetField(connection.FieldEnv, field.TypeString, value)
-		_node.Env = value
 	}
 	if value, ok := cc.mutation.CreatedAt(); ok {
 		_spec.SetField(connection.FieldCreatedAt, field.TypeTime, value)
@@ -208,23 +188,6 @@ func (cc *ConnectionCreate) createSpec() (*Connection, *sqlgraph.CreateSpec) {
 	if value, ok := cc.mutation.UpdatedAt(); ok {
 		_spec.SetField(connection.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
-	}
-	if nodes := cc.mutation.InstitutionIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   connection.InstitutionTable,
-			Columns: []string{connection.InstitutionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(institution.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.InstitutionID = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

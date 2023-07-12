@@ -21,6 +21,8 @@ type Transaction struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// AccountID holds the value of the "account_id" field.
 	AccountID uuid.UUID `json:"account_id,omitempty"`
+	// ProviderName holds the value of the "provider_name" field.
+	ProviderName string `json:"provider_name,omitempty"`
 	// Data holds the value of the "data" field.
 	Data string `json:"data,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -60,7 +62,7 @@ func (*Transaction) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case transaction.FieldData:
+		case transaction.FieldProviderName, transaction.FieldData:
 			values[i] = new(sql.NullString)
 		case transaction.FieldCreatedAt, transaction.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -92,6 +94,12 @@ func (t *Transaction) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field account_id", values[i])
 			} else if value != nil {
 				t.AccountID = *value
+			}
+		case transaction.FieldProviderName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field provider_name", values[i])
+			} else if value.Valid {
+				t.ProviderName = value.String
 			}
 		case transaction.FieldData:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -154,6 +162,9 @@ func (t *Transaction) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
 	builder.WriteString("account_id=")
 	builder.WriteString(fmt.Sprintf("%v", t.AccountID))
+	builder.WriteString(", ")
+	builder.WriteString("provider_name=")
+	builder.WriteString(t.ProviderName)
 	builder.WriteString(", ")
 	builder.WriteString("data=")
 	builder.WriteString(t.Data)

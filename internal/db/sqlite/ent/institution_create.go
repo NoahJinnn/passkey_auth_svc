@@ -243,7 +243,7 @@ func (ic *InstitutionCreate) createSpec() (*Institution, *sqlgraph.CreateSpec) {
 	}
 	if nodes := ic.mutation.ConnectionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   institution.ConnectionTable,
 			Columns: []string{institution.ConnectionColumn},
@@ -255,6 +255,7 @@ func (ic *InstitutionCreate) createSpec() (*Institution, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.institution_connection = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := ic.mutation.AccountsIDs(); len(nodes) > 0 {

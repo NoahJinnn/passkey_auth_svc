@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/predicate"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
 )
@@ -25,8 +24,8 @@ type AccountQuery struct {
 	order            []account.OrderOption
 	inters           []Interceptor
 	predicates       []predicate.Account
-	withInstitution  *InstitutionQuery
 	withTransactions *TransactionQuery
+	withFKs          bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -61,28 +60,6 @@ func (aq *AccountQuery) Unique(unique bool) *AccountQuery {
 func (aq *AccountQuery) Order(o ...account.OrderOption) *AccountQuery {
 	aq.order = append(aq.order, o...)
 	return aq
-}
-
-// QueryInstitution chains the current query on the "institution" edge.
-func (aq *AccountQuery) QueryInstitution() *InstitutionQuery {
-	query := (&InstitutionClient{config: aq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := aq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := aq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(account.Table, account.FieldID, selector),
-			sqlgraph.To(institution.Table, institution.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, account.InstitutionTable, account.InstitutionColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // QueryTransactions chains the current query on the "transactions" edge.
@@ -299,23 +276,11 @@ func (aq *AccountQuery) Clone() *AccountQuery {
 		order:            append([]account.OrderOption{}, aq.order...),
 		inters:           append([]Interceptor{}, aq.inters...),
 		predicates:       append([]predicate.Account{}, aq.predicates...),
-		withInstitution:  aq.withInstitution.Clone(),
 		withTransactions: aq.withTransactions.Clone(),
 		// clone intermediate query.
 		sql:  aq.sql.Clone(),
 		path: aq.path,
 	}
-}
-
-// WithInstitution tells the query-builder to eager-load the nodes that are connected to
-// the "institution" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *AccountQuery) WithInstitution(opts ...func(*InstitutionQuery)) *AccountQuery {
-	query := (&InstitutionClient{config: aq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	aq.withInstitution = query
-	return aq
 }
 
 // WithTransactions tells the query-builder to eager-load the nodes that are connected to
@@ -335,12 +300,12 @@ func (aq *AccountQuery) WithTransactions(opts ...func(*TransactionQuery)) *Accou
 // Example:
 //
 //	var v []struct {
-//		InstitutionID uuid.UUID `json:"institution_id,omitempty"`
+//		ProviderName string `json:"provider_name,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Account.Query().
-//		GroupBy(account.FieldInstitutionID).
+//		GroupBy(account.FieldProviderName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (aq *AccountQuery) GroupBy(field string, fields ...string) *AccountGroupBy {
@@ -358,11 +323,11 @@ func (aq *AccountQuery) GroupBy(field string, fields ...string) *AccountGroupBy 
 // Example:
 //
 //	var v []struct {
-//		InstitutionID uuid.UUID `json:"institution_id,omitempty"`
+//		ProviderName string `json:"provider_name,omitempty"`
 //	}
 //
 //	client.Account.Query().
-//		Select(account.FieldInstitutionID).
+//		Select(account.FieldProviderName).
 //		Scan(ctx, &v)
 func (aq *AccountQuery) Select(fields ...string) *AccountSelect {
 	aq.ctx.Fields = append(aq.ctx.Fields, fields...)
@@ -406,12 +371,15 @@ func (aq *AccountQuery) prepareQuery(ctx context.Context) error {
 func (aq *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Account, error) {
 	var (
 		nodes       = []*Account{}
+		withFKs     = aq.withFKs
 		_spec       = aq.querySpec()
-		loadedTypes = [2]bool{
-			aq.withInstitution != nil,
+		loadedTypes = [1]bool{
 			aq.withTransactions != nil,
 		}
 	)
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, account.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Account).scanValues(nil, columns)
 	}
@@ -430,12 +398,6 @@ func (aq *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := aq.withInstitution; query != nil {
-		if err := aq.loadInstitution(ctx, query, nodes, nil,
-			func(n *Account, e *Institution) { n.Edges.Institution = e }); err != nil {
-			return nil, err
-		}
-	}
 	if query := aq.withTransactions; query != nil {
 		if err := aq.loadTransactions(ctx, query, nodes,
 			func(n *Account) { n.Edges.Transactions = []*Transaction{} },
@@ -446,35 +408,6 @@ func (aq *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 	return nodes, nil
 }
 
-func (aq *AccountQuery) loadInstitution(ctx context.Context, query *InstitutionQuery, nodes []*Account, init func(*Account), assign func(*Account, *Institution)) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*Account)
-	for i := range nodes {
-		fk := nodes[i].InstitutionID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(institution.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "institution_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
 func (aq *AccountQuery) loadTransactions(ctx context.Context, query *TransactionQuery, nodes []*Account, init func(*Account), assign func(*Account, *Transaction)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Account)
@@ -530,9 +463,6 @@ func (aq *AccountQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != account.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
-		}
-		if aq.withInstitution != nil {
-			_spec.Node.AddColumnOnce(account.FieldInstitutionID)
 		}
 	}
 	if ps := aq.predicates; len(ps) > 0 {

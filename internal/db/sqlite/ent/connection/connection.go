@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/gofrs/uuid"
 )
 
@@ -15,35 +14,23 @@ const (
 	Label = "connection"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldInstitutionID holds the string denoting the institution_id field in the database.
-	FieldInstitutionID = "institution_id"
+	// FieldProviderName holds the string denoting the provider_name field in the database.
+	FieldProviderName = "provider_name"
 	// FieldData holds the string denoting the data field in the database.
 	FieldData = "data"
-	// FieldEnv holds the string denoting the env field in the database.
-	FieldEnv = "env"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
-	// EdgeInstitution holds the string denoting the institution edge name in mutations.
-	EdgeInstitution = "institution"
 	// Table holds the table name of the connection in the database.
 	Table = "connections"
-	// InstitutionTable is the table that holds the institution relation/edge.
-	InstitutionTable = "connections"
-	// InstitutionInverseTable is the table name for the Institution entity.
-	// It exists in this package in order to avoid circular dependency with the "institution" package.
-	InstitutionInverseTable = "institutions"
-	// InstitutionColumn is the table column denoting the institution relation/edge.
-	InstitutionColumn = "institution_id"
 )
 
 // Columns holds all SQL columns for connection fields.
 var Columns = []string{
 	FieldID,
-	FieldInstitutionID,
+	FieldProviderName,
 	FieldData,
-	FieldEnv,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
@@ -77,19 +64,14 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByInstitutionID orders the results by the institution_id field.
-func ByInstitutionID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldInstitutionID, opts...).ToFunc()
+// ByProviderName orders the results by the provider_name field.
+func ByProviderName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProviderName, opts...).ToFunc()
 }
 
 // ByData orders the results by the data field.
 func ByData(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldData, opts...).ToFunc()
-}
-
-// ByEnv orders the results by the env field.
-func ByEnv(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldEnv, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.
@@ -100,18 +82,4 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByUpdatedAt orders the results by the updated_at field.
 func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
-}
-
-// ByInstitutionField orders the results by institution field.
-func ByInstitutionField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newInstitutionStep(), sql.OrderByField(field, opts...))
-	}
-}
-func newInstitutionStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(InstitutionInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, true, InstitutionTable, InstitutionColumn),
-	)
 }

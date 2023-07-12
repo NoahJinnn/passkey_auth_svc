@@ -104,13 +104,13 @@ func (s *assetSuite) TestAssetTableHandler_Create() {
 			s.e.ServeHTTP(rec, req)
 			s.Equal(tt.expectedStatusCode, rec.Code)
 			if rec.Code == 200 {
-				assets, err := s.app.GetAssetSvc().ListByUser(ctx, uuid.FromStringOrNil(userId))
+				assets, err := s.app.GetAssetTableSvc().ListByUser(ctx, uuid.FromStringOrNil(userId))
 				s.NoError(err)
 				s.Equal(2, len(assets)) // 1st from fixture, 2nd from create
 				s.Equal(tt.expectedAsset.Sheet, assets[1].Sheet)
 				s.Equal(tt.expectedAsset.Section, assets[1].Section)
 				s.Equal(tt.expectedAsset.Description, assets[1].Description)
-				s.app.GetAssetSvc().Delete(ctx, uuid.FromStringOrNil(userId), assets[1].ID)
+				s.app.GetAssetTableSvc().Delete(ctx, uuid.FromStringOrNil(userId), assets[1].ID)
 			}
 		})
 	}

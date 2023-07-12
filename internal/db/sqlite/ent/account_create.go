@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
 )
 
@@ -23,17 +22,9 @@ type AccountCreate struct {
 	hooks    []Hook
 }
 
-// SetInstitutionID sets the "institution_id" field.
-func (ac *AccountCreate) SetInstitutionID(u uuid.UUID) *AccountCreate {
-	ac.mutation.SetInstitutionID(u)
-	return ac
-}
-
-// SetNillableInstitutionID sets the "institution_id" field if the given value is not nil.
-func (ac *AccountCreate) SetNillableInstitutionID(u *uuid.UUID) *AccountCreate {
-	if u != nil {
-		ac.SetInstitutionID(*u)
-	}
+// SetProviderName sets the "provider_name" field.
+func (ac *AccountCreate) SetProviderName(s string) *AccountCreate {
+	ac.mutation.SetProviderName(s)
 	return ac
 }
 
@@ -83,11 +74,6 @@ func (ac *AccountCreate) SetNillableID(u *uuid.UUID) *AccountCreate {
 		ac.SetID(*u)
 	}
 	return ac
-}
-
-// SetInstitution sets the "institution" edge to the Institution entity.
-func (ac *AccountCreate) SetInstitution(i *Institution) *AccountCreate {
-	return ac.SetInstitutionID(i.ID)
 }
 
 // AddTransactionIDs adds the "transactions" edge to the Transaction entity by IDs.
@@ -156,6 +142,9 @@ func (ac *AccountCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (ac *AccountCreate) check() error {
+	if _, ok := ac.mutation.ProviderName(); !ok {
+		return &ValidationError{Name: "provider_name", err: errors.New(`ent: missing required field "Account.provider_name"`)}
+	}
 	if _, ok := ac.mutation.Data(); !ok {
 		return &ValidationError{Name: "data", err: errors.New(`ent: missing required field "Account.data"`)}
 	}
@@ -200,6 +189,10 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
+	if value, ok := ac.mutation.ProviderName(); ok {
+		_spec.SetField(account.FieldProviderName, field.TypeString, value)
+		_node.ProviderName = value
+	}
 	if value, ok := ac.mutation.Data(); ok {
 		_spec.SetField(account.FieldData, field.TypeString, value)
 		_node.Data = value
@@ -211,23 +204,6 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 	if value, ok := ac.mutation.UpdatedAt(); ok {
 		_spec.SetField(account.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
-	}
-	if nodes := ac.mutation.InstitutionIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   account.InstitutionTable,
-			Columns: []string{account.InstitutionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(institution.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.InstitutionID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := ac.mutation.TransactionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

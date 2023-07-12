@@ -12,7 +12,7 @@ import (
 
 // Appl provides application features (use cases) service.
 type Appl interface {
-	GetAssetSvc() *asset_table.AssetTableSvc
+	GetAssetTableSvc() *asset_table.AssetTableSvc
 	GetProviderSvc() *provider.ProviderSvc
 	GetFvAuthSvc() *finverse.FvAuthSvc
 	GetFvDataSvc() *finverse.FvDataSvc
@@ -22,7 +22,7 @@ type Appl interface {
 // App implements interface Appl.
 type App struct {
 	cfg              *config.Config
-	assetSvc         *asset_table.AssetTableSvc
+	assetTableSvc    *asset_table.AssetTableSvc
 	providerSvc      *provider.ProviderSvc
 	seAccountInfoSvc *saltedge.SeAccountInfoSvc
 	fvAuthSvc        *finverse.FvAuthSvc
@@ -31,15 +31,15 @@ type App struct {
 
 // New creates and returns new App.
 func New(cfg *config.Config, repo dal.INwRepo) *App {
-	assetSvc := asset_table.NewAssetTableSvc(cfg, repo)
 	providerSvc := provider.NewProviderSvc()
+	assetTableSvc := asset_table.NewAssetTableSvc(cfg, repo)
 	seAccountInfoSvc := saltedge.NewSeAccountInfoSvc(cfg)
-	fvAuthSvc := finverse.NewFvAuthSvc(cfg, repo)
-	fvDataSvc := finverse.NewFvDataSvc(cfg, repo)
+	fvAuthSvc := finverse.NewFvAuthSvc(cfg, providerSvc, repo)
+	fvDataSvc := finverse.NewFvDataSvc(cfg, providerSvc, repo)
 
 	return &App{
 		cfg:              cfg,
-		assetSvc:         assetSvc,
+		assetTableSvc:    assetTableSvc,
 		providerSvc:      providerSvc,
 		seAccountInfoSvc: seAccountInfoSvc,
 		fvAuthSvc:        fvAuthSvc,
@@ -47,8 +47,8 @@ func New(cfg *config.Config, repo dal.INwRepo) *App {
 	}
 }
 
-func (a App) GetAssetSvc() *asset_table.AssetTableSvc {
-	return a.assetSvc
+func (a App) GetAssetTableSvc() *asset_table.AssetTableSvc {
+	return a.assetTableSvc
 }
 
 func (a App) GetProviderSvc() *provider.ProviderSvc {

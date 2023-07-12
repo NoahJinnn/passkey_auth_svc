@@ -36,6 +36,12 @@ func (tc *TransactionCreate) SetNillableAccountID(u *uuid.UUID) *TransactionCrea
 	return tc
 }
 
+// SetProviderName sets the "provider_name" field.
+func (tc *TransactionCreate) SetProviderName(s string) *TransactionCreate {
+	tc.mutation.SetProviderName(s)
+	return tc
+}
+
 // SetData sets the "data" field.
 func (tc *TransactionCreate) SetData(s string) *TransactionCreate {
 	tc.mutation.SetData(s)
@@ -140,6 +146,9 @@ func (tc *TransactionCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (tc *TransactionCreate) check() error {
+	if _, ok := tc.mutation.ProviderName(); !ok {
+		return &ValidationError{Name: "provider_name", err: errors.New(`ent: missing required field "Transaction.provider_name"`)}
+	}
 	if _, ok := tc.mutation.Data(); !ok {
 		return &ValidationError{Name: "data", err: errors.New(`ent: missing required field "Transaction.data"`)}
 	}
@@ -183,6 +192,10 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 	if id, ok := tc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
+	}
+	if value, ok := tc.mutation.ProviderName(); ok {
+		_spec.SetField(transaction.FieldProviderName, field.TypeString, value)
+		_node.ProviderName = value
 	}
 	if value, ok := tc.mutation.Data(); ok {
 		_spec.SetField(transaction.FieldData, field.TypeString, value)

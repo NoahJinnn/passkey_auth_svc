@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/income"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 )
 
 // IncomeCreate is the builder for creating a Income entity.
@@ -22,17 +21,9 @@ type IncomeCreate struct {
 	hooks    []Hook
 }
 
-// SetInstitutionID sets the "institution_id" field.
-func (ic *IncomeCreate) SetInstitutionID(u uuid.UUID) *IncomeCreate {
-	ic.mutation.SetInstitutionID(u)
-	return ic
-}
-
-// SetNillableInstitutionID sets the "institution_id" field if the given value is not nil.
-func (ic *IncomeCreate) SetNillableInstitutionID(u *uuid.UUID) *IncomeCreate {
-	if u != nil {
-		ic.SetInstitutionID(*u)
-	}
+// SetProviderName sets the "provider_name" field.
+func (ic *IncomeCreate) SetProviderName(s string) *IncomeCreate {
+	ic.mutation.SetProviderName(s)
 	return ic
 }
 
@@ -82,11 +73,6 @@ func (ic *IncomeCreate) SetNillableID(u *uuid.UUID) *IncomeCreate {
 		ic.SetID(*u)
 	}
 	return ic
-}
-
-// SetInstitution sets the "institution" edge to the Institution entity.
-func (ic *IncomeCreate) SetInstitution(i *Institution) *IncomeCreate {
-	return ic.SetInstitutionID(i.ID)
 }
 
 // Mutation returns the IncomeMutation object of the builder.
@@ -140,6 +126,9 @@ func (ic *IncomeCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (ic *IncomeCreate) check() error {
+	if _, ok := ic.mutation.ProviderName(); !ok {
+		return &ValidationError{Name: "provider_name", err: errors.New(`ent: missing required field "Income.provider_name"`)}
+	}
 	if _, ok := ic.mutation.Data(); !ok {
 		return &ValidationError{Name: "data", err: errors.New(`ent: missing required field "Income.data"`)}
 	}
@@ -184,6 +173,10 @@ func (ic *IncomeCreate) createSpec() (*Income, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
+	if value, ok := ic.mutation.ProviderName(); ok {
+		_spec.SetField(income.FieldProviderName, field.TypeString, value)
+		_node.ProviderName = value
+	}
 	if value, ok := ic.mutation.Data(); ok {
 		_spec.SetField(income.FieldData, field.TypeString, value)
 		_node.Data = value
@@ -195,23 +188,6 @@ func (ic *IncomeCreate) createSpec() (*Income, *sqlgraph.CreateSpec) {
 	if value, ok := ic.mutation.UpdatedAt(); ok {
 		_spec.SetField(income.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
-	}
-	if nodes := ic.mutation.InstitutionIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   income.InstitutionTable,
-			Columns: []string{income.InstitutionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(institution.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.InstitutionID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

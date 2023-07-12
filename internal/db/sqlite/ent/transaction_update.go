@@ -50,6 +50,12 @@ func (tu *TransactionUpdate) ClearAccountID() *TransactionUpdate {
 	return tu
 }
 
+// SetProviderName sets the "provider_name" field.
+func (tu *TransactionUpdate) SetProviderName(s string) *TransactionUpdate {
+	tu.mutation.SetProviderName(s)
+	return tu
+}
+
 // SetData sets the "data" field.
 func (tu *TransactionUpdate) SetData(s string) *TransactionUpdate {
 	tu.mutation.SetData(s)
@@ -123,6 +129,9 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := tu.mutation.ProviderName(); ok {
+		_spec.SetField(transaction.FieldProviderName, field.TypeString, value)
+	}
 	if value, ok := tu.mutation.Data(); ok {
 		_spec.SetField(transaction.FieldData, field.TypeString, value)
 	}
@@ -195,6 +204,12 @@ func (tuo *TransactionUpdateOne) SetNillableAccountID(u *uuid.UUID) *Transaction
 // ClearAccountID clears the value of the "account_id" field.
 func (tuo *TransactionUpdateOne) ClearAccountID() *TransactionUpdateOne {
 	tuo.mutation.ClearAccountID()
+	return tuo
+}
+
+// SetProviderName sets the "provider_name" field.
+func (tuo *TransactionUpdateOne) SetProviderName(s string) *TransactionUpdateOne {
+	tuo.mutation.SetProviderName(s)
 	return tuo
 }
 
@@ -300,6 +315,9 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := tuo.mutation.ProviderName(); ok {
+		_spec.SetField(transaction.FieldProviderName, field.TypeString, value)
 	}
 	if value, ok := tuo.mutation.Data(); ok {
 		_spec.SetField(transaction.FieldData, field.TypeString, value)

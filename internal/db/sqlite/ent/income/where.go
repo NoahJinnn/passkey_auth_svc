@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/predicate"
 )
@@ -56,9 +55,9 @@ func IDLTE(id uuid.UUID) predicate.Income {
 	return predicate.Income(sql.FieldLTE(FieldID, id))
 }
 
-// InstitutionID applies equality check predicate on the "institution_id" field. It's identical to InstitutionIDEQ.
-func InstitutionID(v uuid.UUID) predicate.Income {
-	return predicate.Income(sql.FieldEQ(FieldInstitutionID, v))
+// ProviderName applies equality check predicate on the "provider_name" field. It's identical to ProviderNameEQ.
+func ProviderName(v string) predicate.Income {
+	return predicate.Income(sql.FieldEQ(FieldProviderName, v))
 }
 
 // Data applies equality check predicate on the "data" field. It's identical to DataEQ.
@@ -76,34 +75,69 @@ func UpdatedAt(v time.Time) predicate.Income {
 	return predicate.Income(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
-// InstitutionIDEQ applies the EQ predicate on the "institution_id" field.
-func InstitutionIDEQ(v uuid.UUID) predicate.Income {
-	return predicate.Income(sql.FieldEQ(FieldInstitutionID, v))
+// ProviderNameEQ applies the EQ predicate on the "provider_name" field.
+func ProviderNameEQ(v string) predicate.Income {
+	return predicate.Income(sql.FieldEQ(FieldProviderName, v))
 }
 
-// InstitutionIDNEQ applies the NEQ predicate on the "institution_id" field.
-func InstitutionIDNEQ(v uuid.UUID) predicate.Income {
-	return predicate.Income(sql.FieldNEQ(FieldInstitutionID, v))
+// ProviderNameNEQ applies the NEQ predicate on the "provider_name" field.
+func ProviderNameNEQ(v string) predicate.Income {
+	return predicate.Income(sql.FieldNEQ(FieldProviderName, v))
 }
 
-// InstitutionIDIn applies the In predicate on the "institution_id" field.
-func InstitutionIDIn(vs ...uuid.UUID) predicate.Income {
-	return predicate.Income(sql.FieldIn(FieldInstitutionID, vs...))
+// ProviderNameIn applies the In predicate on the "provider_name" field.
+func ProviderNameIn(vs ...string) predicate.Income {
+	return predicate.Income(sql.FieldIn(FieldProviderName, vs...))
 }
 
-// InstitutionIDNotIn applies the NotIn predicate on the "institution_id" field.
-func InstitutionIDNotIn(vs ...uuid.UUID) predicate.Income {
-	return predicate.Income(sql.FieldNotIn(FieldInstitutionID, vs...))
+// ProviderNameNotIn applies the NotIn predicate on the "provider_name" field.
+func ProviderNameNotIn(vs ...string) predicate.Income {
+	return predicate.Income(sql.FieldNotIn(FieldProviderName, vs...))
 }
 
-// InstitutionIDIsNil applies the IsNil predicate on the "institution_id" field.
-func InstitutionIDIsNil() predicate.Income {
-	return predicate.Income(sql.FieldIsNull(FieldInstitutionID))
+// ProviderNameGT applies the GT predicate on the "provider_name" field.
+func ProviderNameGT(v string) predicate.Income {
+	return predicate.Income(sql.FieldGT(FieldProviderName, v))
 }
 
-// InstitutionIDNotNil applies the NotNil predicate on the "institution_id" field.
-func InstitutionIDNotNil() predicate.Income {
-	return predicate.Income(sql.FieldNotNull(FieldInstitutionID))
+// ProviderNameGTE applies the GTE predicate on the "provider_name" field.
+func ProviderNameGTE(v string) predicate.Income {
+	return predicate.Income(sql.FieldGTE(FieldProviderName, v))
+}
+
+// ProviderNameLT applies the LT predicate on the "provider_name" field.
+func ProviderNameLT(v string) predicate.Income {
+	return predicate.Income(sql.FieldLT(FieldProviderName, v))
+}
+
+// ProviderNameLTE applies the LTE predicate on the "provider_name" field.
+func ProviderNameLTE(v string) predicate.Income {
+	return predicate.Income(sql.FieldLTE(FieldProviderName, v))
+}
+
+// ProviderNameContains applies the Contains predicate on the "provider_name" field.
+func ProviderNameContains(v string) predicate.Income {
+	return predicate.Income(sql.FieldContains(FieldProviderName, v))
+}
+
+// ProviderNameHasPrefix applies the HasPrefix predicate on the "provider_name" field.
+func ProviderNameHasPrefix(v string) predicate.Income {
+	return predicate.Income(sql.FieldHasPrefix(FieldProviderName, v))
+}
+
+// ProviderNameHasSuffix applies the HasSuffix predicate on the "provider_name" field.
+func ProviderNameHasSuffix(v string) predicate.Income {
+	return predicate.Income(sql.FieldHasSuffix(FieldProviderName, v))
+}
+
+// ProviderNameEqualFold applies the EqualFold predicate on the "provider_name" field.
+func ProviderNameEqualFold(v string) predicate.Income {
+	return predicate.Income(sql.FieldEqualFold(FieldProviderName, v))
+}
+
+// ProviderNameContainsFold applies the ContainsFold predicate on the "provider_name" field.
+func ProviderNameContainsFold(v string) predicate.Income {
+	return predicate.Income(sql.FieldContainsFold(FieldProviderName, v))
 }
 
 // DataEQ applies the EQ predicate on the "data" field.
@@ -249,29 +283,6 @@ func UpdatedAtLT(v time.Time) predicate.Income {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.Income {
 	return predicate.Income(sql.FieldLTE(FieldUpdatedAt, v))
-}
-
-// HasInstitution applies the HasEdge predicate on the "institution" edge.
-func HasInstitution() predicate.Income {
-	return predicate.Income(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, InstitutionTable, InstitutionColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasInstitutionWith applies the HasEdge predicate on the "institution" edge with a given conditions (other predicates).
-func HasInstitutionWith(preds ...predicate.Institution) predicate.Income {
-	return predicate.Income(func(s *sql.Selector) {
-		step := newInstitutionStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

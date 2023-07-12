@@ -30,7 +30,7 @@ func (h *AssetHandler) ListByUser(c echo.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
-	result, err := h.GetAssetSvc().ListByUser(c.Request().Context(), userId)
+	result, err := h.GetAssetTableSvc().ListByUser(c.Request().Context(), userId)
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func (h *AssetHandler) Create(c echo.Context) error {
 		return errorhandler.ToHttpError(err)
 	}
 
-	result, err := h.GetAssetSvc().Create(c.Request().Context(), userId, body)
+	result, err := h.GetAssetTableSvc().Create(c.Request().Context(), userId, body)
 	if err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func (h *AssetHandler) Update(c echo.Context) error {
 		return errorhandler.ToHttpError(err)
 	}
 
-	err = h.GetAssetSvc().Update(c.Request().Context(), userId, body)
+	err = h.GetAssetTableSvc().Update(c.Request().Context(), userId, body)
 	if err != nil {
 		return err
 	}
@@ -111,7 +111,7 @@ func (h *AssetHandler) Delete(c echo.Context) error {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	err = h.GetAssetSvc().Delete(c.Request().Context(), userId, assetId)
+	err = h.GetAssetTableSvc().Delete(c.Request().Context(), userId, assetId)
 	if err != nil {
 		return err
 	}

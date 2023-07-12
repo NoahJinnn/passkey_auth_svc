@@ -15,7 +15,6 @@ import (
 	"github.com/hellohq/hqservice/ent/assettable"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
-	"github.com/hellohq/hqservice/ent/identity"
 	"github.com/hellohq/hqservice/ent/jwk"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/primaryemail"
@@ -87,7 +86,6 @@ func checkColumn(table, column string) error {
 			assettable.Table:                  assettable.ValidColumn,
 			email.Table:                       email.ValidColumn,
 			fvsession.Table:                   fvsession.ValidColumn,
-			identity.Table:                    identity.ValidColumn,
 			jwk.Table:                         jwk.ValidColumn,
 			passcode.Table:                    passcode.ValidColumn,
 			primaryemail.Table:                primaryemail.ValidColumn,

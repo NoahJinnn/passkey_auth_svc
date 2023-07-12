@@ -18,8 +18,6 @@ type Tx struct {
 	Email *EmailClient
 	// FvSession is the client for interacting with the FvSession builders.
 	FvSession *FvSessionClient
-	// Identity is the client for interacting with the Identity builders.
-	Identity *IdentityClient
 	// Jwk is the client for interacting with the Jwk builders.
 	Jwk *JwkClient
 	// Passcode is the client for interacting with the Passcode builders.
@@ -170,7 +168,6 @@ func (tx *Tx) init() {
 	tx.AssetTable = NewAssetTableClient(tx.config)
 	tx.Email = NewEmailClient(tx.config)
 	tx.FvSession = NewFvSessionClient(tx.config)
-	tx.Identity = NewIdentityClient(tx.config)
 	tx.Jwk = NewJwkClient(tx.config)
 	tx.Passcode = NewPasscodeClient(tx.config)
 	tx.PrimaryEmail = NewPrimaryEmailClient(tx.config)

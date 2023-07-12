@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
-	"github.com/hellohq/hqservice/ent/identity"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/predicate"
 	"github.com/hellohq/hqservice/ent/primaryemail"
@@ -28,7 +27,6 @@ type EmailQuery struct {
 	inters           []Interceptor
 	predicates       []predicate.Email
 	withUser         *UserQuery
-	withIdentities   *IdentityQuery
 	withPasscodes    *PasscodeQuery
 	withPrimaryEmail *PrimaryEmailQuery
 	// intermediate query (i.e. traversal path).
@@ -82,28 +80,6 @@ func (eq *EmailQuery) QueryUser() *UserQuery {
 			sqlgraph.From(email.Table, email.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, email.UserTable, email.UserColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(eq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryIdentities chains the current query on the "identities" edge.
-func (eq *EmailQuery) QueryIdentities() *IdentityQuery {
-	query := (&IdentityClient{config: eq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := eq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := eq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(email.Table, email.FieldID, selector),
-			sqlgraph.To(identity.Table, identity.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, email.IdentitiesTable, email.IdentitiesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(eq.driver.Dialect(), step)
 		return fromU, nil
@@ -348,7 +324,6 @@ func (eq *EmailQuery) Clone() *EmailQuery {
 		inters:           append([]Interceptor{}, eq.inters...),
 		predicates:       append([]predicate.Email{}, eq.predicates...),
 		withUser:         eq.withUser.Clone(),
-		withIdentities:   eq.withIdentities.Clone(),
 		withPasscodes:    eq.withPasscodes.Clone(),
 		withPrimaryEmail: eq.withPrimaryEmail.Clone(),
 		// clone intermediate query.
@@ -365,17 +340,6 @@ func (eq *EmailQuery) WithUser(opts ...func(*UserQuery)) *EmailQuery {
 		opt(query)
 	}
 	eq.withUser = query
-	return eq
-}
-
-// WithIdentities tells the query-builder to eager-load the nodes that are connected to
-// the "identities" edge. The optional arguments are used to configure the query builder of the edge.
-func (eq *EmailQuery) WithIdentities(opts ...func(*IdentityQuery)) *EmailQuery {
-	query := (&IdentityClient{config: eq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	eq.withIdentities = query
 	return eq
 }
 
@@ -479,9 +443,8 @@ func (eq *EmailQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Email,
 	var (
 		nodes       = []*Email{}
 		_spec       = eq.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [3]bool{
 			eq.withUser != nil,
-			eq.withIdentities != nil,
 			eq.withPasscodes != nil,
 			eq.withPrimaryEmail != nil,
 		}
@@ -507,13 +470,6 @@ func (eq *EmailQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Email,
 	if query := eq.withUser; query != nil {
 		if err := eq.loadUser(ctx, query, nodes, nil,
 			func(n *Email, e *User) { n.Edges.User = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := eq.withIdentities; query != nil {
-		if err := eq.loadIdentities(ctx, query, nodes,
-			func(n *Email) { n.Edges.Identities = []*Identity{} },
-			func(n *Email, e *Identity) { n.Edges.Identities = append(n.Edges.Identities, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -562,36 +518,6 @@ func (eq *EmailQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*E
 		for i := range nodes {
 			assign(nodes[i], n)
 		}
-	}
-	return nil
-}
-func (eq *EmailQuery) loadIdentities(ctx context.Context, query *IdentityQuery, nodes []*Email, init func(*Email), assign func(*Email, *Identity)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*Email)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(identity.FieldEmailID)
-	}
-	query.Where(predicate.Identity(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(email.IdentitiesColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.EmailID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "email_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
 	}
 	return nil
 }

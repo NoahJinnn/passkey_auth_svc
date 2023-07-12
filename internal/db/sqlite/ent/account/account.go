@@ -15,27 +15,18 @@ const (
 	Label = "account"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldInstitutionID holds the string denoting the institution_id field in the database.
-	FieldInstitutionID = "institution_id"
+	// FieldProviderName holds the string denoting the provider_name field in the database.
+	FieldProviderName = "provider_name"
 	// FieldData holds the string denoting the data field in the database.
 	FieldData = "data"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
-	// EdgeInstitution holds the string denoting the institution edge name in mutations.
-	EdgeInstitution = "institution"
 	// EdgeTransactions holds the string denoting the transactions edge name in mutations.
 	EdgeTransactions = "transactions"
 	// Table holds the table name of the account in the database.
 	Table = "accounts"
-	// InstitutionTable is the table that holds the institution relation/edge.
-	InstitutionTable = "accounts"
-	// InstitutionInverseTable is the table name for the Institution entity.
-	// It exists in this package in order to avoid circular dependency with the "institution" package.
-	InstitutionInverseTable = "institutions"
-	// InstitutionColumn is the table column denoting the institution relation/edge.
-	InstitutionColumn = "institution_id"
 	// TransactionsTable is the table that holds the transactions relation/edge.
 	TransactionsTable = "transactions"
 	// TransactionsInverseTable is the table name for the Transaction entity.
@@ -48,16 +39,27 @@ const (
 // Columns holds all SQL columns for account fields.
 var Columns = []string{
 	FieldID,
-	FieldInstitutionID,
+	FieldProviderName,
 	FieldData,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "accounts"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"institution_accounts",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -83,9 +85,9 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByInstitutionID orders the results by the institution_id field.
-func ByInstitutionID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldInstitutionID, opts...).ToFunc()
+// ByProviderName orders the results by the provider_name field.
+func ByProviderName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProviderName, opts...).ToFunc()
 }
 
 // ByData orders the results by the data field.
@@ -103,13 +105,6 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
-// ByInstitutionField orders the results by institution field.
-func ByInstitutionField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newInstitutionStep(), sql.OrderByField(field, opts...))
-	}
-}
-
 // ByTransactionsCount orders the results by transactions count.
 func ByTransactionsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -122,13 +117,6 @@ func ByTransactions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newTransactionsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
-}
-func newInstitutionStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(InstitutionInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, InstitutionTable, InstitutionColumn),
-	)
 }
 func newTransactionsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(

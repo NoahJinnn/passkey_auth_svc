@@ -37,11 +37,11 @@ func init() {
 	connectionFields := schema.Connection{}.Fields()
 	_ = connectionFields
 	// connectionDescCreatedAt is the schema descriptor for created_at field.
-	connectionDescCreatedAt := connectionFields[4].Descriptor()
+	connectionDescCreatedAt := connectionFields[3].Descriptor()
 	// connection.DefaultCreatedAt holds the default value on creation for the created_at field.
 	connection.DefaultCreatedAt = connectionDescCreatedAt.Default.(func() time.Time)
 	// connectionDescUpdatedAt is the schema descriptor for updated_at field.
-	connectionDescUpdatedAt := connectionFields[5].Descriptor()
+	connectionDescUpdatedAt := connectionFields[4].Descriptor()
 	// connection.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	connection.DefaultUpdatedAt = connectionDescUpdatedAt.Default.(func() time.Time)
 	// connection.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -85,11 +85,11 @@ func init() {
 	transactionFields := schema.Transaction{}.Fields()
 	_ = transactionFields
 	// transactionDescCreatedAt is the schema descriptor for created_at field.
-	transactionDescCreatedAt := transactionFields[3].Descriptor()
+	transactionDescCreatedAt := transactionFields[4].Descriptor()
 	// transaction.DefaultCreatedAt holds the default value on creation for the created_at field.
 	transaction.DefaultCreatedAt = transactionDescCreatedAt.Default.(func() time.Time)
 	// transactionDescUpdatedAt is the schema descriptor for updated_at field.
-	transactionDescUpdatedAt := transactionFields[4].Descriptor()
+	transactionDescUpdatedAt := transactionFields[5].Descriptor()
 	// transaction.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	transaction.DefaultUpdatedAt = transactionDescUpdatedAt.Default.(func() time.Time)
 	// transaction.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 )
 
 // Account is the model entity for the Account schema.
@@ -19,8 +18,8 @@ type Account struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// InstitutionID holds the value of the "institution_id" field.
-	InstitutionID uuid.UUID `json:"institution_id,omitempty"`
+	// ProviderName holds the value of the "provider_name" field.
+	ProviderName string `json:"provider_name,omitempty"`
 	// Data holds the value of the "data" field.
 	Data string `json:"data,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -29,38 +28,24 @@ type Account struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AccountQuery when eager-loading is set.
-	Edges        AccountEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges                AccountEdges `json:"edges"`
+	institution_accounts *uuid.UUID
+	selectValues         sql.SelectValues
 }
 
 // AccountEdges holds the relations/edges for other nodes in the graph.
 type AccountEdges struct {
-	// Institution holds the value of the institution edge.
-	Institution *Institution `json:"institution,omitempty"`
 	// Transactions holds the value of the transactions edge.
 	Transactions []*Transaction `json:"transactions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
-}
-
-// InstitutionOrErr returns the Institution value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e AccountEdges) InstitutionOrErr() (*Institution, error) {
-	if e.loadedTypes[0] {
-		if e.Institution == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: institution.Label}
-		}
-		return e.Institution, nil
-	}
-	return nil, &NotLoadedError{edge: "institution"}
+	loadedTypes [1]bool
 }
 
 // TransactionsOrErr returns the Transactions value or an error if the edge
 // was not loaded in eager-loading.
 func (e AccountEdges) TransactionsOrErr() ([]*Transaction, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		return e.Transactions, nil
 	}
 	return nil, &NotLoadedError{edge: "transactions"}
@@ -71,12 +56,14 @@ func (*Account) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case account.FieldData:
+		case account.FieldProviderName, account.FieldData:
 			values[i] = new(sql.NullString)
 		case account.FieldCreatedAt, account.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case account.FieldID, account.FieldInstitutionID:
+		case account.FieldID:
 			values[i] = new(uuid.UUID)
+		case account.ForeignKeys[0]: // institution_accounts
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -98,11 +85,11 @@ func (a *Account) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				a.ID = *value
 			}
-		case account.FieldInstitutionID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field institution_id", values[i])
-			} else if value != nil {
-				a.InstitutionID = *value
+		case account.FieldProviderName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field provider_name", values[i])
+			} else if value.Valid {
+				a.ProviderName = value.String
 			}
 		case account.FieldData:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -122,6 +109,13 @@ func (a *Account) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				a.UpdatedAt = value.Time
 			}
+		case account.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field institution_accounts", values[i])
+			} else if value.Valid {
+				a.institution_accounts = new(uuid.UUID)
+				*a.institution_accounts = *value.S.(*uuid.UUID)
+			}
 		default:
 			a.selectValues.Set(columns[i], values[i])
 		}
@@ -133,11 +127,6 @@ func (a *Account) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (a *Account) Value(name string) (ent.Value, error) {
 	return a.selectValues.Get(name)
-}
-
-// QueryInstitution queries the "institution" edge of the Account entity.
-func (a *Account) QueryInstitution() *InstitutionQuery {
-	return NewAccountClient(a.config).QueryInstitution(a)
 }
 
 // QueryTransactions queries the "transactions" edge of the Account entity.
@@ -168,8 +157,8 @@ func (a *Account) String() string {
 	var builder strings.Builder
 	builder.WriteString("Account(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", a.ID))
-	builder.WriteString("institution_id=")
-	builder.WriteString(fmt.Sprintf("%v", a.InstitutionID))
+	builder.WriteString("provider_name=")
+	builder.WriteString(a.ProviderName)
 	builder.WriteString(", ")
 	builder.WriteString("data=")
 	builder.WriteString(a.Data)

@@ -45,18 +45,6 @@ func (f FvSessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FvSessionMutation", m)
 }
 
-// The IdentityFunc type is an adapter to allow the use of ordinary
-// function as Identity mutator.
-type IdentityFunc func(context.Context, *ent.IdentityMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f IdentityFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.IdentityMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IdentityMutation", m)
-}
-
 // The JwkFunc type is an adapter to allow the use of ordinary
 // function as Jwk mutator.
 type JwkFunc func(context.Context, *ent.JwkMutation) (ent.Value, error)
