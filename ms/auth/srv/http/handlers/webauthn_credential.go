@@ -60,7 +60,7 @@ func (h *WebauthnCredentialHandler) UpdateCredential(c echo.Context) error {
 
 	credentialID := c.Param("id")
 
-	var body dto.WebauthnCredentialUpdateRequest
+	var body dto.WebauthnCredentialUpdateBody
 
 	err = (&echo.DefaultBinder{}).BindBody(c, &body)
 	if err != nil {

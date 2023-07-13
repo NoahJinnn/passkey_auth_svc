@@ -59,7 +59,7 @@ func (h *EmailHandler) Create(c echo.Context) error {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	var body dto.EmailCreateRequest
+	var body dto.EmailCreateBody
 	err = (&echo.DefaultBinder{}).BindBody(c, &body)
 	if err != nil {
 		return errorhandler.ToHttpError(err)

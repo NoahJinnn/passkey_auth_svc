@@ -28,7 +28,7 @@ func NewPasscodeHandler(srv *HttpDeps, sessionManager session.IManager) *Passcod
 }
 
 func (h *PasscodeHandler) Init(c echo.Context) error {
-	var body dto.PasscodeInitRequest
+	var body dto.PasscodeInitBody
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
 		return errorhandler.ToHttpError(err)
 	}
@@ -69,7 +69,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 }
 
 func (h *PasscodeHandler) Finish(c echo.Context) error {
-	var body dto.PasscodeFinishRequest
+	var body dto.PasscodeFinishBody
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
 		return errorhandler.ToHttpError(err)
 	}

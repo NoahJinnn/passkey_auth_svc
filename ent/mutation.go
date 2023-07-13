@@ -272,24 +272,10 @@ func (m *AssetTableMutation) AddedSheet() (r int32, exists bool) {
 	return *v, true
 }
 
-// ClearSheet clears the value of the "sheet" field.
-func (m *AssetTableMutation) ClearSheet() {
-	m.sheet = nil
-	m.addsheet = nil
-	m.clearedFields[assettable.FieldSheet] = struct{}{}
-}
-
-// SheetCleared returns if the "sheet" field was cleared in this mutation.
-func (m *AssetTableMutation) SheetCleared() bool {
-	_, ok := m.clearedFields[assettable.FieldSheet]
-	return ok
-}
-
 // ResetSheet resets all changes to the "sheet" field.
 func (m *AssetTableMutation) ResetSheet() {
 	m.sheet = nil
 	m.addsheet = nil
-	delete(m.clearedFields, assettable.FieldSheet)
 }
 
 // SetSection sets the "section" field.
@@ -342,24 +328,10 @@ func (m *AssetTableMutation) AddedSection() (r int32, exists bool) {
 	return *v, true
 }
 
-// ClearSection clears the value of the "section" field.
-func (m *AssetTableMutation) ClearSection() {
-	m.section = nil
-	m.addsection = nil
-	m.clearedFields[assettable.FieldSection] = struct{}{}
-}
-
-// SectionCleared returns if the "section" field was cleared in this mutation.
-func (m *AssetTableMutation) SectionCleared() bool {
-	_, ok := m.clearedFields[assettable.FieldSection]
-	return ok
-}
-
 // ResetSection resets all changes to the "section" field.
 func (m *AssetTableMutation) ResetSection() {
 	m.section = nil
 	m.addsection = nil
-	delete(m.clearedFields, assettable.FieldSection)
 }
 
 // SetDescription sets the "description" field.
@@ -714,12 +686,6 @@ func (m *AssetTableMutation) ClearedFields() []string {
 	if m.FieldCleared(assettable.FieldUserID) {
 		fields = append(fields, assettable.FieldUserID)
 	}
-	if m.FieldCleared(assettable.FieldSheet) {
-		fields = append(fields, assettable.FieldSheet)
-	}
-	if m.FieldCleared(assettable.FieldSection) {
-		fields = append(fields, assettable.FieldSection)
-	}
 	if m.FieldCleared(assettable.FieldDescription) {
 		fields = append(fields, assettable.FieldDescription)
 	}
@@ -739,12 +705,6 @@ func (m *AssetTableMutation) ClearField(name string) error {
 	switch name {
 	case assettable.FieldUserID:
 		m.ClearUserID()
-		return nil
-	case assettable.FieldSheet:
-		m.ClearSheet()
-		return nil
-	case assettable.FieldSection:
-		m.ClearSection()
 		return nil
 	case assettable.FieldDescription:
 		m.ClearDescription()

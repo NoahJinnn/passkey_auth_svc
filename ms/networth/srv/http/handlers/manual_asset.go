@@ -12,15 +12,15 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
-type AssetTableHandler struct {
+type ManualAssetHandler struct {
 	*HttpDeps
 }
 
-func NewAssetTableHandler(srv *HttpDeps) *AssetTableHandler {
-	return &AssetTableHandler{srv}
+func NewManualAssetHandler(srv *HttpDeps) *ManualAssetHandler {
+	return &ManualAssetHandler{srv}
 }
 
-func (h *AssetTableHandler) ListByUser(c echo.Context) error {
+func (h *ManualAssetHandler) ListByUser(c echo.Context) error {
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("failed to cast session object")
@@ -30,7 +30,7 @@ func (h *AssetTableHandler) ListByUser(c echo.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
-	result, err := h.GetAssetTableSvc().ListByUser(c.Request().Context(), userId)
+	result, err := h.GetProviderSvc().AllManualAsset(c.Request().Context(), userId)
 	if err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func (h *AssetTableHandler) ListByUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
-func (h *AssetTableHandler) Create(c echo.Context) error {
+func (h *ManualAssetHandler) Create(c echo.Context) error {
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("failed to cast session object")
@@ -49,7 +49,7 @@ func (h *AssetTableHandler) Create(c echo.Context) error {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	var body dto.AssetTableBody
+	var body dto.ManualAssetBody
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
 		return errorhandler.ToHttpError(err)
 	}
@@ -58,35 +58,7 @@ func (h *AssetTableHandler) Create(c echo.Context) error {
 		return errorhandler.ToHttpError(err)
 	}
 
-	result, err := h.GetAssetTableSvc().Create(c.Request().Context(), userId, body)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, result)
-}
-
-func (h *AssetTableHandler) Update(c echo.Context) error {
-	sessionToken, ok := c.Get("session").(jwt.Token)
-	if !ok {
-		return errors.New("failed to cast session object")
-	}
-
-	userId, err := uuid.FromString(sessionToken.Subject())
-	if err != nil {
-		return fmt.Errorf("failed to parse subject as uuid: %w", err)
-	}
-
-	var body dto.AssetTableBody
-	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		return errorhandler.ToHttpError(err)
-	}
-
-	if err := c.Validate(body); err != nil {
-		return errorhandler.ToHttpError(err)
-	}
-
-	err = h.GetAssetTableSvc().Update(c.Request().Context(), userId, body)
+	err = h.GetProviderSvc().CreateManualAsset(c.Request().Context(), userId, &body)
 	if err != nil {
 		return err
 	}
@@ -94,7 +66,7 @@ func (h *AssetTableHandler) Update(c echo.Context) error {
 	return c.JSON(http.StatusOK, true)
 }
 
-func (h *AssetTableHandler) Delete(c echo.Context) error {
+func (h *ManualAssetHandler) Update(c echo.Context) error {
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("failed to cast session object")
@@ -105,13 +77,41 @@ func (h *AssetTableHandler) Delete(c echo.Context) error {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	assetIdStr := c.Param("assetTableId")
+	var body dto.ManualAssetBody
+	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
+		return errorhandler.ToHttpError(err)
+	}
+
+	if err := c.Validate(body); err != nil {
+		return errorhandler.ToHttpError(err)
+	}
+
+	err = h.GetProviderSvc().UpdateManualAsset(c.Request().Context(), userId, &body)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, true)
+}
+
+func (h *ManualAssetHandler) Delete(c echo.Context) error {
+	sessionToken, ok := c.Get("session").(jwt.Token)
+	if !ok {
+		return errors.New("failed to cast session object")
+	}
+
+	userId, err := uuid.FromString(sessionToken.Subject())
+	if err != nil {
+		return fmt.Errorf("failed to parse subject as uuid: %w", err)
+	}
+
+	assetIdStr := c.Param("manualAssetId")
 	assetId, err := uuid.FromString(assetIdStr)
 	if err != nil {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	err = h.GetAssetTableSvc().Delete(c.Request().Context(), userId, assetId)
+	err = h.GetProviderSvc().DeleteManualAsset(c.Request().Context(), userId, assetId)
 	if err != nil {
 		return err
 	}

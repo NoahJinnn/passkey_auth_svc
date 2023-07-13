@@ -12,8 +12,8 @@ import (
 
 type IAssetTableSvc interface {
 	ListByUser(ctx context.Context, userID string) ([]*ent.AssetTable, error)
-	Create(ctx context.Context, userID string, body dto.AssetTableRequest) (*ent.AssetTable, error)
-	Update(ctx context.Context, userID string, body dto.AssetTableRequest) error
+	Create(ctx context.Context, userID string, body dto.AssetTableBody) (*ent.AssetTable, error)
+	Update(ctx context.Context, userID string, body dto.AssetTableBody) error
 	Delete(ctx context.Context, userID string, assetID string) error
 }
 
@@ -30,7 +30,7 @@ func (svc *AssetTableSvc) ListByUser(ctx context.Context, userID uuid.UUID) ([]*
 	return svc.repo.GetAssetTableRepo().ListByUser(ctx, userID)
 }
 
-func (svc *AssetTableSvc) Create(ctx context.Context, userID uuid.UUID, body dto.AssetTableRequest) (*ent.AssetTable, error) {
+func (svc *AssetTableSvc) Create(ctx context.Context, userID uuid.UUID, body dto.AssetTableBody) (*ent.AssetTable, error) {
 	asset := &ent.AssetTable{
 		Sheet:       body.Sheet,
 		Section:     body.Section,
@@ -40,7 +40,7 @@ func (svc *AssetTableSvc) Create(ctx context.Context, userID uuid.UUID, body dto
 	return svc.repo.GetAssetTableRepo().Create(ctx, userID, asset)
 }
 
-func (svc *AssetTableSvc) Update(ctx context.Context, userID uuid.UUID, body dto.AssetTableRequest) error {
+func (svc *AssetTableSvc) Update(ctx context.Context, userID uuid.UUID, body dto.AssetTableBody) error {
 	asset := &ent.AssetTable{
 		Sheet:       body.Sheet,
 		Section:     body.Section,

@@ -4,32 +4,26 @@ import (
 	"time"
 
 	"entgo.io/ent"
-	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 )
 
-type AssetTable struct {
+type ManualAsset struct {
 	ent.Schema
 }
 
-func (AssetTable) Fields() []ent.Field {
+func (ManualAsset) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Default(func() uuid.UUID {
 			id, _ := uuid.NewV4()
 			return id
 		}).Immutable(),
-		field.UUID("user_id", uuid.UUID{}).Optional(),
-		field.Int32("sheet"),
-		field.Int32("section"),
+		field.String("provider_name"),
+		field.String("asset_table_id"),
+		field.String("asset_type"),
 		field.String("description").Default("").Optional(),
+		field.Float("value"),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
-	}
-}
-
-func (AssetTable) Edges() []ent.Edge {
-	return []ent.Edge{
-		edge.From("user", User.Type).Ref("asset_tables").Unique().Field("user_id"),
 	}
 }

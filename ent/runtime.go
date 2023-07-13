@@ -26,14 +26,6 @@ import (
 func init() {
 	assettableFields := schema.AssetTable{}.Fields()
 	_ = assettableFields
-	// assettableDescSheet is the schema descriptor for sheet field.
-	assettableDescSheet := assettableFields[2].Descriptor()
-	// assettable.DefaultSheet holds the default value on creation for the sheet field.
-	assettable.DefaultSheet = assettableDescSheet.Default.(int32)
-	// assettableDescSection is the schema descriptor for section field.
-	assettableDescSection := assettableFields[3].Descriptor()
-	// assettable.DefaultSection holds the default value on creation for the section field.
-	assettable.DefaultSection = assettableDescSection.Default.(int32)
 	// assettableDescDescription is the schema descriptor for description field.
 	assettableDescDescription := assettableFields[4].Descriptor()
 	// assettable.DefaultDescription holds the default value on creation for the description field.

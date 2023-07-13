@@ -156,16 +156,6 @@ func SheetLTE(v int32) predicate.AssetTable {
 	return predicate.AssetTable(sql.FieldLTE(FieldSheet, v))
 }
 
-// SheetIsNil applies the IsNil predicate on the "sheet" field.
-func SheetIsNil() predicate.AssetTable {
-	return predicate.AssetTable(sql.FieldIsNull(FieldSheet))
-}
-
-// SheetNotNil applies the NotNil predicate on the "sheet" field.
-func SheetNotNil() predicate.AssetTable {
-	return predicate.AssetTable(sql.FieldNotNull(FieldSheet))
-}
-
 // SectionEQ applies the EQ predicate on the "section" field.
 func SectionEQ(v int32) predicate.AssetTable {
 	return predicate.AssetTable(sql.FieldEQ(FieldSection, v))
@@ -204,16 +194,6 @@ func SectionLT(v int32) predicate.AssetTable {
 // SectionLTE applies the LTE predicate on the "section" field.
 func SectionLTE(v int32) predicate.AssetTable {
 	return predicate.AssetTable(sql.FieldLTE(FieldSection, v))
-}
-
-// SectionIsNil applies the IsNil predicate on the "section" field.
-func SectionIsNil() predicate.AssetTable {
-	return predicate.AssetTable(sql.FieldIsNull(FieldSection))
-}
-
-// SectionNotNil applies the NotNil predicate on the "section" field.
-func SectionNotNil() predicate.AssetTable {
-	return predicate.AssetTable(sql.FieldNotNull(FieldSection))
 }
 
 // DescriptionEQ applies the EQ predicate on the "description" field.

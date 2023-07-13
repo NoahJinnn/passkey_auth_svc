@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite"
@@ -11,7 +12,10 @@ import (
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/income"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/manualasset"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
+	"github.com/hellohq/hqservice/internal/http/errorhandler"
+	"github.com/hellohq/hqservice/ms/networth/srv/http/dto"
 )
 
 type ProviderSvc struct {
@@ -43,6 +47,16 @@ func (p *ProviderSvc) getSqliteConnect(userId string) *ent.Client {
 	return storage
 }
 
+func (p *ProviderSvc) AllManualAsset(ctx context.Context, userId uuid.UUID) ([]*ent.ManualAsset, error) {
+	storage := p.getSqliteConnect(userId.String())
+	ma, err := storage.ManualAsset.Query().All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return ma, nil
+}
+
 func (p *ProviderSvc) AllConnection(ctx context.Context, userId uuid.UUID) ([]*ent.Connection, error) {
 	storage := p.getSqliteConnect(userId.String())
 	conns, err := storage.Connection.Query().All(ctx)
@@ -51,6 +65,55 @@ func (p *ProviderSvc) AllConnection(ctx context.Context, userId uuid.UUID) ([]*e
 	}
 
 	return conns, nil
+}
+
+func (p *ProviderSvc) CreateManualAsset(ctx context.Context, userId uuid.UUID, ma *dto.ManualAssetBody) error {
+	valid := ValidateProvider(ma.ProviderName)
+	if !valid {
+		return errorhandler.NewHTTPError(http.StatusBadRequest, "invalid provider name")
+	}
+
+	storage := p.getSqliteConnect(userId.String())
+	_, err := storage.ManualAsset.Create().
+		SetProviderName(ma.ProviderName).
+		SetAssetTableID(ma.AssetTableID).
+		SetAssetType(ma.AssetType).
+		SetDescription(ma.Description).
+		SetValue(ma.Value).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *ProviderSvc) UpdateManualAsset(ctx context.Context, userId uuid.UUID, ma *dto.ManualAssetBody) error {
+	valid := ValidateProvider(ma.ProviderName)
+	if !valid {
+		return errorhandler.NewHTTPError(http.StatusBadRequest, "invalid provider name")
+	}
+
+	storage := p.getSqliteConnect(userId.String())
+	_, err := storage.ManualAsset.Update().
+		SetProviderName(ma.ProviderName).
+		SetAssetTableID(ma.AssetTableID).
+		SetAssetType(ma.AssetType).
+		SetDescription(ma.Description).
+		SetValue(ma.Value).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *ProviderSvc) DeleteManualAsset(ctx context.Context, userId uuid.UUID, assetId uuid.UUID) error {
+	storage := p.getSqliteConnect(userId.String())
+	_, err := storage.ManualAsset.Delete().Where(manualasset.ID(assetId)).Exec(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (p *ProviderSvc) ConnectionByProviderName(ctx context.Context, userId uuid.UUID, providerName string) (*ent.Connection, error) {

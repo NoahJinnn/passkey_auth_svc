@@ -33,12 +33,12 @@ func (s *passcodeSuite) TestPasscodeHandler_Init() {
 	unknownEmailId := "83618f24-2db8-4ea2-b370-ac8335f782d8"
 	tests := []struct {
 		name               string
-		body               dto.PasscodeInitRequest
+		body               dto.PasscodeInitBody
 		expectedStatusCode int
 	}{
 		{
 			name: "with userID and emailID",
-			body: dto.PasscodeInitRequest{
+			body: dto.PasscodeInitBody{
 				UserId:  "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5",
 				EmailId: &emailId,
 			},
@@ -46,21 +46,21 @@ func (s *passcodeSuite) TestPasscodeHandler_Init() {
 		},
 		{
 			name: "with user id",
-			body: dto.PasscodeInitRequest{
+			body: dto.PasscodeInitBody{
 				UserId: "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5",
 			},
 			expectedStatusCode: http.StatusOK,
 		},
 		{
 			name: "unknown user id",
-			body: dto.PasscodeInitRequest{
+			body: dto.PasscodeInitBody{
 				UserId: unknownEmailId,
 			},
 			expectedStatusCode: http.StatusBadRequest,
 		},
 		{
 			name: "with unknown emailID",
-			body: dto.PasscodeInitRequest{
+			body: dto.PasscodeInitBody{
 				UserId:  "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5",
 				EmailId: &unknownEmailId,
 			},
@@ -152,7 +152,7 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 		s.Run(tt.name, func() {
 			pc, err := s.repo.GetPasscodeRepo().Create(ctx, &tt.passcode)
 			s.Require().NoError(err)
-			body := dto.PasscodeFinishRequest{
+			body := dto.PasscodeFinishBody{
 				Id:   pc.ID.String(),
 				Code: tt.code,
 			}

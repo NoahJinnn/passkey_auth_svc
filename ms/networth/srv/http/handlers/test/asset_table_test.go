@@ -58,7 +58,7 @@ func (s *assetSuite) TestAssetTableHandler_Create() {
 		name               string
 		body               string
 		expectedStatusCode int
-		expectedAsset      ent.AssetTable
+		expectedAsset      *ent.AssetTable
 	}{
 		{
 			name: "success",
@@ -68,23 +68,19 @@ func (s *assetSuite) TestAssetTableHandler_Create() {
 				"description": "Test asset table"
 			}`,
 			expectedStatusCode: http.StatusOK,
-			expectedAsset: ent.AssetTable{
+			expectedAsset: &ent.AssetTable{
 				Sheet:       1,
 				Section:     1,
 				Description: description,
 			},
 		},
 		{
-			name: "default value",
+			name: "missing fields",
 			body: `{
-				"value": 1.123456
+				"description": "Test asset table with missing fields"
 			}`,
-			expectedStatusCode: http.StatusOK,
-			expectedAsset: ent.AssetTable{
-				Sheet:       0,
-				Section:     0,
-				Description: "",
-			},
+			expectedStatusCode: http.StatusBadRequest,
+			expectedAsset:      nil,
 		},
 	}
 

@@ -7,7 +7,7 @@ import (
 	"github.com/hellohq/hqservice/ent"
 )
 
-type WebauthnCredentialUpdateRequest struct {
+type WebauthnCredentialUpdateBody struct {
 	Name *string `json:"name"`
 }
 
