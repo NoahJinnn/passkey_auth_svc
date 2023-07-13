@@ -73,11 +73,12 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 	fv.POST("/link/token", fvAuth.CreateLinkToken)
 	fv.POST("/auth/token", fvAuth.ExchangeAccessToken)
 
-	// TODO: Leave the following routes for FE testing purposes only
 	fvData := handlers.NewFvDataHandler(srv)
-	fv.GET("/institutions", fvData.AllInstitution)
-	fv.GET("/accounts", fvData.AllAccount)
-	fv.GET("/transactions", fvData.AllTransaction)
+	fv.GET("/institutions/all", fvData.AllInstitution)
+	fv.GET("/accounts/all", fvData.AllAccount)
+	fv.GET("/transactions/all", fvData.AllTransaction)
+	// TODO: Leave the below routes for FE testing purposes only
+	fv.GET("/transactions", fvData.PagingTransaction)
 	fv.GET("/balance_history/:accountId", fvData.GetBalanceHistoryByAccountId)
 
 	asset := nw.Group("/asset_tables")

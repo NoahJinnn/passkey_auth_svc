@@ -88,10 +88,29 @@ func (h *FvDataHandler) AllTransaction(c echo.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
+
+	txs, err := h.GetFvDataSvc().AggregateTransactions(c.Request().Context(), userId)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, txs)
+}
+
+func (h *FvDataHandler) PagingTransaction(c echo.Context) error {
+	sessionToken, ok := c.Get("session").(jwt.Token)
+	if !ok {
+		return errors.New("failed to cast session object")
+	}
+
+	userId, err := uuid.FromString(sessionToken.Subject())
+	if err != nil {
+		return fmt.Errorf("failed to parse subject as uuid: %w", err)
+	}
 	offset := c.QueryParam("offset")
 	limit := c.QueryParam("limit")
 
-	txs, err := h.GetFvDataSvc().PagingTransactions(c.Request().Context(), offset, limit, userId)
+	txs, err := h.GetFvDataSvc().PagingTransaction(c.Request().Context(), offset, limit, userId)
 	if err != nil {
 		return err
 	}

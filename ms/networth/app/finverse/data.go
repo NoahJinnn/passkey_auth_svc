@@ -18,8 +18,11 @@ import (
 type IFvDataSvc interface {
 	AllInstitution(ctx context.Context, userId uuid.UUID) ([]interface{}, error)
 	AllAccount(ctx context.Context, userId uuid.UUID) (interface{}, error)
-	PagingTransactions(ctx context.Context, userId uuid.UUID) (interface{}, error)
+	PagingTransaction(ctx context.Context, userId uuid.UUID) (interface{}, error)
 	GetBalanceHistoryByAccountId(ctx context.Context, accountId string, userId uuid.UUID) (interface{}, error)
+	AggregateAccountBalances(ctx context.Context, userId uuid.UUID) ([]interface{}, error)
+	AggregateTransactions(ctx context.Context, userId uuid.UUID) (interface{}, error)
+	getAccessToken(ctx context.Context, providerName string, userId uuid.UUID) (*AccessToken, error)
 }
 
 type FvDataSvc struct {
@@ -95,7 +98,7 @@ func (svc *FvDataSvc) AllAccount(ctx context.Context, userId uuid.UUID) ([]byte,
 	return resp.Body(), nil
 }
 
-func (svc *FvDataSvc) PagingTransactions(ctx context.Context, offset string, limit string, userId uuid.UUID) ([]byte, error) {
+func (svc *FvDataSvc) PagingTransaction(ctx context.Context, offset string, limit string, userId uuid.UUID) ([]byte, error) {
 	var queryStr = ""
 	if offset != "" && limit != "" {
 		queryStr = fmt.Sprintf("?offset=%s&limit=%s", offset, limit)
@@ -186,45 +189,43 @@ func (svc *FvDataSvc) AggregateAccountBalances(ctx context.Context, userId uuid.
 // TODO: Create route for get all transactions
 func (svc *FvDataSvc) AggregateTransactions(ctx context.Context, userId uuid.UUID) (interface{}, error) {
 	aggregation := &Transactions{}
-
 	offset := 0
-	limit := 1000
+	limit := 10
 
-	offsetStr := strconv.Itoa(offset)
-	limitStr := strconv.Itoa(limit)
-
-	txs, err := svc.PagingTransactions(ctx, offsetStr, limitStr, userId)
+	curTxs, err := svc.concatTransactions(ctx, userId, offset, limit, aggregation)
 	if err != nil {
 		return nil, err
 	}
 
-	var curTxs *Transactions
-	err = json.Unmarshal(txs, curTxs)
-	if err != nil {
-		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
 	totalTx := curTxs.TotalTransactions
 	aggregation.TotalTransactions = totalTx
 	aggregation.Other = curTxs.Other
-	aggregation.Transactions = append(curTxs.Transactions, aggregation.Transactions...)
+
 	for {
+		offset = offset + limit
 		if totalTx-(offset+limit) < 0 {
+			if totalTx > offset {
+				svc.concatTransactions(ctx, userId, offset, limit, aggregation)
+			}
 			break
 		}
-		offset = offset + limit + 1
-		offsetStr = strconv.Itoa(offset)
-		limitStr = strconv.Itoa(limit)
-		txs, err := svc.PagingTransactions(ctx, offsetStr, limitStr, userId)
-		if err != nil {
-			return nil, err
-		}
-
-		var curTxs *Transactions
-		err = json.Unmarshal(txs, curTxs)
-		if err != nil {
-			return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-		aggregation.Transactions = append(curTxs.Transactions, aggregation.Transactions...)
+		svc.concatTransactions(ctx, userId, offset, limit, aggregation)
 	}
 	return aggregation, nil
+}
+
+func (svc *FvDataSvc) concatTransactions(ctx context.Context, userId uuid.UUID, offset int, limit int, aggregation *Transactions) (*Transactions, error) {
+	offsetStr := strconv.Itoa(offset)
+	limitStr := strconv.Itoa(limit)
+	txs, err := svc.PagingTransaction(ctx, offsetStr, limitStr, userId)
+	if err != nil {
+		return nil, err
+	}
+	var curTxs Transactions
+	err = json.Unmarshal(txs, &curTxs)
+	if err != nil {
+		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	aggregation.Transactions = append(curTxs.Transactions, aggregation.Transactions...)
+	return &curTxs, nil
 }
