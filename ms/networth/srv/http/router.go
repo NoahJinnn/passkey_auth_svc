@@ -89,5 +89,12 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 	assetTable.PUT("/asset_table", atHandler.Update)
 	assetTable.DELETE("/:assetTableId", atHandler.Delete)
 
+	manualAsset := nw.Group("/manual_assets")
+	maHandler := handlers.NewAssetTableHandler(srv)
+	manualAsset.GET("", maHandler.ListByUser)
+	manualAsset.POST("/manual_asset", maHandler.Create)
+	manualAsset.PUT("/manual_asset", maHandler.Update)
+	manualAsset.DELETE("/:manualAssetId", maHandler.Delete)
+
 	return e, nil
 }
