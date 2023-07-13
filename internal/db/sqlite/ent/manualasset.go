@@ -24,6 +24,8 @@ type ManualAsset struct {
 	AssetTableID string `json:"asset_table_id,omitempty"`
 	// AssetType holds the value of the "asset_type" field.
 	AssetType string `json:"asset_type,omitempty"`
+	// Description holds the value of the "description" field.
+	Description string `json:"description,omitempty"`
 	// Value holds the value of the "value" field.
 	Value float64 `json:"value,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -40,7 +42,7 @@ func (*ManualAsset) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case manualasset.FieldValue:
 			values[i] = new(sql.NullFloat64)
-		case manualasset.FieldProviderName, manualasset.FieldAssetTableID, manualasset.FieldAssetType:
+		case manualasset.FieldProviderName, manualasset.FieldAssetTableID, manualasset.FieldAssetType, manualasset.FieldDescription:
 			values[i] = new(sql.NullString)
 		case manualasset.FieldCreatedAt, manualasset.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -84,6 +86,12 @@ func (ma *ManualAsset) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field asset_type", values[i])
 			} else if value.Valid {
 				ma.AssetType = value.String
+			}
+		case manualasset.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				ma.Description = value.String
 			}
 		case manualasset.FieldValue:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
@@ -147,6 +155,9 @@ func (ma *ManualAsset) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("asset_type=")
 	builder.WriteString(ma.AssetType)
+	builder.WriteString(", ")
+	builder.WriteString("description=")
+	builder.WriteString(ma.Description)
 	builder.WriteString(", ")
 	builder.WriteString("value=")
 	builder.WriteString(fmt.Sprintf("%v", ma.Value))

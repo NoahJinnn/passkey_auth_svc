@@ -39,6 +39,20 @@ func (mac *ManualAssetCreate) SetAssetType(s string) *ManualAssetCreate {
 	return mac
 }
 
+// SetDescription sets the "description" field.
+func (mac *ManualAssetCreate) SetDescription(s string) *ManualAssetCreate {
+	mac.mutation.SetDescription(s)
+	return mac
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (mac *ManualAssetCreate) SetNillableDescription(s *string) *ManualAssetCreate {
+	if s != nil {
+		mac.SetDescription(*s)
+	}
+	return mac
+}
+
 // SetValue sets the "value" field.
 func (mac *ManualAssetCreate) SetValue(f float64) *ManualAssetCreate {
 	mac.mutation.SetValue(f)
@@ -122,6 +136,10 @@ func (mac *ManualAssetCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (mac *ManualAssetCreate) defaults() {
+	if _, ok := mac.mutation.Description(); !ok {
+		v := manualasset.DefaultDescription
+		mac.mutation.SetDescription(v)
+	}
 	if _, ok := mac.mutation.CreatedAt(); !ok {
 		v := manualasset.DefaultCreatedAt()
 		mac.mutation.SetCreatedAt(v)
@@ -202,6 +220,10 @@ func (mac *ManualAssetCreate) createSpec() (*ManualAsset, *sqlgraph.CreateSpec) 
 	if value, ok := mac.mutation.AssetType(); ok {
 		_spec.SetField(manualasset.FieldAssetType, field.TypeString, value)
 		_node.AssetType = value
+	}
+	if value, ok := mac.mutation.Description(); ok {
+		_spec.SetField(manualasset.FieldDescription, field.TypeString, value)
+		_node.Description = value
 	}
 	if value, ok := mac.mutation.Value(); ok {
 		_spec.SetField(manualasset.FieldValue, field.TypeFloat64, value)

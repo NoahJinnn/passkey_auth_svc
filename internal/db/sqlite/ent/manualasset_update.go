@@ -46,6 +46,26 @@ func (mau *ManualAssetUpdate) SetAssetType(s string) *ManualAssetUpdate {
 	return mau
 }
 
+// SetDescription sets the "description" field.
+func (mau *ManualAssetUpdate) SetDescription(s string) *ManualAssetUpdate {
+	mau.mutation.SetDescription(s)
+	return mau
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (mau *ManualAssetUpdate) SetNillableDescription(s *string) *ManualAssetUpdate {
+	if s != nil {
+		mau.SetDescription(*s)
+	}
+	return mau
+}
+
+// ClearDescription clears the value of the "description" field.
+func (mau *ManualAssetUpdate) ClearDescription() *ManualAssetUpdate {
+	mau.mutation.ClearDescription()
+	return mau
+}
+
 // SetValue sets the "value" field.
 func (mau *ManualAssetUpdate) SetValue(f float64) *ManualAssetUpdate {
 	mau.mutation.ResetValue()
@@ -124,6 +144,12 @@ func (mau *ManualAssetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := mau.mutation.AssetType(); ok {
 		_spec.SetField(manualasset.FieldAssetType, field.TypeString, value)
 	}
+	if value, ok := mau.mutation.Description(); ok {
+		_spec.SetField(manualasset.FieldDescription, field.TypeString, value)
+	}
+	if mau.mutation.DescriptionCleared() {
+		_spec.ClearField(manualasset.FieldDescription, field.TypeString)
+	}
 	if value, ok := mau.mutation.Value(); ok {
 		_spec.SetField(manualasset.FieldValue, field.TypeFloat64, value)
 	}
@@ -168,6 +194,26 @@ func (mauo *ManualAssetUpdateOne) SetAssetTableID(s string) *ManualAssetUpdateOn
 // SetAssetType sets the "asset_type" field.
 func (mauo *ManualAssetUpdateOne) SetAssetType(s string) *ManualAssetUpdateOne {
 	mauo.mutation.SetAssetType(s)
+	return mauo
+}
+
+// SetDescription sets the "description" field.
+func (mauo *ManualAssetUpdateOne) SetDescription(s string) *ManualAssetUpdateOne {
+	mauo.mutation.SetDescription(s)
+	return mauo
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (mauo *ManualAssetUpdateOne) SetNillableDescription(s *string) *ManualAssetUpdateOne {
+	if s != nil {
+		mauo.SetDescription(*s)
+	}
+	return mauo
+}
+
+// ClearDescription clears the value of the "description" field.
+func (mauo *ManualAssetUpdateOne) ClearDescription() *ManualAssetUpdateOne {
+	mauo.mutation.ClearDescription()
 	return mauo
 }
 
@@ -278,6 +324,12 @@ func (mauo *ManualAssetUpdateOne) sqlSave(ctx context.Context) (_node *ManualAss
 	}
 	if value, ok := mauo.mutation.AssetType(); ok {
 		_spec.SetField(manualasset.FieldAssetType, field.TypeString, value)
+	}
+	if value, ok := mauo.mutation.Description(); ok {
+		_spec.SetField(manualasset.FieldDescription, field.TypeString, value)
+	}
+	if mauo.mutation.DescriptionCleared() {
+		_spec.ClearField(manualasset.FieldDescription, field.TypeString)
 	}
 	if value, ok := mauo.mutation.Value(); ok {
 		_spec.SetField(manualasset.FieldValue, field.TypeFloat64, value)

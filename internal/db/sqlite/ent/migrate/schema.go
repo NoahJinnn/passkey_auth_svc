@@ -97,6 +97,7 @@ var (
 		{Name: "provider_name", Type: field.TypeString},
 		{Name: "asset_table_id", Type: field.TypeString},
 		{Name: "asset_type", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "value", Type: field.TypeFloat64},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},

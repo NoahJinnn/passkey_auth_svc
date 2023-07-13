@@ -21,6 +21,7 @@ func (ManualAsset) Fields() []ent.Field {
 		field.String("provider_name"),
 		field.String("asset_table_id"),
 		field.String("asset_type"),
+		field.String("description").Default("").Optional(),
 		field.Float("value"),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),

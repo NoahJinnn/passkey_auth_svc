@@ -20,6 +20,8 @@ const (
 	FieldAssetTableID = "asset_table_id"
 	// FieldAssetType holds the string denoting the asset_type field in the database.
 	FieldAssetType = "asset_type"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// FieldValue holds the string denoting the value field in the database.
 	FieldValue = "value"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -36,6 +38,7 @@ var Columns = []string{
 	FieldProviderName,
 	FieldAssetTableID,
 	FieldAssetType,
+	FieldDescription,
 	FieldValue,
 	FieldCreatedAt,
 	FieldUpdatedAt,
@@ -52,6 +55,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultDescription holds the default value on creation for the "description" field.
+	DefaultDescription string
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -83,6 +88,11 @@ func ByAssetTableID(opts ...sql.OrderTermOption) OrderOption {
 // ByAssetType orders the results by the asset_type field.
 func ByAssetType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAssetType, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
 // ByValue orders the results by the value field.
