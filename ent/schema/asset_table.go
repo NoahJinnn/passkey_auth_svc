@@ -20,8 +20,8 @@ func (AssetTable) Fields() []ent.Field {
 			return id
 		}).Immutable(),
 		field.UUID("user_id", uuid.UUID{}).Optional(),
-		field.Int32("sheet").Optional().Default(0),
-		field.Int32("section").Optional().Default(0),
+		field.Int32("sheet"),
+		field.Int32("section"),
 		field.String("description").Default("").Optional(),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),

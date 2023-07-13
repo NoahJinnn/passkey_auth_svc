@@ -57,23 +57,9 @@ func (atu *AssetTableUpdate) SetSheet(i int32) *AssetTableUpdate {
 	return atu
 }
 
-// SetNillableSheet sets the "sheet" field if the given value is not nil.
-func (atu *AssetTableUpdate) SetNillableSheet(i *int32) *AssetTableUpdate {
-	if i != nil {
-		atu.SetSheet(*i)
-	}
-	return atu
-}
-
 // AddSheet adds i to the "sheet" field.
 func (atu *AssetTableUpdate) AddSheet(i int32) *AssetTableUpdate {
 	atu.mutation.AddSheet(i)
-	return atu
-}
-
-// ClearSheet clears the value of the "sheet" field.
-func (atu *AssetTableUpdate) ClearSheet() *AssetTableUpdate {
-	atu.mutation.ClearSheet()
 	return atu
 }
 
@@ -84,23 +70,9 @@ func (atu *AssetTableUpdate) SetSection(i int32) *AssetTableUpdate {
 	return atu
 }
 
-// SetNillableSection sets the "section" field if the given value is not nil.
-func (atu *AssetTableUpdate) SetNillableSection(i *int32) *AssetTableUpdate {
-	if i != nil {
-		atu.SetSection(*i)
-	}
-	return atu
-}
-
 // AddSection adds i to the "section" field.
 func (atu *AssetTableUpdate) AddSection(i int32) *AssetTableUpdate {
 	atu.mutation.AddSection(i)
-	return atu
-}
-
-// ClearSection clears the value of the "section" field.
-func (atu *AssetTableUpdate) ClearSection() *AssetTableUpdate {
-	atu.mutation.ClearSection()
 	return atu
 }
 
@@ -197,17 +169,11 @@ func (atu *AssetTableUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := atu.mutation.AddedSheet(); ok {
 		_spec.AddField(assettable.FieldSheet, field.TypeInt32, value)
 	}
-	if atu.mutation.SheetCleared() {
-		_spec.ClearField(assettable.FieldSheet, field.TypeInt32)
-	}
 	if value, ok := atu.mutation.Section(); ok {
 		_spec.SetField(assettable.FieldSection, field.TypeInt32, value)
 	}
 	if value, ok := atu.mutation.AddedSection(); ok {
 		_spec.AddField(assettable.FieldSection, field.TypeInt32, value)
-	}
-	if atu.mutation.SectionCleared() {
-		_spec.ClearField(assettable.FieldSection, field.TypeInt32)
 	}
 	if value, ok := atu.mutation.Description(); ok {
 		_spec.SetField(assettable.FieldDescription, field.TypeString, value)
@@ -294,23 +260,9 @@ func (atuo *AssetTableUpdateOne) SetSheet(i int32) *AssetTableUpdateOne {
 	return atuo
 }
 
-// SetNillableSheet sets the "sheet" field if the given value is not nil.
-func (atuo *AssetTableUpdateOne) SetNillableSheet(i *int32) *AssetTableUpdateOne {
-	if i != nil {
-		atuo.SetSheet(*i)
-	}
-	return atuo
-}
-
 // AddSheet adds i to the "sheet" field.
 func (atuo *AssetTableUpdateOne) AddSheet(i int32) *AssetTableUpdateOne {
 	atuo.mutation.AddSheet(i)
-	return atuo
-}
-
-// ClearSheet clears the value of the "sheet" field.
-func (atuo *AssetTableUpdateOne) ClearSheet() *AssetTableUpdateOne {
-	atuo.mutation.ClearSheet()
 	return atuo
 }
 
@@ -321,23 +273,9 @@ func (atuo *AssetTableUpdateOne) SetSection(i int32) *AssetTableUpdateOne {
 	return atuo
 }
 
-// SetNillableSection sets the "section" field if the given value is not nil.
-func (atuo *AssetTableUpdateOne) SetNillableSection(i *int32) *AssetTableUpdateOne {
-	if i != nil {
-		atuo.SetSection(*i)
-	}
-	return atuo
-}
-
 // AddSection adds i to the "section" field.
 func (atuo *AssetTableUpdateOne) AddSection(i int32) *AssetTableUpdateOne {
 	atuo.mutation.AddSection(i)
-	return atuo
-}
-
-// ClearSection clears the value of the "section" field.
-func (atuo *AssetTableUpdateOne) ClearSection() *AssetTableUpdateOne {
-	atuo.mutation.ClearSection()
 	return atuo
 }
 
@@ -464,17 +402,11 @@ func (atuo *AssetTableUpdateOne) sqlSave(ctx context.Context) (_node *AssetTable
 	if value, ok := atuo.mutation.AddedSheet(); ok {
 		_spec.AddField(assettable.FieldSheet, field.TypeInt32, value)
 	}
-	if atuo.mutation.SheetCleared() {
-		_spec.ClearField(assettable.FieldSheet, field.TypeInt32)
-	}
 	if value, ok := atuo.mutation.Section(); ok {
 		_spec.SetField(assettable.FieldSection, field.TypeInt32, value)
 	}
 	if value, ok := atuo.mutation.AddedSection(); ok {
 		_spec.AddField(assettable.FieldSection, field.TypeInt32, value)
-	}
-	if atuo.mutation.SectionCleared() {
-		_spec.ClearField(assettable.FieldSection, field.TypeInt32)
 	}
 	if value, ok := atuo.mutation.Description(); ok {
 		_spec.SetField(assettable.FieldDescription, field.TypeString, value)

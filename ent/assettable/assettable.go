@@ -62,10 +62,6 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultSheet holds the default value on creation for the "sheet" field.
-	DefaultSheet int32
-	// DefaultSection holds the default value on creation for the "section" field.
-	DefaultSection int32
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.

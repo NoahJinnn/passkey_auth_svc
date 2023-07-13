@@ -42,25 +42,9 @@ func (atc *AssetTableCreate) SetSheet(i int32) *AssetTableCreate {
 	return atc
 }
 
-// SetNillableSheet sets the "sheet" field if the given value is not nil.
-func (atc *AssetTableCreate) SetNillableSheet(i *int32) *AssetTableCreate {
-	if i != nil {
-		atc.SetSheet(*i)
-	}
-	return atc
-}
-
 // SetSection sets the "section" field.
 func (atc *AssetTableCreate) SetSection(i int32) *AssetTableCreate {
 	atc.mutation.SetSection(i)
-	return atc
-}
-
-// SetNillableSection sets the "section" field if the given value is not nil.
-func (atc *AssetTableCreate) SetNillableSection(i *int32) *AssetTableCreate {
-	if i != nil {
-		atc.SetSection(*i)
-	}
 	return atc
 }
 
@@ -160,14 +144,6 @@ func (atc *AssetTableCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (atc *AssetTableCreate) defaults() {
-	if _, ok := atc.mutation.Sheet(); !ok {
-		v := assettable.DefaultSheet
-		atc.mutation.SetSheet(v)
-	}
-	if _, ok := atc.mutation.Section(); !ok {
-		v := assettable.DefaultSection
-		atc.mutation.SetSection(v)
-	}
 	if _, ok := atc.mutation.Description(); !ok {
 		v := assettable.DefaultDescription
 		atc.mutation.SetDescription(v)
@@ -188,6 +164,12 @@ func (atc *AssetTableCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (atc *AssetTableCreate) check() error {
+	if _, ok := atc.mutation.Sheet(); !ok {
+		return &ValidationError{Name: "sheet", err: errors.New(`ent: missing required field "AssetTable.sheet"`)}
+	}
+	if _, ok := atc.mutation.Section(); !ok {
+		return &ValidationError{Name: "section", err: errors.New(`ent: missing required field "AssetTable.section"`)}
+	}
 	if _, ok := atc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "AssetTable.created_at"`)}
 	}

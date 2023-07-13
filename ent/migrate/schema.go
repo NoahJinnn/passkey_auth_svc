@@ -11,8 +11,8 @@ var (
 	// AssetTablesColumns holds the columns for the "asset_tables" table.
 	AssetTablesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "sheet", Type: field.TypeInt32, Nullable: true, Default: 0},
-		{Name: "section", Type: field.TypeInt32, Nullable: true, Default: 0},
+		{Name: "sheet", Type: field.TypeInt32},
+		{Name: "section", Type: field.TypeInt32},
 		{Name: "description", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
