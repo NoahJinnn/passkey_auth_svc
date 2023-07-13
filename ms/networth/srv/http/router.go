@@ -82,11 +82,12 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 	fv.GET("/transactions", fvData.PagingTransaction)
 	fv.GET("/balance_history/:accountId", fvData.GetBalanceHistoryByAccountId)
 
-	asset := nw.Group("/asset_tables")
-	assetHandler := handlers.NewAssetHandler(srv)
-	asset.GET("", assetHandler.ListByUser)
-	asset.POST("/asset_table", assetHandler.Create)
-	asset.PUT("/asset_table", assetHandler.Update)
-	asset.DELETE("/:id", assetHandler.Delete)
+	assetTable := nw.Group("/asset_tables")
+	atHandler := handlers.NewAssetTableHandler(srv)
+	assetTable.GET("", atHandler.ListByUser)
+	assetTable.POST("/asset_table", atHandler.Create)
+	assetTable.PUT("/asset_table", atHandler.Update)
+	assetTable.DELETE("/:assetTableId", atHandler.Delete)
+
 	return e, nil
 }
