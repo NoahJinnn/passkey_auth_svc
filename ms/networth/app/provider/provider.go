@@ -78,6 +78,7 @@ func (p *ProviderSvc) CreateManualAsset(ctx context.Context, userId uuid.UUID, m
 		SetProviderName(ma.ProviderName).
 		SetAssetTableID(ma.AssetTableID).
 		SetAssetType(ma.AssetType).
+		SetDescription(ma.Description).
 		SetValue(ma.Value).
 		Save(ctx)
 	if err != nil {
@@ -97,6 +98,7 @@ func (p *ProviderSvc) UpdateManualAsset(ctx context.Context, userId uuid.UUID, m
 		SetProviderName(ma.ProviderName).
 		SetAssetTableID(ma.AssetTableID).
 		SetAssetType(ma.AssetType).
+		SetDescription(ma.Description).
 		SetValue(ma.Value).
 		Save(ctx)
 	if err != nil {
