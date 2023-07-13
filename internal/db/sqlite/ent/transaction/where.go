@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/predicate"
 )
@@ -56,11 +55,6 @@ func IDLTE(id uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(sql.FieldLTE(FieldID, id))
 }
 
-// AccountID applies equality check predicate on the "account_id" field. It's identical to AccountIDEQ.
-func AccountID(v uuid.UUID) predicate.Transaction {
-	return predicate.Transaction(sql.FieldEQ(FieldAccountID, v))
-}
-
 // ProviderName applies equality check predicate on the "provider_name" field. It's identical to ProviderNameEQ.
 func ProviderName(v string) predicate.Transaction {
 	return predicate.Transaction(sql.FieldEQ(FieldProviderName, v))
@@ -79,36 +73,6 @@ func CreatedAt(v time.Time) predicate.Transaction {
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.Transaction {
 	return predicate.Transaction(sql.FieldEQ(FieldUpdatedAt, v))
-}
-
-// AccountIDEQ applies the EQ predicate on the "account_id" field.
-func AccountIDEQ(v uuid.UUID) predicate.Transaction {
-	return predicate.Transaction(sql.FieldEQ(FieldAccountID, v))
-}
-
-// AccountIDNEQ applies the NEQ predicate on the "account_id" field.
-func AccountIDNEQ(v uuid.UUID) predicate.Transaction {
-	return predicate.Transaction(sql.FieldNEQ(FieldAccountID, v))
-}
-
-// AccountIDIn applies the In predicate on the "account_id" field.
-func AccountIDIn(vs ...uuid.UUID) predicate.Transaction {
-	return predicate.Transaction(sql.FieldIn(FieldAccountID, vs...))
-}
-
-// AccountIDNotIn applies the NotIn predicate on the "account_id" field.
-func AccountIDNotIn(vs ...uuid.UUID) predicate.Transaction {
-	return predicate.Transaction(sql.FieldNotIn(FieldAccountID, vs...))
-}
-
-// AccountIDIsNil applies the IsNil predicate on the "account_id" field.
-func AccountIDIsNil() predicate.Transaction {
-	return predicate.Transaction(sql.FieldIsNull(FieldAccountID))
-}
-
-// AccountIDNotNil applies the NotNil predicate on the "account_id" field.
-func AccountIDNotNil() predicate.Transaction {
-	return predicate.Transaction(sql.FieldNotNull(FieldAccountID))
 }
 
 // ProviderNameEQ applies the EQ predicate on the "provider_name" field.
@@ -319,29 +283,6 @@ func UpdatedAtLT(v time.Time) predicate.Transaction {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.Transaction {
 	return predicate.Transaction(sql.FieldLTE(FieldUpdatedAt, v))
-}
-
-// HasAccount applies the HasEdge predicate on the "account" edge.
-func HasAccount() predicate.Transaction {
-	return predicate.Transaction(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, AccountTable, AccountColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasAccountWith applies the HasEdge predicate on the "account" edge with a given conditions (other predicates).
-func HasAccountWith(preds ...predicate.Account) predicate.Transaction {
-	return predicate.Transaction(func(s *sql.Selector) {
-		step := newAccountStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

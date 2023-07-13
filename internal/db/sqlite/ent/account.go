@@ -25,30 +25,9 @@ type Account struct {
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the AccountQuery when eager-loading is set.
-	Edges                AccountEdges `json:"edges"`
+	UpdatedAt            time.Time `json:"updated_at,omitempty"`
 	institution_accounts *uuid.UUID
 	selectValues         sql.SelectValues
-}
-
-// AccountEdges holds the relations/edges for other nodes in the graph.
-type AccountEdges struct {
-	// Transactions holds the value of the transactions edge.
-	Transactions []*Transaction `json:"transactions,omitempty"`
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
-}
-
-// TransactionsOrErr returns the Transactions value or an error if the edge
-// was not loaded in eager-loading.
-func (e AccountEdges) TransactionsOrErr() ([]*Transaction, error) {
-	if e.loadedTypes[0] {
-		return e.Transactions, nil
-	}
-	return nil, &NotLoadedError{edge: "transactions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -127,11 +106,6 @@ func (a *Account) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (a *Account) Value(name string) (ent.Value, error) {
 	return a.selectValues.Get(name)
-}
-
-// QueryTransactions queries the "transactions" edge of the Account entity.
-func (a *Account) QueryTransactions() *TransactionQuery {
-	return NewAccountClient(a.config).QueryTransactions(a)
 }
 
 // Update returns a builder for updating this Account.

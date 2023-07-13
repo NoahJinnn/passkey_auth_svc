@@ -98,21 +98,12 @@ var (
 		{Name: "data", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "account_id", Type: field.TypeUUID, Nullable: true},
 	}
 	// TransactionsTable holds the schema information for the "transactions" table.
 	TransactionsTable = &schema.Table{
 		Name:       "transactions",
 		Columns:    TransactionsColumns,
 		PrimaryKey: []*schema.Column{TransactionsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "transactions_accounts_transactions",
-				Columns:    []*schema.Column{TransactionsColumns[5]},
-				RefColumns: []*schema.Column{AccountsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
@@ -128,5 +119,4 @@ func init() {
 	AccountsTable.ForeignKeys[0].RefTable = InstitutionsTable
 	IncomesTable.ForeignKeys[0].RefTable = InstitutionsTable
 	InstitutionsTable.ForeignKeys[0].RefTable = ConnectionsTable
-	TransactionsTable.ForeignKeys[0].RefTable = AccountsTable
 }

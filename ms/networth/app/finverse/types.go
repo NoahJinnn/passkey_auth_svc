@@ -13,6 +13,12 @@ type Account struct {
 	Other     map[string]interface{} `json:"-"`
 }
 
+type Transactions struct {
+	TotalTransactions int                    `json:"total_transactions"`
+	Transactions      []interface{}          `json:"transactions"`
+	Other             map[string]interface{} `json:"-"`
+}
+
 // Request payload types
 type CreateCustomerToken struct {
 	ClientID     string `json:"client_id"  validate:"required"`

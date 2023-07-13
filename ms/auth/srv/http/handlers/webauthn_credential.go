@@ -16,7 +16,13 @@ type WebauthnCredentialHandler struct {
 	*HttpDeps
 }
 
-func (h *WebauthnHandler) ListCredentials(c echo.Context) error {
+func NewWebauthnCredentialHandler(srv *HttpDeps) *WebauthnCredentialHandler {
+	return &WebauthnCredentialHandler{
+		srv,
+	}
+}
+
+func (h *WebauthnCredentialHandler) ListByUser(c echo.Context) error {
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("failed to cast session object")
@@ -27,7 +33,7 @@ func (h *WebauthnHandler) ListCredentials(c echo.Context) error {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	credentials, err := h.GetWebauthnSvc().ListCredentials(c.Request().Context(), userId)
+	credentials, err := h.GetWebauthnSvc().ListByUser(c.Request().Context(), userId)
 	if err != nil {
 		return fmt.Errorf("failed to get webauthn credentials: %w", err)
 	}
@@ -41,7 +47,7 @@ func (h *WebauthnHandler) ListCredentials(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
-func (h *WebauthnHandler) UpdateCredential(c echo.Context) error {
+func (h *WebauthnCredentialHandler) UpdateCredential(c echo.Context) error {
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("failed to cast session object")
@@ -64,7 +70,7 @@ func (h *WebauthnHandler) UpdateCredential(c echo.Context) error {
 	return h.GetWebauthnSvc().UpdateCredential(c.Request().Context(), userId, credentialID, body.Name)
 }
 
-func (h *WebauthnHandler) DeleteCredential(c echo.Context) error {
+func (h *WebauthnCredentialHandler) DeleteCredential(c echo.Context) error {
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("failed to cast session object")

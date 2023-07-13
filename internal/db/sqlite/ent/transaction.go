@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
 )
 
@@ -19,8 +18,6 @@ type Transaction struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// AccountID holds the value of the "account_id" field.
-	AccountID uuid.UUID `json:"account_id,omitempty"`
 	// ProviderName holds the value of the "provider_name" field.
 	ProviderName string `json:"provider_name,omitempty"`
 	// Data holds the value of the "data" field.
@@ -28,33 +25,8 @@ type Transaction struct {
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the TransactionQuery when eager-loading is set.
-	Edges        TransactionEdges `json:"edges"`
+	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
-}
-
-// TransactionEdges holds the relations/edges for other nodes in the graph.
-type TransactionEdges struct {
-	// Account holds the value of the account edge.
-	Account *Account `json:"account,omitempty"`
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
-}
-
-// AccountOrErr returns the Account value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e TransactionEdges) AccountOrErr() (*Account, error) {
-	if e.loadedTypes[0] {
-		if e.Account == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: account.Label}
-		}
-		return e.Account, nil
-	}
-	return nil, &NotLoadedError{edge: "account"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -66,7 +38,7 @@ func (*Transaction) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case transaction.FieldCreatedAt, transaction.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case transaction.FieldID, transaction.FieldAccountID:
+		case transaction.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -88,12 +60,6 @@ func (t *Transaction) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				t.ID = *value
-			}
-		case transaction.FieldAccountID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field account_id", values[i])
-			} else if value != nil {
-				t.AccountID = *value
 			}
 		case transaction.FieldProviderName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -132,11 +98,6 @@ func (t *Transaction) Value(name string) (ent.Value, error) {
 	return t.selectValues.Get(name)
 }
 
-// QueryAccount queries the "account" edge of the Transaction entity.
-func (t *Transaction) QueryAccount() *AccountQuery {
-	return NewTransactionClient(t.config).QueryAccount(t)
-}
-
 // Update returns a builder for updating this Transaction.
 // Note that you need to call Transaction.Unwrap() before calling this method if this Transaction
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -160,9 +121,6 @@ func (t *Transaction) String() string {
 	var builder strings.Builder
 	builder.WriteString("Transaction(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
-	builder.WriteString("account_id=")
-	builder.WriteString(fmt.Sprintf("%v", t.AccountID))
-	builder.WriteString(", ")
 	builder.WriteString("provider_name=")
 	builder.WriteString(t.ProviderName)
 	builder.WriteString(", ")

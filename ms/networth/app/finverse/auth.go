@@ -84,6 +84,10 @@ func (svc *FvAuthSvc) CreateLinkToken(ctx context.Context, clt *CreateLinkToken,
 		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	if fvSession == nil {
+		return nil, errorhandler.NewHTTPError(http.StatusUnauthorized, "finverse session not found")
+	}
+
 	resp, err := svc.req.
 		InitReq(ctx, "POST", "/link/token", b).
 		WithDefaultOpts().
@@ -113,6 +117,10 @@ func (svc *FvAuthSvc) ExchangeAccessToken(ctx context.Context, exchangeCode stri
 		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	if fvSession == nil {
+		return nil, errorhandler.NewHTTPError(http.StatusUnauthorized, "finverse session not found")
+	}
+
 	payload := fmt.Sprintf("client_id=%s&code=%s&redirect_uri=%s&grant_type=authorization_code", svc.config.Finverse.ClientID, exchangeCode, svc.config.Finverse.RedirectURI)
 	resp, err := svc.req.
 		InitReq(ctx, "POST", "/auth/token", []byte(payload)).
@@ -132,7 +140,7 @@ func (svc *FvAuthSvc) ExchangeAccessToken(ctx context.Context, exchangeCode stri
 			NewHTTPError(http.StatusInternalServerError).
 			SetInternal(fmt.Errorf("failed to get fv exchange token: %w", err))
 	}
-	err = svc.provider.SaveConnection(ctx, "finverse", userId.String(), result)
+	err = svc.provider.SaveConnection(ctx, userId, PROVIDER_NAME, result)
 	if err != nil {
 		return nil, errorhandler.
 			NewHTTPError(http.StatusInternalServerError).

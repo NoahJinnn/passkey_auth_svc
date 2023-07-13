@@ -259,7 +259,7 @@ func (svc *WebauthnSvc) FinishLogin(ctx Ctx, request *protocol.ParsedCredentialA
 	return credentialId, userId, nil
 }
 
-func (svc *WebauthnSvc) ListCredentials(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error) {
+func (svc *WebauthnSvc) ListByUser(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error) {
 	return svc.repo.GetWebauthnCredentialRepo().ListByUser(ctx, userId)
 }
 

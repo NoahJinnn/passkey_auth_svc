@@ -57,13 +57,19 @@ func (h *FvDataHandler) AllAccount(c echo.Context) error {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	_, err = h.GetFvDataSvc().AggregateAccountBalances(c.Request().Context(), userId)
+	exist, err := h.GetProviderSvc().CheckAccountExist(c.Request().Context(), userId, finverse.PROVIDER_NAME)
 	if err != nil {
 		return err
 	}
+	if !exist {
+		_, err = h.GetFvDataSvc().AggregateAccountBalances(c.Request().Context(), userId)
+		if err != nil {
+			return err
+		}
+	}
 
 	// Get account data from sqlite db
-	a, err := h.GetProviderSvc().AccountByProviderName(c.Request().Context(), userId.String(), finverse.PROVIDER_NAME)
+	a, err := h.GetProviderSvc().AccountByProviderName(c.Request().Context(), userId, finverse.PROVIDER_NAME)
 	if err != nil {
 		return err
 	}
@@ -81,10 +87,42 @@ func (h *FvDataHandler) AllTransaction(c echo.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
+
+	exist, err := h.GetProviderSvc().CheckTransactionExist(c.Request().Context(), userId, finverse.PROVIDER_NAME)
+	if err != nil {
+		return err
+	}
+
+	if !exist {
+		_, err := h.GetFvDataSvc().AggregateTransactions(c.Request().Context(), userId)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Get account data from sqlite db
+	txs, err := h.GetProviderSvc().TransactionByProviderName(c.Request().Context(), userId, finverse.PROVIDER_NAME)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, txs)
+}
+
+func (h *FvDataHandler) PagingTransaction(c echo.Context) error {
+	sessionToken, ok := c.Get("session").(jwt.Token)
+	if !ok {
+		return errors.New("failed to cast session object")
+	}
+
+	userId, err := uuid.FromString(sessionToken.Subject())
+	if err != nil {
+		return fmt.Errorf("failed to parse subject as uuid: %w", err)
+	}
 	offset := c.QueryParam("offset")
 	limit := c.QueryParam("limit")
 
-	txs, err := h.GetFvDataSvc().AllTransactions(c.Request().Context(), offset, limit, userId)
+	txs, err := h.GetFvDataSvc().PagingTransaction(c.Request().Context(), offset, limit, userId)
 	if err != nil {
 		return err
 	}
@@ -94,7 +132,7 @@ func (h *FvDataHandler) AllTransaction(c echo.Context) error {
 	if err != nil {
 		return errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(err)
 	}
-	return c.JSON(http.StatusOK, txs)
+	return c.JSON(http.StatusOK, result)
 }
 
 func (h *FvDataHandler) GetBalanceHistoryByAccountId(c echo.Context) error {

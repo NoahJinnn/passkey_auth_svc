@@ -72,10 +72,11 @@ func NewServer(appl app.Appl, sessionManager *session.Manager, sharedCfg *shared
 	webauthnLogin.POST("/initialize", webauthnHandler.InitLogin)
 	webauthnLogin.POST("/finalize", webauthnHandler.FinishLogin)
 
+	webauthnCredentialsHandler := handlers.NewWebauthnCredentialHandler(srv)
 	webauthnCredentials := webauthn.Group("/credentials", session.Session(sessionManager))
-	webauthnCredentials.GET("", webauthnHandler.ListCredentials)
-	webauthnCredentials.PATCH("/:id", webauthnHandler.UpdateCredential)
-	webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)
+	webauthnCredentials.GET("", webauthnCredentialsHandler.ListByUser)
+	webauthnCredentials.PATCH("/:id", webauthnCredentialsHandler.UpdateCredential)
+	webauthnCredentials.DELETE("/:id", webauthnCredentialsHandler.DeleteCredential)
 
 	passcodeHandler := handlers.NewPasscodeHandler(srv, sessionManager)
 	passcode := e.Group("/passcode")
