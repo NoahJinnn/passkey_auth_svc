@@ -2,12 +2,12 @@ package dto
 
 import "time"
 
-type PasscodeFinishRequest struct {
+type PasscodeFinishBody struct {
 	Id   string `json:"id" validate:"required,uuid4"`
 	Code string `json:"code" validate:"required"`
 }
 
-type PasscodeInitRequest struct {
+type PasscodeInitBody struct {
 	UserId  string  `json:"user_id" validate:"required,uuid4"`
 	EmailId *string `json:"email_id"`
 }

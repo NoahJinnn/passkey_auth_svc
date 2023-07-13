@@ -18,6 +18,6 @@ func FromEmailModel(email *ent.Email) *EmailResponse {
 	}
 }
 
-type EmailCreateRequest struct {
+type EmailCreateBody struct {
 	Address string `json:"address"`
 }
