@@ -10,6 +10,7 @@ import (
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/income"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/manualasset"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/schema"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
 )
@@ -82,6 +83,22 @@ func init() {
 	institutionDescID := institutionFields[0].Descriptor()
 	// institution.DefaultID holds the default value on creation for the id field.
 	institution.DefaultID = institutionDescID.Default.(func() uuid.UUID)
+	manualassetFields := schema.ManualAsset{}.Fields()
+	_ = manualassetFields
+	// manualassetDescCreatedAt is the schema descriptor for created_at field.
+	manualassetDescCreatedAt := manualassetFields[5].Descriptor()
+	// manualasset.DefaultCreatedAt holds the default value on creation for the created_at field.
+	manualasset.DefaultCreatedAt = manualassetDescCreatedAt.Default.(func() time.Time)
+	// manualassetDescUpdatedAt is the schema descriptor for updated_at field.
+	manualassetDescUpdatedAt := manualassetFields[6].Descriptor()
+	// manualasset.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	manualasset.DefaultUpdatedAt = manualassetDescUpdatedAt.Default.(func() time.Time)
+	// manualasset.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	manualasset.UpdateDefaultUpdatedAt = manualassetDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// manualassetDescID is the schema descriptor for id field.
+	manualassetDescID := manualassetFields[0].Descriptor()
+	// manualasset.DefaultID holds the default value on creation for the id field.
+	manualasset.DefaultID = manualassetDescID.Default.(func() uuid.UUID)
 	transactionFields := schema.Transaction{}.Fields()
 	_ = transactionFields
 	// transactionDescCreatedAt is the schema descriptor for created_at field.
