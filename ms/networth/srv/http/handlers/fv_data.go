@@ -100,13 +100,45 @@ func (h *FvDataHandler) AllTransaction(c echo.Context) error {
 		}
 	}
 
-	// Get account data from sqlite db
+	// Get tx data from sqlite db
 	txs, err := h.GetProviderSvc().TransactionByProviderName(c.Request().Context(), userId, finverse.PROVIDER_NAME)
 	if err != nil {
 		return err
 	}
 
 	return c.JSON(http.StatusOK, txs)
+}
+
+func (h *FvDataHandler) Income(c echo.Context) error {
+	sessionToken, ok := c.Get("session").(jwt.Token)
+	if !ok {
+		return errors.New("failed to cast session object")
+	}
+
+	userId, err := uuid.FromString(sessionToken.Subject())
+	if err != nil {
+		return fmt.Errorf("failed to parse subject as uuid: %w", err)
+	}
+
+	exist, err := h.GetProviderSvc().CheckIncomeExist(c.Request().Context(), userId, finverse.PROVIDER_NAME)
+	if err != nil {
+		return err
+	}
+
+	if !exist {
+		_, err := h.GetFvDataSvc().AggregateIncome(c.Request().Context(), userId)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Get income data from sqlite db
+	i, err := h.GetProviderSvc().IncomeByProviderName(c.Request().Context(), userId, finverse.PROVIDER_NAME)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, i)
 }
 
 func (h *FvDataHandler) PagingTransaction(c echo.Context) error {

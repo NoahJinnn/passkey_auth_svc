@@ -10,6 +10,7 @@ import (
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/income"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
 )
 
@@ -81,6 +82,16 @@ func (p *ProviderSvc) TransactionByProviderName(ctx context.Context, userId uuid
 	return a, nil
 }
 
+func (p *ProviderSvc) IncomeByProviderName(ctx context.Context, userId uuid.UUID, providerName string) (*ent.Income, error) {
+	storage := p.getSqliteConnect(userId.String())
+	i, err := storage.Income.Query().Where(income.ProviderName(providerName)).First(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return i, nil
+}
+
 func (p *ProviderSvc) SaveConnection(ctx context.Context, userId uuid.UUID, providerName string, data interface{}) error {
 	storage := p.getSqliteConnect(userId.String())
 
@@ -126,6 +137,21 @@ func (p *ProviderSvc) SaveTransaction(ctx context.Context, userId uuid.UUID, pro
 	return nil
 }
 
+func (p *ProviderSvc) SaveIncome(ctx context.Context, userId uuid.UUID, providerName string, data interface{}) error {
+	storage := p.getSqliteConnect(userId.String())
+
+	json := toJSON(data)
+	_, err := storage.Income.Create().
+		SetProviderName(providerName).
+		SetData(json).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (p *ProviderSvc) CheckAccountExist(ctx context.Context, userId uuid.UUID, providerName string) (bool, error) {
 	storage := p.getSqliteConnect(userId.String())
 	exist, err := storage.Account.Query().Where(account.ProviderName(providerName)).Exist(ctx)
@@ -139,6 +165,17 @@ func (p *ProviderSvc) CheckTransactionExist(ctx context.Context, userId uuid.UUI
 	storage := p.getSqliteConnect(userId.String())
 
 	exist, err := storage.Transaction.Query().Where(transaction.ProviderName(providerName)).Exist(ctx)
+	if err != nil && !ent.IsNotFound(err) {
+		return false, err
+	}
+
+	return exist, nil
+}
+
+func (p *ProviderSvc) CheckIncomeExist(ctx context.Context, userId uuid.UUID, providerName string) (bool, error) {
+	storage := p.getSqliteConnect(userId.String())
+
+	exist, err := storage.Income.Query().Where(income.ProviderName(providerName)).Exist(ctx)
 	if err != nil && !ent.IsNotFound(err) {
 		return false, err
 	}
