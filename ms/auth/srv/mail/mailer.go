@@ -43,6 +43,5 @@ func (m *Mailer) Send(email []string, subject string, body string) error {
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 		return err
 	}
-	fmt.Println("send passcode successfully")
 	return nil
 }

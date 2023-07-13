@@ -23,6 +23,7 @@ type IFvDataSvc interface {
 	AggregateAccountBalances(ctx context.Context, userId uuid.UUID) ([]interface{}, error)
 	AggregateTransactions(ctx context.Context, userId uuid.UUID) (interface{}, error)
 	getAccessToken(ctx context.Context, providerName string, userId uuid.UUID) (*AccessToken, error)
+	concatTransactions(ctx context.Context, userId uuid.UUID, offset int, limit int, aggregation *Transactions) (*Transactions, error)
 }
 
 type FvDataSvc struct {
@@ -61,13 +62,13 @@ func (svc *FvDataSvc) AllInstitution(ctx context.Context, userId uuid.UUID) ([]b
 
 func (svc *FvDataSvc) getAccessToken(ctx context.Context, providerName string, userId uuid.UUID) (*AccessToken, error) {
 	var accessToken *AccessToken
-	accessTokenPayload, err := svc.provider.ConnectionByProviderName(ctx, userId.String(), providerName)
+	accessTokenPayload, err := svc.provider.ConnectionByProviderName(ctx, userId, providerName)
 	if err != nil {
 		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to get fv connection: %w", err))
 	}
 
 	if accessTokenPayload == nil {
-		return nil, errorhandler.NewHTTPError(http.StatusNotFound, "confidential connection not found")
+		return nil, errorhandler.NewHTTPError(http.StatusUnauthorized, "confidential connection not found")
 	}
 
 	err = json.Unmarshal([]byte(accessTokenPayload.Data), &accessToken)
@@ -176,7 +177,7 @@ func (svc *FvDataSvc) AggregateAccountBalances(ctx context.Context, userId uuid.
 		aggregation = append(aggregation, balance)
 	}
 
-	err = svc.provider.SaveAccount(ctx, "finverse", userId.String(), aggregation)
+	err = svc.provider.SaveAccount(ctx, userId, PROVIDER_NAME, aggregation)
 	if err != nil {
 		return nil, errorhandler.
 			NewHTTPError(http.StatusInternalServerError).
@@ -186,7 +187,6 @@ func (svc *FvDataSvc) AggregateAccountBalances(ctx context.Context, userId uuid.
 	return aggregation, nil
 }
 
-// TODO: Create route for get all transactions
 func (svc *FvDataSvc) AggregateTransactions(ctx context.Context, userId uuid.UUID) (interface{}, error) {
 	aggregation := &Transactions{}
 	offset := 0
@@ -211,6 +211,14 @@ func (svc *FvDataSvc) AggregateTransactions(ctx context.Context, userId uuid.UUI
 		}
 		svc.concatTransactions(ctx, userId, offset, limit, aggregation)
 	}
+
+	err = svc.provider.SaveTransaction(ctx, userId, PROVIDER_NAME, aggregation)
+	if err != nil {
+		return nil, errorhandler.
+			NewHTTPError(http.StatusInternalServerError).
+			SetInternal(fmt.Errorf("failed to save fv exchange token to sqlite: %w", err))
+	}
+
 	return aggregation, nil
 }
 

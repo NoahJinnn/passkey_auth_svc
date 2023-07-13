@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
@@ -41,8 +42,8 @@ func (p *ProviderSvc) getSqliteConnect(userId string) *ent.Client {
 	return storage
 }
 
-func (p *ProviderSvc) AllConnection(ctx context.Context, userId string) ([]*ent.Connection, error) {
-	storage := p.getSqliteConnect(userId)
+func (p *ProviderSvc) AllConnection(ctx context.Context, userId uuid.UUID) ([]*ent.Connection, error) {
+	storage := p.getSqliteConnect(userId.String())
 	conns, err := storage.Connection.Query().All(ctx)
 	if err != nil {
 		return nil, err
@@ -51,8 +52,8 @@ func (p *ProviderSvc) AllConnection(ctx context.Context, userId string) ([]*ent.
 	return conns, nil
 }
 
-func (p *ProviderSvc) ConnectionByProviderName(ctx context.Context, userId string, providerName string) (*ent.Connection, error) {
-	storage := p.getSqliteConnect(userId)
+func (p *ProviderSvc) ConnectionByProviderName(ctx context.Context, userId uuid.UUID, providerName string) (*ent.Connection, error) {
+	storage := p.getSqliteConnect(userId.String())
 	conn, err := storage.Connection.Query().Where(connection.ProviderName(providerName)).First(ctx)
 	if err != nil && !ent.IsNotFound(err) {
 		return nil, err
@@ -60,8 +61,8 @@ func (p *ProviderSvc) ConnectionByProviderName(ctx context.Context, userId strin
 	return conn, nil
 }
 
-func (p *ProviderSvc) AccountByProviderName(ctx context.Context, userId string, providerName string) (*ent.Account, error) {
-	storage := p.getSqliteConnect(userId)
+func (p *ProviderSvc) AccountByProviderName(ctx context.Context, userId uuid.UUID, providerName string) (*ent.Account, error) {
+	storage := p.getSqliteConnect(userId.String())
 	a, err := storage.Account.Query().Where(account.ProviderName(providerName)).First(ctx)
 	if err != nil {
 		return nil, err
@@ -70,8 +71,8 @@ func (p *ProviderSvc) AccountByProviderName(ctx context.Context, userId string, 
 	return a, nil
 }
 
-func (p *ProviderSvc) TransactionByProviderName(ctx context.Context, userId string, providerName string) (*ent.Transaction, error) {
-	storage := p.getSqliteConnect(userId)
+func (p *ProviderSvc) TransactionByProviderName(ctx context.Context, userId uuid.UUID, providerName string) (*ent.Transaction, error) {
+	storage := p.getSqliteConnect(userId.String())
 	a, err := storage.Transaction.Query().Where(transaction.ProviderName(providerName)).First(ctx)
 	if err != nil {
 		return nil, err
@@ -80,8 +81,8 @@ func (p *ProviderSvc) TransactionByProviderName(ctx context.Context, userId stri
 	return a, nil
 }
 
-func (p *ProviderSvc) SaveConnection(ctx context.Context, providerName string, userId string, data interface{}) error {
-	storage := p.getSqliteConnect(userId)
+func (p *ProviderSvc) SaveConnection(ctx context.Context, userId uuid.UUID, providerName string, data interface{}) error {
+	storage := p.getSqliteConnect(userId.String())
 
 	json := toJSON(data)
 	_, err := storage.Connection.Create().
@@ -95,8 +96,8 @@ func (p *ProviderSvc) SaveConnection(ctx context.Context, providerName string, u
 	return nil
 }
 
-func (p *ProviderSvc) SaveAccount(ctx context.Context, providerName string, userId string, data interface{}) error {
-	storage := p.getSqliteConnect(userId)
+func (p *ProviderSvc) SaveAccount(ctx context.Context, userId uuid.UUID, providerName string, data interface{}) error {
+	storage := p.getSqliteConnect(userId.String())
 
 	json := toJSON(data)
 	_, err := storage.Account.Create().
@@ -110,8 +111,8 @@ func (p *ProviderSvc) SaveAccount(ctx context.Context, providerName string, user
 	return nil
 }
 
-func (p *ProviderSvc) SaveTransaction(ctx context.Context, providerName string, userId string, data interface{}) error {
-	storage := p.getSqliteConnect(userId)
+func (p *ProviderSvc) SaveTransaction(ctx context.Context, userId uuid.UUID, providerName string, data interface{}) error {
+	storage := p.getSqliteConnect(userId.String())
 
 	json := toJSON(data)
 	_, err := storage.Transaction.Create().
@@ -125,10 +126,19 @@ func (p *ProviderSvc) SaveTransaction(ctx context.Context, providerName string, 
 	return nil
 }
 
-func (p *ProviderSvc) CheckAccountExist(ctx context.Context, providerName string, userId string) (bool, error) {
-	storage := p.getSqliteConnect(userId)
-
+func (p *ProviderSvc) CheckAccountExist(ctx context.Context, userId uuid.UUID, providerName string) (bool, error) {
+	storage := p.getSqliteConnect(userId.String())
 	exist, err := storage.Account.Query().Where(account.ProviderName(providerName)).Exist(ctx)
+	if err != nil && !ent.IsNotFound(err) {
+		return false, err
+	}
+	return exist, nil
+}
+
+func (p *ProviderSvc) CheckTransactionExist(ctx context.Context, userId uuid.UUID, providerName string) (bool, error) {
+	storage := p.getSqliteConnect(userId.String())
+
+	exist, err := storage.Transaction.Query().Where(transaction.ProviderName(providerName)).Exist(ctx)
 	if err != nil && !ent.IsNotFound(err) {
 		return false, err
 	}

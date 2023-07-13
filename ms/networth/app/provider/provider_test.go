@@ -4,14 +4,16 @@ import (
 	"context"
 	"testing"
 
+	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestListConnection(t *testing.T) {
 	p := NewProviderSvc()
-	p.NewSqliteConnect("test_id")
+	uid := uuid.FromStringOrNil("test_id")
+	p.NewSqliteConnect(uid.String())
 	ctx := context.Background()
-	conns, err := p.AllConnection(ctx, "test_id")
+	conns, err := p.AllConnection(ctx, uid)
 	assert.Nil(t, err)
 	assert.Equal(t, len(conns), 0)
 }

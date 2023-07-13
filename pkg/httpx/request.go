@@ -57,7 +57,7 @@ func (r *Req) Send() (*Resp, error) {
 		}
 		defer resp.Body.Close()
 
-		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("req FAILED\nstatus code: %d\nresponse: %+v", resp.StatusCode, string(result)))
+		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("HTTP CALL FAILED [status code]: %d  [response]: %+v", resp.StatusCode, string(result)))
 	}
 
 	result, err := io.ReadAll(resp.Body)

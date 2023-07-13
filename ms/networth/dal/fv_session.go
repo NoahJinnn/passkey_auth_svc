@@ -24,7 +24,7 @@ func (r *fvSessionRepo) GetByUserId(ctx Ctx, id uuid.UUID) (*ent.FvSession, erro
 		Query().
 		Where(fvsession.UserID(id)).
 		Only(ctx)
-	if err != nil {
+	if err != nil && !ent.IsNotFound(err) {
 		return nil, err
 	}
 
