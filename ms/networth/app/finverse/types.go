@@ -2,8 +2,6 @@ package finverse
 
 import "time"
 
-const PROVIDER_NAME = "finverse"
-
 type Accounts struct {
 	Accounts []Account `json:"accounts"`
 }

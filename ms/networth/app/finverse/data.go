@@ -62,7 +62,7 @@ func (svc *FvDataSvc) AllInstitution(ctx context.Context, userId uuid.UUID) ([]b
 }
 
 func (svc *FvDataSvc) AllAccount(ctx context.Context, userId uuid.UUID) ([]byte, error) {
-	accessToken, err := svc.getAccessToken(ctx, PROVIDER_NAME, userId)
+	accessToken, err := svc.getAccessToken(ctx, provider.Finverse, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (svc *FvDataSvc) AllAccount(ctx context.Context, userId uuid.UUID) ([]byte,
 }
 
 func (svc *FvDataSvc) Income(ctx context.Context, userId uuid.UUID) ([]byte, error) {
-	accessToken, err := svc.getAccessToken(ctx, PROVIDER_NAME, userId)
+	accessToken, err := svc.getAccessToken(ctx, provider.Finverse, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +111,7 @@ func (svc *FvDataSvc) PagingTransaction(ctx context.Context, offset string, limi
 		queryStr = fmt.Sprintf("?offset=%s", offset)
 	}
 
-	accessToken, err := svc.getAccessToken(ctx, PROVIDER_NAME, userId)
+	accessToken, err := svc.getAccessToken(ctx, provider.Finverse, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +131,7 @@ func (svc *FvDataSvc) PagingTransaction(ctx context.Context, offset string, limi
 }
 
 func (svc *FvDataSvc) GetBalanceHistoryByAccountId(ctx context.Context, accountId string, userId uuid.UUID) ([]byte, error) {
-	accessToken, err := svc.getAccessToken(ctx, PROVIDER_NAME, userId)
+	accessToken, err := svc.getAccessToken(ctx, provider.Finverse, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +179,7 @@ func (svc *FvDataSvc) AggregateAccountBalances(ctx context.Context, userId uuid.
 		aggregation = append(aggregation, balance)
 	}
 
-	err = svc.provider.SaveAccount(ctx, userId, PROVIDER_NAME, aggregation)
+	err = svc.provider.SaveAccount(ctx, userId, provider.Finverse, aggregation)
 	if err != nil {
 		return nil, errorhandler.
 			NewHTTPError(http.StatusInternalServerError).
@@ -214,7 +214,7 @@ func (svc *FvDataSvc) AggregateTransactions(ctx context.Context, userId uuid.UUI
 		svc.concatTransactions(ctx, userId, offset, limit, aggregation)
 	}
 
-	err = svc.provider.SaveTransaction(ctx, userId, PROVIDER_NAME, aggregation)
+	err = svc.provider.SaveTransaction(ctx, userId, provider.Finverse, aggregation)
 	if err != nil {
 		return nil, errorhandler.
 			NewHTTPError(http.StatusInternalServerError).
@@ -236,7 +236,7 @@ func (svc *FvDataSvc) AggregateIncome(ctx context.Context, userId uuid.UUID) (in
 		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	err = svc.provider.SaveIncome(ctx, userId, PROVIDER_NAME, aggregation)
+	err = svc.provider.SaveIncome(ctx, userId, provider.Finverse, aggregation)
 	if err != nil {
 		return nil, errorhandler.
 			NewHTTPError(http.StatusInternalServerError).
