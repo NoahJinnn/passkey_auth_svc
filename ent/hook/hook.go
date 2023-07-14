@@ -9,18 +9,6 @@ import (
 	"github.com/hellohq/hqservice/ent"
 )
 
-// The AssetTableFunc type is an adapter to allow the use of ordinary
-// function as AssetTable mutator.
-type AssetTableFunc func(context.Context, *ent.AssetTableMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f AssetTableFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.AssetTableMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AssetTableMutation", m)
-}
-
 // The EmailFunc type is an adapter to allow the use of ordinary
 // function as Email mutator.
 type EmailFunc func(context.Context, *ent.EmailMutation) (ent.Value, error)
@@ -31,6 +19,18 @@ func (f EmailFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EmailMutation", m)
+}
+
+// The FinItemTableFunc type is an adapter to allow the use of ordinary
+// function as FinItemTable mutator.
+type FinItemTableFunc func(context.Context, *ent.FinItemTableMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FinItemTableFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.FinItemTableMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FinItemTableMutation", m)
 }
 
 // The FvSessionFunc type is an adapter to allow the use of ordinary

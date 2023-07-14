@@ -8,30 +8,6 @@ import (
 )
 
 var (
-	// AssetTablesColumns holds the columns for the "asset_tables" table.
-	AssetTablesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "sheet", Type: field.TypeInt32},
-		{Name: "section", Type: field.TypeInt32},
-		{Name: "description", Type: field.TypeString, Nullable: true, Default: ""},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
-	}
-	// AssetTablesTable holds the schema information for the "asset_tables" table.
-	AssetTablesTable = &schema.Table{
-		Name:       "asset_tables",
-		Columns:    AssetTablesColumns,
-		PrimaryKey: []*schema.Column{AssetTablesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "asset_tables_users_asset_tables",
-				Columns:    []*schema.Column{AssetTablesColumns[6]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
 	// EmailsColumns holds the columns for the "emails" table.
 	EmailsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -50,6 +26,31 @@ var (
 			{
 				Symbol:     "emails_users_emails",
 				Columns:    []*schema.Column{EmailsColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// FinItemTablesColumns holds the columns for the "fin_item_tables" table.
+	FinItemTablesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "sheet", Type: field.TypeInt32},
+		{Name: "section", Type: field.TypeInt32},
+		{Name: "category", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
+	}
+	// FinItemTablesTable holds the schema information for the "fin_item_tables" table.
+	FinItemTablesTable = &schema.Table{
+		Name:       "fin_item_tables",
+		Columns:    FinItemTablesColumns,
+		PrimaryKey: []*schema.Column{FinItemTablesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "fin_item_tables_users_fin_item_tables",
+				Columns:    []*schema.Column{FinItemTablesColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -252,8 +253,8 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		AssetTablesTable,
 		EmailsTable,
+		FinItemTablesTable,
 		FvSessionsTable,
 		JwksTable,
 		PasscodesTable,
@@ -267,8 +268,8 @@ var (
 )
 
 func init() {
-	AssetTablesTable.ForeignKeys[0].RefTable = UsersTable
 	EmailsTable.ForeignKeys[0].RefTable = UsersTable
+	FinItemTablesTable.ForeignKeys[0].RefTable = UsersTable
 	FvSessionsTable.ForeignKeys[0].RefTable = UsersTable
 	PasscodesTable.ForeignKeys[0].RefTable = EmailsTable
 	PasscodesTable.ForeignKeys[1].RefTable = UsersTable

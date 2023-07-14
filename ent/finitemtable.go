@@ -10,12 +10,12 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/ent/assettable"
+	"github.com/hellohq/hqservice/ent/finitemtable"
 	"github.com/hellohq/hqservice/ent/user"
 )
 
-// AssetTable is the model entity for the AssetTable schema.
-type AssetTable struct {
+// FinItemTable is the model entity for the FinItemTable schema.
+type FinItemTable struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
@@ -25,6 +25,8 @@ type AssetTable struct {
 	Sheet int32 `json:"sheet,omitempty"`
 	// Section holds the value of the "section" field.
 	Section int32 `json:"section,omitempty"`
+	// Category holds the value of the "category" field.
+	Category string `json:"category,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -32,13 +34,13 @@ type AssetTable struct {
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the AssetTableQuery when eager-loading is set.
-	Edges        AssetTableEdges `json:"edges"`
+	// The values are being populated by the FinItemTableQuery when eager-loading is set.
+	Edges        FinItemTableEdges `json:"edges"`
 	selectValues sql.SelectValues
 }
 
-// AssetTableEdges holds the relations/edges for other nodes in the graph.
-type AssetTableEdges struct {
+// FinItemTableEdges holds the relations/edges for other nodes in the graph.
+type FinItemTableEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -48,7 +50,7 @@ type AssetTableEdges struct {
 
 // UserOrErr returns the User value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e AssetTableEdges) UserOrErr() (*User, error) {
+func (e FinItemTableEdges) UserOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.User == nil {
 			// Edge was loaded but was not found.
@@ -60,17 +62,17 @@ func (e AssetTableEdges) UserOrErr() (*User, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*AssetTable) scanValues(columns []string) ([]any, error) {
+func (*FinItemTable) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case assettable.FieldSheet, assettable.FieldSection:
+		case finitemtable.FieldSheet, finitemtable.FieldSection:
 			values[i] = new(sql.NullInt64)
-		case assettable.FieldDescription:
+		case finitemtable.FieldCategory, finitemtable.FieldDescription:
 			values[i] = new(sql.NullString)
-		case assettable.FieldCreatedAt, assettable.FieldUpdatedAt:
+		case finitemtable.FieldCreatedAt, finitemtable.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case assettable.FieldID, assettable.FieldUserID:
+		case finitemtable.FieldID, finitemtable.FieldUserID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -80,116 +82,125 @@ func (*AssetTable) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the AssetTable fields.
-func (at *AssetTable) assignValues(columns []string, values []any) error {
+// to the FinItemTable fields.
+func (fit *FinItemTable) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case assettable.FieldID:
+		case finitemtable.FieldID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				at.ID = *value
+				fit.ID = *value
 			}
-		case assettable.FieldUserID:
+		case finitemtable.FieldUserID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value != nil {
-				at.UserID = *value
+				fit.UserID = *value
 			}
-		case assettable.FieldSheet:
+		case finitemtable.FieldSheet:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field sheet", values[i])
 			} else if value.Valid {
-				at.Sheet = int32(value.Int64)
+				fit.Sheet = int32(value.Int64)
 			}
-		case assettable.FieldSection:
+		case finitemtable.FieldSection:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field section", values[i])
 			} else if value.Valid {
-				at.Section = int32(value.Int64)
+				fit.Section = int32(value.Int64)
 			}
-		case assettable.FieldDescription:
+		case finitemtable.FieldCategory:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field category", values[i])
+			} else if value.Valid {
+				fit.Category = value.String
+			}
+		case finitemtable.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
-				at.Description = value.String
+				fit.Description = value.String
 			}
-		case assettable.FieldCreatedAt:
+		case finitemtable.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				at.CreatedAt = value.Time
+				fit.CreatedAt = value.Time
 			}
-		case assettable.FieldUpdatedAt:
+		case finitemtable.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				at.UpdatedAt = value.Time
+				fit.UpdatedAt = value.Time
 			}
 		default:
-			at.selectValues.Set(columns[i], values[i])
+			fit.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the AssetTable.
+// Value returns the ent.Value that was dynamically selected and assigned to the FinItemTable.
 // This includes values selected through modifiers, order, etc.
-func (at *AssetTable) Value(name string) (ent.Value, error) {
-	return at.selectValues.Get(name)
+func (fit *FinItemTable) Value(name string) (ent.Value, error) {
+	return fit.selectValues.Get(name)
 }
 
-// QueryUser queries the "user" edge of the AssetTable entity.
-func (at *AssetTable) QueryUser() *UserQuery {
-	return NewAssetTableClient(at.config).QueryUser(at)
+// QueryUser queries the "user" edge of the FinItemTable entity.
+func (fit *FinItemTable) QueryUser() *UserQuery {
+	return NewFinItemTableClient(fit.config).QueryUser(fit)
 }
 
-// Update returns a builder for updating this AssetTable.
-// Note that you need to call AssetTable.Unwrap() before calling this method if this AssetTable
+// Update returns a builder for updating this FinItemTable.
+// Note that you need to call FinItemTable.Unwrap() before calling this method if this FinItemTable
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (at *AssetTable) Update() *AssetTableUpdateOne {
-	return NewAssetTableClient(at.config).UpdateOne(at)
+func (fit *FinItemTable) Update() *FinItemTableUpdateOne {
+	return NewFinItemTableClient(fit.config).UpdateOne(fit)
 }
 
-// Unwrap unwraps the AssetTable entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the FinItemTable entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (at *AssetTable) Unwrap() *AssetTable {
-	_tx, ok := at.config.driver.(*txDriver)
+func (fit *FinItemTable) Unwrap() *FinItemTable {
+	_tx, ok := fit.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: AssetTable is not a transactional entity")
+		panic("ent: FinItemTable is not a transactional entity")
 	}
-	at.config.driver = _tx.drv
-	return at
+	fit.config.driver = _tx.drv
+	return fit
 }
 
 // String implements the fmt.Stringer.
-func (at *AssetTable) String() string {
+func (fit *FinItemTable) String() string {
 	var builder strings.Builder
-	builder.WriteString("AssetTable(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", at.ID))
+	builder.WriteString("FinItemTable(")
+	builder.WriteString(fmt.Sprintf("id=%v, ", fit.ID))
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", at.UserID))
+	builder.WriteString(fmt.Sprintf("%v", fit.UserID))
 	builder.WriteString(", ")
 	builder.WriteString("sheet=")
-	builder.WriteString(fmt.Sprintf("%v", at.Sheet))
+	builder.WriteString(fmt.Sprintf("%v", fit.Sheet))
 	builder.WriteString(", ")
 	builder.WriteString("section=")
-	builder.WriteString(fmt.Sprintf("%v", at.Section))
+	builder.WriteString(fmt.Sprintf("%v", fit.Section))
+	builder.WriteString(", ")
+	builder.WriteString("category=")
+	builder.WriteString(fit.Category)
 	builder.WriteString(", ")
 	builder.WriteString("description=")
-	builder.WriteString(at.Description)
+	builder.WriteString(fit.Description)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
-	builder.WriteString(at.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(fit.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(at.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(fit.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// AssetTables is a parsable slice of AssetTable.
-type AssetTables []*AssetTable
+// FinItemTables is a parsable slice of FinItemTable.
+type FinItemTables []*FinItemTable

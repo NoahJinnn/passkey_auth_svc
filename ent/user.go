@@ -38,8 +38,8 @@ type UserEdges struct {
 	Passcodes []*Passcode `json:"passcodes,omitempty"`
 	// WebauthnCredentials holds the value of the webauthn_credentials edge.
 	WebauthnCredentials []*WebauthnCredential `json:"webauthn_credentials,omitempty"`
-	// AssetTables holds the value of the asset_tables edge.
-	AssetTables []*AssetTable `json:"asset_tables,omitempty"`
+	// FinItemTables holds the value of the fin_item_tables edge.
+	FinItemTables []*FinItemTable `json:"fin_item_tables,omitempty"`
 	// PrimaryEmail holds the value of the primary_email edge.
 	PrimaryEmail *PrimaryEmail `json:"primary_email,omitempty"`
 	// FvSession holds the value of the fv_session edge.
@@ -76,13 +76,13 @@ func (e UserEdges) WebauthnCredentialsOrErr() ([]*WebauthnCredential, error) {
 	return nil, &NotLoadedError{edge: "webauthn_credentials"}
 }
 
-// AssetTablesOrErr returns the AssetTables value or an error if the edge
+// FinItemTablesOrErr returns the FinItemTables value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) AssetTablesOrErr() ([]*AssetTable, error) {
+func (e UserEdges) FinItemTablesOrErr() ([]*FinItemTable, error) {
 	if e.loadedTypes[3] {
-		return e.AssetTables, nil
+		return e.FinItemTables, nil
 	}
-	return nil, &NotLoadedError{edge: "asset_tables"}
+	return nil, &NotLoadedError{edge: "fin_item_tables"}
 }
 
 // PrimaryEmailOrErr returns the PrimaryEmail value or an error if the edge
@@ -181,9 +181,9 @@ func (u *User) QueryWebauthnCredentials() *WebauthnCredentialQuery {
 	return NewUserClient(u.config).QueryWebauthnCredentials(u)
 }
 
-// QueryAssetTables queries the "asset_tables" edge of the User entity.
-func (u *User) QueryAssetTables() *AssetTableQuery {
-	return NewUserClient(u.config).QueryAssetTables(u)
+// QueryFinItemTables queries the "fin_item_tables" edge of the User entity.
+func (u *User) QueryFinItemTables() *FinItemTableQuery {
+	return NewUserClient(u.config).QueryFinItemTables(u)
 }
 
 // QueryPrimaryEmail queries the "primary_email" edge of the User entity.

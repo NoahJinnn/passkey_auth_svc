@@ -12,10 +12,10 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// AssetTable is the client for interacting with the AssetTable builders.
-	AssetTable *AssetTableClient
 	// Email is the client for interacting with the Email builders.
 	Email *EmailClient
+	// FinItemTable is the client for interacting with the FinItemTable builders.
+	FinItemTable *FinItemTableClient
 	// FvSession is the client for interacting with the FvSession builders.
 	FvSession *FvSessionClient
 	// Jwk is the client for interacting with the Jwk builders.
@@ -165,8 +165,8 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.AssetTable = NewAssetTableClient(tx.config)
 	tx.Email = NewEmailClient(tx.config)
+	tx.FinItemTable = NewFinItemTableClient(tx.config)
 	tx.FvSession = NewFvSessionClient(tx.config)
 	tx.Jwk = NewJwkClient(tx.config)
 	tx.Passcode = NewPasscodeClient(tx.config)
@@ -185,7 +185,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: AssetTable.QueryXXX(), the query will be executed
+// applies a query, for example: Email.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

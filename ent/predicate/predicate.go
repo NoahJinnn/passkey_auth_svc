@@ -6,11 +6,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// AssetTable is the predicate function for assettable builders.
-type AssetTable func(*sql.Selector)
-
 // Email is the predicate function for email builders.
 type Email func(*sql.Selector)
+
+// FinItemTable is the predicate function for finitemtable builders.
+type FinItemTable func(*sql.Selector)
 
 // FvSession is the predicate function for fvsession builders.
 type FvSession func(*sql.Selector)

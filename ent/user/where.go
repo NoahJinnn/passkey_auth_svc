@@ -215,21 +215,21 @@ func HasWebauthnCredentialsWith(preds ...predicate.WebauthnCredential) predicate
 	})
 }
 
-// HasAssetTables applies the HasEdge predicate on the "asset_tables" edge.
-func HasAssetTables() predicate.User {
+// HasFinItemTables applies the HasEdge predicate on the "fin_item_tables" edge.
+func HasFinItemTables() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, AssetTablesTable, AssetTablesColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, FinItemTablesTable, FinItemTablesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasAssetTablesWith applies the HasEdge predicate on the "asset_tables" edge with a given conditions (other predicates).
-func HasAssetTablesWith(preds ...predicate.AssetTable) predicate.User {
+// HasFinItemTablesWith applies the HasEdge predicate on the "fin_item_tables" edge with a given conditions (other predicates).
+func HasFinItemTablesWith(preds ...predicate.FinItemTable) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := newAssetTablesStep()
+		step := newFinItemTablesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
