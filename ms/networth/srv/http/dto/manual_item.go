@@ -6,5 +6,5 @@ type ManualItemBody struct {
 	Type         string  `json:"type" validate:"required"`
 	Description  string  `json:"description" validate:"required"`
 	Value        float64 `json:"value" validate:"required"`
-	ProviderName string  `json:"provider_name" validate:"required"`
+	ProviderName string  `json:"provider_name" validate:"provider_name"`
 }

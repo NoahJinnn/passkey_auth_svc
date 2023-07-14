@@ -30,6 +30,7 @@ func NewCustomValidator() *CustomValidator {
 		return name
 	})
 	v.RegisterValidation("item_category", ValidateCategory)
+	v.RegisterValidation("provider_name", ValidateProviderName)
 	return &CustomValidator{Validator: v}
 }
 
@@ -59,7 +60,10 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 	return nil
 }
 
-// ValidateCategory implements validator.Func
 func ValidateCategory(fl validator.FieldLevel) bool {
 	return fl.Field().String() == "asset" || fl.Field().String() == "debt"
+}
+
+func ValidateProviderName(fl validator.FieldLevel) bool {
+	return fl.Field().String() == "finverse" || fl.Field().String() == "manual"
 }

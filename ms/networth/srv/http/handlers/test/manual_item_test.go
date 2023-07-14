@@ -63,14 +63,20 @@ func (s *manualItemSuite) TestManualItemHandler_Create() {
 				"provider_name": "manual"
 			}`,
 			expectedStatusCode: http.StatusBadRequest,
-			expectedAsset: &ent.ManualItem{
-				ItemTableID:  "12345",
-				Category:     "asset",
-				Type:         "debit",
-				Description:  "TCB",
-				Value:        2000.00,
-				ProviderName: "manual",
-			},
+			expectedAsset:      nil,
+		},
+		{
+			name: "failed validation of provider name",
+			body: `{
+				"item_table_id": "12345",
+				"category": "asset",
+				"type": "debit",
+				"description": "TCB",
+				"value": 2000.00,
+				"provider_name": "test"
+			}`,
+			expectedStatusCode: http.StatusBadRequest,
+			expectedAsset:      nil,
 		},
 		{
 			name: "missing item_table_id field",
