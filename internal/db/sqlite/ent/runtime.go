@@ -85,6 +85,14 @@ func init() {
 	institution.DefaultID = institutionDescID.Default.(func() uuid.UUID)
 	manualitemFields := schema.ManualItem{}.Fields()
 	_ = manualitemFields
+	// manualitemDescProviderName is the schema descriptor for provider_name field.
+	manualitemDescProviderName := manualitemFields[1].Descriptor()
+	// manualitem.ProviderNameValidator is a validator for the "provider_name" field. It is called by the builders before save.
+	manualitem.ProviderNameValidator = manualitemDescProviderName.Validators[0].(func(string) error)
+	// manualitemDescCategory is the schema descriptor for category field.
+	manualitemDescCategory := manualitemFields[4].Descriptor()
+	// manualitem.CategoryValidator is a validator for the "category" field. It is called by the builders before save.
+	manualitem.CategoryValidator = manualitemDescCategory.Validators[0].(func(string) error)
 	// manualitemDescDescription is the schema descriptor for description field.
 	manualitemDescDescription := manualitemFields[5].Descriptor()
 	// manualitem.DefaultDescription holds the default value on creation for the description field.

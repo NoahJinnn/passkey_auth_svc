@@ -132,7 +132,25 @@ func (miu *ManualItemUpdate) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (miu *ManualItemUpdate) check() error {
+	if v, ok := miu.mutation.ProviderName(); ok {
+		if err := manualitem.ProviderNameValidator(v); err != nil {
+			return &ValidationError{Name: "provider_name", err: fmt.Errorf(`ent: validator failed for field "ManualItem.provider_name": %w`, err)}
+		}
+	}
+	if v, ok := miu.mutation.Category(); ok {
+		if err := manualitem.CategoryValidator(v); err != nil {
+			return &ValidationError{Name: "category", err: fmt.Errorf(`ent: validator failed for field "ManualItem.category": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (miu *ManualItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := miu.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(manualitem.Table, manualitem.Columns, sqlgraph.NewFieldSpec(manualitem.FieldID, field.TypeUUID))
 	if ps := miu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -305,7 +323,25 @@ func (miuo *ManualItemUpdateOne) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (miuo *ManualItemUpdateOne) check() error {
+	if v, ok := miuo.mutation.ProviderName(); ok {
+		if err := manualitem.ProviderNameValidator(v); err != nil {
+			return &ValidationError{Name: "provider_name", err: fmt.Errorf(`ent: validator failed for field "ManualItem.provider_name": %w`, err)}
+		}
+	}
+	if v, ok := miuo.mutation.Category(); ok {
+		if err := manualitem.CategoryValidator(v); err != nil {
+			return &ValidationError{Name: "category", err: fmt.Errorf(`ent: validator failed for field "ManualItem.category": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (miuo *ManualItemUpdateOne) sqlSave(ctx context.Context) (_node *ManualItem, err error) {
+	if err := miuo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(manualitem.Table, manualitem.Columns, sqlgraph.NewFieldSpec(manualitem.FieldID, field.TypeUUID))
 	id, ok := miuo.mutation.ID()
 	if !ok {

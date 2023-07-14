@@ -16,7 +16,7 @@ type manualItemSuite struct {
 }
 
 func TestManualItemSuite(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	suite.Run(t, new(manualItemSuite))
 }
 

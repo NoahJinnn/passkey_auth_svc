@@ -62,6 +62,10 @@ func init() {
 	fvsession.DefaultID = fvsessionDescID.Default.(func() uuid.UUID)
 	itemtableFields := schema.ItemTable{}.Fields()
 	_ = itemtableFields
+	// itemtableDescCategory is the schema descriptor for category field.
+	itemtableDescCategory := itemtableFields[4].Descriptor()
+	// itemtable.CategoryValidator is a validator for the "category" field. It is called by the builders before save.
+	itemtable.CategoryValidator = itemtableDescCategory.Validators[0].(func(string) error)
 	// itemtableDescDescription is the schema descriptor for description field.
 	itemtableDescDescription := itemtableFields[5].Descriptor()
 	// itemtable.DefaultDescription holds the default value on creation for the description field.

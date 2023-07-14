@@ -165,6 +165,11 @@ func (mic *ManualItemCreate) check() error {
 	if _, ok := mic.mutation.ProviderName(); !ok {
 		return &ValidationError{Name: "provider_name", err: errors.New(`ent: missing required field "ManualItem.provider_name"`)}
 	}
+	if v, ok := mic.mutation.ProviderName(); ok {
+		if err := manualitem.ProviderNameValidator(v); err != nil {
+			return &ValidationError{Name: "provider_name", err: fmt.Errorf(`ent: validator failed for field "ManualItem.provider_name": %w`, err)}
+		}
+	}
 	if _, ok := mic.mutation.ItemTableID(); !ok {
 		return &ValidationError{Name: "item_table_id", err: errors.New(`ent: missing required field "ManualItem.item_table_id"`)}
 	}
@@ -173,6 +178,11 @@ func (mic *ManualItemCreate) check() error {
 	}
 	if _, ok := mic.mutation.Category(); !ok {
 		return &ValidationError{Name: "category", err: errors.New(`ent: missing required field "ManualItem.category"`)}
+	}
+	if v, ok := mic.mutation.Category(); ok {
+		if err := manualitem.CategoryValidator(v); err != nil {
+			return &ValidationError{Name: "category", err: fmt.Errorf(`ent: validator failed for field "ManualItem.category": %w`, err)}
+		}
 	}
 	if _, ok := mic.mutation.Value(); !ok {
 		return &ValidationError{Name: "value", err: errors.New(`ent: missing required field "ManualItem.value"`)}

@@ -58,6 +58,10 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// ProviderNameValidator is a validator for the "provider_name" field. It is called by the builders before save.
+	ProviderNameValidator func(string) error
+	// CategoryValidator is a validator for the "category" field. It is called by the builders before save.
+	CategoryValidator func(string) error
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.

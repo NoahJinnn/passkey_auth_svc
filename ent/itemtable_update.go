@@ -160,7 +160,20 @@ func (itu *ItemTableUpdate) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (itu *ItemTableUpdate) check() error {
+	if v, ok := itu.mutation.Category(); ok {
+		if err := itemtable.CategoryValidator(v); err != nil {
+			return &ValidationError{Name: "category", err: fmt.Errorf(`ent: validator failed for field "ItemTable.category": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (itu *ItemTableUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := itu.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(itemtable.Table, itemtable.Columns, sqlgraph.NewFieldSpec(itemtable.FieldID, field.TypeUUID))
 	if ps := itu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -385,7 +398,20 @@ func (ituo *ItemTableUpdateOne) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (ituo *ItemTableUpdateOne) check() error {
+	if v, ok := ituo.mutation.Category(); ok {
+		if err := itemtable.CategoryValidator(v); err != nil {
+			return &ValidationError{Name: "category", err: fmt.Errorf(`ent: validator failed for field "ItemTable.category": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (ituo *ItemTableUpdateOne) sqlSave(ctx context.Context) (_node *ItemTable, err error) {
+	if err := ituo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(itemtable.Table, itemtable.Columns, sqlgraph.NewFieldSpec(itemtable.FieldID, field.TypeUUID))
 	id, ok := ituo.mutation.ID()
 	if !ok {

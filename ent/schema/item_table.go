@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"errors"
 	"time"
 
 	"entgo.io/ent"
@@ -22,7 +23,12 @@ func (ItemTable) Fields() []ent.Field {
 		field.UUID("user_id", uuid.UUID{}).Optional(),
 		field.Int32("sheet"),
 		field.Int32("section"),
-		field.String("category"),
+		field.String("category").Validate(func(s string) error {
+			if s != "asset" && s != "debt" {
+				return errors.New("category must be asset|debt")
+			}
+			return nil
+		}),
 		field.String("description").Default("").Optional(),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),

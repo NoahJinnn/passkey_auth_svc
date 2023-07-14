@@ -179,6 +179,11 @@ func (itc *ItemTableCreate) check() error {
 	if _, ok := itc.mutation.Category(); !ok {
 		return &ValidationError{Name: "category", err: errors.New(`ent: missing required field "ItemTable.category"`)}
 	}
+	if v, ok := itc.mutation.Category(); ok {
+		if err := itemtable.CategoryValidator(v); err != nil {
+			return &ValidationError{Name: "category", err: fmt.Errorf(`ent: validator failed for field "ItemTable.category": %w`, err)}
+		}
+	}
 	if _, ok := itc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "ItemTable.created_at"`)}
 	}
