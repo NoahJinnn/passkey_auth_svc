@@ -17,7 +17,6 @@ type itemTableSuite struct {
 }
 
 func TestItemTableSuite(t *testing.T) {
-	t.Parallel()
 	suite.Run(t, new(itemTableSuite))
 }
 

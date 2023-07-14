@@ -3,8 +3,6 @@ package test
 import (
 	"context"
 	"fmt"
-	"math/rand"
-	"strings"
 	"testing"
 
 	"github.com/go-testfixtures/testfixtures/v3"
@@ -74,8 +72,7 @@ func (s *Suite) SetupSuite() {
 		s.T().Skip("skipping test in short mode.")
 	}
 	dialect := "postgres"
-	containerName := randomStr()
-	testDb, err := testDal.StartDB(containerName, dialect)
+	testDb, err := testDal.StartDB("integration_test_nw", dialect)
 	s.NoError(err)
 	pgClient := pgsql.NewPgClient(testDb.DatabaseUrl)
 
@@ -127,16 +124,4 @@ func (s *Suite) LoadFixtures(path string) error {
 	}
 
 	return nil
-}
-
-func randomStr() string {
-	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-		"abcdefghijklmnopqrstuvwxyz" +
-		"0123456789")
-	length := 8
-	var b strings.Builder
-	for i := 0; i < length; i++ {
-		b.WriteRune(chars[rand.Intn(len(chars))])
-	}
-	return b.String() // E.g. "ExcbsVQs"
 }
