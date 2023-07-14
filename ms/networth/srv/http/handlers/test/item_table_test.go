@@ -75,6 +75,17 @@ func (s *itemTableSuite) TestItemTableHandler_Create() {
 			},
 		},
 		{
+			name: "failed validation of category",
+			body: `{
+				"sheet": 1,
+				"section": 1,
+				"description": "Test item table",
+				"category": "commercial"
+			}`,
+			expectedStatusCode: http.StatusBadRequest,
+			expectedAsset:      nil,
+		},
+		{
 			name: "missing field",
 			body: `{
 				"sheet": 1,

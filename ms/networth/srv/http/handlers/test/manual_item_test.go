@@ -53,6 +53,26 @@ func (s *manualItemSuite) TestManualItemHandler_Create() {
 			},
 		},
 		{
+			name: "failed validation of category",
+			body: `{
+				"item_table_id": "12345",
+				"category": "commercial",
+				"type": "debit",
+				"description": "TCB",
+				"value": 2000.00,
+				"provider_name": "manual"
+			}`,
+			expectedStatusCode: http.StatusBadRequest,
+			expectedAsset: &ent.ManualItem{
+				ItemTableID:  "12345",
+				Category:     "asset",
+				Type:         "debit",
+				Description:  "TCB",
+				Value:        2000.00,
+				ProviderName: "manual",
+			},
+		},
+		{
 			name: "missing item_table_id field",
 			body: `{
 				"category": "asset",

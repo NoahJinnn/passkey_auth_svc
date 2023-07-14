@@ -101,7 +101,6 @@ func (s *Suite) SetupSuite() {
 
 func (s *Suite) TearDownSuite() {
 	if s.testDb != nil {
-		fmt.Println("Tearing down test database")
 		s.NoError(testDal.PurgeDB(s.testDb))
 	}
 }

@@ -9,7 +9,6 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/http/errorhandler"
-	"github.com/hellohq/hqservice/ms/networth/app/dao"
 	"github.com/hellohq/hqservice/ms/networth/app/provider"
 	"github.com/hellohq/hqservice/ms/networth/config"
 	"github.com/hellohq/hqservice/ms/networth/dal"
@@ -24,7 +23,7 @@ type IFvDataSvc interface {
 	GetBalanceHistoryByAccountId(ctx context.Context, accountId string, userId uuid.UUID) (interface{}, error)
 	AggregateAccountBalances(ctx context.Context, userId uuid.UUID) ([]interface{}, error)
 	AggregateTransactions(ctx context.Context, userId uuid.UUID) (interface{}, error)
-	getAccessToken(ctx context.Context, providerName dao.Provider, userId uuid.UUID) (*AccessToken, error)
+	getAccessToken(ctx context.Context, providerName string, userId uuid.UUID) (*AccessToken, error)
 	concatTransactions(ctx context.Context, userId uuid.UUID, offset int, limit int, aggregation *Transactions) (*Transactions, error)
 }
 
@@ -63,7 +62,7 @@ func (svc *FvDataSvc) AllInstitution(ctx context.Context, userId uuid.UUID) ([]b
 }
 
 func (svc *FvDataSvc) AllAccount(ctx context.Context, userId uuid.UUID) ([]byte, error) {
-	accessToken, err := svc.getAccessToken(ctx, dao.Finverse, userId)
+	accessToken, err := svc.getAccessToken(ctx, Finverse, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +82,7 @@ func (svc *FvDataSvc) AllAccount(ctx context.Context, userId uuid.UUID) ([]byte,
 }
 
 func (svc *FvDataSvc) Income(ctx context.Context, userId uuid.UUID) ([]byte, error) {
-	accessToken, err := svc.getAccessToken(ctx, dao.Finverse, userId)
+	accessToken, err := svc.getAccessToken(ctx, Finverse, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +111,7 @@ func (svc *FvDataSvc) PagingTransaction(ctx context.Context, offset string, limi
 		queryStr = fmt.Sprintf("?offset=%s", offset)
 	}
 
-	accessToken, err := svc.getAccessToken(ctx, dao.Finverse, userId)
+	accessToken, err := svc.getAccessToken(ctx, Finverse, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +131,7 @@ func (svc *FvDataSvc) PagingTransaction(ctx context.Context, offset string, limi
 }
 
 func (svc *FvDataSvc) GetBalanceHistoryByAccountId(ctx context.Context, accountId string, userId uuid.UUID) ([]byte, error) {
-	accessToken, err := svc.getAccessToken(ctx, dao.Finverse, userId)
+	accessToken, err := svc.getAccessToken(ctx, Finverse, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -180,7 +179,7 @@ func (svc *FvDataSvc) AggregateAccountBalances(ctx context.Context, userId uuid.
 		aggregation = append(aggregation, balance)
 	}
 
-	err = svc.provider.SaveAccount(ctx, userId, dao.Finverse, aggregation)
+	err = svc.provider.SaveAccount(ctx, userId, Finverse, aggregation)
 	if err != nil {
 		return nil, errorhandler.
 			NewHTTPError(http.StatusInternalServerError).
@@ -215,7 +214,7 @@ func (svc *FvDataSvc) AggregateTransactions(ctx context.Context, userId uuid.UUI
 		svc.concatTransactions(ctx, userId, offset, limit, aggregation)
 	}
 
-	err = svc.provider.SaveTransaction(ctx, userId, dao.Finverse, aggregation)
+	err = svc.provider.SaveTransaction(ctx, userId, Finverse, aggregation)
 	if err != nil {
 		return nil, errorhandler.
 			NewHTTPError(http.StatusInternalServerError).
@@ -237,7 +236,7 @@ func (svc *FvDataSvc) AggregateIncome(ctx context.Context, userId uuid.UUID) (in
 		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	err = svc.provider.SaveIncome(ctx, userId, dao.Finverse, aggregation)
+	err = svc.provider.SaveIncome(ctx, userId, Finverse, aggregation)
 	if err != nil {
 		return nil, errorhandler.
 			NewHTTPError(http.StatusInternalServerError).
@@ -263,7 +262,7 @@ func (svc *FvDataSvc) concatTransactions(ctx context.Context, userId uuid.UUID, 
 	return &curTxs, nil
 }
 
-func (svc *FvDataSvc) getAccessToken(ctx context.Context, providerName dao.Provider, userId uuid.UUID) (*AccessToken, error) {
+func (svc *FvDataSvc) getAccessToken(ctx context.Context, providerName string, userId uuid.UUID) (*AccessToken, error) {
 	var accessToken *AccessToken
 	accessTokenPayload, err := svc.provider.ConnectionByProviderName(ctx, userId, providerName)
 	if err != nil {

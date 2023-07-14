@@ -2,6 +2,10 @@ package finverse
 
 import "time"
 
+const (
+	Finverse string = "finverse"
+)
+
 type Accounts struct {
 	Accounts []Account `json:"accounts"`
 }

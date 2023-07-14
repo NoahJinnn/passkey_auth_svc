@@ -32,7 +32,7 @@ func (svc *ItemTableSvc) ListByUser(ctx context.Context, userID uuid.UUID) ([]*e
 
 func (svc *ItemTableSvc) Create(ctx context.Context, userID uuid.UUID, body dto.ItemTableBody) (*ent.ItemTable, error) {
 	asset := &ent.ItemTable{
-		Category:    body.Category.String(),
+		Category:    body.Category,
 		Sheet:       body.Sheet,
 		Section:     body.Section,
 		Description: body.Description,
