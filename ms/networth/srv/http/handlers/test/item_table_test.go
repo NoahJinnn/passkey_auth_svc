@@ -12,16 +12,16 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type assetSuite struct {
+type itemTableSuite struct {
 	Suite
 }
 
-func TestAssetSuite(t *testing.T) {
+func TestItemTableSuite(t *testing.T) {
 	t.Parallel()
-	suite.Run(t, new(assetSuite))
+	suite.Run(t, new(itemTableSuite))
 }
 
-func (s *assetSuite) TestAssetTableHandler_ListByUserId() {
+func (s *itemTableSuite) TestItemTableHandler_ListByUserId() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
@@ -47,7 +47,7 @@ func (s *assetSuite) TestAssetTableHandler_ListByUserId() {
 	}
 }
 
-func (s *assetSuite) TestItemTableHandler_Create() {
+func (s *itemTableSuite) TestItemTableHandler_Create() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}

@@ -89,12 +89,12 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 	itemTable.PUT("/item_table", itHandler.Update)
 	itemTable.DELETE("/:itemTableId", itHandler.Delete)
 
-	manualAsset := nw.Group("/manual_assets")
-	maHandler := handlers.NewItemTableHandler(srv)
-	manualAsset.GET("", maHandler.ListByUser)
-	manualAsset.POST("/manual_asset", maHandler.Create)
-	manualAsset.PUT("/manual_asset", maHandler.Update)
-	manualAsset.DELETE("/:manualAssetId", maHandler.Delete)
+	manualItem := nw.Group("/manual_items")
+	miHandler := handlers.NewManualItemHandler(srv)
+	manualItem.GET("", miHandler.ListByUser)
+	manualItem.POST("/manual_item", miHandler.Create)
+	manualItem.PUT("/manual_item", miHandler.Update)
+	manualItem.DELETE("/:manualAssetId", miHandler.Delete)
 
 	return e, nil
 }
