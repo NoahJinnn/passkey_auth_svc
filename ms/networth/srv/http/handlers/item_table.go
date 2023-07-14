@@ -12,15 +12,15 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
-type AssetTableHandler struct {
+type ItemTableHandler struct {
 	*HttpDeps
 }
 
-func NewAssetTableHandler(srv *HttpDeps) *AssetTableHandler {
-	return &AssetTableHandler{srv}
+func NewItemTableHandler(srv *HttpDeps) *ItemTableHandler {
+	return &ItemTableHandler{srv}
 }
 
-func (h *AssetTableHandler) ListByUser(c echo.Context) error {
+func (h *ItemTableHandler) ListByUser(c echo.Context) error {
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("failed to cast session object")
@@ -30,7 +30,7 @@ func (h *AssetTableHandler) ListByUser(c echo.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
-	result, err := h.GetAssetTableSvc().ListByUser(c.Request().Context(), userId)
+	result, err := h.GetItemTableSvc().ListByUser(c.Request().Context(), userId)
 	if err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func (h *AssetTableHandler) ListByUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
-func (h *AssetTableHandler) Create(c echo.Context) error {
+func (h *ItemTableHandler) Create(c echo.Context) error {
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("failed to cast session object")
@@ -49,7 +49,7 @@ func (h *AssetTableHandler) Create(c echo.Context) error {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	var body dto.AssetTableBody
+	var body dto.ItemTableBody
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
 		return errorhandler.ToHttpError(err)
 	}
@@ -58,7 +58,7 @@ func (h *AssetTableHandler) Create(c echo.Context) error {
 		return errorhandler.ToHttpError(err)
 	}
 
-	result, err := h.GetAssetTableSvc().Create(c.Request().Context(), userId, body)
+	result, err := h.GetItemTableSvc().Create(c.Request().Context(), userId, body)
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func (h *AssetTableHandler) Create(c echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
-func (h *AssetTableHandler) Update(c echo.Context) error {
+func (h *ItemTableHandler) Update(c echo.Context) error {
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("failed to cast session object")
@@ -77,7 +77,7 @@ func (h *AssetTableHandler) Update(c echo.Context) error {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	var body dto.AssetTableBody
+	var body dto.ItemTableBody
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
 		return errorhandler.ToHttpError(err)
 	}
@@ -86,7 +86,7 @@ func (h *AssetTableHandler) Update(c echo.Context) error {
 		return errorhandler.ToHttpError(err)
 	}
 
-	err = h.GetAssetTableSvc().Update(c.Request().Context(), userId, body)
+	err = h.GetItemTableSvc().Update(c.Request().Context(), userId, body)
 	if err != nil {
 		return err
 	}
@@ -94,7 +94,7 @@ func (h *AssetTableHandler) Update(c echo.Context) error {
 	return c.JSON(http.StatusOK, true)
 }
 
-func (h *AssetTableHandler) Delete(c echo.Context) error {
+func (h *ItemTableHandler) Delete(c echo.Context) error {
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("failed to cast session object")
@@ -105,13 +105,13 @@ func (h *AssetTableHandler) Delete(c echo.Context) error {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	assetIdStr := c.Param("assetTableId")
+	assetIdStr := c.Param("itemTableId")
 	assetId, err := uuid.FromString(assetIdStr)
 	if err != nil {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	err = h.GetAssetTableSvc().Delete(c.Request().Context(), userId, assetId)
+	err = h.GetItemTableSvc().Delete(c.Request().Context(), userId, assetId)
 	if err != nil {
 		return err
 	}

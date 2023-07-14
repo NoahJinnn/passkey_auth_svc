@@ -24,22 +24,22 @@ const (
 type INwRepo interface {
 	WithTx(ctx Ctx, exec func(ctx Ctx, client *ent.Client) error) error
 	GetFvSessionRepo() IFvSessionRepo
-	GetAssetTableRepo() IAssetTableRepo
+	GetItemTableRepo() IItemTableRepo
 }
 
 type NwRepo struct {
-	Db             *db.Db
-	fvSessionRepo  *fvSessionRepo
-	assetTableRepo *assetTableRepo
+	Db            *db.Db
+	fvSessionRepo *fvSessionRepo
+	itemTableRepo *itemTableRepo
 }
 
 func New(client *db.Db) *NwRepo {
-	assetTableRepo := NewAssetRepo(client.PgClient)
+	itemTableRepo := NewItemTableRepo(client.PgClient)
 	fvSessionRepo := NewFvSessionRepo(client.PgClient)
 	return &NwRepo{
-		Db:             client,
-		assetTableRepo: assetTableRepo,
-		fvSessionRepo:  fvSessionRepo,
+		Db:            client,
+		itemTableRepo: itemTableRepo,
+		fvSessionRepo: fvSessionRepo,
 	}
 }
 
@@ -51,6 +51,6 @@ func (r NwRepo) GetFvSessionRepo() IFvSessionRepo {
 	return r.fvSessionRepo
 }
 
-func (r NwRepo) GetAssetTableRepo() IAssetTableRepo {
-	return r.assetTableRepo
+func (r NwRepo) GetItemTableRepo() IItemTableRepo {
+	return r.itemTableRepo
 }

@@ -25,7 +25,7 @@ func (s *assetSuite) TestAssetTableHandler_ListByUserId() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
-	err := s.LoadFixtures("../../../../test/fixtures/asset_table")
+	err := s.LoadFixtures("../../../../test/fixtures/item_table")
 	s.Require().NoError(err)
 
 	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
@@ -40,7 +40,7 @@ func (s *assetSuite) TestAssetTableHandler_ListByUserId() {
 
 	s.e.ServeHTTP(rec, req)
 	if s.Equal(http.StatusOK, rec.Code) {
-		assets := []ent.AssetTable{}
+		assets := []ent.ItemTable{}
 		err := json.Unmarshal(rec.Body.Bytes(), &assets)
 		s.NoError(err)
 		s.Equal(userId, assets[0].UserID.String())
@@ -51,24 +51,24 @@ func (s *assetSuite) TestAssetTableHandler_Create() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
-	err := s.LoadFixtures("../../../../test/fixtures/asset_table")
+	err := s.LoadFixtures("../../../../test/fixtures/item_table")
 	s.Require().NoError(err)
-	description := "Test asset table"
+	description := "Test item table"
 	tests := []struct {
 		name               string
 		body               string
 		expectedStatusCode int
-		expectedAsset      *ent.AssetTable
+		expectedAsset      *ent.ItemTable
 	}{
 		{
 			name: "success",
 			body: `{
 				"sheet": 1,
 				"section": 1,
-				"description": "Test asset table"
+				"description": "Test item table"
 			}`,
 			expectedStatusCode: http.StatusOK,
-			expectedAsset: &ent.AssetTable{
+			expectedAsset: &ent.ItemTable{
 				Sheet:       1,
 				Section:     1,
 				Description: description,
@@ -77,7 +77,7 @@ func (s *assetSuite) TestAssetTableHandler_Create() {
 		{
 			name: "missing fields",
 			body: `{
-				"description": "Test asset table with missing fields"
+				"description": "Test item table with missing fields"
 			}`,
 			expectedStatusCode: http.StatusBadRequest,
 			expectedAsset:      nil,
@@ -92,7 +92,7 @@ func (s *assetSuite) TestAssetTableHandler_Create() {
 			cookie, err := s.sessionManager.GenerateCookie(token)
 			s.NoError(err)
 
-			req := httptest.NewRequest(http.MethodPost, "/networth/asset_tables/asset_table", strings.NewReader(tt.body))
+			req := httptest.NewRequest(http.MethodPost, "/networth/asset_tables/item_table", strings.NewReader(tt.body))
 			req.AddCookie(cookie)
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
@@ -100,13 +100,13 @@ func (s *assetSuite) TestAssetTableHandler_Create() {
 			s.e.ServeHTTP(rec, req)
 			s.Equal(tt.expectedStatusCode, rec.Code)
 			if rec.Code == 200 {
-				assets, err := s.app.GetAssetTableSvc().ListByUser(ctx, uuid.FromStringOrNil(userId))
+				assets, err := s.app.GetItemTableSvc().ListByUser(ctx, uuid.FromStringOrNil(userId))
 				s.NoError(err)
 				s.Equal(2, len(assets)) // 1st from fixture, 2nd from create
 				s.Equal(tt.expectedAsset.Sheet, assets[1].Sheet)
 				s.Equal(tt.expectedAsset.Section, assets[1].Section)
 				s.Equal(tt.expectedAsset.Description, assets[1].Description)
-				s.app.GetAssetTableSvc().Delete(ctx, uuid.FromStringOrNil(userId), assets[1].ID)
+				s.app.GetItemTableSvc().Delete(ctx, uuid.FromStringOrNil(userId), assets[1].ID)
 			}
 		})
 	}
