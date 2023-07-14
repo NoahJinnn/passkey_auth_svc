@@ -9,6 +9,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/http/errorhandler"
+	"github.com/hellohq/hqservice/ms/networth/app/dao"
 	"github.com/hellohq/hqservice/ms/networth/app/provider"
 	"github.com/hellohq/hqservice/ms/networth/config"
 	"github.com/hellohq/hqservice/ms/networth/dal"
@@ -140,7 +141,7 @@ func (svc *FvAuthSvc) ExchangeAccessToken(ctx context.Context, exchangeCode stri
 			NewHTTPError(http.StatusInternalServerError).
 			SetInternal(fmt.Errorf("failed to get fv exchange token: %w", err))
 	}
-	err = svc.provider.SaveConnection(ctx, userId, provider.Finverse, result)
+	err = svc.provider.SaveConnection(ctx, userId, dao.Finverse, result)
 	if err != nil {
 		return nil, errorhandler.
 			NewHTTPError(http.StatusInternalServerError).

@@ -8,7 +8,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/http/errorhandler"
-	"github.com/hellohq/hqservice/ms/networth/app/provider"
+	"github.com/hellohq/hqservice/ms/networth/app/dao"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
@@ -57,7 +57,7 @@ func (h *FvDataHandler) AllAccount(c echo.Context) error {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	exist, err := h.GetProviderSvc().CheckAccountExist(c.Request().Context(), userId, provider.Finverse)
+	exist, err := h.GetProviderSvc().CheckAccountExist(c.Request().Context(), userId, dao.Finverse)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (h *FvDataHandler) AllAccount(c echo.Context) error {
 	}
 
 	// Get account data from sqlite db
-	a, err := h.GetProviderSvc().AccountByProviderName(c.Request().Context(), userId, provider.Finverse)
+	a, err := h.GetProviderSvc().AccountByProviderName(c.Request().Context(), userId, dao.Finverse)
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (h *FvDataHandler) AllTransaction(c echo.Context) error {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	exist, err := h.GetProviderSvc().CheckTransactionExist(c.Request().Context(), userId, provider.Finverse)
+	exist, err := h.GetProviderSvc().CheckTransactionExist(c.Request().Context(), userId, dao.Finverse)
 	if err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func (h *FvDataHandler) AllTransaction(c echo.Context) error {
 	}
 
 	// Get tx data from sqlite db
-	txs, err := h.GetProviderSvc().TransactionByProviderName(c.Request().Context(), userId, provider.Finverse)
+	txs, err := h.GetProviderSvc().TransactionByProviderName(c.Request().Context(), userId, dao.Finverse)
 	if err != nil {
 		return err
 	}
@@ -120,7 +120,7 @@ func (h *FvDataHandler) Income(c echo.Context) error {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	exist, err := h.GetProviderSvc().CheckIncomeExist(c.Request().Context(), userId, provider.Finverse)
+	exist, err := h.GetProviderSvc().CheckIncomeExist(c.Request().Context(), userId, dao.Finverse)
 	if err != nil {
 		return err
 	}
@@ -133,7 +133,7 @@ func (h *FvDataHandler) Income(c echo.Context) error {
 	}
 
 	// Get income data from sqlite db
-	i, err := h.GetProviderSvc().IncomeByProviderName(c.Request().Context(), userId, provider.Finverse)
+	i, err := h.GetProviderSvc().IncomeByProviderName(c.Request().Context(), userId, dao.Finverse)
 	if err != nil {
 		return err
 	}

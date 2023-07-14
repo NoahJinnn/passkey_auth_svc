@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite"
@@ -15,6 +16,7 @@ import (
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/manualitem"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
 	"github.com/hellohq/hqservice/internal/http/errorhandler"
+	"github.com/hellohq/hqservice/ms/networth/app/dao"
 	"github.com/hellohq/hqservice/ms/networth/srv/http/dto"
 )
 
@@ -36,6 +38,7 @@ func (p *ProviderSvc) NewSqliteConnect(userId string) *ent.Client {
 	if p.userStorage[userId] == nil {
 		p.userStorage[userId] = sqlite.NewSqliteClient(dns)
 	}
+	fmt.Println("dns", dns)
 	return p.userStorage[userId]
 }
 
@@ -68,15 +71,15 @@ func (p *ProviderSvc) AllConnection(ctx context.Context, userId uuid.UUID) ([]*e
 }
 
 func (p *ProviderSvc) CreateManualItem(ctx context.Context, userId uuid.UUID, mi *dto.ManualItemBody) error {
-	valid := ValidateProvider(mi.ProviderName)
+	valid := dao.ValidateProvider(mi.ProviderName)
 	if !valid {
 		return errorhandler.NewHTTPError(http.StatusBadRequest, "invalid provider name")
 	}
 
 	storage := p.getSqliteConnect(userId.String())
 	_, err := storage.ManualItem.Create().
-		SetProviderName(mi.ProviderName).
-		SetCategory(mi.Category).
+		SetProviderName(mi.ProviderName.String()).
+		SetCategory(mi.Category.String()).
 		SetItemTableID(mi.ItemTableID).
 		SetType(mi.Type).
 		SetDescription(mi.Description).
@@ -88,20 +91,20 @@ func (p *ProviderSvc) CreateManualItem(ctx context.Context, userId uuid.UUID, mi
 	return nil
 }
 
-func (p *ProviderSvc) UpdateManualItem(ctx context.Context, userId uuid.UUID, ma *dto.ManualItemBody) error {
-	valid := ValidateProvider(ma.ProviderName)
+func (p *ProviderSvc) UpdateManualItem(ctx context.Context, userId uuid.UUID, mi *dto.ManualItemBody) error {
+	valid := dao.ValidateProvider(mi.ProviderName)
 	if !valid {
 		return errorhandler.NewHTTPError(http.StatusBadRequest, "invalid provider name")
 	}
 
 	storage := p.getSqliteConnect(userId.String())
 	_, err := storage.ManualItem.Update().
-		SetProviderName(ma.ProviderName).
-		SetCategory(ma.Category).
-		SetItemTableID(ma.ItemTableID).
-		SetType(ma.Type).
-		SetDescription(ma.Description).
-		SetValue(ma.Value).
+		SetProviderName(mi.ProviderName.String()).
+		SetCategory(mi.Category.String()).
+		SetItemTableID(mi.ItemTableID).
+		SetType(mi.Type).
+		SetDescription(mi.Description).
+		SetValue(mi.Value).
 		Save(ctx)
 	if err != nil {
 		return err
@@ -118,18 +121,18 @@ func (p *ProviderSvc) DeleteManualItem(ctx context.Context, userId uuid.UUID, it
 	return nil
 }
 
-func (p *ProviderSvc) ConnectionByProviderName(ctx context.Context, userId uuid.UUID, providerName string) (*ent.Connection, error) {
+func (p *ProviderSvc) ConnectionByProviderName(ctx context.Context, userId uuid.UUID, providerName dao.Provider) (*ent.Connection, error) {
 	storage := p.getSqliteConnect(userId.String())
-	conn, err := storage.Connection.Query().Where(connection.ProviderName(providerName)).First(ctx)
+	conn, err := storage.Connection.Query().Where(connection.ProviderName(providerName.String())).First(ctx)
 	if err != nil && !ent.IsNotFound(err) {
 		return nil, err
 	}
 	return conn, nil
 }
 
-func (p *ProviderSvc) AccountByProviderName(ctx context.Context, userId uuid.UUID, providerName string) (*ent.Account, error) {
+func (p *ProviderSvc) AccountByProviderName(ctx context.Context, userId uuid.UUID, providerName dao.Provider) (*ent.Account, error) {
 	storage := p.getSqliteConnect(userId.String())
-	a, err := storage.Account.Query().Where(account.ProviderName(providerName)).First(ctx)
+	a, err := storage.Account.Query().Where(account.ProviderName(providerName.String())).First(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -137,9 +140,9 @@ func (p *ProviderSvc) AccountByProviderName(ctx context.Context, userId uuid.UUI
 	return a, nil
 }
 
-func (p *ProviderSvc) TransactionByProviderName(ctx context.Context, userId uuid.UUID, providerName string) (*ent.Transaction, error) {
+func (p *ProviderSvc) TransactionByProviderName(ctx context.Context, userId uuid.UUID, providerName dao.Provider) (*ent.Transaction, error) {
 	storage := p.getSqliteConnect(userId.String())
-	a, err := storage.Transaction.Query().Where(transaction.ProviderName(providerName)).First(ctx)
+	a, err := storage.Transaction.Query().Where(transaction.ProviderName(providerName.String())).First(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -147,9 +150,9 @@ func (p *ProviderSvc) TransactionByProviderName(ctx context.Context, userId uuid
 	return a, nil
 }
 
-func (p *ProviderSvc) IncomeByProviderName(ctx context.Context, userId uuid.UUID, providerName string) (*ent.Income, error) {
+func (p *ProviderSvc) IncomeByProviderName(ctx context.Context, userId uuid.UUID, providerName dao.Provider) (*ent.Income, error) {
 	storage := p.getSqliteConnect(userId.String())
-	i, err := storage.Income.Query().Where(income.ProviderName(providerName)).First(ctx)
+	i, err := storage.Income.Query().Where(income.ProviderName(providerName.String())).First(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -157,12 +160,12 @@ func (p *ProviderSvc) IncomeByProviderName(ctx context.Context, userId uuid.UUID
 	return i, nil
 }
 
-func (p *ProviderSvc) SaveConnection(ctx context.Context, userId uuid.UUID, providerName string, data interface{}) error {
+func (p *ProviderSvc) SaveConnection(ctx context.Context, userId uuid.UUID, providerName dao.Provider, data interface{}) error {
 	storage := p.getSqliteConnect(userId.String())
 
 	json := toJSON(data)
 	_, err := storage.Connection.Create().
-		SetProviderName(providerName).
+		SetProviderName(providerName.String()).
 		SetData(json).
 		Save(ctx)
 	if err != nil {
@@ -172,12 +175,12 @@ func (p *ProviderSvc) SaveConnection(ctx context.Context, userId uuid.UUID, prov
 	return nil
 }
 
-func (p *ProviderSvc) SaveAccount(ctx context.Context, userId uuid.UUID, providerName string, data interface{}) error {
+func (p *ProviderSvc) SaveAccount(ctx context.Context, userId uuid.UUID, providerName dao.Provider, data interface{}) error {
 	storage := p.getSqliteConnect(userId.String())
 
 	json := toJSON(data)
 	_, err := storage.Account.Create().
-		SetProviderName(providerName).
+		SetProviderName(providerName.String()).
 		SetData(json).
 		Save(ctx)
 	if err != nil {
@@ -187,12 +190,12 @@ func (p *ProviderSvc) SaveAccount(ctx context.Context, userId uuid.UUID, provide
 	return nil
 }
 
-func (p *ProviderSvc) SaveTransaction(ctx context.Context, userId uuid.UUID, providerName string, data interface{}) error {
+func (p *ProviderSvc) SaveTransaction(ctx context.Context, userId uuid.UUID, providerName dao.Provider, data interface{}) error {
 	storage := p.getSqliteConnect(userId.String())
 
 	json := toJSON(data)
 	_, err := storage.Transaction.Create().
-		SetProviderName(providerName).
+		SetProviderName(providerName.String()).
 		SetData(json).
 		Save(ctx)
 	if err != nil {
@@ -202,12 +205,12 @@ func (p *ProviderSvc) SaveTransaction(ctx context.Context, userId uuid.UUID, pro
 	return nil
 }
 
-func (p *ProviderSvc) SaveIncome(ctx context.Context, userId uuid.UUID, providerName string, data interface{}) error {
+func (p *ProviderSvc) SaveIncome(ctx context.Context, userId uuid.UUID, providerName dao.Provider, data interface{}) error {
 	storage := p.getSqliteConnect(userId.String())
 
 	json := toJSON(data)
 	_, err := storage.Income.Create().
-		SetProviderName(providerName).
+		SetProviderName(providerName.String()).
 		SetData(json).
 		Save(ctx)
 	if err != nil {
@@ -217,19 +220,19 @@ func (p *ProviderSvc) SaveIncome(ctx context.Context, userId uuid.UUID, provider
 	return nil
 }
 
-func (p *ProviderSvc) CheckAccountExist(ctx context.Context, userId uuid.UUID, providerName string) (bool, error) {
+func (p *ProviderSvc) CheckAccountExist(ctx context.Context, userId uuid.UUID, providerName dao.Provider) (bool, error) {
 	storage := p.getSqliteConnect(userId.String())
-	exist, err := storage.Account.Query().Where(account.ProviderName(providerName)).Exist(ctx)
+	exist, err := storage.Account.Query().Where(account.ProviderName(providerName.String())).Exist(ctx)
 	if err != nil && !ent.IsNotFound(err) {
 		return false, err
 	}
 	return exist, nil
 }
 
-func (p *ProviderSvc) CheckTransactionExist(ctx context.Context, userId uuid.UUID, providerName string) (bool, error) {
+func (p *ProviderSvc) CheckTransactionExist(ctx context.Context, userId uuid.UUID, providerName dao.Provider) (bool, error) {
 	storage := p.getSqliteConnect(userId.String())
 
-	exist, err := storage.Transaction.Query().Where(transaction.ProviderName(providerName)).Exist(ctx)
+	exist, err := storage.Transaction.Query().Where(transaction.ProviderName(providerName.String())).Exist(ctx)
 	if err != nil && !ent.IsNotFound(err) {
 		return false, err
 	}
@@ -237,10 +240,10 @@ func (p *ProviderSvc) CheckTransactionExist(ctx context.Context, userId uuid.UUI
 	return exist, nil
 }
 
-func (p *ProviderSvc) CheckIncomeExist(ctx context.Context, userId uuid.UUID, providerName string) (bool, error) {
+func (p *ProviderSvc) CheckIncomeExist(ctx context.Context, userId uuid.UUID, providerName dao.Provider) (bool, error) {
 	storage := p.getSqliteConnect(userId.String())
 
-	exist, err := storage.Income.Query().Where(income.ProviderName(providerName)).Exist(ctx)
+	exist, err := storage.Income.Query().Where(income.ProviderName(providerName.String())).Exist(ctx)
 	if err != nil && !ent.IsNotFound(err) {
 		return false, err
 	}
@@ -249,7 +252,7 @@ func (p *ProviderSvc) CheckIncomeExist(ctx context.Context, userId uuid.UUID, pr
 }
 
 func sqliteDns(userId string) string {
-	if userId == "test_id" {
+	if strings.Contains(userId, "test") {
 		return "file:" + userId + "file:ent?mode=memory&_fk=1"
 
 	}

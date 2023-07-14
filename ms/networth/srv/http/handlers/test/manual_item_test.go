@@ -20,7 +20,7 @@ func TestManualItemSuite(t *testing.T) {
 	suite.Run(t, new(manualItemSuite))
 }
 
-func (s *manualItemSuite) TestItemTableHandler_Create() {
+func (s *manualItemSuite) TestManualItemHandler_Create() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
