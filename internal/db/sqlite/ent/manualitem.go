@@ -10,20 +10,22 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/manualasset"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/manualitem"
 )
 
-// ManualAsset is the model entity for the ManualAsset schema.
-type ManualAsset struct {
+// ManualItem is the model entity for the ManualItem schema.
+type ManualItem struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
 	// ProviderName holds the value of the "provider_name" field.
 	ProviderName string `json:"provider_name,omitempty"`
-	// AssetTableID holds the value of the "asset_table_id" field.
-	AssetTableID string `json:"asset_table_id,omitempty"`
-	// AssetType holds the value of the "asset_type" field.
-	AssetType string `json:"asset_type,omitempty"`
+	// ItemTableID holds the value of the "item_table_id" field.
+	ItemTableID string `json:"item_table_id,omitempty"`
+	// Type holds the value of the "type" field.
+	Type string `json:"type,omitempty"`
+	// Category holds the value of the "category" field.
+	Category string `json:"category,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
 	// Value holds the value of the "value" field.
@@ -36,17 +38,17 @@ type ManualAsset struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*ManualAsset) scanValues(columns []string) ([]any, error) {
+func (*ManualItem) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case manualasset.FieldValue:
+		case manualitem.FieldValue:
 			values[i] = new(sql.NullFloat64)
-		case manualasset.FieldProviderName, manualasset.FieldAssetTableID, manualasset.FieldAssetType, manualasset.FieldDescription:
+		case manualitem.FieldProviderName, manualitem.FieldItemTableID, manualitem.FieldType, manualitem.FieldCategory, manualitem.FieldDescription:
 			values[i] = new(sql.NullString)
-		case manualasset.FieldCreatedAt, manualasset.FieldUpdatedAt:
+		case manualitem.FieldCreatedAt, manualitem.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case manualasset.FieldID:
+		case manualitem.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -56,120 +58,129 @@ func (*ManualAsset) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the ManualAsset fields.
-func (ma *ManualAsset) assignValues(columns []string, values []any) error {
+// to the ManualItem fields.
+func (mi *ManualItem) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case manualasset.FieldID:
+		case manualitem.FieldID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				ma.ID = *value
+				mi.ID = *value
 			}
-		case manualasset.FieldProviderName:
+		case manualitem.FieldProviderName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field provider_name", values[i])
 			} else if value.Valid {
-				ma.ProviderName = value.String
+				mi.ProviderName = value.String
 			}
-		case manualasset.FieldAssetTableID:
+		case manualitem.FieldItemTableID:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field asset_table_id", values[i])
+				return fmt.Errorf("unexpected type %T for field item_table_id", values[i])
 			} else if value.Valid {
-				ma.AssetTableID = value.String
+				mi.ItemTableID = value.String
 			}
-		case manualasset.FieldAssetType:
+		case manualitem.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field asset_type", values[i])
+				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				ma.AssetType = value.String
+				mi.Type = value.String
 			}
-		case manualasset.FieldDescription:
+		case manualitem.FieldCategory:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field category", values[i])
+			} else if value.Valid {
+				mi.Category = value.String
+			}
+		case manualitem.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
-				ma.Description = value.String
+				mi.Description = value.String
 			}
-		case manualasset.FieldValue:
+		case manualitem.FieldValue:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field value", values[i])
 			} else if value.Valid {
-				ma.Value = value.Float64
+				mi.Value = value.Float64
 			}
-		case manualasset.FieldCreatedAt:
+		case manualitem.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				ma.CreatedAt = value.Time
+				mi.CreatedAt = value.Time
 			}
-		case manualasset.FieldUpdatedAt:
+		case manualitem.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				ma.UpdatedAt = value.Time
+				mi.UpdatedAt = value.Time
 			}
 		default:
-			ma.selectValues.Set(columns[i], values[i])
+			mi.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
-// GetValue returns the ent.Value that was dynamically selected and assigned to the ManualAsset.
+// GetValue returns the ent.Value that was dynamically selected and assigned to the ManualItem.
 // This includes values selected through modifiers, order, etc.
-func (ma *ManualAsset) GetValue(name string) (ent.Value, error) {
-	return ma.selectValues.Get(name)
+func (mi *ManualItem) GetValue(name string) (ent.Value, error) {
+	return mi.selectValues.Get(name)
 }
 
-// Update returns a builder for updating this ManualAsset.
-// Note that you need to call ManualAsset.Unwrap() before calling this method if this ManualAsset
+// Update returns a builder for updating this ManualItem.
+// Note that you need to call ManualItem.Unwrap() before calling this method if this ManualItem
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (ma *ManualAsset) Update() *ManualAssetUpdateOne {
-	return NewManualAssetClient(ma.config).UpdateOne(ma)
+func (mi *ManualItem) Update() *ManualItemUpdateOne {
+	return NewManualItemClient(mi.config).UpdateOne(mi)
 }
 
-// Unwrap unwraps the ManualAsset entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the ManualItem entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (ma *ManualAsset) Unwrap() *ManualAsset {
-	_tx, ok := ma.config.driver.(*txDriver)
+func (mi *ManualItem) Unwrap() *ManualItem {
+	_tx, ok := mi.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: ManualAsset is not a transactional entity")
+		panic("ent: ManualItem is not a transactional entity")
 	}
-	ma.config.driver = _tx.drv
-	return ma
+	mi.config.driver = _tx.drv
+	return mi
 }
 
 // String implements the fmt.Stringer.
-func (ma *ManualAsset) String() string {
+func (mi *ManualItem) String() string {
 	var builder strings.Builder
-	builder.WriteString("ManualAsset(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", ma.ID))
+	builder.WriteString("ManualItem(")
+	builder.WriteString(fmt.Sprintf("id=%v, ", mi.ID))
 	builder.WriteString("provider_name=")
-	builder.WriteString(ma.ProviderName)
+	builder.WriteString(mi.ProviderName)
 	builder.WriteString(", ")
-	builder.WriteString("asset_table_id=")
-	builder.WriteString(ma.AssetTableID)
+	builder.WriteString("item_table_id=")
+	builder.WriteString(mi.ItemTableID)
 	builder.WriteString(", ")
-	builder.WriteString("asset_type=")
-	builder.WriteString(ma.AssetType)
+	builder.WriteString("type=")
+	builder.WriteString(mi.Type)
+	builder.WriteString(", ")
+	builder.WriteString("category=")
+	builder.WriteString(mi.Category)
 	builder.WriteString(", ")
 	builder.WriteString("description=")
-	builder.WriteString(ma.Description)
+	builder.WriteString(mi.Description)
 	builder.WriteString(", ")
 	builder.WriteString("value=")
-	builder.WriteString(fmt.Sprintf("%v", ma.Value))
+	builder.WriteString(fmt.Sprintf("%v", mi.Value))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
-	builder.WriteString(ma.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(mi.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(ma.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(mi.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// ManualAssets is a parsable slice of ManualAsset.
-type ManualAssets []*ManualAsset
+// ManualItems is a parsable slice of ManualItem.
+type ManualItems []*ManualItem

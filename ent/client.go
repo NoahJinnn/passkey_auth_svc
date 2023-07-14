@@ -15,9 +15,9 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/hellohq/hqservice/ent/assettable"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
+	"github.com/hellohq/hqservice/ent/itemtable"
 	"github.com/hellohq/hqservice/ent/jwk"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/primaryemail"
@@ -33,12 +33,12 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// AssetTable is the client for interacting with the AssetTable builders.
-	AssetTable *AssetTableClient
 	// Email is the client for interacting with the Email builders.
 	Email *EmailClient
 	// FvSession is the client for interacting with the FvSession builders.
 	FvSession *FvSessionClient
+	// ItemTable is the client for interacting with the ItemTable builders.
+	ItemTable *ItemTableClient
 	// Jwk is the client for interacting with the Jwk builders.
 	Jwk *JwkClient
 	// Passcode is the client for interacting with the Passcode builders.
@@ -68,9 +68,9 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.AssetTable = NewAssetTableClient(c.config)
 	c.Email = NewEmailClient(c.config)
 	c.FvSession = NewFvSessionClient(c.config)
+	c.ItemTable = NewItemTableClient(c.config)
 	c.Jwk = NewJwkClient(c.config)
 	c.Passcode = NewPasscodeClient(c.config)
 	c.PrimaryEmail = NewPrimaryEmailClient(c.config)
@@ -161,9 +161,9 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:                                  ctx,
 		config:                               cfg,
-		AssetTable:                           NewAssetTableClient(cfg),
 		Email:                                NewEmailClient(cfg),
 		FvSession:                            NewFvSessionClient(cfg),
+		ItemTable:                            NewItemTableClient(cfg),
 		Jwk:                                  NewJwkClient(cfg),
 		Passcode:                             NewPasscodeClient(cfg),
 		PrimaryEmail:                         NewPrimaryEmailClient(cfg),
@@ -191,9 +191,9 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:                                  ctx,
 		config:                               cfg,
-		AssetTable:                           NewAssetTableClient(cfg),
 		Email:                                NewEmailClient(cfg),
 		FvSession:                            NewFvSessionClient(cfg),
+		ItemTable:                            NewItemTableClient(cfg),
 		Jwk:                                  NewJwkClient(cfg),
 		Passcode:                             NewPasscodeClient(cfg),
 		PrimaryEmail:                         NewPrimaryEmailClient(cfg),
@@ -208,7 +208,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		AssetTable.
+//		Email.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -231,7 +231,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.AssetTable, c.Email, c.FvSession, c.Jwk, c.Passcode, c.PrimaryEmail, c.User,
+		c.Email, c.FvSession, c.ItemTable, c.Jwk, c.Passcode, c.PrimaryEmail, c.User,
 		c.WebauthnCredential, c.WebauthnCredentialTransport, c.WebauthnSessionData,
 		c.WebauthnSessionDataAllowedCredential,
 	} {
@@ -243,7 +243,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.AssetTable, c.Email, c.FvSession, c.Jwk, c.Passcode, c.PrimaryEmail, c.User,
+		c.Email, c.FvSession, c.ItemTable, c.Jwk, c.Passcode, c.PrimaryEmail, c.User,
 		c.WebauthnCredential, c.WebauthnCredentialTransport, c.WebauthnSessionData,
 		c.WebauthnSessionDataAllowedCredential,
 	} {
@@ -254,12 +254,12 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
-	case *AssetTableMutation:
-		return c.AssetTable.mutate(ctx, m)
 	case *EmailMutation:
 		return c.Email.mutate(ctx, m)
 	case *FvSessionMutation:
 		return c.FvSession.mutate(ctx, m)
+	case *ItemTableMutation:
+		return c.ItemTable.mutate(ctx, m)
 	case *JwkMutation:
 		return c.Jwk.mutate(ctx, m)
 	case *PasscodeMutation:
@@ -278,140 +278,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.WebauthnSessionDataAllowedCredential.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
-	}
-}
-
-// AssetTableClient is a client for the AssetTable schema.
-type AssetTableClient struct {
-	config
-}
-
-// NewAssetTableClient returns a client for the AssetTable from the given config.
-func NewAssetTableClient(c config) *AssetTableClient {
-	return &AssetTableClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `assettable.Hooks(f(g(h())))`.
-func (c *AssetTableClient) Use(hooks ...Hook) {
-	c.hooks.AssetTable = append(c.hooks.AssetTable, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `assettable.Intercept(f(g(h())))`.
-func (c *AssetTableClient) Intercept(interceptors ...Interceptor) {
-	c.inters.AssetTable = append(c.inters.AssetTable, interceptors...)
-}
-
-// Create returns a builder for creating a AssetTable entity.
-func (c *AssetTableClient) Create() *AssetTableCreate {
-	mutation := newAssetTableMutation(c.config, OpCreate)
-	return &AssetTableCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of AssetTable entities.
-func (c *AssetTableClient) CreateBulk(builders ...*AssetTableCreate) *AssetTableCreateBulk {
-	return &AssetTableCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for AssetTable.
-func (c *AssetTableClient) Update() *AssetTableUpdate {
-	mutation := newAssetTableMutation(c.config, OpUpdate)
-	return &AssetTableUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *AssetTableClient) UpdateOne(at *AssetTable) *AssetTableUpdateOne {
-	mutation := newAssetTableMutation(c.config, OpUpdateOne, withAssetTable(at))
-	return &AssetTableUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *AssetTableClient) UpdateOneID(id uuid.UUID) *AssetTableUpdateOne {
-	mutation := newAssetTableMutation(c.config, OpUpdateOne, withAssetTableID(id))
-	return &AssetTableUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for AssetTable.
-func (c *AssetTableClient) Delete() *AssetTableDelete {
-	mutation := newAssetTableMutation(c.config, OpDelete)
-	return &AssetTableDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *AssetTableClient) DeleteOne(at *AssetTable) *AssetTableDeleteOne {
-	return c.DeleteOneID(at.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *AssetTableClient) DeleteOneID(id uuid.UUID) *AssetTableDeleteOne {
-	builder := c.Delete().Where(assettable.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &AssetTableDeleteOne{builder}
-}
-
-// Query returns a query builder for AssetTable.
-func (c *AssetTableClient) Query() *AssetTableQuery {
-	return &AssetTableQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeAssetTable},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a AssetTable entity by its id.
-func (c *AssetTableClient) Get(ctx context.Context, id uuid.UUID) (*AssetTable, error) {
-	return c.Query().Where(assettable.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *AssetTableClient) GetX(ctx context.Context, id uuid.UUID) *AssetTable {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryUser queries the user edge of a AssetTable.
-func (c *AssetTableClient) QueryUser(at *AssetTable) *UserQuery {
-	query := (&UserClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := at.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(assettable.Table, assettable.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, assettable.UserTable, assettable.UserColumn),
-		)
-		fromV = sqlgraph.Neighbors(at.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *AssetTableClient) Hooks() []Hook {
-	return c.hooks.AssetTable
-}
-
-// Interceptors returns the client interceptors.
-func (c *AssetTableClient) Interceptors() []Interceptor {
-	return c.inters.AssetTable
-}
-
-func (c *AssetTableClient) mutate(ctx context.Context, m *AssetTableMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&AssetTableCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&AssetTableUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&AssetTableUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&AssetTableDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown AssetTable mutation op: %q", m.Op())
 	}
 }
 
@@ -712,6 +578,140 @@ func (c *FvSessionClient) mutate(ctx context.Context, m *FvSessionMutation) (Val
 		return (&FvSessionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown FvSession mutation op: %q", m.Op())
+	}
+}
+
+// ItemTableClient is a client for the ItemTable schema.
+type ItemTableClient struct {
+	config
+}
+
+// NewItemTableClient returns a client for the ItemTable from the given config.
+func NewItemTableClient(c config) *ItemTableClient {
+	return &ItemTableClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `itemtable.Hooks(f(g(h())))`.
+func (c *ItemTableClient) Use(hooks ...Hook) {
+	c.hooks.ItemTable = append(c.hooks.ItemTable, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `itemtable.Intercept(f(g(h())))`.
+func (c *ItemTableClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ItemTable = append(c.inters.ItemTable, interceptors...)
+}
+
+// Create returns a builder for creating a ItemTable entity.
+func (c *ItemTableClient) Create() *ItemTableCreate {
+	mutation := newItemTableMutation(c.config, OpCreate)
+	return &ItemTableCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ItemTable entities.
+func (c *ItemTableClient) CreateBulk(builders ...*ItemTableCreate) *ItemTableCreateBulk {
+	return &ItemTableCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ItemTable.
+func (c *ItemTableClient) Update() *ItemTableUpdate {
+	mutation := newItemTableMutation(c.config, OpUpdate)
+	return &ItemTableUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ItemTableClient) UpdateOne(it *ItemTable) *ItemTableUpdateOne {
+	mutation := newItemTableMutation(c.config, OpUpdateOne, withItemTable(it))
+	return &ItemTableUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ItemTableClient) UpdateOneID(id uuid.UUID) *ItemTableUpdateOne {
+	mutation := newItemTableMutation(c.config, OpUpdateOne, withItemTableID(id))
+	return &ItemTableUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ItemTable.
+func (c *ItemTableClient) Delete() *ItemTableDelete {
+	mutation := newItemTableMutation(c.config, OpDelete)
+	return &ItemTableDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ItemTableClient) DeleteOne(it *ItemTable) *ItemTableDeleteOne {
+	return c.DeleteOneID(it.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ItemTableClient) DeleteOneID(id uuid.UUID) *ItemTableDeleteOne {
+	builder := c.Delete().Where(itemtable.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ItemTableDeleteOne{builder}
+}
+
+// Query returns a query builder for ItemTable.
+func (c *ItemTableClient) Query() *ItemTableQuery {
+	return &ItemTableQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeItemTable},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ItemTable entity by its id.
+func (c *ItemTableClient) Get(ctx context.Context, id uuid.UUID) (*ItemTable, error) {
+	return c.Query().Where(itemtable.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ItemTableClient) GetX(ctx context.Context, id uuid.UUID) *ItemTable {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a ItemTable.
+func (c *ItemTableClient) QueryUser(it *ItemTable) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := it.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(itemtable.Table, itemtable.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, itemtable.UserTable, itemtable.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(it.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ItemTableClient) Hooks() []Hook {
+	return c.hooks.ItemTable
+}
+
+// Interceptors returns the client interceptors.
+func (c *ItemTableClient) Interceptors() []Interceptor {
+	return c.inters.ItemTable
+}
+
+func (c *ItemTableClient) mutate(ctx context.Context, m *ItemTableMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ItemTableCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ItemTableUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ItemTableUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ItemTableDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ItemTable mutation op: %q", m.Op())
 	}
 }
 
@@ -1274,15 +1274,15 @@ func (c *UserClient) QueryWebauthnCredentials(u *User) *WebauthnCredentialQuery 
 	return query
 }
 
-// QueryAssetTables queries the asset_tables edge of a User.
-func (c *UserClient) QueryAssetTables(u *User) *AssetTableQuery {
-	query := (&AssetTableClient{config: c.config}).Query()
+// QueryItemTables queries the item_tables edge of a User.
+func (c *UserClient) QueryItemTables(u *User) *ItemTableQuery {
+	query := (&ItemTableClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(assettable.Table, assettable.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.AssetTablesTable, user.AssetTablesColumn),
+			sqlgraph.To(itemtable.Table, itemtable.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ItemTablesTable, user.ItemTablesColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -1902,12 +1902,12 @@ func (c *WebauthnSessionDataAllowedCredentialClient) mutate(ctx context.Context,
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		AssetTable, Email, FvSession, Jwk, Passcode, PrimaryEmail, User,
+		Email, FvSession, ItemTable, Jwk, Passcode, PrimaryEmail, User,
 		WebauthnCredential, WebauthnCredentialTransport, WebauthnSessionData,
 		WebauthnSessionDataAllowedCredential []ent.Hook
 	}
 	inters struct {
-		AssetTable, Email, FvSession, Jwk, Passcode, PrimaryEmail, User,
+		Email, FvSession, ItemTable, Jwk, Passcode, PrimaryEmail, User,
 		WebauthnCredential, WebauthnCredentialTransport, WebauthnSessionData,
 		WebauthnSessionDataAllowedCredential []ent.Interceptor
 	}

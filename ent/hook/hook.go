@@ -9,18 +9,6 @@ import (
 	"github.com/hellohq/hqservice/ent"
 )
 
-// The AssetTableFunc type is an adapter to allow the use of ordinary
-// function as AssetTable mutator.
-type AssetTableFunc func(context.Context, *ent.AssetTableMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f AssetTableFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.AssetTableMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AssetTableMutation", m)
-}
-
 // The EmailFunc type is an adapter to allow the use of ordinary
 // function as Email mutator.
 type EmailFunc func(context.Context, *ent.EmailMutation) (ent.Value, error)
@@ -43,6 +31,18 @@ func (f FvSessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FvSessionMutation", m)
+}
+
+// The ItemTableFunc type is an adapter to allow the use of ordinary
+// function as ItemTable mutator.
+type ItemTableFunc func(context.Context, *ent.ItemTableMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ItemTableFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ItemTableMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ItemTableMutation", m)
 }
 
 // The JwkFunc type is an adapter to allow the use of ordinary

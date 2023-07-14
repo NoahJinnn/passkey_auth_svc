@@ -82,19 +82,19 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 	fv.GET("/transactions", fvData.PagingTransaction)
 	fv.GET("/balance_history/:accountId", fvData.GetBalanceHistoryByAccountId)
 
-	assetTable := nw.Group("/asset_tables")
-	atHandler := handlers.NewAssetTableHandler(srv)
-	assetTable.GET("", atHandler.ListByUser)
-	assetTable.POST("/asset_table", atHandler.Create)
-	assetTable.PUT("/asset_table", atHandler.Update)
-	assetTable.DELETE("/:assetTableId", atHandler.Delete)
+	itemTable := nw.Group("/item_tables")
+	itHandler := handlers.NewItemTableHandler(srv)
+	itemTable.GET("", itHandler.ListByUser)
+	itemTable.POST("/item_table", itHandler.Create)
+	itemTable.PUT("/item_table", itHandler.Update)
+	itemTable.DELETE("/:itemTableId", itHandler.Delete)
 
-	manualAsset := nw.Group("/manual_assets")
-	maHandler := handlers.NewAssetTableHandler(srv)
-	manualAsset.GET("", maHandler.ListByUser)
-	manualAsset.POST("/manual_asset", maHandler.Create)
-	manualAsset.PUT("/manual_asset", maHandler.Update)
-	manualAsset.DELETE("/:manualAssetId", maHandler.Delete)
+	manualItem := nw.Group("/manual_items")
+	miHandler := handlers.NewManualItemHandler(srv)
+	manualItem.GET("", miHandler.ListByUser)
+	manualItem.POST("/manual_item", miHandler.Create)
+	manualItem.PUT("/manual_item", miHandler.Update)
+	manualItem.DELETE("/:manualAssetId", miHandler.Delete)
 
 	return e, nil
 }

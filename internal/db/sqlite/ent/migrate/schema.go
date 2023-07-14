@@ -91,22 +91,23 @@ var (
 			},
 		},
 	}
-	// ManualAssetsColumns holds the columns for the "manual_assets" table.
-	ManualAssetsColumns = []*schema.Column{
+	// ManualItemsColumns holds the columns for the "manual_items" table.
+	ManualItemsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "provider_name", Type: field.TypeString},
-		{Name: "asset_table_id", Type: field.TypeString},
-		{Name: "asset_type", Type: field.TypeString},
+		{Name: "item_table_id", Type: field.TypeString},
+		{Name: "type", Type: field.TypeString},
+		{Name: "category", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "value", Type: field.TypeFloat64},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
-	// ManualAssetsTable holds the schema information for the "manual_assets" table.
-	ManualAssetsTable = &schema.Table{
-		Name:       "manual_assets",
-		Columns:    ManualAssetsColumns,
-		PrimaryKey: []*schema.Column{ManualAssetsColumns[0]},
+	// ManualItemsTable holds the schema information for the "manual_items" table.
+	ManualItemsTable = &schema.Table{
+		Name:       "manual_items",
+		Columns:    ManualItemsColumns,
+		PrimaryKey: []*schema.Column{ManualItemsColumns[0]},
 	}
 	// TransactionsColumns holds the columns for the "transactions" table.
 	TransactionsColumns = []*schema.Column{
@@ -128,7 +129,7 @@ var (
 		ConnectionsTable,
 		IncomesTable,
 		InstitutionsTable,
-		ManualAssetsTable,
+		ManualItemsTable,
 		TransactionsTable,
 	}
 )

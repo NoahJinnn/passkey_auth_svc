@@ -16,7 +16,7 @@ import (
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/income"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/manualasset"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/manualitem"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/predicate"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
 )
@@ -34,7 +34,7 @@ const (
 	TypeConnection  = "Connection"
 	TypeIncome      = "Income"
 	TypeInstitution = "Institution"
-	TypeManualAsset = "ManualAsset"
+	TypeManualItem  = "ManualItem"
 	TypeTransaction = "Transaction"
 )
 
@@ -2249,37 +2249,38 @@ func (m *InstitutionMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Institution edge %s", name)
 }
 
-// ManualAssetMutation represents an operation that mutates the ManualAsset nodes in the graph.
-type ManualAssetMutation struct {
+// ManualItemMutation represents an operation that mutates the ManualItem nodes in the graph.
+type ManualItemMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *uuid.UUID
-	provider_name  *string
-	asset_table_id *string
-	asset_type     *string
-	description    *string
-	value          *float64
-	addvalue       *float64
-	created_at     *time.Time
-	updated_at     *time.Time
-	clearedFields  map[string]struct{}
-	done           bool
-	oldValue       func(context.Context) (*ManualAsset, error)
-	predicates     []predicate.ManualAsset
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	provider_name *string
+	item_table_id *string
+	_type         *string
+	category      *string
+	description   *string
+	value         *float64
+	addvalue      *float64
+	created_at    *time.Time
+	updated_at    *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*ManualItem, error)
+	predicates    []predicate.ManualItem
 }
 
-var _ ent.Mutation = (*ManualAssetMutation)(nil)
+var _ ent.Mutation = (*ManualItemMutation)(nil)
 
-// manualassetOption allows management of the mutation configuration using functional options.
-type manualassetOption func(*ManualAssetMutation)
+// manualitemOption allows management of the mutation configuration using functional options.
+type manualitemOption func(*ManualItemMutation)
 
-// newManualAssetMutation creates new mutation for the ManualAsset entity.
-func newManualAssetMutation(c config, op Op, opts ...manualassetOption) *ManualAssetMutation {
-	m := &ManualAssetMutation{
+// newManualItemMutation creates new mutation for the ManualItem entity.
+func newManualItemMutation(c config, op Op, opts ...manualitemOption) *ManualItemMutation {
+	m := &ManualItemMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeManualAsset,
+		typ:           TypeManualItem,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -2288,20 +2289,20 @@ func newManualAssetMutation(c config, op Op, opts ...manualassetOption) *ManualA
 	return m
 }
 
-// withManualAssetID sets the ID field of the mutation.
-func withManualAssetID(id uuid.UUID) manualassetOption {
-	return func(m *ManualAssetMutation) {
+// withManualItemID sets the ID field of the mutation.
+func withManualItemID(id uuid.UUID) manualitemOption {
+	return func(m *ManualItemMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *ManualAsset
+			value *ManualItem
 		)
-		m.oldValue = func(ctx context.Context) (*ManualAsset, error) {
+		m.oldValue = func(ctx context.Context) (*ManualItem, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().ManualAsset.Get(ctx, id)
+					value, err = m.Client().ManualItem.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -2310,10 +2311,10 @@ func withManualAssetID(id uuid.UUID) manualassetOption {
 	}
 }
 
-// withManualAsset sets the old ManualAsset of the mutation.
-func withManualAsset(node *ManualAsset) manualassetOption {
-	return func(m *ManualAssetMutation) {
-		m.oldValue = func(context.Context) (*ManualAsset, error) {
+// withManualItem sets the old ManualItem of the mutation.
+func withManualItem(node *ManualItem) manualitemOption {
+	return func(m *ManualItemMutation) {
+		m.oldValue = func(context.Context) (*ManualItem, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -2322,7 +2323,7 @@ func withManualAsset(node *ManualAsset) manualassetOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m ManualAssetMutation) Client() *Client {
+func (m ManualItemMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -2330,7 +2331,7 @@ func (m ManualAssetMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m ManualAssetMutation) Tx() (*Tx, error) {
+func (m ManualItemMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -2340,14 +2341,14 @@ func (m ManualAssetMutation) Tx() (*Tx, error) {
 }
 
 // SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of ManualAsset entities.
-func (m *ManualAssetMutation) SetID(id uuid.UUID) {
+// operation is only accepted on creation of ManualItem entities.
+func (m *ManualItemMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *ManualAssetMutation) ID() (id uuid.UUID, exists bool) {
+func (m *ManualItemMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -2358,7 +2359,7 @@ func (m *ManualAssetMutation) ID() (id uuid.UUID, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *ManualAssetMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+func (m *ManualItemMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -2367,19 +2368,19 @@ func (m *ManualAssetMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().ManualAsset.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().ManualItem.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
 // SetProviderName sets the "provider_name" field.
-func (m *ManualAssetMutation) SetProviderName(s string) {
+func (m *ManualItemMutation) SetProviderName(s string) {
 	m.provider_name = &s
 }
 
 // ProviderName returns the value of the "provider_name" field in the mutation.
-func (m *ManualAssetMutation) ProviderName() (r string, exists bool) {
+func (m *ManualItemMutation) ProviderName() (r string, exists bool) {
 	v := m.provider_name
 	if v == nil {
 		return
@@ -2387,10 +2388,10 @@ func (m *ManualAssetMutation) ProviderName() (r string, exists bool) {
 	return *v, true
 }
 
-// OldProviderName returns the old "provider_name" field's value of the ManualAsset entity.
-// If the ManualAsset object wasn't provided to the builder, the object is fetched from the database.
+// OldProviderName returns the old "provider_name" field's value of the ManualItem entity.
+// If the ManualItem object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ManualAssetMutation) OldProviderName(ctx context.Context) (v string, err error) {
+func (m *ManualItemMutation) OldProviderName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldProviderName is only allowed on UpdateOne operations")
 	}
@@ -2405,89 +2406,125 @@ func (m *ManualAssetMutation) OldProviderName(ctx context.Context) (v string, er
 }
 
 // ResetProviderName resets all changes to the "provider_name" field.
-func (m *ManualAssetMutation) ResetProviderName() {
+func (m *ManualItemMutation) ResetProviderName() {
 	m.provider_name = nil
 }
 
-// SetAssetTableID sets the "asset_table_id" field.
-func (m *ManualAssetMutation) SetAssetTableID(s string) {
-	m.asset_table_id = &s
+// SetItemTableID sets the "item_table_id" field.
+func (m *ManualItemMutation) SetItemTableID(s string) {
+	m.item_table_id = &s
 }
 
-// AssetTableID returns the value of the "asset_table_id" field in the mutation.
-func (m *ManualAssetMutation) AssetTableID() (r string, exists bool) {
-	v := m.asset_table_id
+// ItemTableID returns the value of the "item_table_id" field in the mutation.
+func (m *ManualItemMutation) ItemTableID() (r string, exists bool) {
+	v := m.item_table_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldAssetTableID returns the old "asset_table_id" field's value of the ManualAsset entity.
-// If the ManualAsset object wasn't provided to the builder, the object is fetched from the database.
+// OldItemTableID returns the old "item_table_id" field's value of the ManualItem entity.
+// If the ManualItem object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ManualAssetMutation) OldAssetTableID(ctx context.Context) (v string, err error) {
+func (m *ManualItemMutation) OldItemTableID(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAssetTableID is only allowed on UpdateOne operations")
+		return v, errors.New("OldItemTableID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAssetTableID requires an ID field in the mutation")
+		return v, errors.New("OldItemTableID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAssetTableID: %w", err)
+		return v, fmt.Errorf("querying old value for OldItemTableID: %w", err)
 	}
-	return oldValue.AssetTableID, nil
+	return oldValue.ItemTableID, nil
 }
 
-// ResetAssetTableID resets all changes to the "asset_table_id" field.
-func (m *ManualAssetMutation) ResetAssetTableID() {
-	m.asset_table_id = nil
+// ResetItemTableID resets all changes to the "item_table_id" field.
+func (m *ManualItemMutation) ResetItemTableID() {
+	m.item_table_id = nil
 }
 
-// SetAssetType sets the "asset_type" field.
-func (m *ManualAssetMutation) SetAssetType(s string) {
-	m.asset_type = &s
+// SetType sets the "type" field.
+func (m *ManualItemMutation) SetType(s string) {
+	m._type = &s
 }
 
-// AssetType returns the value of the "asset_type" field in the mutation.
-func (m *ManualAssetMutation) AssetType() (r string, exists bool) {
-	v := m.asset_type
+// GetType returns the value of the "type" field in the mutation.
+func (m *ManualItemMutation) GetType() (r string, exists bool) {
+	v := m._type
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldAssetType returns the old "asset_type" field's value of the ManualAsset entity.
-// If the ManualAsset object wasn't provided to the builder, the object is fetched from the database.
+// OldType returns the old "type" field's value of the ManualItem entity.
+// If the ManualItem object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ManualAssetMutation) OldAssetType(ctx context.Context) (v string, err error) {
+func (m *ManualItemMutation) OldType(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAssetType is only allowed on UpdateOne operations")
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAssetType requires an ID field in the mutation")
+		return v, errors.New("OldType requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAssetType: %w", err)
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
 	}
-	return oldValue.AssetType, nil
+	return oldValue.Type, nil
 }
 
-// ResetAssetType resets all changes to the "asset_type" field.
-func (m *ManualAssetMutation) ResetAssetType() {
-	m.asset_type = nil
+// ResetType resets all changes to the "type" field.
+func (m *ManualItemMutation) ResetType() {
+	m._type = nil
+}
+
+// SetCategory sets the "category" field.
+func (m *ManualItemMutation) SetCategory(s string) {
+	m.category = &s
+}
+
+// Category returns the value of the "category" field in the mutation.
+func (m *ManualItemMutation) Category() (r string, exists bool) {
+	v := m.category
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCategory returns the old "category" field's value of the ManualItem entity.
+// If the ManualItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ManualItemMutation) OldCategory(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCategory is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCategory requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCategory: %w", err)
+	}
+	return oldValue.Category, nil
+}
+
+// ResetCategory resets all changes to the "category" field.
+func (m *ManualItemMutation) ResetCategory() {
+	m.category = nil
 }
 
 // SetDescription sets the "description" field.
-func (m *ManualAssetMutation) SetDescription(s string) {
+func (m *ManualItemMutation) SetDescription(s string) {
 	m.description = &s
 }
 
 // Description returns the value of the "description" field in the mutation.
-func (m *ManualAssetMutation) Description() (r string, exists bool) {
+func (m *ManualItemMutation) Description() (r string, exists bool) {
 	v := m.description
 	if v == nil {
 		return
@@ -2495,10 +2532,10 @@ func (m *ManualAssetMutation) Description() (r string, exists bool) {
 	return *v, true
 }
 
-// OldDescription returns the old "description" field's value of the ManualAsset entity.
-// If the ManualAsset object wasn't provided to the builder, the object is fetched from the database.
+// OldDescription returns the old "description" field's value of the ManualItem entity.
+// If the ManualItem object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ManualAssetMutation) OldDescription(ctx context.Context) (v string, err error) {
+func (m *ManualItemMutation) OldDescription(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
 	}
@@ -2513,31 +2550,31 @@ func (m *ManualAssetMutation) OldDescription(ctx context.Context) (v string, err
 }
 
 // ClearDescription clears the value of the "description" field.
-func (m *ManualAssetMutation) ClearDescription() {
+func (m *ManualItemMutation) ClearDescription() {
 	m.description = nil
-	m.clearedFields[manualasset.FieldDescription] = struct{}{}
+	m.clearedFields[manualitem.FieldDescription] = struct{}{}
 }
 
 // DescriptionCleared returns if the "description" field was cleared in this mutation.
-func (m *ManualAssetMutation) DescriptionCleared() bool {
-	_, ok := m.clearedFields[manualasset.FieldDescription]
+func (m *ManualItemMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[manualitem.FieldDescription]
 	return ok
 }
 
 // ResetDescription resets all changes to the "description" field.
-func (m *ManualAssetMutation) ResetDescription() {
+func (m *ManualItemMutation) ResetDescription() {
 	m.description = nil
-	delete(m.clearedFields, manualasset.FieldDescription)
+	delete(m.clearedFields, manualitem.FieldDescription)
 }
 
 // SetValue sets the "value" field.
-func (m *ManualAssetMutation) SetValue(f float64) {
+func (m *ManualItemMutation) SetValue(f float64) {
 	m.value = &f
 	m.addvalue = nil
 }
 
 // Value returns the value of the "value" field in the mutation.
-func (m *ManualAssetMutation) Value() (r float64, exists bool) {
+func (m *ManualItemMutation) Value() (r float64, exists bool) {
 	v := m.value
 	if v == nil {
 		return
@@ -2545,10 +2582,10 @@ func (m *ManualAssetMutation) Value() (r float64, exists bool) {
 	return *v, true
 }
 
-// OldValue returns the old "value" field's value of the ManualAsset entity.
-// If the ManualAsset object wasn't provided to the builder, the object is fetched from the database.
+// OldValue returns the old "value" field's value of the ManualItem entity.
+// If the ManualItem object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ManualAssetMutation) OldValue(ctx context.Context) (v float64, err error) {
+func (m *ManualItemMutation) OldValue(ctx context.Context) (v float64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldValue is only allowed on UpdateOne operations")
 	}
@@ -2563,7 +2600,7 @@ func (m *ManualAssetMutation) OldValue(ctx context.Context) (v float64, err erro
 }
 
 // AddValue adds f to the "value" field.
-func (m *ManualAssetMutation) AddValue(f float64) {
+func (m *ManualItemMutation) AddValue(f float64) {
 	if m.addvalue != nil {
 		*m.addvalue += f
 	} else {
@@ -2572,7 +2609,7 @@ func (m *ManualAssetMutation) AddValue(f float64) {
 }
 
 // AddedValue returns the value that was added to the "value" field in this mutation.
-func (m *ManualAssetMutation) AddedValue() (r float64, exists bool) {
+func (m *ManualItemMutation) AddedValue() (r float64, exists bool) {
 	v := m.addvalue
 	if v == nil {
 		return
@@ -2581,18 +2618,18 @@ func (m *ManualAssetMutation) AddedValue() (r float64, exists bool) {
 }
 
 // ResetValue resets all changes to the "value" field.
-func (m *ManualAssetMutation) ResetValue() {
+func (m *ManualItemMutation) ResetValue() {
 	m.value = nil
 	m.addvalue = nil
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (m *ManualAssetMutation) SetCreatedAt(t time.Time) {
+func (m *ManualItemMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
 }
 
 // CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *ManualAssetMutation) CreatedAt() (r time.Time, exists bool) {
+func (m *ManualItemMutation) CreatedAt() (r time.Time, exists bool) {
 	v := m.created_at
 	if v == nil {
 		return
@@ -2600,10 +2637,10 @@ func (m *ManualAssetMutation) CreatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old "created_at" field's value of the ManualAsset entity.
-// If the ManualAsset object wasn't provided to the builder, the object is fetched from the database.
+// OldCreatedAt returns the old "created_at" field's value of the ManualItem entity.
+// If the ManualItem object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ManualAssetMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *ManualItemMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
 	}
@@ -2618,17 +2655,17 @@ func (m *ManualAssetMutation) OldCreatedAt(ctx context.Context) (v time.Time, er
 }
 
 // ResetCreatedAt resets all changes to the "created_at" field.
-func (m *ManualAssetMutation) ResetCreatedAt() {
+func (m *ManualItemMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (m *ManualAssetMutation) SetUpdatedAt(t time.Time) {
+func (m *ManualItemMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
 }
 
 // UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *ManualAssetMutation) UpdatedAt() (r time.Time, exists bool) {
+func (m *ManualItemMutation) UpdatedAt() (r time.Time, exists bool) {
 	v := m.updated_at
 	if v == nil {
 		return
@@ -2636,10 +2673,10 @@ func (m *ManualAssetMutation) UpdatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldUpdatedAt returns the old "updated_at" field's value of the ManualAsset entity.
-// If the ManualAsset object wasn't provided to the builder, the object is fetched from the database.
+// OldUpdatedAt returns the old "updated_at" field's value of the ManualItem entity.
+// If the ManualItem object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ManualAssetMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *ManualItemMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
 	}
@@ -2654,19 +2691,19 @@ func (m *ManualAssetMutation) OldUpdatedAt(ctx context.Context) (v time.Time, er
 }
 
 // ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *ManualAssetMutation) ResetUpdatedAt() {
+func (m *ManualItemMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// Where appends a list predicates to the ManualAssetMutation builder.
-func (m *ManualAssetMutation) Where(ps ...predicate.ManualAsset) {
+// Where appends a list predicates to the ManualItemMutation builder.
+func (m *ManualItemMutation) Where(ps ...predicate.ManualItem) {
 	m.predicates = append(m.predicates, ps...)
 }
 
-// WhereP appends storage-level predicates to the ManualAssetMutation builder. Using this method,
+// WhereP appends storage-level predicates to the ManualItemMutation builder. Using this method,
 // users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *ManualAssetMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.ManualAsset, len(ps))
+func (m *ManualItemMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ManualItem, len(ps))
 	for i := range ps {
 		p[i] = ps[i]
 	}
@@ -2674,45 +2711,48 @@ func (m *ManualAssetMutation) WhereP(ps ...func(*sql.Selector)) {
 }
 
 // Op returns the operation name.
-func (m *ManualAssetMutation) Op() Op {
+func (m *ManualItemMutation) Op() Op {
 	return m.op
 }
 
 // SetOp allows setting the mutation operation.
-func (m *ManualAssetMutation) SetOp(op Op) {
+func (m *ManualItemMutation) SetOp(op Op) {
 	m.op = op
 }
 
-// Type returns the node type of this mutation (ManualAsset).
-func (m *ManualAssetMutation) Type() string {
+// Type returns the node type of this mutation (ManualItem).
+func (m *ManualItemMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *ManualAssetMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+func (m *ManualItemMutation) Fields() []string {
+	fields := make([]string, 0, 8)
 	if m.provider_name != nil {
-		fields = append(fields, manualasset.FieldProviderName)
+		fields = append(fields, manualitem.FieldProviderName)
 	}
-	if m.asset_table_id != nil {
-		fields = append(fields, manualasset.FieldAssetTableID)
+	if m.item_table_id != nil {
+		fields = append(fields, manualitem.FieldItemTableID)
 	}
-	if m.asset_type != nil {
-		fields = append(fields, manualasset.FieldAssetType)
+	if m._type != nil {
+		fields = append(fields, manualitem.FieldType)
+	}
+	if m.category != nil {
+		fields = append(fields, manualitem.FieldCategory)
 	}
 	if m.description != nil {
-		fields = append(fields, manualasset.FieldDescription)
+		fields = append(fields, manualitem.FieldDescription)
 	}
 	if m.value != nil {
-		fields = append(fields, manualasset.FieldValue)
+		fields = append(fields, manualitem.FieldValue)
 	}
 	if m.created_at != nil {
-		fields = append(fields, manualasset.FieldCreatedAt)
+		fields = append(fields, manualitem.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
-		fields = append(fields, manualasset.FieldUpdatedAt)
+		fields = append(fields, manualitem.FieldUpdatedAt)
 	}
 	return fields
 }
@@ -2720,21 +2760,23 @@ func (m *ManualAssetMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *ManualAssetMutation) Field(name string) (ent.Value, bool) {
+func (m *ManualItemMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case manualasset.FieldProviderName:
+	case manualitem.FieldProviderName:
 		return m.ProviderName()
-	case manualasset.FieldAssetTableID:
-		return m.AssetTableID()
-	case manualasset.FieldAssetType:
-		return m.AssetType()
-	case manualasset.FieldDescription:
+	case manualitem.FieldItemTableID:
+		return m.ItemTableID()
+	case manualitem.FieldType:
+		return m.GetType()
+	case manualitem.FieldCategory:
+		return m.Category()
+	case manualitem.FieldDescription:
 		return m.Description()
-	case manualasset.FieldValue:
+	case manualitem.FieldValue:
 		return m.Value()
-	case manualasset.FieldCreatedAt:
+	case manualitem.FieldCreatedAt:
 		return m.CreatedAt()
-	case manualasset.FieldUpdatedAt:
+	case manualitem.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
 	return nil, false
@@ -2743,74 +2785,83 @@ func (m *ManualAssetMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *ManualAssetMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *ManualItemMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case manualasset.FieldProviderName:
+	case manualitem.FieldProviderName:
 		return m.OldProviderName(ctx)
-	case manualasset.FieldAssetTableID:
-		return m.OldAssetTableID(ctx)
-	case manualasset.FieldAssetType:
-		return m.OldAssetType(ctx)
-	case manualasset.FieldDescription:
+	case manualitem.FieldItemTableID:
+		return m.OldItemTableID(ctx)
+	case manualitem.FieldType:
+		return m.OldType(ctx)
+	case manualitem.FieldCategory:
+		return m.OldCategory(ctx)
+	case manualitem.FieldDescription:
 		return m.OldDescription(ctx)
-	case manualasset.FieldValue:
+	case manualitem.FieldValue:
 		return m.OldValue(ctx)
-	case manualasset.FieldCreatedAt:
+	case manualitem.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
-	case manualasset.FieldUpdatedAt:
+	case manualitem.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
-	return nil, fmt.Errorf("unknown ManualAsset field %s", name)
+	return nil, fmt.Errorf("unknown ManualItem field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *ManualAssetMutation) SetField(name string, value ent.Value) error {
+func (m *ManualItemMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case manualasset.FieldProviderName:
+	case manualitem.FieldProviderName:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetProviderName(v)
 		return nil
-	case manualasset.FieldAssetTableID:
+	case manualitem.FieldItemTableID:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetAssetTableID(v)
+		m.SetItemTableID(v)
 		return nil
-	case manualasset.FieldAssetType:
+	case manualitem.FieldType:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetAssetType(v)
+		m.SetType(v)
 		return nil
-	case manualasset.FieldDescription:
+	case manualitem.FieldCategory:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCategory(v)
+		return nil
+	case manualitem.FieldDescription:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDescription(v)
 		return nil
-	case manualasset.FieldValue:
+	case manualitem.FieldValue:
 		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetValue(v)
 		return nil
-	case manualasset.FieldCreatedAt:
+	case manualitem.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
 		return nil
-	case manualasset.FieldUpdatedAt:
+	case manualitem.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -2818,15 +2869,15 @@ func (m *ManualAssetMutation) SetField(name string, value ent.Value) error {
 		m.SetUpdatedAt(v)
 		return nil
 	}
-	return fmt.Errorf("unknown ManualAsset field %s", name)
+	return fmt.Errorf("unknown ManualItem field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *ManualAssetMutation) AddedFields() []string {
+func (m *ManualItemMutation) AddedFields() []string {
 	var fields []string
 	if m.addvalue != nil {
-		fields = append(fields, manualasset.FieldValue)
+		fields = append(fields, manualitem.FieldValue)
 	}
 	return fields
 }
@@ -2834,9 +2885,9 @@ func (m *ManualAssetMutation) AddedFields() []string {
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *ManualAssetMutation) AddedField(name string) (ent.Value, bool) {
+func (m *ManualItemMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case manualasset.FieldValue:
+	case manualitem.FieldValue:
 		return m.AddedValue()
 	}
 	return nil, false
@@ -2845,9 +2896,9 @@ func (m *ManualAssetMutation) AddedField(name string) (ent.Value, bool) {
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *ManualAssetMutation) AddField(name string, value ent.Value) error {
+func (m *ManualItemMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case manualasset.FieldValue:
+	case manualitem.FieldValue:
 		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -2855,112 +2906,115 @@ func (m *ManualAssetMutation) AddField(name string, value ent.Value) error {
 		m.AddValue(v)
 		return nil
 	}
-	return fmt.Errorf("unknown ManualAsset numeric field %s", name)
+	return fmt.Errorf("unknown ManualItem numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *ManualAssetMutation) ClearedFields() []string {
+func (m *ManualItemMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(manualasset.FieldDescription) {
-		fields = append(fields, manualasset.FieldDescription)
+	if m.FieldCleared(manualitem.FieldDescription) {
+		fields = append(fields, manualitem.FieldDescription)
 	}
 	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *ManualAssetMutation) FieldCleared(name string) bool {
+func (m *ManualItemMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *ManualAssetMutation) ClearField(name string) error {
+func (m *ManualItemMutation) ClearField(name string) error {
 	switch name {
-	case manualasset.FieldDescription:
+	case manualitem.FieldDescription:
 		m.ClearDescription()
 		return nil
 	}
-	return fmt.Errorf("unknown ManualAsset nullable field %s", name)
+	return fmt.Errorf("unknown ManualItem nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *ManualAssetMutation) ResetField(name string) error {
+func (m *ManualItemMutation) ResetField(name string) error {
 	switch name {
-	case manualasset.FieldProviderName:
+	case manualitem.FieldProviderName:
 		m.ResetProviderName()
 		return nil
-	case manualasset.FieldAssetTableID:
-		m.ResetAssetTableID()
+	case manualitem.FieldItemTableID:
+		m.ResetItemTableID()
 		return nil
-	case manualasset.FieldAssetType:
-		m.ResetAssetType()
+	case manualitem.FieldType:
+		m.ResetType()
 		return nil
-	case manualasset.FieldDescription:
+	case manualitem.FieldCategory:
+		m.ResetCategory()
+		return nil
+	case manualitem.FieldDescription:
 		m.ResetDescription()
 		return nil
-	case manualasset.FieldValue:
+	case manualitem.FieldValue:
 		m.ResetValue()
 		return nil
-	case manualasset.FieldCreatedAt:
+	case manualitem.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
-	case manualasset.FieldUpdatedAt:
+	case manualitem.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
 	}
-	return fmt.Errorf("unknown ManualAsset field %s", name)
+	return fmt.Errorf("unknown ManualItem field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *ManualAssetMutation) AddedEdges() []string {
+func (m *ManualItemMutation) AddedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *ManualAssetMutation) AddedIDs(name string) []ent.Value {
+func (m *ManualItemMutation) AddedIDs(name string) []ent.Value {
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *ManualAssetMutation) RemovedEdges() []string {
+func (m *ManualItemMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *ManualAssetMutation) RemovedIDs(name string) []ent.Value {
+func (m *ManualItemMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *ManualAssetMutation) ClearedEdges() []string {
+func (m *ManualItemMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 0)
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *ManualAssetMutation) EdgeCleared(name string) bool {
+func (m *ManualItemMutation) EdgeCleared(name string) bool {
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *ManualAssetMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown ManualAsset unique edge %s", name)
+func (m *ManualItemMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown ManualItem unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *ManualAssetMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown ManualAsset edge %s", name)
+func (m *ManualItemMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown ManualItem edge %s", name)
 }
 
 // TransactionMutation represents an operation that mutates the Transaction nodes in the graph.

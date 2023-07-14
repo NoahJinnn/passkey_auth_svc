@@ -25,8 +25,8 @@ const (
 	EdgePasscodes = "passcodes"
 	// EdgeWebauthnCredentials holds the string denoting the webauthn_credentials edge name in mutations.
 	EdgeWebauthnCredentials = "webauthn_credentials"
-	// EdgeAssetTables holds the string denoting the asset_tables edge name in mutations.
-	EdgeAssetTables = "asset_tables"
+	// EdgeItemTables holds the string denoting the item_tables edge name in mutations.
+	EdgeItemTables = "item_tables"
 	// EdgePrimaryEmail holds the string denoting the primary_email edge name in mutations.
 	EdgePrimaryEmail = "primary_email"
 	// EdgeFvSession holds the string denoting the fv_session edge name in mutations.
@@ -54,13 +54,13 @@ const (
 	WebauthnCredentialsInverseTable = "webauthn_credentials"
 	// WebauthnCredentialsColumn is the table column denoting the webauthn_credentials relation/edge.
 	WebauthnCredentialsColumn = "user_id"
-	// AssetTablesTable is the table that holds the asset_tables relation/edge.
-	AssetTablesTable = "asset_tables"
-	// AssetTablesInverseTable is the table name for the AssetTable entity.
-	// It exists in this package in order to avoid circular dependency with the "assettable" package.
-	AssetTablesInverseTable = "asset_tables"
-	// AssetTablesColumn is the table column denoting the asset_tables relation/edge.
-	AssetTablesColumn = "user_id"
+	// ItemTablesTable is the table that holds the item_tables relation/edge.
+	ItemTablesTable = "item_tables"
+	// ItemTablesInverseTable is the table name for the ItemTable entity.
+	// It exists in this package in order to avoid circular dependency with the "itemtable" package.
+	ItemTablesInverseTable = "item_tables"
+	// ItemTablesColumn is the table column denoting the item_tables relation/edge.
+	ItemTablesColumn = "user_id"
 	// PrimaryEmailTable is the table that holds the primary_email relation/edge.
 	PrimaryEmailTable = "primary_emails"
 	// PrimaryEmailInverseTable is the table name for the PrimaryEmail entity.
@@ -165,17 +165,17 @@ func ByWebauthnCredentials(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOpti
 	}
 }
 
-// ByAssetTablesCount orders the results by asset_tables count.
-func ByAssetTablesCount(opts ...sql.OrderTermOption) OrderOption {
+// ByItemTablesCount orders the results by item_tables count.
+func ByItemTablesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newAssetTablesStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newItemTablesStep(), opts...)
 	}
 }
 
-// ByAssetTables orders the results by asset_tables terms.
-func ByAssetTables(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByItemTables orders the results by item_tables terms.
+func ByItemTables(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newAssetTablesStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newItemTablesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -213,11 +213,11 @@ func newWebauthnCredentialsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, WebauthnCredentialsTable, WebauthnCredentialsColumn),
 	)
 }
-func newAssetTablesStep() *sqlgraph.Step {
+func newItemTablesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(AssetTablesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, AssetTablesTable, AssetTablesColumn),
+		sqlgraph.To(ItemTablesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ItemTablesTable, ItemTablesColumn),
 	)
 }
 func newPrimaryEmailStep() *sqlgraph.Step {

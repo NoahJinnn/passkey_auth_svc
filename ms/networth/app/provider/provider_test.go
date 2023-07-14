@@ -1,19 +1,31 @@
 package provider
 
 import (
-	"context"
 	"testing"
 
-	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestListConnection(t *testing.T) {
+func TestSqliteConnection(t *testing.T) {
 	p := NewProviderSvc()
-	uid := uuid.FromStringOrNil("test_id")
-	p.NewSqliteConnect(uid.String())
-	ctx := context.Background()
-	conns, err := p.AllConnection(ctx, uid)
-	assert.Nil(t, err)
-	assert.Equal(t, len(conns), 0)
+
+	tests := []struct {
+		name string
+		uids []string
+	}{
+		{
+			name: "3 conn success",
+			uids: []string{"test_id1", "test_id2", "test_id3"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, uid := range tt.uids {
+				p.NewSqliteConnect(uid)
+			}
+			assert.Equal(t, len(tt.uids), len(p.userStorage))
+		})
+	}
+
 }

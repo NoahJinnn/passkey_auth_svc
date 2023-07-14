@@ -51,6 +51,7 @@ func StartDB(name string, dialect string) (*TestDB, error) {
 		config.AutoRemove = true
 		config.RestartPolicy = docker.RestartPolicy{Name: "no"}
 	})
+	fmt.Println("Starting docker container", name)
 	if err != nil {
 		return nil, fmt.Errorf("could not start resource: %w", err)
 	}

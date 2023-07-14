@@ -30,6 +30,6 @@ func (r repoT) GetFvSessionRepo() dal.IFvSessionRepo {
 	panic("implement me")
 }
 
-func (r repoT) GetAssetTableRepo() dal.IAssetTableRepo {
+func (r repoT) GetItemTableRepo() dal.IItemTableRepo {
 	panic("implement me")
 }

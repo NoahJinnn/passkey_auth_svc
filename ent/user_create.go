@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/ent/assettable"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
+	"github.com/hellohq/hqservice/ent/itemtable"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/primaryemail"
 	"github.com/hellohq/hqservice/ent/user"
@@ -114,19 +114,19 @@ func (uc *UserCreate) AddWebauthnCredentials(w ...*WebauthnCredential) *UserCrea
 	return uc.AddWebauthnCredentialIDs(ids...)
 }
 
-// AddAssetTableIDs adds the "asset_tables" edge to the AssetTable entity by IDs.
-func (uc *UserCreate) AddAssetTableIDs(ids ...uuid.UUID) *UserCreate {
-	uc.mutation.AddAssetTableIDs(ids...)
+// AddItemTableIDs adds the "item_tables" edge to the ItemTable entity by IDs.
+func (uc *UserCreate) AddItemTableIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddItemTableIDs(ids...)
 	return uc
 }
 
-// AddAssetTables adds the "asset_tables" edges to the AssetTable entity.
-func (uc *UserCreate) AddAssetTables(a ...*AssetTable) *UserCreate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+// AddItemTables adds the "item_tables" edges to the ItemTable entity.
+func (uc *UserCreate) AddItemTables(i ...*ItemTable) *UserCreate {
+	ids := make([]uuid.UUID, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
 	}
-	return uc.AddAssetTableIDs(ids...)
+	return uc.AddItemTableIDs(ids...)
 }
 
 // SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID.
@@ -315,15 +315,15 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.AssetTablesIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.ItemTablesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.AssetTablesTable,
-			Columns: []string{user.AssetTablesColumn},
+			Table:   user.ItemTablesTable,
+			Columns: []string{user.ItemTablesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(assettable.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(itemtable.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

@@ -140,7 +140,7 @@ func (svc *FvAuthSvc) ExchangeAccessToken(ctx context.Context, exchangeCode stri
 			NewHTTPError(http.StatusInternalServerError).
 			SetInternal(fmt.Errorf("failed to get fv exchange token: %w", err))
 	}
-	err = svc.provider.SaveConnection(ctx, userId, provider.Finverse, result)
+	err = svc.provider.SaveConnection(ctx, userId, Finverse, result)
 	if err != nil {
 		return nil, errorhandler.
 			NewHTTPError(http.StatusInternalServerError).

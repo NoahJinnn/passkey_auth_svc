@@ -18,8 +18,8 @@ type Income func(*sql.Selector)
 // Institution is the predicate function for institution builders.
 type Institution func(*sql.Selector)
 
-// ManualAsset is the predicate function for manualasset builders.
-type ManualAsset func(*sql.Selector)
+// ManualItem is the predicate function for manualitem builders.
+type ManualItem func(*sql.Selector)
 
 // Transaction is the predicate function for transaction builders.
 type Transaction func(*sql.Selector)
