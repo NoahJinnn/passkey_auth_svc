@@ -21,18 +21,6 @@ func (f EmailFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EmailMutation", m)
 }
 
-// The FinItemTableFunc type is an adapter to allow the use of ordinary
-// function as FinItemTable mutator.
-type FinItemTableFunc func(context.Context, *ent.FinItemTableMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f FinItemTableFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.FinItemTableMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FinItemTableMutation", m)
-}
-
 // The FvSessionFunc type is an adapter to allow the use of ordinary
 // function as FvSession mutator.
 type FvSessionFunc func(context.Context, *ent.FvSessionMutation) (ent.Value, error)
@@ -43,6 +31,18 @@ func (f FvSessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FvSessionMutation", m)
+}
+
+// The ItemTableFunc type is an adapter to allow the use of ordinary
+// function as ItemTable mutator.
+type ItemTableFunc func(context.Context, *ent.ItemTableMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ItemTableFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ItemTableMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ItemTableMutation", m)
 }
 
 // The JwkFunc type is an adapter to allow the use of ordinary

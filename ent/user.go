@@ -38,8 +38,8 @@ type UserEdges struct {
 	Passcodes []*Passcode `json:"passcodes,omitempty"`
 	// WebauthnCredentials holds the value of the webauthn_credentials edge.
 	WebauthnCredentials []*WebauthnCredential `json:"webauthn_credentials,omitempty"`
-	// FinItemTables holds the value of the fin_item_tables edge.
-	FinItemTables []*FinItemTable `json:"fin_item_tables,omitempty"`
+	// ItemTables holds the value of the item_tables edge.
+	ItemTables []*ItemTable `json:"item_tables,omitempty"`
 	// PrimaryEmail holds the value of the primary_email edge.
 	PrimaryEmail *PrimaryEmail `json:"primary_email,omitempty"`
 	// FvSession holds the value of the fv_session edge.
@@ -76,13 +76,13 @@ func (e UserEdges) WebauthnCredentialsOrErr() ([]*WebauthnCredential, error) {
 	return nil, &NotLoadedError{edge: "webauthn_credentials"}
 }
 
-// FinItemTablesOrErr returns the FinItemTables value or an error if the edge
+// ItemTablesOrErr returns the ItemTables value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) FinItemTablesOrErr() ([]*FinItemTable, error) {
+func (e UserEdges) ItemTablesOrErr() ([]*ItemTable, error) {
 	if e.loadedTypes[3] {
-		return e.FinItemTables, nil
+		return e.ItemTables, nil
 	}
-	return nil, &NotLoadedError{edge: "fin_item_tables"}
+	return nil, &NotLoadedError{edge: "item_tables"}
 }
 
 // PrimaryEmailOrErr returns the PrimaryEmail value or an error if the edge
@@ -181,9 +181,9 @@ func (u *User) QueryWebauthnCredentials() *WebauthnCredentialQuery {
 	return NewUserClient(u.config).QueryWebauthnCredentials(u)
 }
 
-// QueryFinItemTables queries the "fin_item_tables" edge of the User entity.
-func (u *User) QueryFinItemTables() *FinItemTableQuery {
-	return NewUserClient(u.config).QueryFinItemTables(u)
+// QueryItemTables queries the "item_tables" edge of the User entity.
+func (u *User) QueryItemTables() *ItemTableQuery {
+	return NewUserClient(u.config).QueryItemTables(u)
 }
 
 // QueryPrimaryEmail queries the "primary_email" edge of the User entity.

@@ -14,10 +14,10 @@ type Tx struct {
 	config
 	// Email is the client for interacting with the Email builders.
 	Email *EmailClient
-	// FinItemTable is the client for interacting with the FinItemTable builders.
-	FinItemTable *FinItemTableClient
 	// FvSession is the client for interacting with the FvSession builders.
 	FvSession *FvSessionClient
+	// ItemTable is the client for interacting with the ItemTable builders.
+	ItemTable *ItemTableClient
 	// Jwk is the client for interacting with the Jwk builders.
 	Jwk *JwkClient
 	// Passcode is the client for interacting with the Passcode builders.
@@ -166,8 +166,8 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Email = NewEmailClient(tx.config)
-	tx.FinItemTable = NewFinItemTableClient(tx.config)
 	tx.FvSession = NewFvSessionClient(tx.config)
+	tx.ItemTable = NewItemTableClient(tx.config)
 	tx.Jwk = NewJwkClient(tx.config)
 	tx.Passcode = NewPasscodeClient(tx.config)
 	tx.PrimaryEmail = NewPrimaryEmailClient(tx.config)

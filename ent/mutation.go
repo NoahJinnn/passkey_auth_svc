@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
-	"github.com/hellohq/hqservice/ent/finitemtable"
 	"github.com/hellohq/hqservice/ent/fvsession"
+	"github.com/hellohq/hqservice/ent/itemtable"
 	"github.com/hellohq/hqservice/ent/jwk"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/predicate"
@@ -36,8 +36,8 @@ const (
 
 	// Node types.
 	TypeEmail                                = "Email"
-	TypeFinItemTable                         = "FinItemTable"
 	TypeFvSession                            = "FvSession"
+	TypeItemTable                            = "ItemTable"
 	TypeJwk                                  = "Jwk"
 	TypePasscode                             = "Passcode"
 	TypePrimaryEmail                         = "PrimaryEmail"
@@ -815,825 +815,6 @@ func (m *EmailMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Email edge %s", name)
 }
 
-// FinItemTableMutation represents an operation that mutates the FinItemTable nodes in the graph.
-type FinItemTableMutation struct {
-	config
-	op            Op
-	typ           string
-	id            *uuid.UUID
-	sheet         *int32
-	addsheet      *int32
-	section       *int32
-	addsection    *int32
-	category      *string
-	description   *string
-	created_at    *time.Time
-	updated_at    *time.Time
-	clearedFields map[string]struct{}
-	user          *uuid.UUID
-	cleareduser   bool
-	done          bool
-	oldValue      func(context.Context) (*FinItemTable, error)
-	predicates    []predicate.FinItemTable
-}
-
-var _ ent.Mutation = (*FinItemTableMutation)(nil)
-
-// finitemtableOption allows management of the mutation configuration using functional options.
-type finitemtableOption func(*FinItemTableMutation)
-
-// newFinItemTableMutation creates new mutation for the FinItemTable entity.
-func newFinItemTableMutation(c config, op Op, opts ...finitemtableOption) *FinItemTableMutation {
-	m := &FinItemTableMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeFinItemTable,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withFinItemTableID sets the ID field of the mutation.
-func withFinItemTableID(id uuid.UUID) finitemtableOption {
-	return func(m *FinItemTableMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *FinItemTable
-		)
-		m.oldValue = func(ctx context.Context) (*FinItemTable, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().FinItemTable.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withFinItemTable sets the old FinItemTable of the mutation.
-func withFinItemTable(node *FinItemTable) finitemtableOption {
-	return func(m *FinItemTableMutation) {
-		m.oldValue = func(context.Context) (*FinItemTable, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m FinItemTableMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m FinItemTableMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of FinItemTable entities.
-func (m *FinItemTableMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *FinItemTableMutation) ID() (id uuid.UUID, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *FinItemTableMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []uuid.UUID{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().FinItemTable.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetUserID sets the "user_id" field.
-func (m *FinItemTableMutation) SetUserID(u uuid.UUID) {
-	m.user = &u
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *FinItemTableMutation) UserID() (r uuid.UUID, exists bool) {
-	v := m.user
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the FinItemTable entity.
-// If the FinItemTable object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FinItemTableMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// ClearUserID clears the value of the "user_id" field.
-func (m *FinItemTableMutation) ClearUserID() {
-	m.user = nil
-	m.clearedFields[finitemtable.FieldUserID] = struct{}{}
-}
-
-// UserIDCleared returns if the "user_id" field was cleared in this mutation.
-func (m *FinItemTableMutation) UserIDCleared() bool {
-	_, ok := m.clearedFields[finitemtable.FieldUserID]
-	return ok
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *FinItemTableMutation) ResetUserID() {
-	m.user = nil
-	delete(m.clearedFields, finitemtable.FieldUserID)
-}
-
-// SetSheet sets the "sheet" field.
-func (m *FinItemTableMutation) SetSheet(i int32) {
-	m.sheet = &i
-	m.addsheet = nil
-}
-
-// Sheet returns the value of the "sheet" field in the mutation.
-func (m *FinItemTableMutation) Sheet() (r int32, exists bool) {
-	v := m.sheet
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSheet returns the old "sheet" field's value of the FinItemTable entity.
-// If the FinItemTable object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FinItemTableMutation) OldSheet(ctx context.Context) (v int32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSheet is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSheet requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSheet: %w", err)
-	}
-	return oldValue.Sheet, nil
-}
-
-// AddSheet adds i to the "sheet" field.
-func (m *FinItemTableMutation) AddSheet(i int32) {
-	if m.addsheet != nil {
-		*m.addsheet += i
-	} else {
-		m.addsheet = &i
-	}
-}
-
-// AddedSheet returns the value that was added to the "sheet" field in this mutation.
-func (m *FinItemTableMutation) AddedSheet() (r int32, exists bool) {
-	v := m.addsheet
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetSheet resets all changes to the "sheet" field.
-func (m *FinItemTableMutation) ResetSheet() {
-	m.sheet = nil
-	m.addsheet = nil
-}
-
-// SetSection sets the "section" field.
-func (m *FinItemTableMutation) SetSection(i int32) {
-	m.section = &i
-	m.addsection = nil
-}
-
-// Section returns the value of the "section" field in the mutation.
-func (m *FinItemTableMutation) Section() (r int32, exists bool) {
-	v := m.section
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSection returns the old "section" field's value of the FinItemTable entity.
-// If the FinItemTable object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FinItemTableMutation) OldSection(ctx context.Context) (v int32, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSection is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSection requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSection: %w", err)
-	}
-	return oldValue.Section, nil
-}
-
-// AddSection adds i to the "section" field.
-func (m *FinItemTableMutation) AddSection(i int32) {
-	if m.addsection != nil {
-		*m.addsection += i
-	} else {
-		m.addsection = &i
-	}
-}
-
-// AddedSection returns the value that was added to the "section" field in this mutation.
-func (m *FinItemTableMutation) AddedSection() (r int32, exists bool) {
-	v := m.addsection
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetSection resets all changes to the "section" field.
-func (m *FinItemTableMutation) ResetSection() {
-	m.section = nil
-	m.addsection = nil
-}
-
-// SetCategory sets the "category" field.
-func (m *FinItemTableMutation) SetCategory(s string) {
-	m.category = &s
-}
-
-// Category returns the value of the "category" field in the mutation.
-func (m *FinItemTableMutation) Category() (r string, exists bool) {
-	v := m.category
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCategory returns the old "category" field's value of the FinItemTable entity.
-// If the FinItemTable object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FinItemTableMutation) OldCategory(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCategory is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCategory requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCategory: %w", err)
-	}
-	return oldValue.Category, nil
-}
-
-// ResetCategory resets all changes to the "category" field.
-func (m *FinItemTableMutation) ResetCategory() {
-	m.category = nil
-}
-
-// SetDescription sets the "description" field.
-func (m *FinItemTableMutation) SetDescription(s string) {
-	m.description = &s
-}
-
-// Description returns the value of the "description" field in the mutation.
-func (m *FinItemTableMutation) Description() (r string, exists bool) {
-	v := m.description
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDescription returns the old "description" field's value of the FinItemTable entity.
-// If the FinItemTable object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FinItemTableMutation) OldDescription(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDescription requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
-	}
-	return oldValue.Description, nil
-}
-
-// ClearDescription clears the value of the "description" field.
-func (m *FinItemTableMutation) ClearDescription() {
-	m.description = nil
-	m.clearedFields[finitemtable.FieldDescription] = struct{}{}
-}
-
-// DescriptionCleared returns if the "description" field was cleared in this mutation.
-func (m *FinItemTableMutation) DescriptionCleared() bool {
-	_, ok := m.clearedFields[finitemtable.FieldDescription]
-	return ok
-}
-
-// ResetDescription resets all changes to the "description" field.
-func (m *FinItemTableMutation) ResetDescription() {
-	m.description = nil
-	delete(m.clearedFields, finitemtable.FieldDescription)
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *FinItemTableMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *FinItemTableMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the FinItemTable entity.
-// If the FinItemTable object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FinItemTableMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *FinItemTableMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *FinItemTableMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *FinItemTableMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the FinItemTable entity.
-// If the FinItemTable object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FinItemTableMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *FinItemTableMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (m *FinItemTableMutation) ClearUser() {
-	m.cleareduser = true
-}
-
-// UserCleared reports if the "user" edge to the User entity was cleared.
-func (m *FinItemTableMutation) UserCleared() bool {
-	return m.UserIDCleared() || m.cleareduser
-}
-
-// UserIDs returns the "user" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UserID instead. It exists only for internal usage by the builders.
-func (m *FinItemTableMutation) UserIDs() (ids []uuid.UUID) {
-	if id := m.user; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetUser resets all changes to the "user" edge.
-func (m *FinItemTableMutation) ResetUser() {
-	m.user = nil
-	m.cleareduser = false
-}
-
-// Where appends a list predicates to the FinItemTableMutation builder.
-func (m *FinItemTableMutation) Where(ps ...predicate.FinItemTable) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the FinItemTableMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *FinItemTableMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.FinItemTable, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *FinItemTableMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *FinItemTableMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (FinItemTable).
-func (m *FinItemTableMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *FinItemTableMutation) Fields() []string {
-	fields := make([]string, 0, 7)
-	if m.user != nil {
-		fields = append(fields, finitemtable.FieldUserID)
-	}
-	if m.sheet != nil {
-		fields = append(fields, finitemtable.FieldSheet)
-	}
-	if m.section != nil {
-		fields = append(fields, finitemtable.FieldSection)
-	}
-	if m.category != nil {
-		fields = append(fields, finitemtable.FieldCategory)
-	}
-	if m.description != nil {
-		fields = append(fields, finitemtable.FieldDescription)
-	}
-	if m.created_at != nil {
-		fields = append(fields, finitemtable.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, finitemtable.FieldUpdatedAt)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *FinItemTableMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case finitemtable.FieldUserID:
-		return m.UserID()
-	case finitemtable.FieldSheet:
-		return m.Sheet()
-	case finitemtable.FieldSection:
-		return m.Section()
-	case finitemtable.FieldCategory:
-		return m.Category()
-	case finitemtable.FieldDescription:
-		return m.Description()
-	case finitemtable.FieldCreatedAt:
-		return m.CreatedAt()
-	case finitemtable.FieldUpdatedAt:
-		return m.UpdatedAt()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *FinItemTableMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case finitemtable.FieldUserID:
-		return m.OldUserID(ctx)
-	case finitemtable.FieldSheet:
-		return m.OldSheet(ctx)
-	case finitemtable.FieldSection:
-		return m.OldSection(ctx)
-	case finitemtable.FieldCategory:
-		return m.OldCategory(ctx)
-	case finitemtable.FieldDescription:
-		return m.OldDescription(ctx)
-	case finitemtable.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case finitemtable.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	}
-	return nil, fmt.Errorf("unknown FinItemTable field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *FinItemTableMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case finitemtable.FieldUserID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
-	case finitemtable.FieldSheet:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSheet(v)
-		return nil
-	case finitemtable.FieldSection:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSection(v)
-		return nil
-	case finitemtable.FieldCategory:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCategory(v)
-		return nil
-	case finitemtable.FieldDescription:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDescription(v)
-		return nil
-	case finitemtable.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case finitemtable.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	}
-	return fmt.Errorf("unknown FinItemTable field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *FinItemTableMutation) AddedFields() []string {
-	var fields []string
-	if m.addsheet != nil {
-		fields = append(fields, finitemtable.FieldSheet)
-	}
-	if m.addsection != nil {
-		fields = append(fields, finitemtable.FieldSection)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *FinItemTableMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case finitemtable.FieldSheet:
-		return m.AddedSheet()
-	case finitemtable.FieldSection:
-		return m.AddedSection()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *FinItemTableMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case finitemtable.FieldSheet:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddSheet(v)
-		return nil
-	case finitemtable.FieldSection:
-		v, ok := value.(int32)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddSection(v)
-		return nil
-	}
-	return fmt.Errorf("unknown FinItemTable numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *FinItemTableMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(finitemtable.FieldUserID) {
-		fields = append(fields, finitemtable.FieldUserID)
-	}
-	if m.FieldCleared(finitemtable.FieldDescription) {
-		fields = append(fields, finitemtable.FieldDescription)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *FinItemTableMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *FinItemTableMutation) ClearField(name string) error {
-	switch name {
-	case finitemtable.FieldUserID:
-		m.ClearUserID()
-		return nil
-	case finitemtable.FieldDescription:
-		m.ClearDescription()
-		return nil
-	}
-	return fmt.Errorf("unknown FinItemTable nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *FinItemTableMutation) ResetField(name string) error {
-	switch name {
-	case finitemtable.FieldUserID:
-		m.ResetUserID()
-		return nil
-	case finitemtable.FieldSheet:
-		m.ResetSheet()
-		return nil
-	case finitemtable.FieldSection:
-		m.ResetSection()
-		return nil
-	case finitemtable.FieldCategory:
-		m.ResetCategory()
-		return nil
-	case finitemtable.FieldDescription:
-		m.ResetDescription()
-		return nil
-	case finitemtable.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case finitemtable.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	}
-	return fmt.Errorf("unknown FinItemTable field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *FinItemTableMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.user != nil {
-		edges = append(edges, finitemtable.EdgeUser)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *FinItemTableMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case finitemtable.EdgeUser:
-		if id := m.user; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *FinItemTableMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *FinItemTableMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *FinItemTableMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.cleareduser {
-		edges = append(edges, finitemtable.EdgeUser)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *FinItemTableMutation) EdgeCleared(name string) bool {
-	switch name {
-	case finitemtable.EdgeUser:
-		return m.cleareduser
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *FinItemTableMutation) ClearEdge(name string) error {
-	switch name {
-	case finitemtable.EdgeUser:
-		m.ClearUser()
-		return nil
-	}
-	return fmt.Errorf("unknown FinItemTable unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *FinItemTableMutation) ResetEdge(name string) error {
-	switch name {
-	case finitemtable.EdgeUser:
-		m.ResetUser()
-		return nil
-	}
-	return fmt.Errorf("unknown FinItemTable edge %s", name)
-}
-
 // FvSessionMutation represents an operation that mutates the FvSession nodes in the graph.
 type FvSessionMutation struct {
 	config
@@ -2399,6 +1580,825 @@ func (m *FvSessionMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown FvSession edge %s", name)
+}
+
+// ItemTableMutation represents an operation that mutates the ItemTable nodes in the graph.
+type ItemTableMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	sheet         *int32
+	addsheet      *int32
+	section       *int32
+	addsection    *int32
+	category      *string
+	description   *string
+	created_at    *time.Time
+	updated_at    *time.Time
+	clearedFields map[string]struct{}
+	user          *uuid.UUID
+	cleareduser   bool
+	done          bool
+	oldValue      func(context.Context) (*ItemTable, error)
+	predicates    []predicate.ItemTable
+}
+
+var _ ent.Mutation = (*ItemTableMutation)(nil)
+
+// itemtableOption allows management of the mutation configuration using functional options.
+type itemtableOption func(*ItemTableMutation)
+
+// newItemTableMutation creates new mutation for the ItemTable entity.
+func newItemTableMutation(c config, op Op, opts ...itemtableOption) *ItemTableMutation {
+	m := &ItemTableMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeItemTable,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withItemTableID sets the ID field of the mutation.
+func withItemTableID(id uuid.UUID) itemtableOption {
+	return func(m *ItemTableMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *ItemTable
+		)
+		m.oldValue = func(ctx context.Context) (*ItemTable, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().ItemTable.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withItemTable sets the old ItemTable of the mutation.
+func withItemTable(node *ItemTable) itemtableOption {
+	return func(m *ItemTableMutation) {
+		m.oldValue = func(context.Context) (*ItemTable, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ItemTableMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ItemTableMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of ItemTable entities.
+func (m *ItemTableMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ItemTableMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ItemTableMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().ItemTable.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetUserID sets the "user_id" field.
+func (m *ItemTableMutation) SetUserID(u uuid.UUID) {
+	m.user = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *ItemTableMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the ItemTable entity.
+// If the ItemTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemTableMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ClearUserID clears the value of the "user_id" field.
+func (m *ItemTableMutation) ClearUserID() {
+	m.user = nil
+	m.clearedFields[itemtable.FieldUserID] = struct{}{}
+}
+
+// UserIDCleared returns if the "user_id" field was cleared in this mutation.
+func (m *ItemTableMutation) UserIDCleared() bool {
+	_, ok := m.clearedFields[itemtable.FieldUserID]
+	return ok
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *ItemTableMutation) ResetUserID() {
+	m.user = nil
+	delete(m.clearedFields, itemtable.FieldUserID)
+}
+
+// SetSheet sets the "sheet" field.
+func (m *ItemTableMutation) SetSheet(i int32) {
+	m.sheet = &i
+	m.addsheet = nil
+}
+
+// Sheet returns the value of the "sheet" field in the mutation.
+func (m *ItemTableMutation) Sheet() (r int32, exists bool) {
+	v := m.sheet
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSheet returns the old "sheet" field's value of the ItemTable entity.
+// If the ItemTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemTableMutation) OldSheet(ctx context.Context) (v int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSheet is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSheet requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSheet: %w", err)
+	}
+	return oldValue.Sheet, nil
+}
+
+// AddSheet adds i to the "sheet" field.
+func (m *ItemTableMutation) AddSheet(i int32) {
+	if m.addsheet != nil {
+		*m.addsheet += i
+	} else {
+		m.addsheet = &i
+	}
+}
+
+// AddedSheet returns the value that was added to the "sheet" field in this mutation.
+func (m *ItemTableMutation) AddedSheet() (r int32, exists bool) {
+	v := m.addsheet
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSheet resets all changes to the "sheet" field.
+func (m *ItemTableMutation) ResetSheet() {
+	m.sheet = nil
+	m.addsheet = nil
+}
+
+// SetSection sets the "section" field.
+func (m *ItemTableMutation) SetSection(i int32) {
+	m.section = &i
+	m.addsection = nil
+}
+
+// Section returns the value of the "section" field in the mutation.
+func (m *ItemTableMutation) Section() (r int32, exists bool) {
+	v := m.section
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSection returns the old "section" field's value of the ItemTable entity.
+// If the ItemTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemTableMutation) OldSection(ctx context.Context) (v int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSection is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSection requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSection: %w", err)
+	}
+	return oldValue.Section, nil
+}
+
+// AddSection adds i to the "section" field.
+func (m *ItemTableMutation) AddSection(i int32) {
+	if m.addsection != nil {
+		*m.addsection += i
+	} else {
+		m.addsection = &i
+	}
+}
+
+// AddedSection returns the value that was added to the "section" field in this mutation.
+func (m *ItemTableMutation) AddedSection() (r int32, exists bool) {
+	v := m.addsection
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSection resets all changes to the "section" field.
+func (m *ItemTableMutation) ResetSection() {
+	m.section = nil
+	m.addsection = nil
+}
+
+// SetCategory sets the "category" field.
+func (m *ItemTableMutation) SetCategory(s string) {
+	m.category = &s
+}
+
+// Category returns the value of the "category" field in the mutation.
+func (m *ItemTableMutation) Category() (r string, exists bool) {
+	v := m.category
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCategory returns the old "category" field's value of the ItemTable entity.
+// If the ItemTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemTableMutation) OldCategory(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCategory is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCategory requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCategory: %w", err)
+	}
+	return oldValue.Category, nil
+}
+
+// ResetCategory resets all changes to the "category" field.
+func (m *ItemTableMutation) ResetCategory() {
+	m.category = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *ItemTableMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *ItemTableMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the ItemTable entity.
+// If the ItemTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemTableMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ClearDescription clears the value of the "description" field.
+func (m *ItemTableMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[itemtable.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *ItemTableMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[itemtable.FieldDescription]
+	return ok
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *ItemTableMutation) ResetDescription() {
+	m.description = nil
+	delete(m.clearedFields, itemtable.FieldDescription)
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *ItemTableMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *ItemTableMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the ItemTable entity.
+// If the ItemTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemTableMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *ItemTableMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *ItemTableMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *ItemTableMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the ItemTable entity.
+// If the ItemTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemTableMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *ItemTableMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *ItemTableMutation) ClearUser() {
+	m.cleareduser = true
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *ItemTableMutation) UserCleared() bool {
+	return m.UserIDCleared() || m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *ItemTableMutation) UserIDs() (ids []uuid.UUID) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *ItemTableMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// Where appends a list predicates to the ItemTableMutation builder.
+func (m *ItemTableMutation) Where(ps ...predicate.ItemTable) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ItemTableMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ItemTableMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ItemTable, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ItemTableMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ItemTableMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (ItemTable).
+func (m *ItemTableMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ItemTableMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.user != nil {
+		fields = append(fields, itemtable.FieldUserID)
+	}
+	if m.sheet != nil {
+		fields = append(fields, itemtable.FieldSheet)
+	}
+	if m.section != nil {
+		fields = append(fields, itemtable.FieldSection)
+	}
+	if m.category != nil {
+		fields = append(fields, itemtable.FieldCategory)
+	}
+	if m.description != nil {
+		fields = append(fields, itemtable.FieldDescription)
+	}
+	if m.created_at != nil {
+		fields = append(fields, itemtable.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, itemtable.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ItemTableMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case itemtable.FieldUserID:
+		return m.UserID()
+	case itemtable.FieldSheet:
+		return m.Sheet()
+	case itemtable.FieldSection:
+		return m.Section()
+	case itemtable.FieldCategory:
+		return m.Category()
+	case itemtable.FieldDescription:
+		return m.Description()
+	case itemtable.FieldCreatedAt:
+		return m.CreatedAt()
+	case itemtable.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ItemTableMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case itemtable.FieldUserID:
+		return m.OldUserID(ctx)
+	case itemtable.FieldSheet:
+		return m.OldSheet(ctx)
+	case itemtable.FieldSection:
+		return m.OldSection(ctx)
+	case itemtable.FieldCategory:
+		return m.OldCategory(ctx)
+	case itemtable.FieldDescription:
+		return m.OldDescription(ctx)
+	case itemtable.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case itemtable.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown ItemTable field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ItemTableMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case itemtable.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case itemtable.FieldSheet:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSheet(v)
+		return nil
+	case itemtable.FieldSection:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSection(v)
+		return nil
+	case itemtable.FieldCategory:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCategory(v)
+		return nil
+	case itemtable.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case itemtable.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case itemtable.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ItemTable field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ItemTableMutation) AddedFields() []string {
+	var fields []string
+	if m.addsheet != nil {
+		fields = append(fields, itemtable.FieldSheet)
+	}
+	if m.addsection != nil {
+		fields = append(fields, itemtable.FieldSection)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ItemTableMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case itemtable.FieldSheet:
+		return m.AddedSheet()
+	case itemtable.FieldSection:
+		return m.AddedSection()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ItemTableMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case itemtable.FieldSheet:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSheet(v)
+		return nil
+	case itemtable.FieldSection:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSection(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ItemTable numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ItemTableMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(itemtable.FieldUserID) {
+		fields = append(fields, itemtable.FieldUserID)
+	}
+	if m.FieldCleared(itemtable.FieldDescription) {
+		fields = append(fields, itemtable.FieldDescription)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ItemTableMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ItemTableMutation) ClearField(name string) error {
+	switch name {
+	case itemtable.FieldUserID:
+		m.ClearUserID()
+		return nil
+	case itemtable.FieldDescription:
+		m.ClearDescription()
+		return nil
+	}
+	return fmt.Errorf("unknown ItemTable nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ItemTableMutation) ResetField(name string) error {
+	switch name {
+	case itemtable.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case itemtable.FieldSheet:
+		m.ResetSheet()
+		return nil
+	case itemtable.FieldSection:
+		m.ResetSection()
+		return nil
+	case itemtable.FieldCategory:
+		m.ResetCategory()
+		return nil
+	case itemtable.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case itemtable.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case itemtable.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown ItemTable field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ItemTableMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.user != nil {
+		edges = append(edges, itemtable.EdgeUser)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ItemTableMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case itemtable.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ItemTableMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ItemTableMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ItemTableMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareduser {
+		edges = append(edges, itemtable.EdgeUser)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ItemTableMutation) EdgeCleared(name string) bool {
+	switch name {
+	case itemtable.EdgeUser:
+		return m.cleareduser
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ItemTableMutation) ClearEdge(name string) error {
+	switch name {
+	case itemtable.EdgeUser:
+		m.ClearUser()
+		return nil
+	}
+	return fmt.Errorf("unknown ItemTable unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ItemTableMutation) ResetEdge(name string) error {
+	switch name {
+	case itemtable.EdgeUser:
+		m.ResetUser()
+		return nil
+	}
+	return fmt.Errorf("unknown ItemTable edge %s", name)
 }
 
 // JwkMutation represents an operation that mutates the Jwk nodes in the graph.
@@ -4302,9 +4302,9 @@ type UserMutation struct {
 	webauthn_credentials        map[string]struct{}
 	removedwebauthn_credentials map[string]struct{}
 	clearedwebauthn_credentials bool
-	fin_item_tables             map[uuid.UUID]struct{}
-	removedfin_item_tables      map[uuid.UUID]struct{}
-	clearedfin_item_tables      bool
+	item_tables                 map[uuid.UUID]struct{}
+	removeditem_tables          map[uuid.UUID]struct{}
+	cleareditem_tables          bool
 	primary_email               *uuid.UUID
 	clearedprimary_email        bool
 	fv_session                  *uuid.UUID
@@ -4652,58 +4652,58 @@ func (m *UserMutation) ResetWebauthnCredentials() {
 	m.removedwebauthn_credentials = nil
 }
 
-// AddFinItemTableIDs adds the "fin_item_tables" edge to the FinItemTable entity by ids.
-func (m *UserMutation) AddFinItemTableIDs(ids ...uuid.UUID) {
-	if m.fin_item_tables == nil {
-		m.fin_item_tables = make(map[uuid.UUID]struct{})
+// AddItemTableIDs adds the "item_tables" edge to the ItemTable entity by ids.
+func (m *UserMutation) AddItemTableIDs(ids ...uuid.UUID) {
+	if m.item_tables == nil {
+		m.item_tables = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.fin_item_tables[ids[i]] = struct{}{}
+		m.item_tables[ids[i]] = struct{}{}
 	}
 }
 
-// ClearFinItemTables clears the "fin_item_tables" edge to the FinItemTable entity.
-func (m *UserMutation) ClearFinItemTables() {
-	m.clearedfin_item_tables = true
+// ClearItemTables clears the "item_tables" edge to the ItemTable entity.
+func (m *UserMutation) ClearItemTables() {
+	m.cleareditem_tables = true
 }
 
-// FinItemTablesCleared reports if the "fin_item_tables" edge to the FinItemTable entity was cleared.
-func (m *UserMutation) FinItemTablesCleared() bool {
-	return m.clearedfin_item_tables
+// ItemTablesCleared reports if the "item_tables" edge to the ItemTable entity was cleared.
+func (m *UserMutation) ItemTablesCleared() bool {
+	return m.cleareditem_tables
 }
 
-// RemoveFinItemTableIDs removes the "fin_item_tables" edge to the FinItemTable entity by IDs.
-func (m *UserMutation) RemoveFinItemTableIDs(ids ...uuid.UUID) {
-	if m.removedfin_item_tables == nil {
-		m.removedfin_item_tables = make(map[uuid.UUID]struct{})
+// RemoveItemTableIDs removes the "item_tables" edge to the ItemTable entity by IDs.
+func (m *UserMutation) RemoveItemTableIDs(ids ...uuid.UUID) {
+	if m.removeditem_tables == nil {
+		m.removeditem_tables = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.fin_item_tables, ids[i])
-		m.removedfin_item_tables[ids[i]] = struct{}{}
+		delete(m.item_tables, ids[i])
+		m.removeditem_tables[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedFinItemTables returns the removed IDs of the "fin_item_tables" edge to the FinItemTable entity.
-func (m *UserMutation) RemovedFinItemTablesIDs() (ids []uuid.UUID) {
-	for id := range m.removedfin_item_tables {
+// RemovedItemTables returns the removed IDs of the "item_tables" edge to the ItemTable entity.
+func (m *UserMutation) RemovedItemTablesIDs() (ids []uuid.UUID) {
+	for id := range m.removeditem_tables {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// FinItemTablesIDs returns the "fin_item_tables" edge IDs in the mutation.
-func (m *UserMutation) FinItemTablesIDs() (ids []uuid.UUID) {
-	for id := range m.fin_item_tables {
+// ItemTablesIDs returns the "item_tables" edge IDs in the mutation.
+func (m *UserMutation) ItemTablesIDs() (ids []uuid.UUID) {
+	for id := range m.item_tables {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetFinItemTables resets all changes to the "fin_item_tables" edge.
-func (m *UserMutation) ResetFinItemTables() {
-	m.fin_item_tables = nil
-	m.clearedfin_item_tables = false
-	m.removedfin_item_tables = nil
+// ResetItemTables resets all changes to the "item_tables" edge.
+func (m *UserMutation) ResetItemTables() {
+	m.item_tables = nil
+	m.cleareditem_tables = false
+	m.removeditem_tables = nil
 }
 
 // SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by id.
@@ -4944,8 +4944,8 @@ func (m *UserMutation) AddedEdges() []string {
 	if m.webauthn_credentials != nil {
 		edges = append(edges, user.EdgeWebauthnCredentials)
 	}
-	if m.fin_item_tables != nil {
-		edges = append(edges, user.EdgeFinItemTables)
+	if m.item_tables != nil {
+		edges = append(edges, user.EdgeItemTables)
 	}
 	if m.primary_email != nil {
 		edges = append(edges, user.EdgePrimaryEmail)
@@ -4978,9 +4978,9 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeFinItemTables:
-		ids := make([]ent.Value, 0, len(m.fin_item_tables))
-		for id := range m.fin_item_tables {
+	case user.EdgeItemTables:
+		ids := make([]ent.Value, 0, len(m.item_tables))
+		for id := range m.item_tables {
 			ids = append(ids, id)
 		}
 		return ids
@@ -5008,8 +5008,8 @@ func (m *UserMutation) RemovedEdges() []string {
 	if m.removedwebauthn_credentials != nil {
 		edges = append(edges, user.EdgeWebauthnCredentials)
 	}
-	if m.removedfin_item_tables != nil {
-		edges = append(edges, user.EdgeFinItemTables)
+	if m.removeditem_tables != nil {
+		edges = append(edges, user.EdgeItemTables)
 	}
 	return edges
 }
@@ -5036,9 +5036,9 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeFinItemTables:
-		ids := make([]ent.Value, 0, len(m.removedfin_item_tables))
-		for id := range m.removedfin_item_tables {
+	case user.EdgeItemTables:
+		ids := make([]ent.Value, 0, len(m.removeditem_tables))
+		for id := range m.removeditem_tables {
 			ids = append(ids, id)
 		}
 		return ids
@@ -5058,8 +5058,8 @@ func (m *UserMutation) ClearedEdges() []string {
 	if m.clearedwebauthn_credentials {
 		edges = append(edges, user.EdgeWebauthnCredentials)
 	}
-	if m.clearedfin_item_tables {
-		edges = append(edges, user.EdgeFinItemTables)
+	if m.cleareditem_tables {
+		edges = append(edges, user.EdgeItemTables)
 	}
 	if m.clearedprimary_email {
 		edges = append(edges, user.EdgePrimaryEmail)
@@ -5080,8 +5080,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedpasscodes
 	case user.EdgeWebauthnCredentials:
 		return m.clearedwebauthn_credentials
-	case user.EdgeFinItemTables:
-		return m.clearedfin_item_tables
+	case user.EdgeItemTables:
+		return m.cleareditem_tables
 	case user.EdgePrimaryEmail:
 		return m.clearedprimary_email
 	case user.EdgeFvSession:
@@ -5117,8 +5117,8 @@ func (m *UserMutation) ResetEdge(name string) error {
 	case user.EdgeWebauthnCredentials:
 		m.ResetWebauthnCredentials()
 		return nil
-	case user.EdgeFinItemTables:
-		m.ResetFinItemTables()
+	case user.EdgeItemTables:
+		m.ResetItemTables()
 		return nil
 	case user.EdgePrimaryEmail:
 		m.ResetPrimaryEmail()

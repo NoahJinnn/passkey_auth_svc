@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
-	"github.com/hellohq/hqservice/ent/finitemtable"
 	"github.com/hellohq/hqservice/ent/fvsession"
+	"github.com/hellohq/hqservice/ent/itemtable"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/primaryemail"
 	"github.com/hellohq/hqservice/ent/user"
@@ -114,19 +114,19 @@ func (uc *UserCreate) AddWebauthnCredentials(w ...*WebauthnCredential) *UserCrea
 	return uc.AddWebauthnCredentialIDs(ids...)
 }
 
-// AddFinItemTableIDs adds the "fin_item_tables" edge to the FinItemTable entity by IDs.
-func (uc *UserCreate) AddFinItemTableIDs(ids ...uuid.UUID) *UserCreate {
-	uc.mutation.AddFinItemTableIDs(ids...)
+// AddItemTableIDs adds the "item_tables" edge to the ItemTable entity by IDs.
+func (uc *UserCreate) AddItemTableIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddItemTableIDs(ids...)
 	return uc
 }
 
-// AddFinItemTables adds the "fin_item_tables" edges to the FinItemTable entity.
-func (uc *UserCreate) AddFinItemTables(f ...*FinItemTable) *UserCreate {
-	ids := make([]uuid.UUID, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+// AddItemTables adds the "item_tables" edges to the ItemTable entity.
+func (uc *UserCreate) AddItemTables(i ...*ItemTable) *UserCreate {
+	ids := make([]uuid.UUID, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
 	}
-	return uc.AddFinItemTableIDs(ids...)
+	return uc.AddItemTableIDs(ids...)
 }
 
 // SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID.
@@ -315,15 +315,15 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.FinItemTablesIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.ItemTablesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.FinItemTablesTable,
-			Columns: []string{user.FinItemTablesColumn},
+			Table:   user.ItemTablesTable,
+			Columns: []string{user.ItemTablesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(finitemtable.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(itemtable.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

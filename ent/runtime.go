@@ -7,8 +7,8 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
-	"github.com/hellohq/hqservice/ent/finitemtable"
 	"github.com/hellohq/hqservice/ent/fvsession"
+	"github.com/hellohq/hqservice/ent/itemtable"
 	"github.com/hellohq/hqservice/ent/jwk"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/primaryemail"
@@ -44,26 +44,6 @@ func init() {
 	emailDescID := emailFields[0].Descriptor()
 	// email.DefaultID holds the default value on creation for the id field.
 	email.DefaultID = emailDescID.Default.(func() uuid.UUID)
-	finitemtableFields := schema.FinItemTable{}.Fields()
-	_ = finitemtableFields
-	// finitemtableDescDescription is the schema descriptor for description field.
-	finitemtableDescDescription := finitemtableFields[5].Descriptor()
-	// finitemtable.DefaultDescription holds the default value on creation for the description field.
-	finitemtable.DefaultDescription = finitemtableDescDescription.Default.(string)
-	// finitemtableDescCreatedAt is the schema descriptor for created_at field.
-	finitemtableDescCreatedAt := finitemtableFields[6].Descriptor()
-	// finitemtable.DefaultCreatedAt holds the default value on creation for the created_at field.
-	finitemtable.DefaultCreatedAt = finitemtableDescCreatedAt.Default.(func() time.Time)
-	// finitemtableDescUpdatedAt is the schema descriptor for updated_at field.
-	finitemtableDescUpdatedAt := finitemtableFields[7].Descriptor()
-	// finitemtable.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	finitemtable.DefaultUpdatedAt = finitemtableDescUpdatedAt.Default.(func() time.Time)
-	// finitemtable.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	finitemtable.UpdateDefaultUpdatedAt = finitemtableDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// finitemtableDescID is the schema descriptor for id field.
-	finitemtableDescID := finitemtableFields[0].Descriptor()
-	// finitemtable.DefaultID holds the default value on creation for the id field.
-	finitemtable.DefaultID = finitemtableDescID.Default.(func() uuid.UUID)
 	fvsessionFields := schema.FvSession{}.Fields()
 	_ = fvsessionFields
 	// fvsessionDescCreatedAt is the schema descriptor for created_at field.
@@ -80,6 +60,26 @@ func init() {
 	fvsessionDescID := fvsessionFields[0].Descriptor()
 	// fvsession.DefaultID holds the default value on creation for the id field.
 	fvsession.DefaultID = fvsessionDescID.Default.(func() uuid.UUID)
+	itemtableFields := schema.ItemTable{}.Fields()
+	_ = itemtableFields
+	// itemtableDescDescription is the schema descriptor for description field.
+	itemtableDescDescription := itemtableFields[5].Descriptor()
+	// itemtable.DefaultDescription holds the default value on creation for the description field.
+	itemtable.DefaultDescription = itemtableDescDescription.Default.(string)
+	// itemtableDescCreatedAt is the schema descriptor for created_at field.
+	itemtableDescCreatedAt := itemtableFields[6].Descriptor()
+	// itemtable.DefaultCreatedAt holds the default value on creation for the created_at field.
+	itemtable.DefaultCreatedAt = itemtableDescCreatedAt.Default.(func() time.Time)
+	// itemtableDescUpdatedAt is the schema descriptor for updated_at field.
+	itemtableDescUpdatedAt := itemtableFields[7].Descriptor()
+	// itemtable.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	itemtable.DefaultUpdatedAt = itemtableDescUpdatedAt.Default.(func() time.Time)
+	// itemtable.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	itemtable.UpdateDefaultUpdatedAt = itemtableDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// itemtableDescID is the schema descriptor for id field.
+	itemtableDescID := itemtableFields[0].Descriptor()
+	// itemtable.DefaultID holds the default value on creation for the id field.
+	itemtable.DefaultID = itemtableDescID.Default.(func() uuid.UUID)
 	jwkFields := schema.Jwk{}.Fields()
 	_ = jwkFields
 	// jwkDescCreatedAt is the schema descriptor for created_at field.

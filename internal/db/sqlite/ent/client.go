@@ -19,7 +19,7 @@ import (
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/income"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/manualasset"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/manualitem"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
 )
 
@@ -36,8 +36,8 @@ type Client struct {
 	Income *IncomeClient
 	// Institution is the client for interacting with the Institution builders.
 	Institution *InstitutionClient
-	// ManualAsset is the client for interacting with the ManualAsset builders.
-	ManualAsset *ManualAssetClient
+	// ManualItem is the client for interacting with the ManualItem builders.
+	ManualItem *ManualItemClient
 	// Transaction is the client for interacting with the Transaction builders.
 	Transaction *TransactionClient
 }
@@ -57,7 +57,7 @@ func (c *Client) init() {
 	c.Connection = NewConnectionClient(c.config)
 	c.Income = NewIncomeClient(c.config)
 	c.Institution = NewInstitutionClient(c.config)
-	c.ManualAsset = NewManualAssetClient(c.config)
+	c.ManualItem = NewManualItemClient(c.config)
 	c.Transaction = NewTransactionClient(c.config)
 }
 
@@ -145,7 +145,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Connection:  NewConnectionClient(cfg),
 		Income:      NewIncomeClient(cfg),
 		Institution: NewInstitutionClient(cfg),
-		ManualAsset: NewManualAssetClient(cfg),
+		ManualItem:  NewManualItemClient(cfg),
 		Transaction: NewTransactionClient(cfg),
 	}, nil
 }
@@ -170,7 +170,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Connection:  NewConnectionClient(cfg),
 		Income:      NewIncomeClient(cfg),
 		Institution: NewInstitutionClient(cfg),
-		ManualAsset: NewManualAssetClient(cfg),
+		ManualItem:  NewManualItemClient(cfg),
 		Transaction: NewTransactionClient(cfg),
 	}, nil
 }
@@ -201,7 +201,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Account, c.Connection, c.Income, c.Institution, c.ManualAsset, c.Transaction,
+		c.Account, c.Connection, c.Income, c.Institution, c.ManualItem, c.Transaction,
 	} {
 		n.Use(hooks...)
 	}
@@ -211,7 +211,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Account, c.Connection, c.Income, c.Institution, c.ManualAsset, c.Transaction,
+		c.Account, c.Connection, c.Income, c.Institution, c.ManualItem, c.Transaction,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -228,8 +228,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Income.mutate(ctx, m)
 	case *InstitutionMutation:
 		return c.Institution.mutate(ctx, m)
-	case *ManualAssetMutation:
-		return c.ManualAsset.mutate(ctx, m)
+	case *ManualItemMutation:
+		return c.ManualItem.mutate(ctx, m)
 	case *TransactionMutation:
 		return c.Transaction.mutate(ctx, m)
 	default:
@@ -757,92 +757,92 @@ func (c *InstitutionClient) mutate(ctx context.Context, m *InstitutionMutation) 
 	}
 }
 
-// ManualAssetClient is a client for the ManualAsset schema.
-type ManualAssetClient struct {
+// ManualItemClient is a client for the ManualItem schema.
+type ManualItemClient struct {
 	config
 }
 
-// NewManualAssetClient returns a client for the ManualAsset from the given config.
-func NewManualAssetClient(c config) *ManualAssetClient {
-	return &ManualAssetClient{config: c}
+// NewManualItemClient returns a client for the ManualItem from the given config.
+func NewManualItemClient(c config) *ManualItemClient {
+	return &ManualItemClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `manualasset.Hooks(f(g(h())))`.
-func (c *ManualAssetClient) Use(hooks ...Hook) {
-	c.hooks.ManualAsset = append(c.hooks.ManualAsset, hooks...)
+// A call to `Use(f, g, h)` equals to `manualitem.Hooks(f(g(h())))`.
+func (c *ManualItemClient) Use(hooks ...Hook) {
+	c.hooks.ManualItem = append(c.hooks.ManualItem, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `manualasset.Intercept(f(g(h())))`.
-func (c *ManualAssetClient) Intercept(interceptors ...Interceptor) {
-	c.inters.ManualAsset = append(c.inters.ManualAsset, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `manualitem.Intercept(f(g(h())))`.
+func (c *ManualItemClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ManualItem = append(c.inters.ManualItem, interceptors...)
 }
 
-// Create returns a builder for creating a ManualAsset entity.
-func (c *ManualAssetClient) Create() *ManualAssetCreate {
-	mutation := newManualAssetMutation(c.config, OpCreate)
-	return &ManualAssetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a ManualItem entity.
+func (c *ManualItemClient) Create() *ManualItemCreate {
+	mutation := newManualItemMutation(c.config, OpCreate)
+	return &ManualItemCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of ManualAsset entities.
-func (c *ManualAssetClient) CreateBulk(builders ...*ManualAssetCreate) *ManualAssetCreateBulk {
-	return &ManualAssetCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of ManualItem entities.
+func (c *ManualItemClient) CreateBulk(builders ...*ManualItemCreate) *ManualItemCreateBulk {
+	return &ManualItemCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for ManualAsset.
-func (c *ManualAssetClient) Update() *ManualAssetUpdate {
-	mutation := newManualAssetMutation(c.config, OpUpdate)
-	return &ManualAssetUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for ManualItem.
+func (c *ManualItemClient) Update() *ManualItemUpdate {
+	mutation := newManualItemMutation(c.config, OpUpdate)
+	return &ManualItemUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *ManualAssetClient) UpdateOne(ma *ManualAsset) *ManualAssetUpdateOne {
-	mutation := newManualAssetMutation(c.config, OpUpdateOne, withManualAsset(ma))
-	return &ManualAssetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *ManualItemClient) UpdateOne(mi *ManualItem) *ManualItemUpdateOne {
+	mutation := newManualItemMutation(c.config, OpUpdateOne, withManualItem(mi))
+	return &ManualItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ManualAssetClient) UpdateOneID(id uuid.UUID) *ManualAssetUpdateOne {
-	mutation := newManualAssetMutation(c.config, OpUpdateOne, withManualAssetID(id))
-	return &ManualAssetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *ManualItemClient) UpdateOneID(id uuid.UUID) *ManualItemUpdateOne {
+	mutation := newManualItemMutation(c.config, OpUpdateOne, withManualItemID(id))
+	return &ManualItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for ManualAsset.
-func (c *ManualAssetClient) Delete() *ManualAssetDelete {
-	mutation := newManualAssetMutation(c.config, OpDelete)
-	return &ManualAssetDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for ManualItem.
+func (c *ManualItemClient) Delete() *ManualItemDelete {
+	mutation := newManualItemMutation(c.config, OpDelete)
+	return &ManualItemDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *ManualAssetClient) DeleteOne(ma *ManualAsset) *ManualAssetDeleteOne {
-	return c.DeleteOneID(ma.ID)
+func (c *ManualItemClient) DeleteOne(mi *ManualItem) *ManualItemDeleteOne {
+	return c.DeleteOneID(mi.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *ManualAssetClient) DeleteOneID(id uuid.UUID) *ManualAssetDeleteOne {
-	builder := c.Delete().Where(manualasset.ID(id))
+func (c *ManualItemClient) DeleteOneID(id uuid.UUID) *ManualItemDeleteOne {
+	builder := c.Delete().Where(manualitem.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &ManualAssetDeleteOne{builder}
+	return &ManualItemDeleteOne{builder}
 }
 
-// Query returns a query builder for ManualAsset.
-func (c *ManualAssetClient) Query() *ManualAssetQuery {
-	return &ManualAssetQuery{
+// Query returns a query builder for ManualItem.
+func (c *ManualItemClient) Query() *ManualItemQuery {
+	return &ManualItemQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeManualAsset},
+		ctx:    &QueryContext{Type: TypeManualItem},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a ManualAsset entity by its id.
-func (c *ManualAssetClient) Get(ctx context.Context, id uuid.UUID) (*ManualAsset, error) {
-	return c.Query().Where(manualasset.ID(id)).Only(ctx)
+// Get returns a ManualItem entity by its id.
+func (c *ManualItemClient) Get(ctx context.Context, id uuid.UUID) (*ManualItem, error) {
+	return c.Query().Where(manualitem.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ManualAssetClient) GetX(ctx context.Context, id uuid.UUID) *ManualAsset {
+func (c *ManualItemClient) GetX(ctx context.Context, id uuid.UUID) *ManualItem {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -851,27 +851,27 @@ func (c *ManualAssetClient) GetX(ctx context.Context, id uuid.UUID) *ManualAsset
 }
 
 // Hooks returns the client hooks.
-func (c *ManualAssetClient) Hooks() []Hook {
-	return c.hooks.ManualAsset
+func (c *ManualItemClient) Hooks() []Hook {
+	return c.hooks.ManualItem
 }
 
 // Interceptors returns the client interceptors.
-func (c *ManualAssetClient) Interceptors() []Interceptor {
-	return c.inters.ManualAsset
+func (c *ManualItemClient) Interceptors() []Interceptor {
+	return c.inters.ManualItem
 }
 
-func (c *ManualAssetClient) mutate(ctx context.Context, m *ManualAssetMutation) (Value, error) {
+func (c *ManualItemClient) mutate(ctx context.Context, m *ManualItemMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&ManualAssetCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&ManualItemCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&ManualAssetUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&ManualItemUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&ManualAssetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&ManualItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&ManualAssetDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&ManualItemDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown ManualAsset mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown ManualItem mutation op: %q", m.Op())
 	}
 }
 
@@ -996,10 +996,10 @@ func (c *TransactionClient) mutate(ctx context.Context, m *TransactionMutation) 
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Account, Connection, Income, Institution, ManualAsset, Transaction []ent.Hook
+		Account, Connection, Income, Institution, ManualItem, Transaction []ent.Hook
 	}
 	inters struct {
-		Account, Connection, Income, Institution, ManualAsset,
+		Account, Connection, Income, Institution, ManualItem,
 		Transaction []ent.Interceptor
 	}
 )

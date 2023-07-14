@@ -25,8 +25,8 @@ const (
 	EdgePasscodes = "passcodes"
 	// EdgeWebauthnCredentials holds the string denoting the webauthn_credentials edge name in mutations.
 	EdgeWebauthnCredentials = "webauthn_credentials"
-	// EdgeFinItemTables holds the string denoting the fin_item_tables edge name in mutations.
-	EdgeFinItemTables = "fin_item_tables"
+	// EdgeItemTables holds the string denoting the item_tables edge name in mutations.
+	EdgeItemTables = "item_tables"
 	// EdgePrimaryEmail holds the string denoting the primary_email edge name in mutations.
 	EdgePrimaryEmail = "primary_email"
 	// EdgeFvSession holds the string denoting the fv_session edge name in mutations.
@@ -54,13 +54,13 @@ const (
 	WebauthnCredentialsInverseTable = "webauthn_credentials"
 	// WebauthnCredentialsColumn is the table column denoting the webauthn_credentials relation/edge.
 	WebauthnCredentialsColumn = "user_id"
-	// FinItemTablesTable is the table that holds the fin_item_tables relation/edge.
-	FinItemTablesTable = "fin_item_tables"
-	// FinItemTablesInverseTable is the table name for the FinItemTable entity.
-	// It exists in this package in order to avoid circular dependency with the "finitemtable" package.
-	FinItemTablesInverseTable = "fin_item_tables"
-	// FinItemTablesColumn is the table column denoting the fin_item_tables relation/edge.
-	FinItemTablesColumn = "user_id"
+	// ItemTablesTable is the table that holds the item_tables relation/edge.
+	ItemTablesTable = "item_tables"
+	// ItemTablesInverseTable is the table name for the ItemTable entity.
+	// It exists in this package in order to avoid circular dependency with the "itemtable" package.
+	ItemTablesInverseTable = "item_tables"
+	// ItemTablesColumn is the table column denoting the item_tables relation/edge.
+	ItemTablesColumn = "user_id"
 	// PrimaryEmailTable is the table that holds the primary_email relation/edge.
 	PrimaryEmailTable = "primary_emails"
 	// PrimaryEmailInverseTable is the table name for the PrimaryEmail entity.
@@ -165,17 +165,17 @@ func ByWebauthnCredentials(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOpti
 	}
 }
 
-// ByFinItemTablesCount orders the results by fin_item_tables count.
-func ByFinItemTablesCount(opts ...sql.OrderTermOption) OrderOption {
+// ByItemTablesCount orders the results by item_tables count.
+func ByItemTablesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newFinItemTablesStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newItemTablesStep(), opts...)
 	}
 }
 
-// ByFinItemTables orders the results by fin_item_tables terms.
-func ByFinItemTables(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByItemTables orders the results by item_tables terms.
+func ByItemTables(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newFinItemTablesStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newItemTablesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -213,11 +213,11 @@ func newWebauthnCredentialsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, WebauthnCredentialsTable, WebauthnCredentialsColumn),
 	)
 }
-func newFinItemTablesStep() *sqlgraph.Step {
+func newItemTablesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(FinItemTablesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, FinItemTablesTable, FinItemTablesColumn),
+		sqlgraph.To(ItemTablesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ItemTablesTable, ItemTablesColumn),
 	)
 }
 func newPrimaryEmailStep() *sqlgraph.Step {

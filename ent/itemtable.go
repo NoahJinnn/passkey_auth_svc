@@ -10,12 +10,12 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/ent/finitemtable"
+	"github.com/hellohq/hqservice/ent/itemtable"
 	"github.com/hellohq/hqservice/ent/user"
 )
 
-// FinItemTable is the model entity for the FinItemTable schema.
-type FinItemTable struct {
+// ItemTable is the model entity for the ItemTable schema.
+type ItemTable struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
@@ -34,13 +34,13 @@ type FinItemTable struct {
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the FinItemTableQuery when eager-loading is set.
-	Edges        FinItemTableEdges `json:"edges"`
+	// The values are being populated by the ItemTableQuery when eager-loading is set.
+	Edges        ItemTableEdges `json:"edges"`
 	selectValues sql.SelectValues
 }
 
-// FinItemTableEdges holds the relations/edges for other nodes in the graph.
-type FinItemTableEdges struct {
+// ItemTableEdges holds the relations/edges for other nodes in the graph.
+type ItemTableEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -50,7 +50,7 @@ type FinItemTableEdges struct {
 
 // UserOrErr returns the User value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e FinItemTableEdges) UserOrErr() (*User, error) {
+func (e ItemTableEdges) UserOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.User == nil {
 			// Edge was loaded but was not found.
@@ -62,17 +62,17 @@ func (e FinItemTableEdges) UserOrErr() (*User, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*FinItemTable) scanValues(columns []string) ([]any, error) {
+func (*ItemTable) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case finitemtable.FieldSheet, finitemtable.FieldSection:
+		case itemtable.FieldSheet, itemtable.FieldSection:
 			values[i] = new(sql.NullInt64)
-		case finitemtable.FieldCategory, finitemtable.FieldDescription:
+		case itemtable.FieldCategory, itemtable.FieldDescription:
 			values[i] = new(sql.NullString)
-		case finitemtable.FieldCreatedAt, finitemtable.FieldUpdatedAt:
+		case itemtable.FieldCreatedAt, itemtable.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case finitemtable.FieldID, finitemtable.FieldUserID:
+		case itemtable.FieldID, itemtable.FieldUserID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -82,125 +82,125 @@ func (*FinItemTable) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the FinItemTable fields.
-func (fit *FinItemTable) assignValues(columns []string, values []any) error {
+// to the ItemTable fields.
+func (it *ItemTable) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case finitemtable.FieldID:
+		case itemtable.FieldID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				fit.ID = *value
+				it.ID = *value
 			}
-		case finitemtable.FieldUserID:
+		case itemtable.FieldUserID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value != nil {
-				fit.UserID = *value
+				it.UserID = *value
 			}
-		case finitemtable.FieldSheet:
+		case itemtable.FieldSheet:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field sheet", values[i])
 			} else if value.Valid {
-				fit.Sheet = int32(value.Int64)
+				it.Sheet = int32(value.Int64)
 			}
-		case finitemtable.FieldSection:
+		case itemtable.FieldSection:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field section", values[i])
 			} else if value.Valid {
-				fit.Section = int32(value.Int64)
+				it.Section = int32(value.Int64)
 			}
-		case finitemtable.FieldCategory:
+		case itemtable.FieldCategory:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field category", values[i])
 			} else if value.Valid {
-				fit.Category = value.String
+				it.Category = value.String
 			}
-		case finitemtable.FieldDescription:
+		case itemtable.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
-				fit.Description = value.String
+				it.Description = value.String
 			}
-		case finitemtable.FieldCreatedAt:
+		case itemtable.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				fit.CreatedAt = value.Time
+				it.CreatedAt = value.Time
 			}
-		case finitemtable.FieldUpdatedAt:
+		case itemtable.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				fit.UpdatedAt = value.Time
+				it.UpdatedAt = value.Time
 			}
 		default:
-			fit.selectValues.Set(columns[i], values[i])
+			it.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the FinItemTable.
+// Value returns the ent.Value that was dynamically selected and assigned to the ItemTable.
 // This includes values selected through modifiers, order, etc.
-func (fit *FinItemTable) Value(name string) (ent.Value, error) {
-	return fit.selectValues.Get(name)
+func (it *ItemTable) Value(name string) (ent.Value, error) {
+	return it.selectValues.Get(name)
 }
 
-// QueryUser queries the "user" edge of the FinItemTable entity.
-func (fit *FinItemTable) QueryUser() *UserQuery {
-	return NewFinItemTableClient(fit.config).QueryUser(fit)
+// QueryUser queries the "user" edge of the ItemTable entity.
+func (it *ItemTable) QueryUser() *UserQuery {
+	return NewItemTableClient(it.config).QueryUser(it)
 }
 
-// Update returns a builder for updating this FinItemTable.
-// Note that you need to call FinItemTable.Unwrap() before calling this method if this FinItemTable
+// Update returns a builder for updating this ItemTable.
+// Note that you need to call ItemTable.Unwrap() before calling this method if this ItemTable
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (fit *FinItemTable) Update() *FinItemTableUpdateOne {
-	return NewFinItemTableClient(fit.config).UpdateOne(fit)
+func (it *ItemTable) Update() *ItemTableUpdateOne {
+	return NewItemTableClient(it.config).UpdateOne(it)
 }
 
-// Unwrap unwraps the FinItemTable entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the ItemTable entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (fit *FinItemTable) Unwrap() *FinItemTable {
-	_tx, ok := fit.config.driver.(*txDriver)
+func (it *ItemTable) Unwrap() *ItemTable {
+	_tx, ok := it.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: FinItemTable is not a transactional entity")
+		panic("ent: ItemTable is not a transactional entity")
 	}
-	fit.config.driver = _tx.drv
-	return fit
+	it.config.driver = _tx.drv
+	return it
 }
 
 // String implements the fmt.Stringer.
-func (fit *FinItemTable) String() string {
+func (it *ItemTable) String() string {
 	var builder strings.Builder
-	builder.WriteString("FinItemTable(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", fit.ID))
+	builder.WriteString("ItemTable(")
+	builder.WriteString(fmt.Sprintf("id=%v, ", it.ID))
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", fit.UserID))
+	builder.WriteString(fmt.Sprintf("%v", it.UserID))
 	builder.WriteString(", ")
 	builder.WriteString("sheet=")
-	builder.WriteString(fmt.Sprintf("%v", fit.Sheet))
+	builder.WriteString(fmt.Sprintf("%v", it.Sheet))
 	builder.WriteString(", ")
 	builder.WriteString("section=")
-	builder.WriteString(fmt.Sprintf("%v", fit.Section))
+	builder.WriteString(fmt.Sprintf("%v", it.Section))
 	builder.WriteString(", ")
 	builder.WriteString("category=")
-	builder.WriteString(fit.Category)
+	builder.WriteString(it.Category)
 	builder.WriteString(", ")
 	builder.WriteString("description=")
-	builder.WriteString(fit.Description)
+	builder.WriteString(it.Description)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
-	builder.WriteString(fit.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(it.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(fit.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(it.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// FinItemTables is a parsable slice of FinItemTable.
-type FinItemTables []*FinItemTable
+// ItemTables is a parsable slice of ItemTable.
+type ItemTables []*ItemTable

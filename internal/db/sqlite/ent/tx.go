@@ -20,8 +20,8 @@ type Tx struct {
 	Income *IncomeClient
 	// Institution is the client for interacting with the Institution builders.
 	Institution *InstitutionClient
-	// ManualAsset is the client for interacting with the ManualAsset builders.
-	ManualAsset *ManualAssetClient
+	// ManualItem is the client for interacting with the ManualItem builders.
+	ManualItem *ManualItemClient
 	// Transaction is the client for interacting with the Transaction builders.
 	Transaction *TransactionClient
 
@@ -159,7 +159,7 @@ func (tx *Tx) init() {
 	tx.Connection = NewConnectionClient(tx.config)
 	tx.Income = NewIncomeClient(tx.config)
 	tx.Institution = NewInstitutionClient(tx.config)
-	tx.ManualAsset = NewManualAssetClient(tx.config)
+	tx.ManualItem = NewManualItemClient(tx.config)
 	tx.Transaction = NewTransactionClient(tx.config)
 }
 

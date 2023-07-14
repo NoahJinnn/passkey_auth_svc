@@ -9,11 +9,11 @@ import (
 // Email is the predicate function for email builders.
 type Email func(*sql.Selector)
 
-// FinItemTable is the predicate function for finitemtable builders.
-type FinItemTable func(*sql.Selector)
-
 // FvSession is the predicate function for fvsession builders.
 type FvSession func(*sql.Selector)
+
+// ItemTable is the predicate function for itemtable builders.
+type ItemTable func(*sql.Selector)
 
 // Jwk is the predicate function for jwk builders.
 type Jwk func(*sql.Selector)

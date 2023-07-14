@@ -10,7 +10,7 @@ import (
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/income"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/manualasset"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/manualitem"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/schema"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
 )
@@ -83,26 +83,26 @@ func init() {
 	institutionDescID := institutionFields[0].Descriptor()
 	// institution.DefaultID holds the default value on creation for the id field.
 	institution.DefaultID = institutionDescID.Default.(func() uuid.UUID)
-	manualassetFields := schema.ManualAsset{}.Fields()
-	_ = manualassetFields
-	// manualassetDescDescription is the schema descriptor for description field.
-	manualassetDescDescription := manualassetFields[4].Descriptor()
-	// manualasset.DefaultDescription holds the default value on creation for the description field.
-	manualasset.DefaultDescription = manualassetDescDescription.Default.(string)
-	// manualassetDescCreatedAt is the schema descriptor for created_at field.
-	manualassetDescCreatedAt := manualassetFields[6].Descriptor()
-	// manualasset.DefaultCreatedAt holds the default value on creation for the created_at field.
-	manualasset.DefaultCreatedAt = manualassetDescCreatedAt.Default.(func() time.Time)
-	// manualassetDescUpdatedAt is the schema descriptor for updated_at field.
-	manualassetDescUpdatedAt := manualassetFields[7].Descriptor()
-	// manualasset.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	manualasset.DefaultUpdatedAt = manualassetDescUpdatedAt.Default.(func() time.Time)
-	// manualasset.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	manualasset.UpdateDefaultUpdatedAt = manualassetDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// manualassetDescID is the schema descriptor for id field.
-	manualassetDescID := manualassetFields[0].Descriptor()
-	// manualasset.DefaultID holds the default value on creation for the id field.
-	manualasset.DefaultID = manualassetDescID.Default.(func() uuid.UUID)
+	manualitemFields := schema.ManualItem{}.Fields()
+	_ = manualitemFields
+	// manualitemDescDescription is the schema descriptor for description field.
+	manualitemDescDescription := manualitemFields[5].Descriptor()
+	// manualitem.DefaultDescription holds the default value on creation for the description field.
+	manualitem.DefaultDescription = manualitemDescDescription.Default.(string)
+	// manualitemDescCreatedAt is the schema descriptor for created_at field.
+	manualitemDescCreatedAt := manualitemFields[7].Descriptor()
+	// manualitem.DefaultCreatedAt holds the default value on creation for the created_at field.
+	manualitem.DefaultCreatedAt = manualitemDescCreatedAt.Default.(func() time.Time)
+	// manualitemDescUpdatedAt is the schema descriptor for updated_at field.
+	manualitemDescUpdatedAt := manualitemFields[8].Descriptor()
+	// manualitem.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	manualitem.DefaultUpdatedAt = manualitemDescUpdatedAt.Default.(func() time.Time)
+	// manualitem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	manualitem.UpdateDefaultUpdatedAt = manualitemDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// manualitemDescID is the schema descriptor for id field.
+	manualitemDescID := manualitemFields[0].Descriptor()
+	// manualitem.DefaultID holds the default value on creation for the id field.
+	manualitem.DefaultID = manualitemDescID.Default.(func() uuid.UUID)
 	transactionFields := schema.Transaction{}.Fields()
 	_ = transactionFields
 	// transactionDescCreatedAt is the schema descriptor for created_at field.

@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
-	"github.com/hellohq/hqservice/ent/finitemtable"
 	"github.com/hellohq/hqservice/ent/fvsession"
+	"github.com/hellohq/hqservice/ent/itemtable"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/predicate"
 	"github.com/hellohq/hqservice/ent/primaryemail"
@@ -86,19 +86,19 @@ func (uu *UserUpdate) AddWebauthnCredentials(w ...*WebauthnCredential) *UserUpda
 	return uu.AddWebauthnCredentialIDs(ids...)
 }
 
-// AddFinItemTableIDs adds the "fin_item_tables" edge to the FinItemTable entity by IDs.
-func (uu *UserUpdate) AddFinItemTableIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.AddFinItemTableIDs(ids...)
+// AddItemTableIDs adds the "item_tables" edge to the ItemTable entity by IDs.
+func (uu *UserUpdate) AddItemTableIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddItemTableIDs(ids...)
 	return uu
 }
 
-// AddFinItemTables adds the "fin_item_tables" edges to the FinItemTable entity.
-func (uu *UserUpdate) AddFinItemTables(f ...*FinItemTable) *UserUpdate {
-	ids := make([]uuid.UUID, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+// AddItemTables adds the "item_tables" edges to the ItemTable entity.
+func (uu *UserUpdate) AddItemTables(i ...*ItemTable) *UserUpdate {
+	ids := make([]uuid.UUID, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
 	}
-	return uu.AddFinItemTableIDs(ids...)
+	return uu.AddItemTableIDs(ids...)
 }
 
 // SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID.
@@ -207,25 +207,25 @@ func (uu *UserUpdate) RemoveWebauthnCredentials(w ...*WebauthnCredential) *UserU
 	return uu.RemoveWebauthnCredentialIDs(ids...)
 }
 
-// ClearFinItemTables clears all "fin_item_tables" edges to the FinItemTable entity.
-func (uu *UserUpdate) ClearFinItemTables() *UserUpdate {
-	uu.mutation.ClearFinItemTables()
+// ClearItemTables clears all "item_tables" edges to the ItemTable entity.
+func (uu *UserUpdate) ClearItemTables() *UserUpdate {
+	uu.mutation.ClearItemTables()
 	return uu
 }
 
-// RemoveFinItemTableIDs removes the "fin_item_tables" edge to FinItemTable entities by IDs.
-func (uu *UserUpdate) RemoveFinItemTableIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.RemoveFinItemTableIDs(ids...)
+// RemoveItemTableIDs removes the "item_tables" edge to ItemTable entities by IDs.
+func (uu *UserUpdate) RemoveItemTableIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveItemTableIDs(ids...)
 	return uu
 }
 
-// RemoveFinItemTables removes "fin_item_tables" edges to FinItemTable entities.
-func (uu *UserUpdate) RemoveFinItemTables(f ...*FinItemTable) *UserUpdate {
-	ids := make([]uuid.UUID, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+// RemoveItemTables removes "item_tables" edges to ItemTable entities.
+func (uu *UserUpdate) RemoveItemTables(i ...*ItemTable) *UserUpdate {
+	ids := make([]uuid.UUID, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
 	}
-	return uu.RemoveFinItemTableIDs(ids...)
+	return uu.RemoveItemTableIDs(ids...)
 }
 
 // ClearPrimaryEmail clears the "primary_email" edge to the PrimaryEmail entity.
@@ -423,28 +423,28 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.FinItemTablesCleared() {
+	if uu.mutation.ItemTablesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.FinItemTablesTable,
-			Columns: []string{user.FinItemTablesColumn},
+			Table:   user.ItemTablesTable,
+			Columns: []string{user.ItemTablesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(finitemtable.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(itemtable.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedFinItemTablesIDs(); len(nodes) > 0 && !uu.mutation.FinItemTablesCleared() {
+	if nodes := uu.mutation.RemovedItemTablesIDs(); len(nodes) > 0 && !uu.mutation.ItemTablesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.FinItemTablesTable,
-			Columns: []string{user.FinItemTablesColumn},
+			Table:   user.ItemTablesTable,
+			Columns: []string{user.ItemTablesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(finitemtable.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(itemtable.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -452,15 +452,15 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.FinItemTablesIDs(); len(nodes) > 0 {
+	if nodes := uu.mutation.ItemTablesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.FinItemTablesTable,
-			Columns: []string{user.FinItemTablesColumn},
+			Table:   user.ItemTablesTable,
+			Columns: []string{user.ItemTablesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(finitemtable.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(itemtable.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -597,19 +597,19 @@ func (uuo *UserUpdateOne) AddWebauthnCredentials(w ...*WebauthnCredential) *User
 	return uuo.AddWebauthnCredentialIDs(ids...)
 }
 
-// AddFinItemTableIDs adds the "fin_item_tables" edge to the FinItemTable entity by IDs.
-func (uuo *UserUpdateOne) AddFinItemTableIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.AddFinItemTableIDs(ids...)
+// AddItemTableIDs adds the "item_tables" edge to the ItemTable entity by IDs.
+func (uuo *UserUpdateOne) AddItemTableIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddItemTableIDs(ids...)
 	return uuo
 }
 
-// AddFinItemTables adds the "fin_item_tables" edges to the FinItemTable entity.
-func (uuo *UserUpdateOne) AddFinItemTables(f ...*FinItemTable) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+// AddItemTables adds the "item_tables" edges to the ItemTable entity.
+func (uuo *UserUpdateOne) AddItemTables(i ...*ItemTable) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
 	}
-	return uuo.AddFinItemTableIDs(ids...)
+	return uuo.AddItemTableIDs(ids...)
 }
 
 // SetPrimaryEmailID sets the "primary_email" edge to the PrimaryEmail entity by ID.
@@ -718,25 +718,25 @@ func (uuo *UserUpdateOne) RemoveWebauthnCredentials(w ...*WebauthnCredential) *U
 	return uuo.RemoveWebauthnCredentialIDs(ids...)
 }
 
-// ClearFinItemTables clears all "fin_item_tables" edges to the FinItemTable entity.
-func (uuo *UserUpdateOne) ClearFinItemTables() *UserUpdateOne {
-	uuo.mutation.ClearFinItemTables()
+// ClearItemTables clears all "item_tables" edges to the ItemTable entity.
+func (uuo *UserUpdateOne) ClearItemTables() *UserUpdateOne {
+	uuo.mutation.ClearItemTables()
 	return uuo
 }
 
-// RemoveFinItemTableIDs removes the "fin_item_tables" edge to FinItemTable entities by IDs.
-func (uuo *UserUpdateOne) RemoveFinItemTableIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.RemoveFinItemTableIDs(ids...)
+// RemoveItemTableIDs removes the "item_tables" edge to ItemTable entities by IDs.
+func (uuo *UserUpdateOne) RemoveItemTableIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveItemTableIDs(ids...)
 	return uuo
 }
 
-// RemoveFinItemTables removes "fin_item_tables" edges to FinItemTable entities.
-func (uuo *UserUpdateOne) RemoveFinItemTables(f ...*FinItemTable) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+// RemoveItemTables removes "item_tables" edges to ItemTable entities.
+func (uuo *UserUpdateOne) RemoveItemTables(i ...*ItemTable) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
 	}
-	return uuo.RemoveFinItemTableIDs(ids...)
+	return uuo.RemoveItemTableIDs(ids...)
 }
 
 // ClearPrimaryEmail clears the "primary_email" edge to the PrimaryEmail entity.
@@ -964,28 +964,28 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.FinItemTablesCleared() {
+	if uuo.mutation.ItemTablesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.FinItemTablesTable,
-			Columns: []string{user.FinItemTablesColumn},
+			Table:   user.ItemTablesTable,
+			Columns: []string{user.ItemTablesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(finitemtable.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(itemtable.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedFinItemTablesIDs(); len(nodes) > 0 && !uuo.mutation.FinItemTablesCleared() {
+	if nodes := uuo.mutation.RemovedItemTablesIDs(); len(nodes) > 0 && !uuo.mutation.ItemTablesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.FinItemTablesTable,
-			Columns: []string{user.FinItemTablesColumn},
+			Table:   user.ItemTablesTable,
+			Columns: []string{user.ItemTablesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(finitemtable.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(itemtable.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -993,15 +993,15 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.FinItemTablesIDs(); len(nodes) > 0 {
+	if nodes := uuo.mutation.ItemTablesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.FinItemTablesTable,
-			Columns: []string{user.FinItemTablesColumn},
+			Table:   user.ItemTablesTable,
+			Columns: []string{user.ItemTablesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(finitemtable.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(itemtable.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

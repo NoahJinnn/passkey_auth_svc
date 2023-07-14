@@ -9,11 +9,11 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-type FinItemTable struct {
+type ItemTable struct {
 	ent.Schema
 }
 
-func (FinItemTable) Fields() []ent.Field {
+func (ItemTable) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Default(func() uuid.UUID {
 			id, _ := uuid.NewV4()
@@ -29,8 +29,8 @@ func (FinItemTable) Fields() []ent.Field {
 	}
 }
 
-func (FinItemTable) Edges() []ent.Edge {
+func (ItemTable) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).Ref("fin_item_tables").Unique().Field("user_id"),
+		edge.From("user", User.Type).Ref("item_tables").Unique().Field("user_id"),
 	}
 }

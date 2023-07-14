@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
-	"github.com/hellohq/hqservice/ent/finitemtable"
 	"github.com/hellohq/hqservice/ent/fvsession"
+	"github.com/hellohq/hqservice/ent/itemtable"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/predicate"
 	"github.com/hellohq/hqservice/ent/primaryemail"
@@ -32,7 +32,7 @@ type UserQuery struct {
 	withEmails              *EmailQuery
 	withPasscodes           *PasscodeQuery
 	withWebauthnCredentials *WebauthnCredentialQuery
-	withFinItemTables       *FinItemTableQuery
+	withItemTables          *ItemTableQuery
 	withPrimaryEmail        *PrimaryEmailQuery
 	withFvSession           *FvSessionQuery
 	// intermediate query (i.e. traversal path).
@@ -137,9 +137,9 @@ func (uq *UserQuery) QueryWebauthnCredentials() *WebauthnCredentialQuery {
 	return query
 }
 
-// QueryFinItemTables chains the current query on the "fin_item_tables" edge.
-func (uq *UserQuery) QueryFinItemTables() *FinItemTableQuery {
-	query := (&FinItemTableClient{config: uq.config}).Query()
+// QueryItemTables chains the current query on the "item_tables" edge.
+func (uq *UserQuery) QueryItemTables() *ItemTableQuery {
+	query := (&ItemTableClient{config: uq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -150,8 +150,8 @@ func (uq *UserQuery) QueryFinItemTables() *FinItemTableQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(finitemtable.Table, finitemtable.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.FinItemTablesTable, user.FinItemTablesColumn),
+			sqlgraph.To(itemtable.Table, itemtable.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ItemTablesTable, user.ItemTablesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -398,7 +398,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withEmails:              uq.withEmails.Clone(),
 		withPasscodes:           uq.withPasscodes.Clone(),
 		withWebauthnCredentials: uq.withWebauthnCredentials.Clone(),
-		withFinItemTables:       uq.withFinItemTables.Clone(),
+		withItemTables:          uq.withItemTables.Clone(),
 		withPrimaryEmail:        uq.withPrimaryEmail.Clone(),
 		withFvSession:           uq.withFvSession.Clone(),
 		// clone intermediate query.
@@ -440,14 +440,14 @@ func (uq *UserQuery) WithWebauthnCredentials(opts ...func(*WebauthnCredentialQue
 	return uq
 }
 
-// WithFinItemTables tells the query-builder to eager-load the nodes that are connected to
-// the "fin_item_tables" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithFinItemTables(opts ...func(*FinItemTableQuery)) *UserQuery {
-	query := (&FinItemTableClient{config: uq.config}).Query()
+// WithItemTables tells the query-builder to eager-load the nodes that are connected to
+// the "item_tables" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithItemTables(opts ...func(*ItemTableQuery)) *UserQuery {
+	query := (&ItemTableClient{config: uq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withFinItemTables = query
+	uq.withItemTables = query
 	return uq
 }
 
@@ -555,7 +555,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			uq.withEmails != nil,
 			uq.withPasscodes != nil,
 			uq.withWebauthnCredentials != nil,
-			uq.withFinItemTables != nil,
+			uq.withItemTables != nil,
 			uq.withPrimaryEmail != nil,
 			uq.withFvSession != nil,
 		}
@@ -601,10 +601,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
-	if query := uq.withFinItemTables; query != nil {
-		if err := uq.loadFinItemTables(ctx, query, nodes,
-			func(n *User) { n.Edges.FinItemTables = []*FinItemTable{} },
-			func(n *User, e *FinItemTable) { n.Edges.FinItemTables = append(n.Edges.FinItemTables, e) }); err != nil {
+	if query := uq.withItemTables; query != nil {
+		if err := uq.loadItemTables(ctx, query, nodes,
+			func(n *User) { n.Edges.ItemTables = []*ItemTable{} },
+			func(n *User, e *ItemTable) { n.Edges.ItemTables = append(n.Edges.ItemTables, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -716,7 +716,7 @@ func (uq *UserQuery) loadWebauthnCredentials(ctx context.Context, query *Webauth
 	}
 	return nil
 }
-func (uq *UserQuery) loadFinItemTables(ctx context.Context, query *FinItemTableQuery, nodes []*User, init func(*User), assign func(*User, *FinItemTable)) error {
+func (uq *UserQuery) loadItemTables(ctx context.Context, query *ItemTableQuery, nodes []*User, init func(*User), assign func(*User, *ItemTable)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*User)
 	for i := range nodes {
@@ -727,10 +727,10 @@ func (uq *UserQuery) loadFinItemTables(ctx context.Context, query *FinItemTableQ
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(finitemtable.FieldUserID)
+		query.ctx.AppendFieldOnce(itemtable.FieldUserID)
 	}
-	query.Where(predicate.FinItemTable(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.FinItemTablesColumn), fks...))
+	query.Where(predicate.ItemTable(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ItemTablesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

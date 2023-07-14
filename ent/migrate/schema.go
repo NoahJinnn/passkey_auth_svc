@@ -31,31 +31,6 @@ var (
 			},
 		},
 	}
-	// FinItemTablesColumns holds the columns for the "fin_item_tables" table.
-	FinItemTablesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "sheet", Type: field.TypeInt32},
-		{Name: "section", Type: field.TypeInt32},
-		{Name: "category", Type: field.TypeString},
-		{Name: "description", Type: field.TypeString, Nullable: true, Default: ""},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
-	}
-	// FinItemTablesTable holds the schema information for the "fin_item_tables" table.
-	FinItemTablesTable = &schema.Table{
-		Name:       "fin_item_tables",
-		Columns:    FinItemTablesColumns,
-		PrimaryKey: []*schema.Column{FinItemTablesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "fin_item_tables_users_fin_item_tables",
-				Columns:    []*schema.Column{FinItemTablesColumns[7]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
 	// FvSessionsColumns holds the columns for the "fv_sessions" table.
 	FvSessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -76,6 +51,31 @@ var (
 			{
 				Symbol:     "fv_sessions_users_fv_session",
 				Columns:    []*schema.Column{FvSessionsColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// ItemTablesColumns holds the columns for the "item_tables" table.
+	ItemTablesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "sheet", Type: field.TypeInt32},
+		{Name: "section", Type: field.TypeInt32},
+		{Name: "category", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
+	}
+	// ItemTablesTable holds the schema information for the "item_tables" table.
+	ItemTablesTable = &schema.Table{
+		Name:       "item_tables",
+		Columns:    ItemTablesColumns,
+		PrimaryKey: []*schema.Column{ItemTablesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "item_tables_users_item_tables",
+				Columns:    []*schema.Column{ItemTablesColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -254,8 +254,8 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		EmailsTable,
-		FinItemTablesTable,
 		FvSessionsTable,
+		ItemTablesTable,
 		JwksTable,
 		PasscodesTable,
 		PrimaryEmailsTable,
@@ -269,8 +269,8 @@ var (
 
 func init() {
 	EmailsTable.ForeignKeys[0].RefTable = UsersTable
-	FinItemTablesTable.ForeignKeys[0].RefTable = UsersTable
 	FvSessionsTable.ForeignKeys[0].RefTable = UsersTable
+	ItemTablesTable.ForeignKeys[0].RefTable = UsersTable
 	PasscodesTable.ForeignKeys[0].RefTable = EmailsTable
 	PasscodesTable.ForeignKeys[1].RefTable = UsersTable
 	PrimaryEmailsTable.ForeignKeys[0].RefTable = EmailsTable
