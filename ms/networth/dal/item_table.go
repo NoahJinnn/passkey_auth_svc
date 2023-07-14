@@ -39,6 +39,7 @@ func (r *itemTableRepo) Create(ctx context.Context, userID uuid.UUID, itemtable 
 	newAsset, err := r.pgsql.ItemTable.
 		Create().
 		SetUserID(userID).
+		SetCategory(itemtable.Category).
 		SetSheet(itemtable.Sheet).
 		SetSection(itemtable.Section).
 		SetDescription(itemtable.Description).

@@ -34,7 +34,7 @@ func (s *assetSuite) TestAssetTableHandler_ListByUserId() {
 	cookie, err := s.sessionManager.GenerateCookie(token)
 	s.NoError(err)
 
-	req := httptest.NewRequest(http.MethodGet, "/networth/asset_tables", nil)
+	req := httptest.NewRequest(http.MethodGet, "/networth/item_tables", nil)
 	req.AddCookie(cookie)
 	rec := httptest.NewRecorder()
 
@@ -47,13 +47,12 @@ func (s *assetSuite) TestAssetTableHandler_ListByUserId() {
 	}
 }
 
-func (s *assetSuite) TestAssetTableHandler_Create() {
+func (s *assetSuite) TestItemTableHandler_Create() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
 	err := s.LoadFixtures("../../../../test/fixtures/item_table")
 	s.Require().NoError(err)
-	description := "Test item table"
 	tests := []struct {
 		name               string
 		body               string
@@ -65,19 +64,23 @@ func (s *assetSuite) TestAssetTableHandler_Create() {
 			body: `{
 				"sheet": 1,
 				"section": 1,
-				"description": "Test item table"
+				"description": "Test item table",
+				"category": "asset"
 			}`,
 			expectedStatusCode: http.StatusOK,
 			expectedAsset: &ent.ItemTable{
 				Sheet:       1,
 				Section:     1,
-				Description: description,
+				Description: "Test item table",
+				Category:    "asset",
 			},
 		},
 		{
-			name: "missing fields",
+			name: "missing field",
 			body: `{
-				"description": "Test item table with missing fields"
+				"sheet": 1,
+				"section": 1,
+				"description": "Test item table with missing field"
 			}`,
 			expectedStatusCode: http.StatusBadRequest,
 			expectedAsset:      nil,
@@ -92,7 +95,7 @@ func (s *assetSuite) TestAssetTableHandler_Create() {
 			cookie, err := s.sessionManager.GenerateCookie(token)
 			s.NoError(err)
 
-			req := httptest.NewRequest(http.MethodPost, "/networth/asset_tables/item_table", strings.NewReader(tt.body))
+			req := httptest.NewRequest(http.MethodPost, "/networth/item_tables/item_table", strings.NewReader(tt.body))
 			req.AddCookie(cookie)
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
@@ -106,6 +109,7 @@ func (s *assetSuite) TestAssetTableHandler_Create() {
 				s.Equal(tt.expectedAsset.Sheet, assets[1].Sheet)
 				s.Equal(tt.expectedAsset.Section, assets[1].Section)
 				s.Equal(tt.expectedAsset.Description, assets[1].Description)
+				s.Equal(tt.expectedAsset.Category, assets[1].Category)
 				s.app.GetItemTableSvc().Delete(ctx, uuid.FromStringOrNil(userId), assets[1].ID)
 			}
 		})
