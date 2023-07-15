@@ -112,15 +112,16 @@ func (s *itemTableSuite) TestItemTableHandler_Create() {
 
 			s.e.ServeHTTP(rec, req)
 			s.Equal(tt.expectedStatusCode, rec.Code)
+			itSvc := s.app.GetItemTableSvc()
 			if rec.Code == 200 {
-				assets, err := s.app.GetItemTableSvc().ListByUser(ctx, uuid.FromStringOrNil(userId))
+				assets, err := itSvc.ListByUser(ctx, uuid.FromStringOrNil(userId))
 				s.NoError(err)
 				s.Equal(2, len(assets)) // 1st from fixture, 2nd from create
 				s.Equal(tt.expectedAsset.Sheet, assets[1].Sheet)
 				s.Equal(tt.expectedAsset.Section, assets[1].Section)
 				s.Equal(tt.expectedAsset.Description, assets[1].Description)
 				s.Equal(tt.expectedAsset.Category, assets[1].Category)
-				s.app.GetItemTableSvc().Delete(ctx, uuid.FromStringOrNil(userId), assets[1].ID)
+				itSvc.Delete(ctx, uuid.FromStringOrNil(userId), assets[1].ID)
 			}
 		})
 	}

@@ -23,5 +23,8 @@ func NewSqliteClient(dsn string) *ent.Client {
 	); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
+
+	// client.
+
 	return client
 }

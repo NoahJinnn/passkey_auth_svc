@@ -25,7 +25,11 @@ func TestSqliteConnection(t *testing.T) {
 				p.NewSqliteConnect(uid)
 			}
 			assert.Equal(t, len(tt.uids), len(p.userStorage))
+
+			for _, uid := range tt.uids {
+				p.ClearSqliteConnect(uid)
+			}
+			assert.Equal(t, 0, len(p.userStorage))
 		})
 	}
-
 }

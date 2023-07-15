@@ -151,10 +151,10 @@ func (s *manualItemSuite) TestManualItemHandler_Create() {
 			expectedAsset:      nil,
 		},
 	}
-
+	providerSvc := s.app.GetProviderSvc()
+	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
 	for _, tt := range tests {
 		s.Run(tt.name, func() {
-			userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
 			token, err := s.sessionManager.GenerateJWT(userId)
 			s.Require().NoError(err)
 			cookie, err := s.sessionManager.GenerateCookie(token)
@@ -168,7 +168,7 @@ func (s *manualItemSuite) TestManualItemHandler_Create() {
 			s.e.ServeHTTP(rec, req)
 			s.Equal(tt.expectedStatusCode, rec.Code)
 			if rec.Code == 200 {
-				assets, err := s.app.GetProviderSvc().AllManualItem(ctx, uuid.FromStringOrNil(userId))
+				assets, err := providerSvc.AllManualItem(ctx, uuid.FromStringOrNil(userId))
 				s.NoError(err)
 				s.Equal(1, len(assets))
 				s.Equal(tt.expectedAsset.ItemTableID, assets[0].ItemTableID)
@@ -177,8 +177,10 @@ func (s *manualItemSuite) TestManualItemHandler_Create() {
 				s.Equal(tt.expectedAsset.Description, assets[0].Description)
 				s.Equal(tt.expectedAsset.Value, assets[0].Value)
 				s.Equal(tt.expectedAsset.ProviderName, assets[0].ProviderName)
-				s.app.GetProviderSvc().DeleteManualItem(ctx, uuid.FromStringOrNil(userId), assets[0].ID)
+				providerSvc.DeleteManualItem(ctx, uuid.FromStringOrNil(userId), assets[0].ID)
 			}
 		})
 	}
+
+	providerSvc.ClearSqliteConnect(userId)
 }

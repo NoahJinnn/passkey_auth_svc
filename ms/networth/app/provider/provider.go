@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/gofrs/uuid"
@@ -28,14 +29,23 @@ func NewProviderSvc() *ProviderSvc {
 }
 
 func (p *ProviderSvc) NewSqliteConnect(userId string) *ent.Client {
-	dns := sqliteDns(userId)
 	if p.userStorage == nil {
 		p.userStorage = make(map[string]*ent.Client)
 	}
 	if p.userStorage[userId] == nil {
+		dns := sqliteDns(userId)
 		p.userStorage[userId] = sqlite.NewSqliteClient(dns)
 	}
 	return p.userStorage[userId]
+}
+
+func (p *ProviderSvc) ClearSqliteConnect(userId string) {
+	conn := p.userStorage[userId]
+	conn.Close()
+	if p.userStorage != nil {
+		delete(p.userStorage, userId)
+	}
+	os.Remove(userId + ".db")
 }
 
 func (p *ProviderSvc) getSqliteConnect(userId string) *ent.Client {
