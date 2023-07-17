@@ -3,6 +3,7 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 
 	"entgo.io/ent/dialect"
@@ -13,11 +14,8 @@ import (
 )
 
 func NewSqliteClient(dsn string) *ent.Client {
-	db, err := sql.Open(dialect.SQLite, dsn)
+	db := NewSqliteDrive(dsn)
 	drv := entsql.OpenDB(dialect.SQLite, db)
-	if err != nil {
-		log.Fatalf("failed opening connection to sqlite: %v", err)
-	}
 
 	client := ent.NewClient(ent.Driver(drv))
 
@@ -39,14 +37,54 @@ func NewSqliteDrive(dsn string) *sql.DB {
 	}
 	conn, err := db.Conn(context.Background())
 	if err != nil {
-		log.Fatalf("failed opening connection to sqlite: %v", err)
+		log.Fatalf("failed getting connection: %v", err)
 	}
 	defer conn.Close()
 	err = conn.Raw(func(driverConn interface{}) error {
 		sqliteConn := driverConn.(*sqlite3.SQLiteConn)
-		sqliteConn.LoadExtension("crsqlite-darwin-aarch64", "sqlite3_crsqlite_init")
+		err := sqliteConn.LoadExtension("crsqlite-darwin-aarch64", "sqlite3_crsqlite_init")
+		if err != nil {
+			return err
+		}
 		return nil
 	})
+	if err != nil {
+		log.Fatalf("failed loading extension: %v", err)
+	}
+
+	rows, err := db.Query("SELECT quote(crsql_siteid());")
+	if err != nil {
+		log.Fatalf("failed to query crsql lite id: %v", err)
+	}
+
+	columns, err := rows.Columns()
+	if err != nil {
+		fmt.Println("Error getting column names:", err)
+		return nil
+	}
+
+	result := make([]string, 0)
+	values := make([]interface{}, len(columns))
+	for rows.Next() {
+
+		err = rows.Scan(values...)
+		if err != nil {
+			fmt.Println("Error scanning row values:", err)
+			return nil
+		}
+		rowData := make([]string, len(columns))
+		for i := range columns {
+			rowData[i] = fmt.Sprintf("%v", *values[i].(*interface{}))
+		}
+		result = append(result, rowData...)
+
+	}
+	fmt.Println(result)
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}

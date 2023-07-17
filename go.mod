@@ -48,6 +48,7 @@ require (
 	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/bep/godartsass v0.16.0 // indirect
 	github.com/bep/golibsass v1.1.0 // indirect
+	github.com/brianvoe/gofakeit/v6 v6.23.0 // indirect
 	github.com/cli/safeexec v1.0.0 // indirect
 	github.com/containerd/continuity v0.3.0 // indirect
 	github.com/creack/pty v1.1.18 // indirect
