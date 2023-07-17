@@ -14,19 +14,6 @@ import (
 
 func NewSqliteClient(dsn string) *ent.Client {
 	db, err := sql.Open(dialect.SQLite, dsn)
-	if err != nil {
-		log.Fatalf("failed opening connection to sqlite: %v", err)
-	}
-	conn, err := db.Conn(context.Background())
-	if err != nil {
-		log.Fatalf("failed opening connection to sqlite: %v", err)
-	}
-	defer conn.Close()
-	err = conn.Raw(func(driverConn interface{}) error {
-		sqliteConn := driverConn.(*sqlite3.SQLiteConn)
-		sqliteConn.LoadExtension("crsqlite-darwin-aarch64", "sqlite3_crsqlite_init")
-		return nil
-	})
 	drv := entsql.OpenDB(dialect.SQLite, db)
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
@@ -43,4 +30,26 @@ func NewSqliteClient(dsn string) *ent.Client {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 	return client
+}
+
+func NewSqliteDrive(dsn string) *sql.DB {
+	db, err := sql.Open(dialect.SQLite, dsn)
+	if err != nil {
+		log.Fatalf("failed opening connection to sqlite: %v", err)
+	}
+	conn, err := db.Conn(context.Background())
+	if err != nil {
+		log.Fatalf("failed opening connection to sqlite: %v", err)
+	}
+	defer conn.Close()
+	err = conn.Raw(func(driverConn interface{}) error {
+		sqliteConn := driverConn.(*sqlite3.SQLiteConn)
+		sqliteConn.LoadExtension("crsqlite-darwin-aarch64", "sqlite3_crsqlite_init")
+		return nil
+	})
+	if err != nil {
+		log.Fatalf("failed opening connection to sqlite: %v", err)
+	}
+
+	return db
 }
