@@ -109,6 +109,19 @@ var (
 		Columns:    ManualItemsColumns,
 		PrimaryKey: []*schema.Column{ManualItemsColumns[0]},
 	}
+	// TodosColumns holds the columns for the "todos" table.
+	TodosColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "list_id", Type: field.TypeInt, Default: 0},
+		{Name: "text", Type: field.TypeString, Default: ""},
+		{Name: "completed", Type: field.TypeBool, Default: false},
+	}
+	// TodosTable holds the schema information for the "todos" table.
+	TodosTable = &schema.Table{
+		Name:       "todos",
+		Columns:    TodosColumns,
+		PrimaryKey: []*schema.Column{TodosColumns[0]},
+	}
 	// TransactionsColumns holds the columns for the "transactions" table.
 	TransactionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -130,6 +143,7 @@ var (
 		IncomesTable,
 		InstitutionsTable,
 		ManualItemsTable,
+		TodosTable,
 		TransactionsTable,
 	}
 )

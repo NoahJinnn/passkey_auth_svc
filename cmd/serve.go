@@ -50,7 +50,7 @@ func NewServeCmd(cfg *sharedconfig.Shared) *cobra.Command {
 			defer cancel()
 
 			dbClient := db.InitDbClient(ctxStartupCmdServe, cfg)
-			defer dbClient.PgClient.Close()
+			defer dbClient.PgEnt.Close()
 
 			jwkRepo := session.NewJwkRepo(dbClient)
 			sessionManager := session.InitSessionManager(ctxStartupCmdServe, cfg, jwkRepo)

@@ -39,11 +39,11 @@ type AuthRepo struct {
 type Ctx = context.Context
 
 func New(client *db.Db) *AuthRepo {
-	userRepo := NewUserRepo(client.PgClient)
-	waCredentialRepo := NewWebauthnCredentialRepo(client.PgClient)
-	waSessionRepo := NewWebauthnSessionRepo(client.PgClient)
-	emailRepo := NewEmailRepo(client.PgClient)
-	passcodeRepo := NewPasscodeRepo(client.PgClient)
+	userRepo := NewUserRepo(client.PgEnt)
+	waCredentialRepo := NewWebauthnCredentialRepo(client.PgEnt)
+	waSessionRepo := NewWebauthnSessionRepo(client.PgEnt)
+	emailRepo := NewEmailRepo(client.PgEnt)
+	passcodeRepo := NewPasscodeRepo(client.PgEnt)
 	return &AuthRepo{
 		Db:               client,
 		userRepo:         userRepo,
@@ -55,7 +55,7 @@ func New(client *db.Db) *AuthRepo {
 }
 
 func (r AuthRepo) WithTx(ctx context.Context, exec func(ctx Ctx, client *ent.Client) error) error {
-	return pgsql.WithTx(ctx, r.Db.PgClient, exec)
+	return pgsql.WithTx(ctx, r.Db.PgEnt, exec)
 }
 
 func (r AuthRepo) GetUserRepo() IUserRepo {

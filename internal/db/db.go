@@ -10,15 +10,15 @@ import (
 )
 
 type Db struct {
-	PgClient *ent.Client
+	PgEnt *ent.Client
 	// We can declare multiple clients here, e.g: MySQLClient *ent.Client, SQLiteClient *ent.Client
 }
 
 func InitDbClient(ctxStartupCmdServe context.Context, cfg *sharedconfig.Shared) *Db {
 	cfg.Postgres.SSLMode = pqx.SSLRequire
 	dateSourceName := cfg.Postgres.FormatDSN()
-	pgClient := pgsql.NewPgClient(dateSourceName)
+	pgEnt := pgsql.NewPgEnt(dateSourceName)
 	return &Db{
-		PgClient: pgClient,
+		PgEnt: pgEnt,
 	}
 }

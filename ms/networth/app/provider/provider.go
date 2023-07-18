@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
+	"os"
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite"
@@ -28,12 +28,13 @@ func NewProviderSvc() *ProviderSvc {
 }
 
 func (p *ProviderSvc) NewSqliteConnect(userId string) *ent.Client {
-	dns := sqliteDns(userId)
 	if p.userStorage == nil {
 		p.userStorage = make(map[string]*ent.Client)
 	}
 	if p.userStorage[userId] == nil {
-		p.userStorage[userId] = sqlite.NewSqliteClient(dns)
+		dns := sqliteDns(userId)
+		db := sqlite.NewSqliteDrive(dns)
+		p.userStorage[userId] = sqlite.NewSqliteEnt(db)
 	}
 	return p.userStorage[userId]
 }
@@ -237,11 +238,16 @@ func (p *ProviderSvc) CheckIncomeExist(ctx context.Context, userId uuid.UUID, pr
 	return exist, nil
 }
 
-func sqliteDns(userId string) string {
-	if strings.Contains(userId, "test") {
-		return "file:" + userId + "file:ent?mode=memory&_fk=1"
-
+func (p *ProviderSvc) ClearSqliteDB(userId string) {
+	conn := p.userStorage[userId]
+	conn.Close()
+	if p.userStorage != nil {
+		delete(p.userStorage, userId)
 	}
+	os.Remove(userId + ".db")
+}
+
+func sqliteDns(userId string) string {
 	return "file:" + userId + ".db?cache=shared&_fk=1"
 }
 
