@@ -13,8 +13,16 @@ import (
 	"github.com/mattn/go-sqlite3"
 )
 
-func NewSqliteClient(dsn string) *ent.Client {
-	db := NewSqliteDrive(dsn)
+func NewSqliteDrive(dsn string) *sql.DB {
+	db, err := sql.Open(dialect.SQLite, dsn)
+	if err != nil {
+		log.Fatalf("failed opening connection to sqlite: %v", err)
+	}
+
+	return db
+}
+
+func NewSqliteEnt(db *sql.DB) *ent.Client {
 	drv := entsql.OpenDB(dialect.SQLite, db)
 
 	client := ent.NewClient(ent.Driver(drv))
@@ -28,15 +36,6 @@ func NewSqliteClient(dsn string) *ent.Client {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 	return client
-}
-
-func NewSqliteDrive(dsn string) *sql.DB {
-	db, err := sql.Open(dialect.SQLite, dsn)
-	if err != nil {
-		log.Fatalf("failed opening connection to sqlite: %v", err)
-	}
-
-	return db
 }
 
 func NewSqliteConn(db *sql.DB) *sql.Conn {
@@ -61,7 +60,6 @@ func NewSqliteConn(db *sql.DB) *sql.Conn {
 	r := conn.QueryRowContext(context.Background(), "SELECT quote(crsql_siteid());")
 	var siteid string
 	if err = r.Scan(&siteid); err == sql.ErrNoRows {
-		log.Printf("Id not found")
 		log.Fatalf("failed to query crsql lite id: %v", err)
 	}
 

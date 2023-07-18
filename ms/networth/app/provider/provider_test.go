@@ -15,7 +15,7 @@ func TestSqliteConnection(t *testing.T) {
 	}{
 		{
 			name: "3 conn success",
-			uids: []string{"test_id1", "test_id2", "test_id3"},
+			uids: []string{"id1", "id2", "id3"},
 		},
 	}
 

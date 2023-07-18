@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite"
@@ -34,7 +33,8 @@ func (p *ProviderSvc) NewSqliteConnect(userId string) *ent.Client {
 	}
 	if p.userStorage[userId] == nil {
 		dns := sqliteDns(userId)
-		p.userStorage[userId] = sqlite.NewSqliteClient(dns)
+		db := sqlite.NewSqliteDrive(dns)
+		p.userStorage[userId] = sqlite.NewSqliteEnt(db)
 	}
 	return p.userStorage[userId]
 }
@@ -248,10 +248,6 @@ func (p *ProviderSvc) ClearSqliteDB(userId string) {
 }
 
 func sqliteDns(userId string) string {
-	if strings.Contains(userId, "test") {
-		return "file:" + userId + "file:ent?mode=memory&_fk=1"
-
-	}
 	return "file:" + userId + ".db?cache=shared&_fk=1"
 }
 
