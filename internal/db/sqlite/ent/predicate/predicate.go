@@ -21,5 +21,8 @@ type Institution func(*sql.Selector)
 // ManualItem is the predicate function for manualitem builders.
 type ManualItem func(*sql.Selector)
 
+// Todo is the predicate function for todo builders.
+type Todo func(*sql.Selector)
+
 // Transaction is the predicate function for transaction builders.
 type Transaction func(*sql.Selector)

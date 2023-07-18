@@ -12,6 +12,7 @@ import (
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/manualitem"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/schema"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/todo"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
 )
 
@@ -111,6 +112,34 @@ func init() {
 	manualitemDescID := manualitemFields[0].Descriptor()
 	// manualitem.DefaultID holds the default value on creation for the id field.
 	manualitem.DefaultID = manualitemDescID.Default.(func() uuid.UUID)
+	todoFields := schema.Todo{}.Fields()
+	_ = todoFields
+	// todoDescListId is the schema descriptor for listId field.
+	todoDescListId := todoFields[1].Descriptor()
+	// todo.DefaultListId holds the default value on creation for the listId field.
+	todo.DefaultListId = todoDescListId.Default.(int)
+	// todoDescText is the schema descriptor for text field.
+	todoDescText := todoFields[2].Descriptor()
+	// todo.DefaultText holds the default value on creation for the text field.
+	todo.DefaultText = todoDescText.Default.(string)
+	// todoDescCompleted is the schema descriptor for completed field.
+	todoDescCompleted := todoFields[3].Descriptor()
+	// todo.DefaultCompleted holds the default value on creation for the completed field.
+	todo.DefaultCompleted = todoDescCompleted.Default.(bool)
+	// todoDescCreatedAt is the schema descriptor for created_at field.
+	todoDescCreatedAt := todoFields[4].Descriptor()
+	// todo.DefaultCreatedAt holds the default value on creation for the created_at field.
+	todo.DefaultCreatedAt = todoDescCreatedAt.Default.(func() time.Time)
+	// todoDescUpdatedAt is the schema descriptor for updated_at field.
+	todoDescUpdatedAt := todoFields[5].Descriptor()
+	// todo.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	todo.DefaultUpdatedAt = todoDescUpdatedAt.Default.(func() time.Time)
+	// todo.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	todo.UpdateDefaultUpdatedAt = todoDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// todoDescID is the schema descriptor for id field.
+	todoDescID := todoFields[0].Descriptor()
+	// todo.DefaultID holds the default value on creation for the id field.
+	todo.DefaultID = todoDescID.Default.(func() uuid.UUID)
 	transactionFields := schema.Transaction{}.Fields()
 	_ = transactionFields
 	// transactionDescCreatedAt is the schema descriptor for created_at field.

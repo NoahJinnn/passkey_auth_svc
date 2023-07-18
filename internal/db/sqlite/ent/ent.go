@@ -17,6 +17,7 @@ import (
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/income"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/manualitem"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent/todo"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/transaction"
 )
 
@@ -83,6 +84,7 @@ func checkColumn(table, column string) error {
 			income.Table:      income.ValidColumn,
 			institution.Table: institution.ValidColumn,
 			manualitem.Table:  manualitem.ValidColumn,
+			todo.Table:        todo.ValidColumn,
 			transaction.Table: transaction.ValidColumn,
 		})
 	})
