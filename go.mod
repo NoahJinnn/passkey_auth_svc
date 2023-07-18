@@ -1,6 +1,6 @@
 module github.com/hellohq/hqservice
 
-go 1.19
+go 1.20
 
 require (
 	github.com/gofrs/uuid v4.4.0+incompatible
@@ -19,6 +19,7 @@ require (
 require (
 	entgo.io/ent v0.12.3
 	github.com/OneSignal/onesignal-go-api v1.0.4
+	github.com/brianvoe/gofakeit/v6 v6.23.0
 	github.com/cosmtrek/air v1.44.0
 	github.com/go-playground/validator/v10 v10.14.1
 	github.com/go-testfixtures/testfixtures/v3 v3.9.0
@@ -26,7 +27,7 @@ require (
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/lestrrat-go/jwx/v2 v2.0.11
-	github.com/mattn/go-sqlite3 v2.0.3+incompatible
+	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/mattn/goveralls v0.0.11
 	github.com/nicksnyder/go-i18n/v2 v2.2.1
 	github.com/nikoksr/doppler-go v0.3.0
@@ -48,7 +49,6 @@ require (
 	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/bep/godartsass v0.16.0 // indirect
 	github.com/bep/golibsass v1.1.0 // indirect
-	github.com/brianvoe/gofakeit/v6 v6.23.0 // indirect
 	github.com/cli/safeexec v1.0.0 // indirect
 	github.com/containerd/continuity v0.3.0 // indirect
 	github.com/creack/pty v1.1.18 // indirect

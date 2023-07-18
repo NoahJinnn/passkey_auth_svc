@@ -182,5 +182,5 @@ func (s *manualItemSuite) TestManualItemHandler_Create() {
 		})
 	}
 
-	providerSvc.ClearSqliteConnect(userId)
+	providerSvc.ClearSqliteDB(userId)
 }
