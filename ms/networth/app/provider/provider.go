@@ -39,15 +39,6 @@ func (p *ProviderSvc) NewSqliteConnect(userId string) *ent.Client {
 	return p.userStorage[userId]
 }
 
-func (p *ProviderSvc) ClearSqliteConnect(userId string) {
-	conn := p.userStorage[userId]
-	conn.Close()
-	if p.userStorage != nil {
-		delete(p.userStorage, userId)
-	}
-	os.Remove(userId + ".db")
-}
-
 func (p *ProviderSvc) getSqliteConnect(userId string) *ent.Client {
 	storage := p.userStorage[userId]
 	if storage == nil {
@@ -245,6 +236,15 @@ func (p *ProviderSvc) CheckIncomeExist(ctx context.Context, userId uuid.UUID, pr
 	}
 
 	return exist, nil
+}
+
+func (p *ProviderSvc) ClearSqliteDB(userId string) {
+	conn := p.userStorage[userId]
+	conn.Close()
+	if p.userStorage != nil {
+		delete(p.userStorage, userId)
+	}
+	os.Remove(userId + ".db")
 }
 
 func sqliteDns(userId string) string {
