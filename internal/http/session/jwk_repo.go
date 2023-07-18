@@ -25,7 +25,7 @@ func NewJwkRepo(db *db.Db) IJwkRepo {
 }
 
 func (r *jwkRepo) Jwk(ctx context.Context, id uint) (*ent.Jwk, error) {
-	jwk, err := r.db.PgClient.Jwk.
+	jwk, err := r.db.PgEnt.Jwk.
 		Query().
 		Where(jwk.ID(id)).
 		Only(ctx)
@@ -40,7 +40,7 @@ func (r *jwkRepo) Jwk(ctx context.Context, id uint) (*ent.Jwk, error) {
 }
 
 func (r *jwkRepo) All(ctx context.Context) ([]*ent.Jwk, error) {
-	jwks, err := r.db.PgClient.Jwk.
+	jwks, err := r.db.PgEnt.Jwk.
 		Query().
 		All(ctx)
 	if err != nil {
@@ -51,7 +51,7 @@ func (r *jwkRepo) All(ctx context.Context) ([]*ent.Jwk, error) {
 }
 
 func (r *jwkRepo) Last(ctx context.Context) (*ent.Jwk, error) {
-	jwk, err := r.db.PgClient.Jwk.
+	jwk, err := r.db.PgEnt.Jwk.
 		Query().
 		Order(ent.Desc(jwk.FieldCreatedAt, jwk.FieldID)).
 		Limit(1).
@@ -64,7 +64,7 @@ func (r *jwkRepo) Last(ctx context.Context) (*ent.Jwk, error) {
 }
 
 func (r *jwkRepo) Create(ctx context.Context, jwk ent.Jwk) error {
-	_, err := r.db.PgClient.Jwk.
+	_, err := r.db.PgEnt.Jwk.
 		Create().
 		SetID(jwk.ID).
 		SetKeyData(jwk.KeyData).

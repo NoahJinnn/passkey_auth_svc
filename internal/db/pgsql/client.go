@@ -9,7 +9,7 @@ import (
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/migrate"
 )
 
-func NewPgClient(dsn string) *ent.Client {
+func NewPgEnt(dsn string) *ent.Client {
 	client, err := ent.Open(dialect.Postgres, dsn)
 	if err != nil {
 		log.Fatalf("failed opening connection to postgres: %v", err)

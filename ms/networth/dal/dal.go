@@ -34,8 +34,8 @@ type NwRepo struct {
 }
 
 func New(client *db.Db) *NwRepo {
-	itemTableRepo := NewItemTableRepo(client.PgClient)
-	fvSessionRepo := NewFvSessionRepo(client.PgClient)
+	itemTableRepo := NewItemTableRepo(client.PgEnt)
+	fvSessionRepo := NewFvSessionRepo(client.PgEnt)
 	return &NwRepo{
 		Db:            client,
 		itemTableRepo: itemTableRepo,
@@ -44,7 +44,7 @@ func New(client *db.Db) *NwRepo {
 }
 
 func (r NwRepo) WithTx(ctx Ctx, exec func(ctx Ctx, client *ent.Client) error) error {
-	return pgsql.WithTx(ctx, r.Db.PgClient, exec)
+	return pgsql.WithTx(ctx, r.Db.PgEnt, exec)
 }
 
 func (r NwRepo) GetFvSessionRepo() IFvSessionRepo {
