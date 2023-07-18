@@ -2,14 +2,11 @@ package main
 
 import (
 	"github.com/hellohq/hqservice/cmd"
-	"github.com/hellohq/hqservice/internal/db/sqlite"
 	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/pkg/def"
 )
 
 func main() {
-	sqlite.NewSqliteClient("file:" + "userId" + ".db?cache=shared&_fk=1")
-
 	err := def.Init()
 	if err != nil {
 		cmd.Log.Fatalf("failed to get defaults: %s", err)

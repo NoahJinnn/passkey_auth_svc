@@ -1,6 +1,7 @@
 package sqlite
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -10,23 +11,34 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+type Todo struct {
+	ID        int
+	Text      string
+	Completed bool
+}
 type sqliteTestSuite struct {
 	suite.Suite
-	db []*sql.DB
+	conns []*sql.Conn
 }
 
-func (suite *sqliteTestSuite) SetupTest() {
-	for i := 0; i < 2; i++ {
+func (s *sqliteTestSuite) SetupTest() {
+	ctx := context.Background()
+	for i := 0; i < 3; i++ {
 		db := NewSqliteDrive("file:" + fmt.Sprintf("test %d", i) + "file:ent?mode=memory&_fk=1")
-		db.Exec(`CREATE TABLE todo ("id" primary key, "listId", "completed", "text")`)
-		db.Exec(`SELECT crsql_as_crr('todo')`)
+		conn := NewSqliteConn(db)
+		conn.ExecContext(ctx, `CREATE TABLE todo ("id" primary key, "listId", "completed", "text")`)
+		conn.ExecContext(ctx, `SELECT crsql_as_crr('todo')`)
+		s.conns = append(s.conns, conn)
+	}
+}
 
-		suite.db = append(suite.db, db)
+func (s *sqliteTestSuite) TearDownTest() {
+	for _, conn := range s.conns {
+		conn.Close()
 	}
 }
 
 func TestSqliteTestSuite(t *testing.T) {
-	// t.Parallel()
 	suite.Run(t, new(sqliteTestSuite))
 }
 
@@ -40,10 +52,10 @@ func createInsert(id interface{}, listId interface{}, text string, completed boo
 	return query, params
 }
 
-func all(db *sql.DB, q []interface{}) []map[string]interface{} {
+func queryAllRows(ctx context.Context, db *sql.Conn, q []interface{}) []map[string]interface{} {
 	query := q[0].(string)
 	params := q[1].([]interface{})
-	stmt, err := db.Prepare(query)
+	stmt, err := db.PrepareContext(ctx, query)
 	if err != nil {
 		fmt.Println("Error preparing statement:", err)
 		return nil
@@ -84,21 +96,27 @@ func all(db *sql.DB, q []interface{}) []map[string]interface{} {
 	return result
 }
 
-func sync(left *sql.DB, right *sql.DB) {
-	changesets, err := left.Query(`SELECT * FROM crsql_changes`)
+func sync(ctx context.Context, left *sql.Conn, right *sql.Conn) {
+	changesets, err := left.QueryContext(ctx, `SELECT * FROM crsql_changes WHERE db_version > 0 AND site_id IS NULL`)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	tx, err := right.Begin()
+	tx, err := right.BeginTx(ctx, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	stmt, err := tx.Prepare("INSERT INTO crsql_changes VALUES (?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := tx.Prepare(`INSERT INTO crsql_changes VALUES (?, ?, ?, ?, ?, ?, ?)`)
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	// [table] TEXT NOT NULL,
+	// [pk] TEXT NOT NULL,
+	// [cid] TEXT NOT NULL,
+	// [val] ANY,
+	// [col_version] INTEGER NOT NULL,
+	// [db_version] INTEGER NOT NULL,
+	// [site_id] BLOB --
 	for changesets.Next() {
 		var table string
 		var pk string
@@ -106,9 +124,11 @@ func sync(left *sql.DB, right *sql.DB) {
 		var val interface{}
 		var col_version int
 		var db_version int
-		var site_id string
+		var site_id []byte
 		err = changesets.Scan(&table, &pk, &cid, &val, &col_version, &db_version, &site_id)
-		log.Fatal(err)
+		if err != nil {
+			log.Fatal(err)
+		}
 		_, err := stmt.Exec(table, pk, cid, val, col_version, db_version, site_id)
 		if err != nil {
 			fmt.Println("Error executing statement:", err)
@@ -124,30 +144,88 @@ func sync(left *sql.DB, right *sql.DB) {
 	}
 }
 
-func assertAll(dbs []*sql.DB) {
-	results := make([][]map[string]interface{}, len(dbs))
+func (s *sqliteTestSuite) TestInsert() {
+	ctx := context.Background()
+	query, params := createInsert("1", "2", "Sample text", true)
+	_, err := s.conns[0].ExecContext(ctx, query, params...)
+	if err != nil {
+		fmt.Println("Error executing query:", err)
+		return
+	}
 
-	for i, db := range dbs {
-		query := fmt.Sprintf(`SELECT * FROM todo ORDER BY id DESC`)
-		results[i] = all(db, []interface{}{query, []interface{}{}})
+	query = `SELECT * FROM todo`
+	rows, err := s.conns[0].QueryContext(ctx, query)
+	s.NoError(err)
+	defer rows.Close()
+
+	for rows.Next() {
+		var id string
+		var listId string
+		var text string
+		var completed int
+		err = rows.Scan(&id, &listId, &completed, &text)
+		s.NoError(err)
+
+		s.Equal("1", id)
+		s.Equal("2", listId)
+		s.Equal("Sample text", text)
+		s.Equal(1, completed)
+	}
+}
+
+func (s *sqliteTestSuite) TestMerge() {
+	ctx := context.Background()
+	todos := make([]Todo, gofakeit.IntRange(4, 20))
+	for i := range todos {
+		todos[i] = Todo{
+			ID:        gofakeit.IntRange(1, 1000),
+			Text:      gofakeit.Sentence(3),
+			Completed: gofakeit.Bool(),
+		}
+	}
+
+	for i, todo := range todos {
+		query, params := createInsert(i, todo.ID, todo.Text, todo.Completed)
+		_, err := s.conns[0].ExecContext(ctx, query, params...)
+		if err != nil {
+			fmt.Println("Error executing query:", err)
+			return
+		}
+	}
+	sync(ctx, s.conns[0], s.conns[1])
+	sync(ctx, s.conns[0], s.conns[2])
+	s.True(assertAllRowsByConn(ctx, s.conns), "All rows should be equal, DBs sync failed")
+	sync(ctx, s.conns[1], s.conns[0])
+	sync(ctx, s.conns[2], s.conns[0])
+	assertAllRowsByConn(ctx, s.conns)
+	s.True(assertAllRowsByConn(ctx, s.conns), "All rows should be equal, DBs sync failed")
+}
+
+func assertAllRowsByConn(ctx context.Context, conns []*sql.Conn) bool {
+	results := make([][]map[string]interface{}, len(conns))
+
+	for i, db := range conns {
+		query := `SELECT * FROM todo ORDER BY id DESC`
+		results[i] = queryAllRows(ctx, db, []interface{}{query, []interface{}{}})
 	}
 
 	for i := 0; i < len(results)-1; i++ {
 		if !isEqual(results[i], results[i+1]) {
 			fmt.Println("Assertion failed!")
-			fmt.Println("Results:")
-			for _, rows := range results {
+			fmt.Println("Results of", i)
+			for _, rows := range results[i] {
 				fmt.Println(rows)
 			}
-			return
-		}
-		fmt.Println("Results:")
-		for _, rows := range results {
-			fmt.Println(rows)
+			fmt.Println("Results of", i+1)
+			for _, rows := range results[i+1] {
+				fmt.Println(rows)
+			}
+
+			return false
 		}
 	}
 
-	fmt.Println("All assertions passed!")
+	return true
 }
 
 func isEqual(a, b []map[string]interface{}) bool {
@@ -180,62 +258,4 @@ func isRowEqual(a, b map[string]interface{}) bool {
 	}
 
 	return true
-}
-
-func (s *sqliteTestSuite) TestInsert() {
-	query, params := createInsert("1", "2", "Sample text", true)
-	_, err := s.db[0].Exec(query, params...)
-	if err != nil {
-		fmt.Println("Error executing query:", err)
-		return
-	}
-
-	query = `SELECT * FROM todo`
-	rows, err := s.db[0].Query(query)
-	s.NoError(err)
-	defer rows.Close()
-
-	for rows.Next() {
-		var id string
-		var listId string
-		var text string
-		var completed int
-		err = rows.Scan(&id, &listId, &completed, &text)
-		s.NoError(err)
-
-		s.Equal("1", id)
-		s.Equal("2", listId)
-		s.Equal("Sample text", text)
-		s.Equal(1, completed)
-	}
-}
-
-type Todo struct {
-	ID        int
-	Text      string
-	Completed bool
-}
-
-func (s *sqliteTestSuite) TestMerge() {
-	todos := make([]Todo, gofakeit.IntRange(4, 20))
-	for i := range todos {
-		todos[i] = Todo{
-			ID:        gofakeit.IntRange(1, 1000),
-			Text:      gofakeit.Sentence(3),
-			Completed: gofakeit.Bool(),
-		}
-	}
-
-	for i, todo := range todos {
-		query, params := createInsert(i, todo.ID, todo.Text, todo.Completed)
-		for _, db := range s.db {
-			_, err := db.Exec(query, params...)
-			if err != nil {
-				fmt.Println("Error executing query:", err)
-				return
-			}
-		}
-	}
-	sync(s.db[0], s.db[1])
-	assertAll(s.db)
 }

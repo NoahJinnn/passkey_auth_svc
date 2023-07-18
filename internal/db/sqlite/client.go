@@ -35,11 +35,15 @@ func NewSqliteDrive(dsn string) *sql.DB {
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
+
+	return db
+}
+
+func NewSqliteConn(db *sql.DB) *sql.Conn {
 	conn, err := db.Conn(context.Background())
 	if err != nil {
 		log.Fatalf("failed getting connection: %v", err)
 	}
-	defer conn.Close()
 
 	err = conn.Raw(func(driverConn interface{}) error {
 		sqliteConn := driverConn.(*sqlite3.SQLiteConn)
@@ -61,7 +65,5 @@ func NewSqliteDrive(dsn string) *sql.DB {
 		log.Fatalf("failed to query crsql lite id: %v", err)
 	}
 
-	fmt.Printf("r: %v\n", siteid)
-
-	return db
+	return conn
 }
