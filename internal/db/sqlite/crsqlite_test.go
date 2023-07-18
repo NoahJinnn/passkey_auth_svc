@@ -8,32 +8,39 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/internal/db/sqlite/ent"
 	"github.com/stretchr/testify/suite"
 )
 
 type Todo struct {
-	ID        int
+	ID        string
+	ListId    int
 	Text      string
 	Completed bool
 }
 type sqliteTestSuite struct {
 	suite.Suite
-	conns []*sql.Conn
+	ctx     context.Context
+	conns   []*sql.Conn
+	clients []*ent.Client
 }
 
 func (s *sqliteTestSuite) SetupTest() {
 	ctx := context.Background()
+	s.ctx = ctx
 	for i := 0; i < 3; i++ {
-		db := NewSqliteDrive("file:" + fmt.Sprintf("test %d", i) + "file:ent?mode=memory&_fk=1")
+		db := NewSqliteDrive("file:" + fmt.Sprintf("test %d", i) + ".db?cache=shared&_fk=1")
+		client := NewSqliteEnt(db)
+		s.clients = append(s.clients, client)
 		conn := NewSqliteConn(db)
-		conn.ExecContext(ctx, `CREATE TABLE todo ("id" primary key, "listId", "completed", "text")`)
-		conn.ExecContext(ctx, `SELECT crsql_as_crr('todo')`)
 		s.conns = append(s.conns, conn)
 	}
 }
 
 func (s *sqliteTestSuite) TearDownTest() {
 	for _, conn := range s.conns {
+		conn.ExecContext(s.ctx, `SELECT crsql_finalize();`)
 		conn.Close()
 	}
 }
@@ -42,14 +49,42 @@ func TestSqliteTestSuite(t *testing.T) {
 	suite.Run(t, new(sqliteTestSuite))
 }
 
-func createInsert(id interface{}, listId interface{}, text string, completed bool) (string, []interface{}) {
-	query := `INSERT INTO todo ("id", "listId", "text", "completed") VALUES (?, ?, ?, ?)`
-	completedInt := 0
-	if completed {
-		completedInt = 1
+func (s *sqliteTestSuite) TestMerge() {
+	todos := make([]Todo, gofakeit.IntRange(4, 20))
+	for i := range todos {
+		todos[i] = Todo{
+			ID:        gofakeit.UUID(),
+			ListId:    gofakeit.IntRange(1, 1000),
+			Text:      gofakeit.Sentence(3),
+			Completed: gofakeit.Bool(),
+		}
 	}
-	params := []interface{}{id, listId, text, completedInt}
-	return query, params
+
+	for _, todo := range todos {
+		err := s.clients[0].Todo.Create().
+			SetID(uuid.FromStringOrNil(todo.ID)).
+			SetListId(todo.ListId).
+			SetText(todo.Text).
+			SetCompleted(todo.Completed).
+			Exec(s.ctx)
+		if err != nil {
+			fmt.Println("Error insert todo:", err)
+			return
+		}
+	}
+
+	for _, conn := range s.conns {
+		_, err := conn.ExecContext(s.ctx, `SELECT crsql_as_crr('todos')`)
+		s.NoError(err)
+	}
+
+	sync(s.ctx, s.conns[0], s.conns[1])
+	sync(s.ctx, s.conns[0], s.conns[2])
+	s.True(assertAllRowsByConn(s.ctx, s.conns), "All rows should be equal, DBs sync failed")
+	sync(s.ctx, s.conns[1], s.conns[0])
+	sync(s.ctx, s.conns[2], s.conns[0])
+	assertAllRowsByConn(s.ctx, s.conns)
+	s.True(assertAllRowsByConn(s.ctx, s.conns), "All rows should be equal, DBs sync failed")
 }
 
 func queryAllRows(ctx context.Context, db *sql.Conn, q []interface{}) []map[string]interface{} {
@@ -144,68 +179,11 @@ func sync(ctx context.Context, left *sql.Conn, right *sql.Conn) {
 	}
 }
 
-func (s *sqliteTestSuite) TestInsert() {
-	ctx := context.Background()
-	query, params := createInsert("1", "2", "Sample text", true)
-	_, err := s.conns[0].ExecContext(ctx, query, params...)
-	if err != nil {
-		fmt.Println("Error executing query:", err)
-		return
-	}
-
-	query = `SELECT * FROM todo`
-	rows, err := s.conns[0].QueryContext(ctx, query)
-	s.NoError(err)
-	defer rows.Close()
-
-	for rows.Next() {
-		var id string
-		var listId string
-		var text string
-		var completed int
-		err = rows.Scan(&id, &listId, &completed, &text)
-		s.NoError(err)
-
-		s.Equal("1", id)
-		s.Equal("2", listId)
-		s.Equal("Sample text", text)
-		s.Equal(1, completed)
-	}
-}
-
-func (s *sqliteTestSuite) TestMerge() {
-	ctx := context.Background()
-	todos := make([]Todo, gofakeit.IntRange(4, 20))
-	for i := range todos {
-		todos[i] = Todo{
-			ID:        gofakeit.IntRange(1, 1000),
-			Text:      gofakeit.Sentence(3),
-			Completed: gofakeit.Bool(),
-		}
-	}
-
-	for i, todo := range todos {
-		query, params := createInsert(i, todo.ID, todo.Text, todo.Completed)
-		_, err := s.conns[0].ExecContext(ctx, query, params...)
-		if err != nil {
-			fmt.Println("Error executing query:", err)
-			return
-		}
-	}
-	sync(ctx, s.conns[0], s.conns[1])
-	sync(ctx, s.conns[0], s.conns[2])
-	s.True(assertAllRowsByConn(ctx, s.conns), "All rows should be equal, DBs sync failed")
-	sync(ctx, s.conns[1], s.conns[0])
-	sync(ctx, s.conns[2], s.conns[0])
-	assertAllRowsByConn(ctx, s.conns)
-	s.True(assertAllRowsByConn(ctx, s.conns), "All rows should be equal, DBs sync failed")
-}
-
 func assertAllRowsByConn(ctx context.Context, conns []*sql.Conn) bool {
 	results := make([][]map[string]interface{}, len(conns))
 
 	for i, db := range conns {
-		query := `SELECT * FROM todo ORDER BY id DESC`
+		query := `SELECT * FROM todos ORDER BY id DESC`
 		results[i] = queryAllRows(ctx, db, []interface{}{query, []interface{}{}})
 	}
 
