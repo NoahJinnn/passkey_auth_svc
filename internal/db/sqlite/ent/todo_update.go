@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -77,12 +76,6 @@ func (tu *TodoUpdate) SetNillableCompleted(b *bool) *TodoUpdate {
 	return tu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (tu *TodoUpdate) SetUpdatedAt(t time.Time) *TodoUpdate {
-	tu.mutation.SetUpdatedAt(t)
-	return tu
-}
-
 // Mutation returns the TodoMutation object of the builder.
 func (tu *TodoUpdate) Mutation() *TodoMutation {
 	return tu.mutation
@@ -90,7 +83,6 @@ func (tu *TodoUpdate) Mutation() *TodoMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tu *TodoUpdate) Save(ctx context.Context) (int, error) {
-	tu.defaults()
 	return withHooks(ctx, tu.sqlSave, tu.mutation, tu.hooks)
 }
 
@@ -116,14 +108,6 @@ func (tu *TodoUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (tu *TodoUpdate) defaults() {
-	if _, ok := tu.mutation.UpdatedAt(); !ok {
-		v := todo.UpdateDefaultUpdatedAt()
-		tu.mutation.SetUpdatedAt(v)
-	}
-}
-
 func (tu *TodoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(todo.Table, todo.Columns, sqlgraph.NewFieldSpec(todo.FieldID, field.TypeUUID))
 	if ps := tu.mutation.predicates; len(ps) > 0 {
@@ -144,9 +128,6 @@ func (tu *TodoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := tu.mutation.Completed(); ok {
 		_spec.SetField(todo.FieldCompleted, field.TypeBool, value)
-	}
-	if value, ok := tu.mutation.UpdatedAt(); ok {
-		_spec.SetField(todo.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -217,12 +198,6 @@ func (tuo *TodoUpdateOne) SetNillableCompleted(b *bool) *TodoUpdateOne {
 	return tuo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (tuo *TodoUpdateOne) SetUpdatedAt(t time.Time) *TodoUpdateOne {
-	tuo.mutation.SetUpdatedAt(t)
-	return tuo
-}
-
 // Mutation returns the TodoMutation object of the builder.
 func (tuo *TodoUpdateOne) Mutation() *TodoMutation {
 	return tuo.mutation
@@ -243,7 +218,6 @@ func (tuo *TodoUpdateOne) Select(field string, fields ...string) *TodoUpdateOne 
 
 // Save executes the query and returns the updated Todo entity.
 func (tuo *TodoUpdateOne) Save(ctx context.Context) (*Todo, error) {
-	tuo.defaults()
 	return withHooks(ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
 }
 
@@ -266,14 +240,6 @@ func (tuo *TodoUpdateOne) Exec(ctx context.Context) error {
 func (tuo *TodoUpdateOne) ExecX(ctx context.Context) {
 	if err := tuo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (tuo *TodoUpdateOne) defaults() {
-	if _, ok := tuo.mutation.UpdatedAt(); !ok {
-		v := todo.UpdateDefaultUpdatedAt()
-		tuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -314,9 +280,6 @@ func (tuo *TodoUpdateOne) sqlSave(ctx context.Context) (_node *Todo, err error) 
 	}
 	if value, ok := tuo.mutation.Completed(); ok {
 		_spec.SetField(todo.FieldCompleted, field.TypeBool, value)
-	}
-	if value, ok := tuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(todo.FieldUpdatedAt, field.TypeTime, value)
 	}
 	_node = &Todo{config: tuo.config}
 	_spec.Assign = _node.assignValues

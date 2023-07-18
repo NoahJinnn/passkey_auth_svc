@@ -115,8 +115,6 @@ var (
 		{Name: "list_id", Type: field.TypeInt, Default: 0},
 		{Name: "text", Type: field.TypeString, Default: ""},
 		{Name: "completed", Type: field.TypeBool, Default: false},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// TodosTable holds the schema information for the "todos" table.
 	TodosTable = &schema.Table{

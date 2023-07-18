@@ -5,7 +5,6 @@ package ent
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -23,11 +22,7 @@ type Todo struct {
 	// Text holds the value of the "text" field.
 	Text string `json:"text,omitempty"`
 	// Completed holds the value of the "completed" field.
-	Completed bool `json:"completed,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt    time.Time `json:"updated_at,omitempty"`
+	Completed    bool `json:"completed,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -42,8 +37,6 @@ func (*Todo) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case todo.FieldText:
 			values[i] = new(sql.NullString)
-		case todo.FieldCreatedAt, todo.FieldUpdatedAt:
-			values[i] = new(sql.NullTime)
 		case todo.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
@@ -84,18 +77,6 @@ func (t *Todo) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field completed", values[i])
 			} else if value.Valid {
 				t.Completed = value.Bool
-			}
-		case todo.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
-			} else if value.Valid {
-				t.CreatedAt = value.Time
-			}
-		case todo.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
-			} else if value.Valid {
-				t.UpdatedAt = value.Time
 			}
 		default:
 			t.selectValues.Set(columns[i], values[i])
@@ -141,12 +122,6 @@ func (t *Todo) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("completed=")
 	builder.WriteString(fmt.Sprintf("%v", t.Completed))
-	builder.WriteString(", ")
-	builder.WriteString("created_at=")
-	builder.WriteString(t.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("updated_at=")
-	builder.WriteString(t.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

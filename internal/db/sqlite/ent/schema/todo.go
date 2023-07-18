@@ -1,8 +1,6 @@
 package schema
 
 import (
-	"time"
-
 	"entgo.io/ent"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
@@ -22,8 +20,6 @@ func (Todo) Fields() []ent.Field {
 		field.Int("listId").Default(0),
 		field.String("text").Default(""),
 		field.Bool("completed").Default(false),
-		field.Time("created_at").Default(time.Now).Immutable(),
-		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 
