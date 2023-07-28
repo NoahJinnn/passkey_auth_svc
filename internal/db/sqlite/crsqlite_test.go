@@ -31,9 +31,9 @@ func (s *sqliteTestSuite) SetupTest() {
 	s.ctx = ctx
 	for i := 0; i < 3; i++ {
 		db := NewSqliteDrive("file:" + fmt.Sprintf("test %d", i) + ".db?cache=shared&_fk=1")
-		client := NewSqliteEnt(db)
+		client := NewSqliteEnt(ctx, db)
 		s.clients = append(s.clients, client)
-		conn := NewSqliteConn(db)
+		conn := NewSqliteConn(ctx, db)
 		s.conns = append(s.conns, conn)
 	}
 }
@@ -74,7 +74,7 @@ func (s *sqliteTestSuite) TestMerge() {
 	}
 
 	for _, conn := range s.conns {
-		_, err := conn.ExecContext(s.ctx, `SELECT crsql_as_crr('todos')`)
+		_, err := conn.ExecContext(s.ctx, `SELECT crsql_as_crr(?)`, "todos")
 		s.NoError(err)
 	}
 

@@ -22,12 +22,9 @@ func NewSqliteDrive(dsn string) *sql.DB {
 	return db
 }
 
-func NewSqliteEnt(db *sql.DB) *ent.Client {
+func NewSqliteEnt(ctx context.Context, db *sql.DB) *ent.Client {
 	drv := entsql.OpenDB(dialect.SQLite, db)
-
 	client := ent.NewClient(ent.Driver(drv))
-
-	ctx := context.Background()
 	// Run the auto migration tool.
 	if err := client.Schema.Create(ctx,
 		migrate.WithDropIndex(true),
@@ -38,7 +35,7 @@ func NewSqliteEnt(db *sql.DB) *ent.Client {
 	return client
 }
 
-func NewSqliteConn(db *sql.DB) *sql.Conn {
+func NewSqliteConn(ctx context.Context, db *sql.DB) *sql.Conn {
 	conn, err := db.Conn(context.Background())
 	if err != nil {
 		log.Fatalf("failed getting connection: %v", err)
@@ -46,7 +43,7 @@ func NewSqliteConn(db *sql.DB) *sql.Conn {
 
 	err = conn.Raw(func(driverConn interface{}) error {
 		sqliteConn := driverConn.(*sqlite3.SQLiteConn)
-		err := sqliteConn.LoadExtension("crsqlite-aarch64", "sqlite3_crsqlite_init")
+		err := sqliteConn.LoadExtension("/Users/trannguyen/Workspaces/hq/app/hqservice/internal/db/sqlite/crsqlite-aarch64", "sqlite3_crsqlite_init")
 		if err != nil {
 			return err
 		}
@@ -63,5 +60,13 @@ func NewSqliteConn(db *sql.DB) *sql.Conn {
 		log.Fatalf("failed to query crsql lite id: %v", err)
 	}
 
+	// Convert tables to CRRs
+	syncTables := []string{"connections", "institutions", "accounts", "transactions", "incomes", "manual_items"}
+	for _, table := range syncTables {
+		_, err := conn.ExecContext(ctx, `SELECT crsql_as_crr(?)`, table)
+		if err != nil {
+			log.Fatalf("failed to convert table to CRR: %v", err)
+		}
+	}
 	return conn
 }

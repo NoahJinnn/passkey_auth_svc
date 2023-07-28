@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,7 +23,7 @@ func TestSqliteConnection(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, uid := range tt.uids {
-				p.NewSqliteConnect(uid)
+				p.NewSqliteConnect(context.Background(), uid)
 			}
 			assert.Equal(t, len(tt.uids), len(p.userStorage))
 
