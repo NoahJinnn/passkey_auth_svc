@@ -54,12 +54,6 @@ func NewSqliteConn(ctx context.Context, db *sql.DB) *sql.Conn {
 		log.Fatalf("failed loading extension: %v", err)
 	}
 
-	r := conn.QueryRowContext(context.Background(), "SELECT quote(crsql_siteid());")
-	var siteid string
-	if err = r.Scan(&siteid); err == sql.ErrNoRows {
-		log.Fatalf("failed to query crsql lite id: %v", err)
-	}
-
 	// Convert tables to CRRs
 	syncTables := []string{"connections", "institutions", "accounts", "transactions", "incomes", "manual_items"}
 	for _, table := range syncTables {
