@@ -80,34 +80,37 @@ func (s *sqliteTestSuite) TestMerge() {
 
 	sync(s.ctx, s.conns[0], s.conns[1])
 	sync(s.ctx, s.conns[0], s.conns[2])
-	s.True(assertAllRowsByConn(s.ctx, s.conns), "All rows should be equal, DBs sync failed")
+	isSync, err := assertAllRowsByConn(s.ctx, s.conns)
+	s.NoError(err)
+	s.True(isSync, "All rows should be equal, DBs sync failed")
 	sync(s.ctx, s.conns[1], s.conns[0])
 	sync(s.ctx, s.conns[2], s.conns[0])
-	assertAllRowsByConn(s.ctx, s.conns)
-	s.True(assertAllRowsByConn(s.ctx, s.conns), "All rows should be equal, DBs sync failed")
+	isSync, err = assertAllRowsByConn(s.ctx, s.conns)
+	s.NoError(err)
+	s.True(isSync, "All rows should be equal, DBs sync failed")
 }
 
-func queryAllRows(ctx context.Context, db *sql.Conn, q []interface{}) []map[string]interface{} {
+func queryAllRows(ctx context.Context, db *sql.Conn, q []interface{}) ([]map[string]interface{}, error) {
 	query := q[0].(string)
 	params := q[1].([]interface{})
 	stmt, err := db.PrepareContext(ctx, query)
 	if err != nil {
 		fmt.Println("Error preparing statement:", err)
-		return nil
+		return nil, err
 	}
 	defer stmt.Close()
 
 	rows, err := stmt.Query(params...)
 	if err != nil {
 		fmt.Println("Error executing query:", err)
-		return nil
+		return nil, err
 	}
 	defer rows.Close()
 
 	columns, err := rows.Columns()
 	if err != nil {
 		fmt.Println("Error getting column names:", err)
-		return nil
+		return nil, err
 	}
 
 	result := make([]map[string]interface{}, 0)
@@ -119,7 +122,7 @@ func queryAllRows(ctx context.Context, db *sql.Conn, q []interface{}) []map[stri
 		err = rows.Scan(values...)
 		if err != nil {
 			fmt.Println("Error scanning row values:", err)
-			return nil
+			return nil, err
 		}
 		rowData := make(map[string]interface{})
 		for i, column := range columns {
@@ -128,7 +131,7 @@ func queryAllRows(ctx context.Context, db *sql.Conn, q []interface{}) []map[stri
 		result = append(result, rowData)
 	}
 
-	return result
+	return result, nil
 }
 
 func sync(ctx context.Context, left *sql.Conn, right *sql.Conn) {
@@ -179,31 +182,32 @@ func sync(ctx context.Context, left *sql.Conn, right *sql.Conn) {
 	}
 }
 
-func assertAllRowsByConn(ctx context.Context, conns []*sql.Conn) bool {
+func assertAllRowsByConn(ctx context.Context, conns []*sql.Conn) (bool, error) {
 	results := make([][]map[string]interface{}, len(conns))
 
 	for i, db := range conns {
 		query := `SELECT * FROM todos ORDER BY id DESC`
-		results[i] = queryAllRows(ctx, db, []interface{}{query, []interface{}{}})
+		result, err := queryAllRows(ctx, db, []interface{}{query, []interface{}{}})
+		if err != nil {
+			return false, err
+		}
+		results[i] = result
 	}
 
 	for i := 0; i < len(results)-1; i++ {
 		if !isEqual(results[i], results[i+1]) {
-			fmt.Println("Assertion failed!")
-			fmt.Println("Results of", i)
 			for _, rows := range results[i] {
 				fmt.Println(rows)
 			}
-			fmt.Println("Results of", i+1)
 			for _, rows := range results[i+1] {
 				fmt.Println(rows)
 			}
 
-			return false
+			return false, fmt.Errorf("Assertion failed! Results of %d and %d are not equal", i, i+1)
 		}
 	}
 
-	return true
+	return true, nil
 }
 
 func isEqual(a, b []map[string]interface{}) bool {
