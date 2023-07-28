@@ -46,7 +46,7 @@ func NewSqliteConn(db *sql.DB) *sql.Conn {
 
 	err = conn.Raw(func(driverConn interface{}) error {
 		sqliteConn := driverConn.(*sqlite3.SQLiteConn)
-		err := sqliteConn.LoadExtension("crsqlite", "sqlite3_crsqlite_init")
+		err := sqliteConn.LoadExtension("crsqlite-aarch64", "sqlite3_crsqlite_init")
 		if err != nil {
 			return err
 		}

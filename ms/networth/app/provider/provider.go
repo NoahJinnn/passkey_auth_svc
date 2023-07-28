@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite"
@@ -244,7 +243,6 @@ func (p *ProviderSvc) ClearSqliteDB(userId string) {
 	if p.userStorage != nil {
 		delete(p.userStorage, userId)
 	}
-	os.Remove(userId + ".db")
 }
 
 func sqliteDns(userId string) string {
