@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -34,15 +33,25 @@ func (iu *IncomeUpdate) SetProviderName(s string) *IncomeUpdate {
 	return iu
 }
 
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (iu *IncomeUpdate) SetNillableProviderName(s *string) *IncomeUpdate {
+	if s != nil {
+		iu.SetProviderName(*s)
+	}
+	return iu
+}
+
 // SetData sets the "data" field.
 func (iu *IncomeUpdate) SetData(s string) *IncomeUpdate {
 	iu.mutation.SetData(s)
 	return iu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (iu *IncomeUpdate) SetUpdatedAt(t time.Time) *IncomeUpdate {
-	iu.mutation.SetUpdatedAt(t)
+// SetNillableData sets the "data" field if the given value is not nil.
+func (iu *IncomeUpdate) SetNillableData(s *string) *IncomeUpdate {
+	if s != nil {
+		iu.SetData(*s)
+	}
 	return iu
 }
 
@@ -53,7 +62,6 @@ func (iu *IncomeUpdate) Mutation() *IncomeMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (iu *IncomeUpdate) Save(ctx context.Context) (int, error) {
-	iu.defaults()
 	return withHooks(ctx, iu.sqlSave, iu.mutation, iu.hooks)
 }
 
@@ -79,14 +87,6 @@ func (iu *IncomeUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (iu *IncomeUpdate) defaults() {
-	if _, ok := iu.mutation.UpdatedAt(); !ok {
-		v := income.UpdateDefaultUpdatedAt()
-		iu.mutation.SetUpdatedAt(v)
-	}
-}
-
 func (iu *IncomeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(income.Table, income.Columns, sqlgraph.NewFieldSpec(income.FieldID, field.TypeUUID))
 	if ps := iu.mutation.predicates; len(ps) > 0 {
@@ -101,9 +101,6 @@ func (iu *IncomeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := iu.mutation.Data(); ok {
 		_spec.SetField(income.FieldData, field.TypeString, value)
-	}
-	if value, ok := iu.mutation.UpdatedAt(); ok {
-		_spec.SetField(income.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, iu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -131,15 +128,25 @@ func (iuo *IncomeUpdateOne) SetProviderName(s string) *IncomeUpdateOne {
 	return iuo
 }
 
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (iuo *IncomeUpdateOne) SetNillableProviderName(s *string) *IncomeUpdateOne {
+	if s != nil {
+		iuo.SetProviderName(*s)
+	}
+	return iuo
+}
+
 // SetData sets the "data" field.
 func (iuo *IncomeUpdateOne) SetData(s string) *IncomeUpdateOne {
 	iuo.mutation.SetData(s)
 	return iuo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (iuo *IncomeUpdateOne) SetUpdatedAt(t time.Time) *IncomeUpdateOne {
-	iuo.mutation.SetUpdatedAt(t)
+// SetNillableData sets the "data" field if the given value is not nil.
+func (iuo *IncomeUpdateOne) SetNillableData(s *string) *IncomeUpdateOne {
+	if s != nil {
+		iuo.SetData(*s)
+	}
 	return iuo
 }
 
@@ -163,7 +170,6 @@ func (iuo *IncomeUpdateOne) Select(field string, fields ...string) *IncomeUpdate
 
 // Save executes the query and returns the updated Income entity.
 func (iuo *IncomeUpdateOne) Save(ctx context.Context) (*Income, error) {
-	iuo.defaults()
 	return withHooks(ctx, iuo.sqlSave, iuo.mutation, iuo.hooks)
 }
 
@@ -186,14 +192,6 @@ func (iuo *IncomeUpdateOne) Exec(ctx context.Context) error {
 func (iuo *IncomeUpdateOne) ExecX(ctx context.Context) {
 	if err := iuo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (iuo *IncomeUpdateOne) defaults() {
-	if _, ok := iuo.mutation.UpdatedAt(); !ok {
-		v := income.UpdateDefaultUpdatedAt()
-		iuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -228,9 +226,6 @@ func (iuo *IncomeUpdateOne) sqlSave(ctx context.Context) (_node *Income, err err
 	}
 	if value, ok := iuo.mutation.Data(); ok {
 		_spec.SetField(income.FieldData, field.TypeString, value)
-	}
-	if value, ok := iuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(income.FieldUpdatedAt, field.TypeTime, value)
 	}
 	_node = &Income{config: iuo.config}
 	_spec.Assign = _node.assignValues

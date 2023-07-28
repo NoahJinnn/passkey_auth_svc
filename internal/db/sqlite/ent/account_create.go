@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -27,36 +26,24 @@ func (ac *AccountCreate) SetProviderName(s string) *AccountCreate {
 	return ac
 }
 
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (ac *AccountCreate) SetNillableProviderName(s *string) *AccountCreate {
+	if s != nil {
+		ac.SetProviderName(*s)
+	}
+	return ac
+}
+
 // SetData sets the "data" field.
 func (ac *AccountCreate) SetData(s string) *AccountCreate {
 	ac.mutation.SetData(s)
 	return ac
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (ac *AccountCreate) SetCreatedAt(t time.Time) *AccountCreate {
-	ac.mutation.SetCreatedAt(t)
-	return ac
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (ac *AccountCreate) SetNillableCreatedAt(t *time.Time) *AccountCreate {
-	if t != nil {
-		ac.SetCreatedAt(*t)
-	}
-	return ac
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (ac *AccountCreate) SetUpdatedAt(t time.Time) *AccountCreate {
-	ac.mutation.SetUpdatedAt(t)
-	return ac
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (ac *AccountCreate) SetNillableUpdatedAt(t *time.Time) *AccountCreate {
-	if t != nil {
-		ac.SetUpdatedAt(*t)
+// SetNillableData sets the "data" field if the given value is not nil.
+func (ac *AccountCreate) SetNillableData(s *string) *AccountCreate {
+	if s != nil {
+		ac.SetData(*s)
 	}
 	return ac
 }
@@ -110,13 +97,13 @@ func (ac *AccountCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (ac *AccountCreate) defaults() {
-	if _, ok := ac.mutation.CreatedAt(); !ok {
-		v := account.DefaultCreatedAt()
-		ac.mutation.SetCreatedAt(v)
+	if _, ok := ac.mutation.ProviderName(); !ok {
+		v := account.DefaultProviderName
+		ac.mutation.SetProviderName(v)
 	}
-	if _, ok := ac.mutation.UpdatedAt(); !ok {
-		v := account.DefaultUpdatedAt()
-		ac.mutation.SetUpdatedAt(v)
+	if _, ok := ac.mutation.Data(); !ok {
+		v := account.DefaultData
+		ac.mutation.SetData(v)
 	}
 	if _, ok := ac.mutation.ID(); !ok {
 		v := account.DefaultID()
@@ -131,12 +118,6 @@ func (ac *AccountCreate) check() error {
 	}
 	if _, ok := ac.mutation.Data(); !ok {
 		return &ValidationError{Name: "data", err: errors.New(`ent: missing required field "Account.data"`)}
-	}
-	if _, ok := ac.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Account.created_at"`)}
-	}
-	if _, ok := ac.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Account.updated_at"`)}
 	}
 	return nil
 }
@@ -180,14 +161,6 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 	if value, ok := ac.mutation.Data(); ok {
 		_spec.SetField(account.FieldData, field.TypeString, value)
 		_node.Data = value
-	}
-	if value, ok := ac.mutation.CreatedAt(); ok {
-		_spec.SetField(account.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
-	}
-	if value, ok := ac.mutation.UpdatedAt(); ok {
-		_spec.SetField(account.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
 	}
 	return _node, _spec
 }

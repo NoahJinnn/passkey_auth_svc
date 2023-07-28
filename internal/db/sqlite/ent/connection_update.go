@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -34,15 +33,25 @@ func (cu *ConnectionUpdate) SetProviderName(s string) *ConnectionUpdate {
 	return cu
 }
 
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (cu *ConnectionUpdate) SetNillableProviderName(s *string) *ConnectionUpdate {
+	if s != nil {
+		cu.SetProviderName(*s)
+	}
+	return cu
+}
+
 // SetData sets the "data" field.
 func (cu *ConnectionUpdate) SetData(s string) *ConnectionUpdate {
 	cu.mutation.SetData(s)
 	return cu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (cu *ConnectionUpdate) SetUpdatedAt(t time.Time) *ConnectionUpdate {
-	cu.mutation.SetUpdatedAt(t)
+// SetNillableData sets the "data" field if the given value is not nil.
+func (cu *ConnectionUpdate) SetNillableData(s *string) *ConnectionUpdate {
+	if s != nil {
+		cu.SetData(*s)
+	}
 	return cu
 }
 
@@ -53,7 +62,6 @@ func (cu *ConnectionUpdate) Mutation() *ConnectionMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *ConnectionUpdate) Save(ctx context.Context) (int, error) {
-	cu.defaults()
 	return withHooks(ctx, cu.sqlSave, cu.mutation, cu.hooks)
 }
 
@@ -79,14 +87,6 @@ func (cu *ConnectionUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (cu *ConnectionUpdate) defaults() {
-	if _, ok := cu.mutation.UpdatedAt(); !ok {
-		v := connection.UpdateDefaultUpdatedAt()
-		cu.mutation.SetUpdatedAt(v)
-	}
-}
-
 func (cu *ConnectionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(connection.Table, connection.Columns, sqlgraph.NewFieldSpec(connection.FieldID, field.TypeUUID))
 	if ps := cu.mutation.predicates; len(ps) > 0 {
@@ -101,9 +101,6 @@ func (cu *ConnectionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := cu.mutation.Data(); ok {
 		_spec.SetField(connection.FieldData, field.TypeString, value)
-	}
-	if value, ok := cu.mutation.UpdatedAt(); ok {
-		_spec.SetField(connection.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -131,15 +128,25 @@ func (cuo *ConnectionUpdateOne) SetProviderName(s string) *ConnectionUpdateOne {
 	return cuo
 }
 
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (cuo *ConnectionUpdateOne) SetNillableProviderName(s *string) *ConnectionUpdateOne {
+	if s != nil {
+		cuo.SetProviderName(*s)
+	}
+	return cuo
+}
+
 // SetData sets the "data" field.
 func (cuo *ConnectionUpdateOne) SetData(s string) *ConnectionUpdateOne {
 	cuo.mutation.SetData(s)
 	return cuo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (cuo *ConnectionUpdateOne) SetUpdatedAt(t time.Time) *ConnectionUpdateOne {
-	cuo.mutation.SetUpdatedAt(t)
+// SetNillableData sets the "data" field if the given value is not nil.
+func (cuo *ConnectionUpdateOne) SetNillableData(s *string) *ConnectionUpdateOne {
+	if s != nil {
+		cuo.SetData(*s)
+	}
 	return cuo
 }
 
@@ -163,7 +170,6 @@ func (cuo *ConnectionUpdateOne) Select(field string, fields ...string) *Connecti
 
 // Save executes the query and returns the updated Connection entity.
 func (cuo *ConnectionUpdateOne) Save(ctx context.Context) (*Connection, error) {
-	cuo.defaults()
 	return withHooks(ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
 }
 
@@ -186,14 +192,6 @@ func (cuo *ConnectionUpdateOne) Exec(ctx context.Context) error {
 func (cuo *ConnectionUpdateOne) ExecX(ctx context.Context) {
 	if err := cuo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (cuo *ConnectionUpdateOne) defaults() {
-	if _, ok := cuo.mutation.UpdatedAt(); !ok {
-		v := connection.UpdateDefaultUpdatedAt()
-		cuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -228,9 +226,6 @@ func (cuo *ConnectionUpdateOne) sqlSave(ctx context.Context) (_node *Connection,
 	}
 	if value, ok := cuo.mutation.Data(); ok {
 		_spec.SetField(connection.FieldData, field.TypeString, value)
-	}
-	if value, ok := cuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(connection.FieldUpdatedAt, field.TypeTime, value)
 	}
 	_node = &Connection{config: cuo.config}
 	_spec.Assign = _node.assignValues

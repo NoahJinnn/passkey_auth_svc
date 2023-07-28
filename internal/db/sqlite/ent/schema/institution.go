@@ -1,11 +1,7 @@
 package schema
 
 import (
-	"time"
-
 	"entgo.io/ent"
-	"entgo.io/ent/schema"
-	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
 )
@@ -20,21 +16,7 @@ func (Institution) Fields() []ent.Field {
 			id, _ := uuid.NewV4()
 			return id
 		}).Immutable(),
-		field.String("provider_name"),
-		field.String("data"),
-		field.Time("created_at").Default(time.Now).Immutable(),
-		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+		field.String("provider_name").Default(""),
+		field.String("data").Default(""),
 	}
-}
-
-func (Institution) Edges() []ent.Edge {
-	return []ent.Edge{
-		edge.To("connection", Connection.Type).Unique(),
-		edge.To("accounts", Account.Type),
-		edge.To("incomes", Income.Type),
-	}
-}
-
-func (Institution) Annotations() []schema.Annotation {
-	return nil
 }

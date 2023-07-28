@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -27,36 +26,24 @@ func (tc *TransactionCreate) SetProviderName(s string) *TransactionCreate {
 	return tc
 }
 
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableProviderName(s *string) *TransactionCreate {
+	if s != nil {
+		tc.SetProviderName(*s)
+	}
+	return tc
+}
+
 // SetData sets the "data" field.
 func (tc *TransactionCreate) SetData(s string) *TransactionCreate {
 	tc.mutation.SetData(s)
 	return tc
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (tc *TransactionCreate) SetCreatedAt(t time.Time) *TransactionCreate {
-	tc.mutation.SetCreatedAt(t)
-	return tc
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (tc *TransactionCreate) SetNillableCreatedAt(t *time.Time) *TransactionCreate {
-	if t != nil {
-		tc.SetCreatedAt(*t)
-	}
-	return tc
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (tc *TransactionCreate) SetUpdatedAt(t time.Time) *TransactionCreate {
-	tc.mutation.SetUpdatedAt(t)
-	return tc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (tc *TransactionCreate) SetNillableUpdatedAt(t *time.Time) *TransactionCreate {
-	if t != nil {
-		tc.SetUpdatedAt(*t)
+// SetNillableData sets the "data" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableData(s *string) *TransactionCreate {
+	if s != nil {
+		tc.SetData(*s)
 	}
 	return tc
 }
@@ -110,13 +97,13 @@ func (tc *TransactionCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (tc *TransactionCreate) defaults() {
-	if _, ok := tc.mutation.CreatedAt(); !ok {
-		v := transaction.DefaultCreatedAt()
-		tc.mutation.SetCreatedAt(v)
+	if _, ok := tc.mutation.ProviderName(); !ok {
+		v := transaction.DefaultProviderName
+		tc.mutation.SetProviderName(v)
 	}
-	if _, ok := tc.mutation.UpdatedAt(); !ok {
-		v := transaction.DefaultUpdatedAt()
-		tc.mutation.SetUpdatedAt(v)
+	if _, ok := tc.mutation.Data(); !ok {
+		v := transaction.DefaultData
+		tc.mutation.SetData(v)
 	}
 	if _, ok := tc.mutation.ID(); !ok {
 		v := transaction.DefaultID()
@@ -131,12 +118,6 @@ func (tc *TransactionCreate) check() error {
 	}
 	if _, ok := tc.mutation.Data(); !ok {
 		return &ValidationError{Name: "data", err: errors.New(`ent: missing required field "Transaction.data"`)}
-	}
-	if _, ok := tc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Transaction.created_at"`)}
-	}
-	if _, ok := tc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Transaction.updated_at"`)}
 	}
 	return nil
 }
@@ -180,14 +161,6 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 	if value, ok := tc.mutation.Data(); ok {
 		_spec.SetField(transaction.FieldData, field.TypeString, value)
 		_node.Data = value
-	}
-	if value, ok := tc.mutation.CreatedAt(); ok {
-		_spec.SetField(transaction.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
-	}
-	if value, ok := tc.mutation.UpdatedAt(); ok {
-		_spec.SetField(transaction.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
 	}
 	return _node, _spec
 }

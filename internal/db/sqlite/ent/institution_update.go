@@ -6,15 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/income"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/predicate"
 )
@@ -38,65 +33,26 @@ func (iu *InstitutionUpdate) SetProviderName(s string) *InstitutionUpdate {
 	return iu
 }
 
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (iu *InstitutionUpdate) SetNillableProviderName(s *string) *InstitutionUpdate {
+	if s != nil {
+		iu.SetProviderName(*s)
+	}
+	return iu
+}
+
 // SetData sets the "data" field.
 func (iu *InstitutionUpdate) SetData(s string) *InstitutionUpdate {
 	iu.mutation.SetData(s)
 	return iu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (iu *InstitutionUpdate) SetUpdatedAt(t time.Time) *InstitutionUpdate {
-	iu.mutation.SetUpdatedAt(t)
-	return iu
-}
-
-// SetConnectionID sets the "connection" edge to the Connection entity by ID.
-func (iu *InstitutionUpdate) SetConnectionID(id uuid.UUID) *InstitutionUpdate {
-	iu.mutation.SetConnectionID(id)
-	return iu
-}
-
-// SetNillableConnectionID sets the "connection" edge to the Connection entity by ID if the given value is not nil.
-func (iu *InstitutionUpdate) SetNillableConnectionID(id *uuid.UUID) *InstitutionUpdate {
-	if id != nil {
-		iu = iu.SetConnectionID(*id)
+// SetNillableData sets the "data" field if the given value is not nil.
+func (iu *InstitutionUpdate) SetNillableData(s *string) *InstitutionUpdate {
+	if s != nil {
+		iu.SetData(*s)
 	}
 	return iu
-}
-
-// SetConnection sets the "connection" edge to the Connection entity.
-func (iu *InstitutionUpdate) SetConnection(c *Connection) *InstitutionUpdate {
-	return iu.SetConnectionID(c.ID)
-}
-
-// AddAccountIDs adds the "accounts" edge to the Account entity by IDs.
-func (iu *InstitutionUpdate) AddAccountIDs(ids ...uuid.UUID) *InstitutionUpdate {
-	iu.mutation.AddAccountIDs(ids...)
-	return iu
-}
-
-// AddAccounts adds the "accounts" edges to the Account entity.
-func (iu *InstitutionUpdate) AddAccounts(a ...*Account) *InstitutionUpdate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
-	}
-	return iu.AddAccountIDs(ids...)
-}
-
-// AddIncomeIDs adds the "incomes" edge to the Income entity by IDs.
-func (iu *InstitutionUpdate) AddIncomeIDs(ids ...uuid.UUID) *InstitutionUpdate {
-	iu.mutation.AddIncomeIDs(ids...)
-	return iu
-}
-
-// AddIncomes adds the "incomes" edges to the Income entity.
-func (iu *InstitutionUpdate) AddIncomes(i ...*Income) *InstitutionUpdate {
-	ids := make([]uuid.UUID, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
-	}
-	return iu.AddIncomeIDs(ids...)
 }
 
 // Mutation returns the InstitutionMutation object of the builder.
@@ -104,57 +60,8 @@ func (iu *InstitutionUpdate) Mutation() *InstitutionMutation {
 	return iu.mutation
 }
 
-// ClearConnection clears the "connection" edge to the Connection entity.
-func (iu *InstitutionUpdate) ClearConnection() *InstitutionUpdate {
-	iu.mutation.ClearConnection()
-	return iu
-}
-
-// ClearAccounts clears all "accounts" edges to the Account entity.
-func (iu *InstitutionUpdate) ClearAccounts() *InstitutionUpdate {
-	iu.mutation.ClearAccounts()
-	return iu
-}
-
-// RemoveAccountIDs removes the "accounts" edge to Account entities by IDs.
-func (iu *InstitutionUpdate) RemoveAccountIDs(ids ...uuid.UUID) *InstitutionUpdate {
-	iu.mutation.RemoveAccountIDs(ids...)
-	return iu
-}
-
-// RemoveAccounts removes "accounts" edges to Account entities.
-func (iu *InstitutionUpdate) RemoveAccounts(a ...*Account) *InstitutionUpdate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
-	}
-	return iu.RemoveAccountIDs(ids...)
-}
-
-// ClearIncomes clears all "incomes" edges to the Income entity.
-func (iu *InstitutionUpdate) ClearIncomes() *InstitutionUpdate {
-	iu.mutation.ClearIncomes()
-	return iu
-}
-
-// RemoveIncomeIDs removes the "incomes" edge to Income entities by IDs.
-func (iu *InstitutionUpdate) RemoveIncomeIDs(ids ...uuid.UUID) *InstitutionUpdate {
-	iu.mutation.RemoveIncomeIDs(ids...)
-	return iu
-}
-
-// RemoveIncomes removes "incomes" edges to Income entities.
-func (iu *InstitutionUpdate) RemoveIncomes(i ...*Income) *InstitutionUpdate {
-	ids := make([]uuid.UUID, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
-	}
-	return iu.RemoveIncomeIDs(ids...)
-}
-
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (iu *InstitutionUpdate) Save(ctx context.Context) (int, error) {
-	iu.defaults()
 	return withHooks(ctx, iu.sqlSave, iu.mutation, iu.hooks)
 }
 
@@ -180,14 +87,6 @@ func (iu *InstitutionUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (iu *InstitutionUpdate) defaults() {
-	if _, ok := iu.mutation.UpdatedAt(); !ok {
-		v := institution.UpdateDefaultUpdatedAt()
-		iu.mutation.SetUpdatedAt(v)
-	}
-}
-
 func (iu *InstitutionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(institution.Table, institution.Columns, sqlgraph.NewFieldSpec(institution.FieldID, field.TypeUUID))
 	if ps := iu.mutation.predicates; len(ps) > 0 {
@@ -202,128 +101,6 @@ func (iu *InstitutionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := iu.mutation.Data(); ok {
 		_spec.SetField(institution.FieldData, field.TypeString, value)
-	}
-	if value, ok := iu.mutation.UpdatedAt(); ok {
-		_spec.SetField(institution.FieldUpdatedAt, field.TypeTime, value)
-	}
-	if iu.mutation.ConnectionCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   institution.ConnectionTable,
-			Columns: []string{institution.ConnectionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(connection.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := iu.mutation.ConnectionIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   institution.ConnectionTable,
-			Columns: []string{institution.ConnectionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(connection.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if iu.mutation.AccountsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   institution.AccountsTable,
-			Columns: []string{institution.AccountsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := iu.mutation.RemovedAccountsIDs(); len(nodes) > 0 && !iu.mutation.AccountsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   institution.AccountsTable,
-			Columns: []string{institution.AccountsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := iu.mutation.AccountsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   institution.AccountsTable,
-			Columns: []string{institution.AccountsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if iu.mutation.IncomesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   institution.IncomesTable,
-			Columns: []string{institution.IncomesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(income.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := iu.mutation.RemovedIncomesIDs(); len(nodes) > 0 && !iu.mutation.IncomesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   institution.IncomesTable,
-			Columns: []string{institution.IncomesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(income.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := iu.mutation.IncomesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   institution.IncomesTable,
-			Columns: []string{institution.IncomesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(income.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, iu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -351,118 +128,31 @@ func (iuo *InstitutionUpdateOne) SetProviderName(s string) *InstitutionUpdateOne
 	return iuo
 }
 
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (iuo *InstitutionUpdateOne) SetNillableProviderName(s *string) *InstitutionUpdateOne {
+	if s != nil {
+		iuo.SetProviderName(*s)
+	}
+	return iuo
+}
+
 // SetData sets the "data" field.
 func (iuo *InstitutionUpdateOne) SetData(s string) *InstitutionUpdateOne {
 	iuo.mutation.SetData(s)
 	return iuo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (iuo *InstitutionUpdateOne) SetUpdatedAt(t time.Time) *InstitutionUpdateOne {
-	iuo.mutation.SetUpdatedAt(t)
-	return iuo
-}
-
-// SetConnectionID sets the "connection" edge to the Connection entity by ID.
-func (iuo *InstitutionUpdateOne) SetConnectionID(id uuid.UUID) *InstitutionUpdateOne {
-	iuo.mutation.SetConnectionID(id)
-	return iuo
-}
-
-// SetNillableConnectionID sets the "connection" edge to the Connection entity by ID if the given value is not nil.
-func (iuo *InstitutionUpdateOne) SetNillableConnectionID(id *uuid.UUID) *InstitutionUpdateOne {
-	if id != nil {
-		iuo = iuo.SetConnectionID(*id)
+// SetNillableData sets the "data" field if the given value is not nil.
+func (iuo *InstitutionUpdateOne) SetNillableData(s *string) *InstitutionUpdateOne {
+	if s != nil {
+		iuo.SetData(*s)
 	}
 	return iuo
-}
-
-// SetConnection sets the "connection" edge to the Connection entity.
-func (iuo *InstitutionUpdateOne) SetConnection(c *Connection) *InstitutionUpdateOne {
-	return iuo.SetConnectionID(c.ID)
-}
-
-// AddAccountIDs adds the "accounts" edge to the Account entity by IDs.
-func (iuo *InstitutionUpdateOne) AddAccountIDs(ids ...uuid.UUID) *InstitutionUpdateOne {
-	iuo.mutation.AddAccountIDs(ids...)
-	return iuo
-}
-
-// AddAccounts adds the "accounts" edges to the Account entity.
-func (iuo *InstitutionUpdateOne) AddAccounts(a ...*Account) *InstitutionUpdateOne {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
-	}
-	return iuo.AddAccountIDs(ids...)
-}
-
-// AddIncomeIDs adds the "incomes" edge to the Income entity by IDs.
-func (iuo *InstitutionUpdateOne) AddIncomeIDs(ids ...uuid.UUID) *InstitutionUpdateOne {
-	iuo.mutation.AddIncomeIDs(ids...)
-	return iuo
-}
-
-// AddIncomes adds the "incomes" edges to the Income entity.
-func (iuo *InstitutionUpdateOne) AddIncomes(i ...*Income) *InstitutionUpdateOne {
-	ids := make([]uuid.UUID, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
-	}
-	return iuo.AddIncomeIDs(ids...)
 }
 
 // Mutation returns the InstitutionMutation object of the builder.
 func (iuo *InstitutionUpdateOne) Mutation() *InstitutionMutation {
 	return iuo.mutation
-}
-
-// ClearConnection clears the "connection" edge to the Connection entity.
-func (iuo *InstitutionUpdateOne) ClearConnection() *InstitutionUpdateOne {
-	iuo.mutation.ClearConnection()
-	return iuo
-}
-
-// ClearAccounts clears all "accounts" edges to the Account entity.
-func (iuo *InstitutionUpdateOne) ClearAccounts() *InstitutionUpdateOne {
-	iuo.mutation.ClearAccounts()
-	return iuo
-}
-
-// RemoveAccountIDs removes the "accounts" edge to Account entities by IDs.
-func (iuo *InstitutionUpdateOne) RemoveAccountIDs(ids ...uuid.UUID) *InstitutionUpdateOne {
-	iuo.mutation.RemoveAccountIDs(ids...)
-	return iuo
-}
-
-// RemoveAccounts removes "accounts" edges to Account entities.
-func (iuo *InstitutionUpdateOne) RemoveAccounts(a ...*Account) *InstitutionUpdateOne {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
-	}
-	return iuo.RemoveAccountIDs(ids...)
-}
-
-// ClearIncomes clears all "incomes" edges to the Income entity.
-func (iuo *InstitutionUpdateOne) ClearIncomes() *InstitutionUpdateOne {
-	iuo.mutation.ClearIncomes()
-	return iuo
-}
-
-// RemoveIncomeIDs removes the "incomes" edge to Income entities by IDs.
-func (iuo *InstitutionUpdateOne) RemoveIncomeIDs(ids ...uuid.UUID) *InstitutionUpdateOne {
-	iuo.mutation.RemoveIncomeIDs(ids...)
-	return iuo
-}
-
-// RemoveIncomes removes "incomes" edges to Income entities.
-func (iuo *InstitutionUpdateOne) RemoveIncomes(i ...*Income) *InstitutionUpdateOne {
-	ids := make([]uuid.UUID, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
-	}
-	return iuo.RemoveIncomeIDs(ids...)
 }
 
 // Where appends a list predicates to the InstitutionUpdate builder.
@@ -480,7 +170,6 @@ func (iuo *InstitutionUpdateOne) Select(field string, fields ...string) *Institu
 
 // Save executes the query and returns the updated Institution entity.
 func (iuo *InstitutionUpdateOne) Save(ctx context.Context) (*Institution, error) {
-	iuo.defaults()
 	return withHooks(ctx, iuo.sqlSave, iuo.mutation, iuo.hooks)
 }
 
@@ -503,14 +192,6 @@ func (iuo *InstitutionUpdateOne) Exec(ctx context.Context) error {
 func (iuo *InstitutionUpdateOne) ExecX(ctx context.Context) {
 	if err := iuo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (iuo *InstitutionUpdateOne) defaults() {
-	if _, ok := iuo.mutation.UpdatedAt(); !ok {
-		v := institution.UpdateDefaultUpdatedAt()
-		iuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -545,128 +226,6 @@ func (iuo *InstitutionUpdateOne) sqlSave(ctx context.Context) (_node *Institutio
 	}
 	if value, ok := iuo.mutation.Data(); ok {
 		_spec.SetField(institution.FieldData, field.TypeString, value)
-	}
-	if value, ok := iuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(institution.FieldUpdatedAt, field.TypeTime, value)
-	}
-	if iuo.mutation.ConnectionCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   institution.ConnectionTable,
-			Columns: []string{institution.ConnectionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(connection.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := iuo.mutation.ConnectionIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   institution.ConnectionTable,
-			Columns: []string{institution.ConnectionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(connection.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if iuo.mutation.AccountsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   institution.AccountsTable,
-			Columns: []string{institution.AccountsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := iuo.mutation.RemovedAccountsIDs(); len(nodes) > 0 && !iuo.mutation.AccountsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   institution.AccountsTable,
-			Columns: []string{institution.AccountsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := iuo.mutation.AccountsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   institution.AccountsTable,
-			Columns: []string{institution.AccountsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if iuo.mutation.IncomesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   institution.IncomesTable,
-			Columns: []string{institution.IncomesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(income.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := iuo.mutation.RemovedIncomesIDs(); len(nodes) > 0 && !iuo.mutation.IncomesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   institution.IncomesTable,
-			Columns: []string{institution.IncomesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(income.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := iuo.mutation.IncomesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   institution.IncomesTable,
-			Columns: []string{institution.IncomesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(income.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Institution{config: iuo.config}
 	_spec.Assign = _node.assignValues

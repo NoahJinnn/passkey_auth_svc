@@ -3,8 +3,6 @@
 package manualitem
 
 import (
-	"time"
-
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
 )
@@ -26,10 +24,6 @@ const (
 	FieldDescription = "description"
 	// FieldValue holds the string denoting the value field in the database.
 	FieldValue = "value"
-	// FieldCreatedAt holds the string denoting the created_at field in the database.
-	FieldCreatedAt = "created_at"
-	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
-	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the manualitem in the database.
 	Table = "manual_items"
 )
@@ -43,8 +37,6 @@ var Columns = []string{
 	FieldCategory,
 	FieldDescription,
 	FieldValue,
-	FieldCreatedAt,
-	FieldUpdatedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -58,18 +50,22 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultProviderName holds the default value on creation for the "provider_name" field.
+	DefaultProviderName string
 	// ProviderNameValidator is a validator for the "provider_name" field. It is called by the builders before save.
 	ProviderNameValidator func(string) error
+	// DefaultItemTableID holds the default value on creation for the "item_table_id" field.
+	DefaultItemTableID string
+	// DefaultType holds the default value on creation for the "type" field.
+	DefaultType string
+	// DefaultCategory holds the default value on creation for the "category" field.
+	DefaultCategory string
 	// CategoryValidator is a validator for the "category" field. It is called by the builders before save.
 	CategoryValidator func(string) error
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
-	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() time.Time
-	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
-	DefaultUpdatedAt func() time.Time
-	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
-	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultValue holds the default value on creation for the "value" field.
+	DefaultValue float64
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -110,14 +106,4 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 // ByValue orders the results by the value field.
 func ByValue(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldValue, opts...).ToFunc()
-}
-
-// ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
-}
-
-// ByUpdatedAt orders the results by the updated_at field.
-func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }

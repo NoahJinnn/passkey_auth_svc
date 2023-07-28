@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -34,15 +33,25 @@ func (au *AccountUpdate) SetProviderName(s string) *AccountUpdate {
 	return au
 }
 
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (au *AccountUpdate) SetNillableProviderName(s *string) *AccountUpdate {
+	if s != nil {
+		au.SetProviderName(*s)
+	}
+	return au
+}
+
 // SetData sets the "data" field.
 func (au *AccountUpdate) SetData(s string) *AccountUpdate {
 	au.mutation.SetData(s)
 	return au
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (au *AccountUpdate) SetUpdatedAt(t time.Time) *AccountUpdate {
-	au.mutation.SetUpdatedAt(t)
+// SetNillableData sets the "data" field if the given value is not nil.
+func (au *AccountUpdate) SetNillableData(s *string) *AccountUpdate {
+	if s != nil {
+		au.SetData(*s)
+	}
 	return au
 }
 
@@ -53,7 +62,6 @@ func (au *AccountUpdate) Mutation() *AccountMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (au *AccountUpdate) Save(ctx context.Context) (int, error) {
-	au.defaults()
 	return withHooks(ctx, au.sqlSave, au.mutation, au.hooks)
 }
 
@@ -79,14 +87,6 @@ func (au *AccountUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (au *AccountUpdate) defaults() {
-	if _, ok := au.mutation.UpdatedAt(); !ok {
-		v := account.UpdateDefaultUpdatedAt()
-		au.mutation.SetUpdatedAt(v)
-	}
-}
-
 func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(account.Table, account.Columns, sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID))
 	if ps := au.mutation.predicates; len(ps) > 0 {
@@ -101,9 +101,6 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := au.mutation.Data(); ok {
 		_spec.SetField(account.FieldData, field.TypeString, value)
-	}
-	if value, ok := au.mutation.UpdatedAt(); ok {
-		_spec.SetField(account.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -131,15 +128,25 @@ func (auo *AccountUpdateOne) SetProviderName(s string) *AccountUpdateOne {
 	return auo
 }
 
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (auo *AccountUpdateOne) SetNillableProviderName(s *string) *AccountUpdateOne {
+	if s != nil {
+		auo.SetProviderName(*s)
+	}
+	return auo
+}
+
 // SetData sets the "data" field.
 func (auo *AccountUpdateOne) SetData(s string) *AccountUpdateOne {
 	auo.mutation.SetData(s)
 	return auo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (auo *AccountUpdateOne) SetUpdatedAt(t time.Time) *AccountUpdateOne {
-	auo.mutation.SetUpdatedAt(t)
+// SetNillableData sets the "data" field if the given value is not nil.
+func (auo *AccountUpdateOne) SetNillableData(s *string) *AccountUpdateOne {
+	if s != nil {
+		auo.SetData(*s)
+	}
 	return auo
 }
 
@@ -163,7 +170,6 @@ func (auo *AccountUpdateOne) Select(field string, fields ...string) *AccountUpda
 
 // Save executes the query and returns the updated Account entity.
 func (auo *AccountUpdateOne) Save(ctx context.Context) (*Account, error) {
-	auo.defaults()
 	return withHooks(ctx, auo.sqlSave, auo.mutation, auo.hooks)
 }
 
@@ -186,14 +192,6 @@ func (auo *AccountUpdateOne) Exec(ctx context.Context) error {
 func (auo *AccountUpdateOne) ExecX(ctx context.Context) {
 	if err := auo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (auo *AccountUpdateOne) defaults() {
-	if _, ok := auo.mutation.UpdatedAt(); !ok {
-		v := account.UpdateDefaultUpdatedAt()
-		auo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -228,9 +226,6 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 	}
 	if value, ok := auo.mutation.Data(); ok {
 		_spec.SetField(account.FieldData, field.TypeString, value)
-	}
-	if value, ok := auo.mutation.UpdatedAt(); ok {
-		_spec.SetField(account.FieldUpdatedAt, field.TypeTime, value)
 	}
 	_node = &Account{config: auo.config}
 	_spec.Assign = _node.assignValues

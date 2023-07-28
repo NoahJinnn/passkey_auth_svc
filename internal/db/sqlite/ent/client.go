@@ -14,7 +14,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/income"
@@ -692,54 +691,6 @@ func (c *InstitutionClient) GetX(ctx context.Context, id uuid.UUID) *Institution
 		panic(err)
 	}
 	return obj
-}
-
-// QueryConnection queries the connection edge of a Institution.
-func (c *InstitutionClient) QueryConnection(i *Institution) *ConnectionQuery {
-	query := (&ConnectionClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := i.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(institution.Table, institution.FieldID, id),
-			sqlgraph.To(connection.Table, connection.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, institution.ConnectionTable, institution.ConnectionColumn),
-		)
-		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryAccounts queries the accounts edge of a Institution.
-func (c *InstitutionClient) QueryAccounts(i *Institution) *AccountQuery {
-	query := (&AccountClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := i.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(institution.Table, institution.FieldID, id),
-			sqlgraph.To(account.Table, account.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, institution.AccountsTable, institution.AccountsColumn),
-		)
-		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryIncomes queries the incomes edge of a Institution.
-func (c *InstitutionClient) QueryIncomes(i *Institution) *IncomeQuery {
-	query := (&IncomeClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := i.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(institution.Table, institution.FieldID, id),
-			sqlgraph.To(income.Table, income.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, institution.IncomesTable, institution.IncomesColumn),
-		)
-		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
 }
 
 // Hooks returns the client hooks.

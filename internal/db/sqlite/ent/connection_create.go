@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -27,36 +26,24 @@ func (cc *ConnectionCreate) SetProviderName(s string) *ConnectionCreate {
 	return cc
 }
 
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (cc *ConnectionCreate) SetNillableProviderName(s *string) *ConnectionCreate {
+	if s != nil {
+		cc.SetProviderName(*s)
+	}
+	return cc
+}
+
 // SetData sets the "data" field.
 func (cc *ConnectionCreate) SetData(s string) *ConnectionCreate {
 	cc.mutation.SetData(s)
 	return cc
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (cc *ConnectionCreate) SetCreatedAt(t time.Time) *ConnectionCreate {
-	cc.mutation.SetCreatedAt(t)
-	return cc
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (cc *ConnectionCreate) SetNillableCreatedAt(t *time.Time) *ConnectionCreate {
-	if t != nil {
-		cc.SetCreatedAt(*t)
-	}
-	return cc
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (cc *ConnectionCreate) SetUpdatedAt(t time.Time) *ConnectionCreate {
-	cc.mutation.SetUpdatedAt(t)
-	return cc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (cc *ConnectionCreate) SetNillableUpdatedAt(t *time.Time) *ConnectionCreate {
-	if t != nil {
-		cc.SetUpdatedAt(*t)
+// SetNillableData sets the "data" field if the given value is not nil.
+func (cc *ConnectionCreate) SetNillableData(s *string) *ConnectionCreate {
+	if s != nil {
+		cc.SetData(*s)
 	}
 	return cc
 }
@@ -110,13 +97,13 @@ func (cc *ConnectionCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (cc *ConnectionCreate) defaults() {
-	if _, ok := cc.mutation.CreatedAt(); !ok {
-		v := connection.DefaultCreatedAt()
-		cc.mutation.SetCreatedAt(v)
+	if _, ok := cc.mutation.ProviderName(); !ok {
+		v := connection.DefaultProviderName
+		cc.mutation.SetProviderName(v)
 	}
-	if _, ok := cc.mutation.UpdatedAt(); !ok {
-		v := connection.DefaultUpdatedAt()
-		cc.mutation.SetUpdatedAt(v)
+	if _, ok := cc.mutation.Data(); !ok {
+		v := connection.DefaultData
+		cc.mutation.SetData(v)
 	}
 	if _, ok := cc.mutation.ID(); !ok {
 		v := connection.DefaultID()
@@ -131,12 +118,6 @@ func (cc *ConnectionCreate) check() error {
 	}
 	if _, ok := cc.mutation.Data(); !ok {
 		return &ValidationError{Name: "data", err: errors.New(`ent: missing required field "Connection.data"`)}
-	}
-	if _, ok := cc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Connection.created_at"`)}
-	}
-	if _, ok := cc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Connection.updated_at"`)}
 	}
 	return nil
 }
@@ -180,14 +161,6 @@ func (cc *ConnectionCreate) createSpec() (*Connection, *sqlgraph.CreateSpec) {
 	if value, ok := cc.mutation.Data(); ok {
 		_spec.SetField(connection.FieldData, field.TypeString, value)
 		_node.Data = value
-	}
-	if value, ok := cc.mutation.CreatedAt(); ok {
-		_spec.SetField(connection.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
-	}
-	if value, ok := cc.mutation.UpdatedAt(); ok {
-		_spec.SetField(connection.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
 	}
 	return _node, _spec
 }

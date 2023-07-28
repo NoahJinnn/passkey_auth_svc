@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -12,9 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/income"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/predicate"
 )
@@ -22,14 +18,10 @@ import (
 // InstitutionQuery is the builder for querying Institution entities.
 type InstitutionQuery struct {
 	config
-	ctx            *QueryContext
-	order          []institution.OrderOption
-	inters         []Interceptor
-	predicates     []predicate.Institution
-	withConnection *ConnectionQuery
-	withAccounts   *AccountQuery
-	withIncomes    *IncomeQuery
-	withFKs        bool
+	ctx        *QueryContext
+	order      []institution.OrderOption
+	inters     []Interceptor
+	predicates []predicate.Institution
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -64,72 +56,6 @@ func (iq *InstitutionQuery) Unique(unique bool) *InstitutionQuery {
 func (iq *InstitutionQuery) Order(o ...institution.OrderOption) *InstitutionQuery {
 	iq.order = append(iq.order, o...)
 	return iq
-}
-
-// QueryConnection chains the current query on the "connection" edge.
-func (iq *InstitutionQuery) QueryConnection() *ConnectionQuery {
-	query := (&ConnectionClient{config: iq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := iq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := iq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(institution.Table, institution.FieldID, selector),
-			sqlgraph.To(connection.Table, connection.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, institution.ConnectionTable, institution.ConnectionColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(iq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryAccounts chains the current query on the "accounts" edge.
-func (iq *InstitutionQuery) QueryAccounts() *AccountQuery {
-	query := (&AccountClient{config: iq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := iq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := iq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(institution.Table, institution.FieldID, selector),
-			sqlgraph.To(account.Table, account.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, institution.AccountsTable, institution.AccountsColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(iq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryIncomes chains the current query on the "incomes" edge.
-func (iq *InstitutionQuery) QueryIncomes() *IncomeQuery {
-	query := (&IncomeClient{config: iq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := iq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := iq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(institution.Table, institution.FieldID, selector),
-			sqlgraph.To(income.Table, income.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, institution.IncomesTable, institution.IncomesColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(iq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // First returns the first Institution entity from the query.
@@ -319,51 +245,15 @@ func (iq *InstitutionQuery) Clone() *InstitutionQuery {
 		return nil
 	}
 	return &InstitutionQuery{
-		config:         iq.config,
-		ctx:            iq.ctx.Clone(),
-		order:          append([]institution.OrderOption{}, iq.order...),
-		inters:         append([]Interceptor{}, iq.inters...),
-		predicates:     append([]predicate.Institution{}, iq.predicates...),
-		withConnection: iq.withConnection.Clone(),
-		withAccounts:   iq.withAccounts.Clone(),
-		withIncomes:    iq.withIncomes.Clone(),
+		config:     iq.config,
+		ctx:        iq.ctx.Clone(),
+		order:      append([]institution.OrderOption{}, iq.order...),
+		inters:     append([]Interceptor{}, iq.inters...),
+		predicates: append([]predicate.Institution{}, iq.predicates...),
 		// clone intermediate query.
 		sql:  iq.sql.Clone(),
 		path: iq.path,
 	}
-}
-
-// WithConnection tells the query-builder to eager-load the nodes that are connected to
-// the "connection" edge. The optional arguments are used to configure the query builder of the edge.
-func (iq *InstitutionQuery) WithConnection(opts ...func(*ConnectionQuery)) *InstitutionQuery {
-	query := (&ConnectionClient{config: iq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	iq.withConnection = query
-	return iq
-}
-
-// WithAccounts tells the query-builder to eager-load the nodes that are connected to
-// the "accounts" edge. The optional arguments are used to configure the query builder of the edge.
-func (iq *InstitutionQuery) WithAccounts(opts ...func(*AccountQuery)) *InstitutionQuery {
-	query := (&AccountClient{config: iq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	iq.withAccounts = query
-	return iq
-}
-
-// WithIncomes tells the query-builder to eager-load the nodes that are connected to
-// the "incomes" edge. The optional arguments are used to configure the query builder of the edge.
-func (iq *InstitutionQuery) WithIncomes(opts ...func(*IncomeQuery)) *InstitutionQuery {
-	query := (&IncomeClient{config: iq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	iq.withIncomes = query
-	return iq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -442,28 +332,15 @@ func (iq *InstitutionQuery) prepareQuery(ctx context.Context) error {
 
 func (iq *InstitutionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Institution, error) {
 	var (
-		nodes       = []*Institution{}
-		withFKs     = iq.withFKs
-		_spec       = iq.querySpec()
-		loadedTypes = [3]bool{
-			iq.withConnection != nil,
-			iq.withAccounts != nil,
-			iq.withIncomes != nil,
-		}
+		nodes = []*Institution{}
+		_spec = iq.querySpec()
 	)
-	if iq.withConnection != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, institution.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Institution).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Institution{config: iq.config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -475,122 +352,7 @@ func (iq *InstitutionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := iq.withConnection; query != nil {
-		if err := iq.loadConnection(ctx, query, nodes, nil,
-			func(n *Institution, e *Connection) { n.Edges.Connection = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := iq.withAccounts; query != nil {
-		if err := iq.loadAccounts(ctx, query, nodes,
-			func(n *Institution) { n.Edges.Accounts = []*Account{} },
-			func(n *Institution, e *Account) { n.Edges.Accounts = append(n.Edges.Accounts, e) }); err != nil {
-			return nil, err
-		}
-	}
-	if query := iq.withIncomes; query != nil {
-		if err := iq.loadIncomes(ctx, query, nodes,
-			func(n *Institution) { n.Edges.Incomes = []*Income{} },
-			func(n *Institution, e *Income) { n.Edges.Incomes = append(n.Edges.Incomes, e) }); err != nil {
-			return nil, err
-		}
-	}
 	return nodes, nil
-}
-
-func (iq *InstitutionQuery) loadConnection(ctx context.Context, query *ConnectionQuery, nodes []*Institution, init func(*Institution), assign func(*Institution, *Connection)) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*Institution)
-	for i := range nodes {
-		if nodes[i].institution_connection == nil {
-			continue
-		}
-		fk := *nodes[i].institution_connection
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(connection.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "institution_connection" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
-func (iq *InstitutionQuery) loadAccounts(ctx context.Context, query *AccountQuery, nodes []*Institution, init func(*Institution), assign func(*Institution, *Account)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*Institution)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	query.withFKs = true
-	query.Where(predicate.Account(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(institution.AccountsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.institution_accounts
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "institution_accounts" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "institution_accounts" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
-func (iq *InstitutionQuery) loadIncomes(ctx context.Context, query *IncomeQuery, nodes []*Institution, init func(*Institution), assign func(*Institution, *Income)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*Institution)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	query.withFKs = true
-	query.Where(predicate.Income(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(institution.IncomesColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.institution_incomes
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "institution_incomes" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "institution_incomes" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
 }
 
 func (iq *InstitutionQuery) sqlCount(ctx context.Context) (int, error) {

@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -34,9 +33,25 @@ func (miu *ManualItemUpdate) SetProviderName(s string) *ManualItemUpdate {
 	return miu
 }
 
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (miu *ManualItemUpdate) SetNillableProviderName(s *string) *ManualItemUpdate {
+	if s != nil {
+		miu.SetProviderName(*s)
+	}
+	return miu
+}
+
 // SetItemTableID sets the "item_table_id" field.
 func (miu *ManualItemUpdate) SetItemTableID(s string) *ManualItemUpdate {
 	miu.mutation.SetItemTableID(s)
+	return miu
+}
+
+// SetNillableItemTableID sets the "item_table_id" field if the given value is not nil.
+func (miu *ManualItemUpdate) SetNillableItemTableID(s *string) *ManualItemUpdate {
+	if s != nil {
+		miu.SetItemTableID(*s)
+	}
 	return miu
 }
 
@@ -46,9 +61,25 @@ func (miu *ManualItemUpdate) SetType(s string) *ManualItemUpdate {
 	return miu
 }
 
+// SetNillableType sets the "type" field if the given value is not nil.
+func (miu *ManualItemUpdate) SetNillableType(s *string) *ManualItemUpdate {
+	if s != nil {
+		miu.SetType(*s)
+	}
+	return miu
+}
+
 // SetCategory sets the "category" field.
 func (miu *ManualItemUpdate) SetCategory(s string) *ManualItemUpdate {
 	miu.mutation.SetCategory(s)
+	return miu
+}
+
+// SetNillableCategory sets the "category" field if the given value is not nil.
+func (miu *ManualItemUpdate) SetNillableCategory(s *string) *ManualItemUpdate {
+	if s != nil {
+		miu.SetCategory(*s)
+	}
 	return miu
 }
 
@@ -79,15 +110,17 @@ func (miu *ManualItemUpdate) SetValue(f float64) *ManualItemUpdate {
 	return miu
 }
 
-// AddValue adds f to the "value" field.
-func (miu *ManualItemUpdate) AddValue(f float64) *ManualItemUpdate {
-	miu.mutation.AddValue(f)
+// SetNillableValue sets the "value" field if the given value is not nil.
+func (miu *ManualItemUpdate) SetNillableValue(f *float64) *ManualItemUpdate {
+	if f != nil {
+		miu.SetValue(*f)
+	}
 	return miu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (miu *ManualItemUpdate) SetUpdatedAt(t time.Time) *ManualItemUpdate {
-	miu.mutation.SetUpdatedAt(t)
+// AddValue adds f to the "value" field.
+func (miu *ManualItemUpdate) AddValue(f float64) *ManualItemUpdate {
+	miu.mutation.AddValue(f)
 	return miu
 }
 
@@ -98,7 +131,6 @@ func (miu *ManualItemUpdate) Mutation() *ManualItemMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (miu *ManualItemUpdate) Save(ctx context.Context) (int, error) {
-	miu.defaults()
 	return withHooks(ctx, miu.sqlSave, miu.mutation, miu.hooks)
 }
 
@@ -121,14 +153,6 @@ func (miu *ManualItemUpdate) Exec(ctx context.Context) error {
 func (miu *ManualItemUpdate) ExecX(ctx context.Context) {
 	if err := miu.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (miu *ManualItemUpdate) defaults() {
-	if _, ok := miu.mutation.UpdatedAt(); !ok {
-		v := manualitem.UpdateDefaultUpdatedAt()
-		miu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -183,9 +207,6 @@ func (miu *ManualItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := miu.mutation.AddedValue(); ok {
 		_spec.AddField(manualitem.FieldValue, field.TypeFloat64, value)
 	}
-	if value, ok := miu.mutation.UpdatedAt(); ok {
-		_spec.SetField(manualitem.FieldUpdatedAt, field.TypeTime, value)
-	}
 	if n, err = sqlgraph.UpdateNodes(ctx, miu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{manualitem.Label}
@@ -212,9 +233,25 @@ func (miuo *ManualItemUpdateOne) SetProviderName(s string) *ManualItemUpdateOne 
 	return miuo
 }
 
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (miuo *ManualItemUpdateOne) SetNillableProviderName(s *string) *ManualItemUpdateOne {
+	if s != nil {
+		miuo.SetProviderName(*s)
+	}
+	return miuo
+}
+
 // SetItemTableID sets the "item_table_id" field.
 func (miuo *ManualItemUpdateOne) SetItemTableID(s string) *ManualItemUpdateOne {
 	miuo.mutation.SetItemTableID(s)
+	return miuo
+}
+
+// SetNillableItemTableID sets the "item_table_id" field if the given value is not nil.
+func (miuo *ManualItemUpdateOne) SetNillableItemTableID(s *string) *ManualItemUpdateOne {
+	if s != nil {
+		miuo.SetItemTableID(*s)
+	}
 	return miuo
 }
 
@@ -224,9 +261,25 @@ func (miuo *ManualItemUpdateOne) SetType(s string) *ManualItemUpdateOne {
 	return miuo
 }
 
+// SetNillableType sets the "type" field if the given value is not nil.
+func (miuo *ManualItemUpdateOne) SetNillableType(s *string) *ManualItemUpdateOne {
+	if s != nil {
+		miuo.SetType(*s)
+	}
+	return miuo
+}
+
 // SetCategory sets the "category" field.
 func (miuo *ManualItemUpdateOne) SetCategory(s string) *ManualItemUpdateOne {
 	miuo.mutation.SetCategory(s)
+	return miuo
+}
+
+// SetNillableCategory sets the "category" field if the given value is not nil.
+func (miuo *ManualItemUpdateOne) SetNillableCategory(s *string) *ManualItemUpdateOne {
+	if s != nil {
+		miuo.SetCategory(*s)
+	}
 	return miuo
 }
 
@@ -257,15 +310,17 @@ func (miuo *ManualItemUpdateOne) SetValue(f float64) *ManualItemUpdateOne {
 	return miuo
 }
 
-// AddValue adds f to the "value" field.
-func (miuo *ManualItemUpdateOne) AddValue(f float64) *ManualItemUpdateOne {
-	miuo.mutation.AddValue(f)
+// SetNillableValue sets the "value" field if the given value is not nil.
+func (miuo *ManualItemUpdateOne) SetNillableValue(f *float64) *ManualItemUpdateOne {
+	if f != nil {
+		miuo.SetValue(*f)
+	}
 	return miuo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (miuo *ManualItemUpdateOne) SetUpdatedAt(t time.Time) *ManualItemUpdateOne {
-	miuo.mutation.SetUpdatedAt(t)
+// AddValue adds f to the "value" field.
+func (miuo *ManualItemUpdateOne) AddValue(f float64) *ManualItemUpdateOne {
+	miuo.mutation.AddValue(f)
 	return miuo
 }
 
@@ -289,7 +344,6 @@ func (miuo *ManualItemUpdateOne) Select(field string, fields ...string) *ManualI
 
 // Save executes the query and returns the updated ManualItem entity.
 func (miuo *ManualItemUpdateOne) Save(ctx context.Context) (*ManualItem, error) {
-	miuo.defaults()
 	return withHooks(ctx, miuo.sqlSave, miuo.mutation, miuo.hooks)
 }
 
@@ -312,14 +366,6 @@ func (miuo *ManualItemUpdateOne) Exec(ctx context.Context) error {
 func (miuo *ManualItemUpdateOne) ExecX(ctx context.Context) {
 	if err := miuo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (miuo *ManualItemUpdateOne) defaults() {
-	if _, ok := miuo.mutation.UpdatedAt(); !ok {
-		v := manualitem.UpdateDefaultUpdatedAt()
-		miuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -390,9 +436,6 @@ func (miuo *ManualItemUpdateOne) sqlSave(ctx context.Context) (_node *ManualItem
 	}
 	if value, ok := miuo.mutation.AddedValue(); ok {
 		_spec.AddField(manualitem.FieldValue, field.TypeFloat64, value)
-	}
-	if value, ok := miuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(manualitem.FieldUpdatedAt, field.TypeTime, value)
 	}
 	_node = &ManualItem{config: miuo.config}
 	_spec.Assign = _node.assignValues

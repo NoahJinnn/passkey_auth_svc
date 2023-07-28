@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -27,36 +26,24 @@ func (ic *IncomeCreate) SetProviderName(s string) *IncomeCreate {
 	return ic
 }
 
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (ic *IncomeCreate) SetNillableProviderName(s *string) *IncomeCreate {
+	if s != nil {
+		ic.SetProviderName(*s)
+	}
+	return ic
+}
+
 // SetData sets the "data" field.
 func (ic *IncomeCreate) SetData(s string) *IncomeCreate {
 	ic.mutation.SetData(s)
 	return ic
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (ic *IncomeCreate) SetCreatedAt(t time.Time) *IncomeCreate {
-	ic.mutation.SetCreatedAt(t)
-	return ic
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (ic *IncomeCreate) SetNillableCreatedAt(t *time.Time) *IncomeCreate {
-	if t != nil {
-		ic.SetCreatedAt(*t)
-	}
-	return ic
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (ic *IncomeCreate) SetUpdatedAt(t time.Time) *IncomeCreate {
-	ic.mutation.SetUpdatedAt(t)
-	return ic
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (ic *IncomeCreate) SetNillableUpdatedAt(t *time.Time) *IncomeCreate {
-	if t != nil {
-		ic.SetUpdatedAt(*t)
+// SetNillableData sets the "data" field if the given value is not nil.
+func (ic *IncomeCreate) SetNillableData(s *string) *IncomeCreate {
+	if s != nil {
+		ic.SetData(*s)
 	}
 	return ic
 }
@@ -110,13 +97,13 @@ func (ic *IncomeCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (ic *IncomeCreate) defaults() {
-	if _, ok := ic.mutation.CreatedAt(); !ok {
-		v := income.DefaultCreatedAt()
-		ic.mutation.SetCreatedAt(v)
+	if _, ok := ic.mutation.ProviderName(); !ok {
+		v := income.DefaultProviderName
+		ic.mutation.SetProviderName(v)
 	}
-	if _, ok := ic.mutation.UpdatedAt(); !ok {
-		v := income.DefaultUpdatedAt()
-		ic.mutation.SetUpdatedAt(v)
+	if _, ok := ic.mutation.Data(); !ok {
+		v := income.DefaultData
+		ic.mutation.SetData(v)
 	}
 	if _, ok := ic.mutation.ID(); !ok {
 		v := income.DefaultID()
@@ -131,12 +118,6 @@ func (ic *IncomeCreate) check() error {
 	}
 	if _, ok := ic.mutation.Data(); !ok {
 		return &ValidationError{Name: "data", err: errors.New(`ent: missing required field "Income.data"`)}
-	}
-	if _, ok := ic.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Income.created_at"`)}
-	}
-	if _, ok := ic.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Income.updated_at"`)}
 	}
 	return nil
 }
@@ -180,14 +161,6 @@ func (ic *IncomeCreate) createSpec() (*Income, *sqlgraph.CreateSpec) {
 	if value, ok := ic.mutation.Data(); ok {
 		_spec.SetField(income.FieldData, field.TypeString, value)
 		_node.Data = value
-	}
-	if value, ok := ic.mutation.CreatedAt(); ok {
-		_spec.SetField(income.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
-	}
-	if value, ok := ic.mutation.UpdatedAt(); ok {
-		_spec.SetField(income.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
 	}
 	return _node, _spec
 }

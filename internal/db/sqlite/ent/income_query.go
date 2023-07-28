@@ -22,7 +22,6 @@ type IncomeQuery struct {
 	order      []income.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Income
-	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -333,13 +332,9 @@ func (iq *IncomeQuery) prepareQuery(ctx context.Context) error {
 
 func (iq *IncomeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Income, error) {
 	var (
-		nodes   = []*Income{}
-		withFKs = iq.withFKs
-		_spec   = iq.querySpec()
+		nodes = []*Income{}
+		_spec = iq.querySpec()
 	)
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, income.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Income).scanValues(nil, columns)
 	}

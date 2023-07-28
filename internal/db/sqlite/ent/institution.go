@@ -5,12 +5,10 @@ package ent
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 )
 
@@ -22,60 +20,8 @@ type Institution struct {
 	// ProviderName holds the value of the "provider_name" field.
 	ProviderName string `json:"provider_name,omitempty"`
 	// Data holds the value of the "data" field.
-	Data string `json:"data,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the InstitutionQuery when eager-loading is set.
-	Edges                  InstitutionEdges `json:"edges"`
-	institution_connection *uuid.UUID
-	selectValues           sql.SelectValues
-}
-
-// InstitutionEdges holds the relations/edges for other nodes in the graph.
-type InstitutionEdges struct {
-	// Connection holds the value of the connection edge.
-	Connection *Connection `json:"connection,omitempty"`
-	// Accounts holds the value of the accounts edge.
-	Accounts []*Account `json:"accounts,omitempty"`
-	// Incomes holds the value of the incomes edge.
-	Incomes []*Income `json:"incomes,omitempty"`
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
-}
-
-// ConnectionOrErr returns the Connection value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e InstitutionEdges) ConnectionOrErr() (*Connection, error) {
-	if e.loadedTypes[0] {
-		if e.Connection == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: connection.Label}
-		}
-		return e.Connection, nil
-	}
-	return nil, &NotLoadedError{edge: "connection"}
-}
-
-// AccountsOrErr returns the Accounts value or an error if the edge
-// was not loaded in eager-loading.
-func (e InstitutionEdges) AccountsOrErr() ([]*Account, error) {
-	if e.loadedTypes[1] {
-		return e.Accounts, nil
-	}
-	return nil, &NotLoadedError{edge: "accounts"}
-}
-
-// IncomesOrErr returns the Incomes value or an error if the edge
-// was not loaded in eager-loading.
-func (e InstitutionEdges) IncomesOrErr() ([]*Income, error) {
-	if e.loadedTypes[2] {
-		return e.Incomes, nil
-	}
-	return nil, &NotLoadedError{edge: "incomes"}
+	Data         string `json:"data,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -85,12 +31,8 @@ func (*Institution) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case institution.FieldProviderName, institution.FieldData:
 			values[i] = new(sql.NullString)
-		case institution.FieldCreatedAt, institution.FieldUpdatedAt:
-			values[i] = new(sql.NullTime)
 		case institution.FieldID:
 			values[i] = new(uuid.UUID)
-		case institution.ForeignKeys[0]: // institution_connection
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -124,25 +66,6 @@ func (i *Institution) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				i.Data = value.String
 			}
-		case institution.FieldCreatedAt:
-			if value, ok := values[j].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[j])
-			} else if value.Valid {
-				i.CreatedAt = value.Time
-			}
-		case institution.FieldUpdatedAt:
-			if value, ok := values[j].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[j])
-			} else if value.Valid {
-				i.UpdatedAt = value.Time
-			}
-		case institution.ForeignKeys[0]:
-			if value, ok := values[j].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field institution_connection", values[j])
-			} else if value.Valid {
-				i.institution_connection = new(uuid.UUID)
-				*i.institution_connection = *value.S.(*uuid.UUID)
-			}
 		default:
 			i.selectValues.Set(columns[j], values[j])
 		}
@@ -154,21 +77,6 @@ func (i *Institution) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (i *Institution) Value(name string) (ent.Value, error) {
 	return i.selectValues.Get(name)
-}
-
-// QueryConnection queries the "connection" edge of the Institution entity.
-func (i *Institution) QueryConnection() *ConnectionQuery {
-	return NewInstitutionClient(i.config).QueryConnection(i)
-}
-
-// QueryAccounts queries the "accounts" edge of the Institution entity.
-func (i *Institution) QueryAccounts() *AccountQuery {
-	return NewInstitutionClient(i.config).QueryAccounts(i)
-}
-
-// QueryIncomes queries the "incomes" edge of the Institution entity.
-func (i *Institution) QueryIncomes() *IncomeQuery {
-	return NewInstitutionClient(i.config).QueryIncomes(i)
 }
 
 // Update returns a builder for updating this Institution.
@@ -199,12 +107,6 @@ func (i *Institution) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("data=")
 	builder.WriteString(i.Data)
-	builder.WriteString(", ")
-	builder.WriteString("created_at=")
-	builder.WriteString(i.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("updated_at=")
-	builder.WriteString(i.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
