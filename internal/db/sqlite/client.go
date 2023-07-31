@@ -26,7 +26,7 @@ func NewSqliteEnt(ctx context.Context, db *sql.DB) *ent.Client {
 	drv := entsql.OpenDB(dialect.SQLite, db)
 	client := ent.NewClient(ent.Driver(drv))
 	// Run the auto migration tool.
-	if err := client.Schema.Create(ctx,
+	if err := client.Debug().Schema.Create(ctx,
 		migrate.WithDropIndex(true),
 		migrate.WithDropColumn(true),
 	); err != nil {
