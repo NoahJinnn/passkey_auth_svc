@@ -44,7 +44,7 @@ func NewManager() *Manager {
 func (m *Manager) setupEventHandlers() {
 	m.handlers["sync"] = func(e Event, c *Client) error {
 		fmt.Println("handle event type: ", e.Type)
-		fmt.Println("handle event payload: ", e.Payload)
+
 		// Marshal Payload into wanted format
 		var syncP SyncPayload
 		if err := json.Unmarshal(e.Payload, &syncP); err != nil {
@@ -58,6 +58,7 @@ func (m *Manager) setupEventHandlers() {
 		if err != nil {
 			return fmt.Errorf("failed to marshal broadcast message: %v", err)
 		}
+
 		var outgoingEvent Event
 		outgoingEvent.Type = "ack"
 		outgoingEvent.Payload = data
@@ -69,7 +70,6 @@ func (m *Manager) setupEventHandlers() {
 
 // routeEvent is used to make sure the correct event goes into the correct handler
 func (m *Manager) routeEvent(event Event, c *Client) error {
-	fmt.Printf("Routing event: %+v\n", event)
 	// Check if Handler is present in Map
 	if handler, ok := m.handlers[event.Type]; ok {
 		// Execute the handler and return any err

@@ -10,7 +10,7 @@ import (
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/migrate"
-	"github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func NewSqliteDrive(dsn string) *sql.DB {
@@ -42,25 +42,11 @@ func NewSqliteConn(ctx context.Context, db *sql.DB) *sql.Conn {
 	}
 
 	err = conn.Raw(func(driverConn interface{}) error {
-		sqliteConn := driverConn.(*sqlite3.SQLiteConn)
-		err := sqliteConn.LoadExtension("/Users/trannguyen/Workspaces/hq/app/hqservice/internal/db/sqlite/crsqlite-aarch64", "sqlite3_crsqlite_init")
-		if err != nil {
-			return err
-		}
 		fmt.Println("load extension success")
 		return nil
 	})
 	if err != nil {
 		log.Fatalf("failed loading extension: %v", err)
-	}
-
-	// Convert tables to CRRs
-	syncTables := []string{"connections", "institutions", "accounts", "transactions", "incomes", "manual_items"}
-	for _, table := range syncTables {
-		_, err := conn.ExecContext(ctx, `SELECT crsql_as_crr(?)`, table)
-		if err != nil {
-			log.Fatalf("failed to convert table to CRR: %v", err)
-		}
 	}
 	return conn
 }
