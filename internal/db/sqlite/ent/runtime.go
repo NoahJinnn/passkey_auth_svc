@@ -3,8 +3,6 @@
 package ent
 
 import (
-	"time"
-
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
@@ -22,64 +20,56 @@ import (
 func init() {
 	accountFields := schema.Account{}.Fields()
 	_ = accountFields
-	// accountDescCreatedAt is the schema descriptor for created_at field.
-	accountDescCreatedAt := accountFields[3].Descriptor()
-	// account.DefaultCreatedAt holds the default value on creation for the created_at field.
-	account.DefaultCreatedAt = accountDescCreatedAt.Default.(func() time.Time)
-	// accountDescUpdatedAt is the schema descriptor for updated_at field.
-	accountDescUpdatedAt := accountFields[4].Descriptor()
-	// account.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	account.DefaultUpdatedAt = accountDescUpdatedAt.Default.(func() time.Time)
-	// account.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	account.UpdateDefaultUpdatedAt = accountDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// accountDescProviderName is the schema descriptor for provider_name field.
+	accountDescProviderName := accountFields[1].Descriptor()
+	// account.DefaultProviderName holds the default value on creation for the provider_name field.
+	account.DefaultProviderName = accountDescProviderName.Default.(string)
+	// accountDescData is the schema descriptor for data field.
+	accountDescData := accountFields[2].Descriptor()
+	// account.DefaultData holds the default value on creation for the data field.
+	account.DefaultData = accountDescData.Default.(string)
 	// accountDescID is the schema descriptor for id field.
 	accountDescID := accountFields[0].Descriptor()
 	// account.DefaultID holds the default value on creation for the id field.
 	account.DefaultID = accountDescID.Default.(func() uuid.UUID)
 	connectionFields := schema.Connection{}.Fields()
 	_ = connectionFields
-	// connectionDescCreatedAt is the schema descriptor for created_at field.
-	connectionDescCreatedAt := connectionFields[3].Descriptor()
-	// connection.DefaultCreatedAt holds the default value on creation for the created_at field.
-	connection.DefaultCreatedAt = connectionDescCreatedAt.Default.(func() time.Time)
-	// connectionDescUpdatedAt is the schema descriptor for updated_at field.
-	connectionDescUpdatedAt := connectionFields[4].Descriptor()
-	// connection.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	connection.DefaultUpdatedAt = connectionDescUpdatedAt.Default.(func() time.Time)
-	// connection.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	connection.UpdateDefaultUpdatedAt = connectionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// connectionDescProviderName is the schema descriptor for provider_name field.
+	connectionDescProviderName := connectionFields[1].Descriptor()
+	// connection.DefaultProviderName holds the default value on creation for the provider_name field.
+	connection.DefaultProviderName = connectionDescProviderName.Default.(string)
+	// connectionDescData is the schema descriptor for data field.
+	connectionDescData := connectionFields[2].Descriptor()
+	// connection.DefaultData holds the default value on creation for the data field.
+	connection.DefaultData = connectionDescData.Default.(string)
 	// connectionDescID is the schema descriptor for id field.
 	connectionDescID := connectionFields[0].Descriptor()
 	// connection.DefaultID holds the default value on creation for the id field.
 	connection.DefaultID = connectionDescID.Default.(func() uuid.UUID)
 	incomeFields := schema.Income{}.Fields()
 	_ = incomeFields
-	// incomeDescCreatedAt is the schema descriptor for created_at field.
-	incomeDescCreatedAt := incomeFields[3].Descriptor()
-	// income.DefaultCreatedAt holds the default value on creation for the created_at field.
-	income.DefaultCreatedAt = incomeDescCreatedAt.Default.(func() time.Time)
-	// incomeDescUpdatedAt is the schema descriptor for updated_at field.
-	incomeDescUpdatedAt := incomeFields[4].Descriptor()
-	// income.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	income.DefaultUpdatedAt = incomeDescUpdatedAt.Default.(func() time.Time)
-	// income.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	income.UpdateDefaultUpdatedAt = incomeDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// incomeDescProviderName is the schema descriptor for provider_name field.
+	incomeDescProviderName := incomeFields[1].Descriptor()
+	// income.DefaultProviderName holds the default value on creation for the provider_name field.
+	income.DefaultProviderName = incomeDescProviderName.Default.(string)
+	// incomeDescData is the schema descriptor for data field.
+	incomeDescData := incomeFields[2].Descriptor()
+	// income.DefaultData holds the default value on creation for the data field.
+	income.DefaultData = incomeDescData.Default.(string)
 	// incomeDescID is the schema descriptor for id field.
 	incomeDescID := incomeFields[0].Descriptor()
 	// income.DefaultID holds the default value on creation for the id field.
 	income.DefaultID = incomeDescID.Default.(func() uuid.UUID)
 	institutionFields := schema.Institution{}.Fields()
 	_ = institutionFields
-	// institutionDescCreatedAt is the schema descriptor for created_at field.
-	institutionDescCreatedAt := institutionFields[3].Descriptor()
-	// institution.DefaultCreatedAt holds the default value on creation for the created_at field.
-	institution.DefaultCreatedAt = institutionDescCreatedAt.Default.(func() time.Time)
-	// institutionDescUpdatedAt is the schema descriptor for updated_at field.
-	institutionDescUpdatedAt := institutionFields[4].Descriptor()
-	// institution.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	institution.DefaultUpdatedAt = institutionDescUpdatedAt.Default.(func() time.Time)
-	// institution.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	institution.UpdateDefaultUpdatedAt = institutionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// institutionDescProviderName is the schema descriptor for provider_name field.
+	institutionDescProviderName := institutionFields[1].Descriptor()
+	// institution.DefaultProviderName holds the default value on creation for the provider_name field.
+	institution.DefaultProviderName = institutionDescProviderName.Default.(string)
+	// institutionDescData is the schema descriptor for data field.
+	institutionDescData := institutionFields[2].Descriptor()
+	// institution.DefaultData holds the default value on creation for the data field.
+	institution.DefaultData = institutionDescData.Default.(string)
 	// institutionDescID is the schema descriptor for id field.
 	institutionDescID := institutionFields[0].Descriptor()
 	// institution.DefaultID holds the default value on creation for the id field.
@@ -88,26 +78,32 @@ func init() {
 	_ = manualitemFields
 	// manualitemDescProviderName is the schema descriptor for provider_name field.
 	manualitemDescProviderName := manualitemFields[1].Descriptor()
+	// manualitem.DefaultProviderName holds the default value on creation for the provider_name field.
+	manualitem.DefaultProviderName = manualitemDescProviderName.Default.(string)
 	// manualitem.ProviderNameValidator is a validator for the "provider_name" field. It is called by the builders before save.
 	manualitem.ProviderNameValidator = manualitemDescProviderName.Validators[0].(func(string) error)
+	// manualitemDescItemTableID is the schema descriptor for item_table_id field.
+	manualitemDescItemTableID := manualitemFields[2].Descriptor()
+	// manualitem.DefaultItemTableID holds the default value on creation for the item_table_id field.
+	manualitem.DefaultItemTableID = manualitemDescItemTableID.Default.(string)
+	// manualitemDescType is the schema descriptor for type field.
+	manualitemDescType := manualitemFields[3].Descriptor()
+	// manualitem.DefaultType holds the default value on creation for the type field.
+	manualitem.DefaultType = manualitemDescType.Default.(string)
 	// manualitemDescCategory is the schema descriptor for category field.
 	manualitemDescCategory := manualitemFields[4].Descriptor()
+	// manualitem.DefaultCategory holds the default value on creation for the category field.
+	manualitem.DefaultCategory = manualitemDescCategory.Default.(string)
 	// manualitem.CategoryValidator is a validator for the "category" field. It is called by the builders before save.
 	manualitem.CategoryValidator = manualitemDescCategory.Validators[0].(func(string) error)
 	// manualitemDescDescription is the schema descriptor for description field.
 	manualitemDescDescription := manualitemFields[5].Descriptor()
 	// manualitem.DefaultDescription holds the default value on creation for the description field.
 	manualitem.DefaultDescription = manualitemDescDescription.Default.(string)
-	// manualitemDescCreatedAt is the schema descriptor for created_at field.
-	manualitemDescCreatedAt := manualitemFields[7].Descriptor()
-	// manualitem.DefaultCreatedAt holds the default value on creation for the created_at field.
-	manualitem.DefaultCreatedAt = manualitemDescCreatedAt.Default.(func() time.Time)
-	// manualitemDescUpdatedAt is the schema descriptor for updated_at field.
-	manualitemDescUpdatedAt := manualitemFields[8].Descriptor()
-	// manualitem.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	manualitem.DefaultUpdatedAt = manualitemDescUpdatedAt.Default.(func() time.Time)
-	// manualitem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	manualitem.UpdateDefaultUpdatedAt = manualitemDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// manualitemDescValue is the schema descriptor for value field.
+	manualitemDescValue := manualitemFields[6].Descriptor()
+	// manualitem.DefaultValue holds the default value on creation for the value field.
+	manualitem.DefaultValue = manualitemDescValue.Default.(float64)
 	// manualitemDescID is the schema descriptor for id field.
 	manualitemDescID := manualitemFields[0].Descriptor()
 	// manualitem.DefaultID holds the default value on creation for the id field.
@@ -132,16 +128,14 @@ func init() {
 	todo.DefaultID = todoDescID.Default.(func() uuid.UUID)
 	transactionFields := schema.Transaction{}.Fields()
 	_ = transactionFields
-	// transactionDescCreatedAt is the schema descriptor for created_at field.
-	transactionDescCreatedAt := transactionFields[3].Descriptor()
-	// transaction.DefaultCreatedAt holds the default value on creation for the created_at field.
-	transaction.DefaultCreatedAt = transactionDescCreatedAt.Default.(func() time.Time)
-	// transactionDescUpdatedAt is the schema descriptor for updated_at field.
-	transactionDescUpdatedAt := transactionFields[4].Descriptor()
-	// transaction.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	transaction.DefaultUpdatedAt = transactionDescUpdatedAt.Default.(func() time.Time)
-	// transaction.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	transaction.UpdateDefaultUpdatedAt = transactionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// transactionDescProviderName is the schema descriptor for provider_name field.
+	transactionDescProviderName := transactionFields[1].Descriptor()
+	// transaction.DefaultProviderName holds the default value on creation for the provider_name field.
+	transaction.DefaultProviderName = transactionDescProviderName.Default.(string)
+	// transactionDescData is the schema descriptor for data field.
+	transactionDescData := transactionFields[2].Descriptor()
+	// transaction.DefaultData holds the default value on creation for the data field.
+	transaction.DefaultData = transactionDescData.Default.(string)
 	// transactionDescID is the schema descriptor for id field.
 	transactionDescID := transactionFields[0].Descriptor()
 	// transaction.DefaultID holds the default value on creation for the id field.

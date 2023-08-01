@@ -1,6 +1,9 @@
 package provider
 
 import (
+	"context"
+	"database/sql"
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,7 +25,12 @@ func TestSqliteConnection(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, uid := range tt.uids {
-				p.NewSqliteConnect(uid)
+				conn := p.NewSqliteConnect(context.Background(), uid).conn
+				r := conn.QueryRowContext(context.Background(), "SELECT quote(crsql_siteid());")
+				var siteid string
+				if err := r.Scan(&siteid); err == sql.ErrNoRows {
+					log.Fatalf("failed to query crsql lite id: %v", err)
+				}
 			}
 			assert.Equal(t, len(tt.uids), len(p.userStorage))
 

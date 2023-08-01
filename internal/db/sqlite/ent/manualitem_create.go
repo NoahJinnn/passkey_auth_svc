@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -27,9 +26,25 @@ func (mic *ManualItemCreate) SetProviderName(s string) *ManualItemCreate {
 	return mic
 }
 
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (mic *ManualItemCreate) SetNillableProviderName(s *string) *ManualItemCreate {
+	if s != nil {
+		mic.SetProviderName(*s)
+	}
+	return mic
+}
+
 // SetItemTableID sets the "item_table_id" field.
 func (mic *ManualItemCreate) SetItemTableID(s string) *ManualItemCreate {
 	mic.mutation.SetItemTableID(s)
+	return mic
+}
+
+// SetNillableItemTableID sets the "item_table_id" field if the given value is not nil.
+func (mic *ManualItemCreate) SetNillableItemTableID(s *string) *ManualItemCreate {
+	if s != nil {
+		mic.SetItemTableID(*s)
+	}
 	return mic
 }
 
@@ -39,9 +54,25 @@ func (mic *ManualItemCreate) SetType(s string) *ManualItemCreate {
 	return mic
 }
 
+// SetNillableType sets the "type" field if the given value is not nil.
+func (mic *ManualItemCreate) SetNillableType(s *string) *ManualItemCreate {
+	if s != nil {
+		mic.SetType(*s)
+	}
+	return mic
+}
+
 // SetCategory sets the "category" field.
 func (mic *ManualItemCreate) SetCategory(s string) *ManualItemCreate {
 	mic.mutation.SetCategory(s)
+	return mic
+}
+
+// SetNillableCategory sets the "category" field if the given value is not nil.
+func (mic *ManualItemCreate) SetNillableCategory(s *string) *ManualItemCreate {
+	if s != nil {
+		mic.SetCategory(*s)
+	}
 	return mic
 }
 
@@ -65,30 +96,10 @@ func (mic *ManualItemCreate) SetValue(f float64) *ManualItemCreate {
 	return mic
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (mic *ManualItemCreate) SetCreatedAt(t time.Time) *ManualItemCreate {
-	mic.mutation.SetCreatedAt(t)
-	return mic
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (mic *ManualItemCreate) SetNillableCreatedAt(t *time.Time) *ManualItemCreate {
-	if t != nil {
-		mic.SetCreatedAt(*t)
-	}
-	return mic
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (mic *ManualItemCreate) SetUpdatedAt(t time.Time) *ManualItemCreate {
-	mic.mutation.SetUpdatedAt(t)
-	return mic
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (mic *ManualItemCreate) SetNillableUpdatedAt(t *time.Time) *ManualItemCreate {
-	if t != nil {
-		mic.SetUpdatedAt(*t)
+// SetNillableValue sets the "value" field if the given value is not nil.
+func (mic *ManualItemCreate) SetNillableValue(f *float64) *ManualItemCreate {
+	if f != nil {
+		mic.SetValue(*f)
 	}
 	return mic
 }
@@ -142,17 +153,29 @@ func (mic *ManualItemCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (mic *ManualItemCreate) defaults() {
+	if _, ok := mic.mutation.ProviderName(); !ok {
+		v := manualitem.DefaultProviderName
+		mic.mutation.SetProviderName(v)
+	}
+	if _, ok := mic.mutation.ItemTableID(); !ok {
+		v := manualitem.DefaultItemTableID
+		mic.mutation.SetItemTableID(v)
+	}
+	if _, ok := mic.mutation.GetType(); !ok {
+		v := manualitem.DefaultType
+		mic.mutation.SetType(v)
+	}
+	if _, ok := mic.mutation.Category(); !ok {
+		v := manualitem.DefaultCategory
+		mic.mutation.SetCategory(v)
+	}
 	if _, ok := mic.mutation.Description(); !ok {
 		v := manualitem.DefaultDescription
 		mic.mutation.SetDescription(v)
 	}
-	if _, ok := mic.mutation.CreatedAt(); !ok {
-		v := manualitem.DefaultCreatedAt()
-		mic.mutation.SetCreatedAt(v)
-	}
-	if _, ok := mic.mutation.UpdatedAt(); !ok {
-		v := manualitem.DefaultUpdatedAt()
-		mic.mutation.SetUpdatedAt(v)
+	if _, ok := mic.mutation.Value(); !ok {
+		v := manualitem.DefaultValue
+		mic.mutation.SetValue(v)
 	}
 	if _, ok := mic.mutation.ID(); !ok {
 		v := manualitem.DefaultID()
@@ -186,12 +209,6 @@ func (mic *ManualItemCreate) check() error {
 	}
 	if _, ok := mic.mutation.Value(); !ok {
 		return &ValidationError{Name: "value", err: errors.New(`ent: missing required field "ManualItem.value"`)}
-	}
-	if _, ok := mic.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "ManualItem.created_at"`)}
-	}
-	if _, ok := mic.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "ManualItem.updated_at"`)}
 	}
 	return nil
 }
@@ -251,14 +268,6 @@ func (mic *ManualItemCreate) createSpec() (*ManualItem, *sqlgraph.CreateSpec) {
 	if value, ok := mic.mutation.Value(); ok {
 		_spec.SetField(manualitem.FieldValue, field.TypeFloat64, value)
 		_node.Value = value
-	}
-	if value, ok := mic.mutation.CreatedAt(); ok {
-		_spec.SetField(manualitem.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
-	}
-	if value, ok := mic.mutation.UpdatedAt(); ok {
-		_spec.SetField(manualitem.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
 	}
 	return _node, _spec
 }

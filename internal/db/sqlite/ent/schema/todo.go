@@ -7,6 +7,7 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+// This schema is used to create test data.
 type Todo struct {
 	ent.Schema
 }

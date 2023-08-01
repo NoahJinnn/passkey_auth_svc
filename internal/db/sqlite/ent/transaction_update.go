@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -34,15 +33,25 @@ func (tu *TransactionUpdate) SetProviderName(s string) *TransactionUpdate {
 	return tu
 }
 
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableProviderName(s *string) *TransactionUpdate {
+	if s != nil {
+		tu.SetProviderName(*s)
+	}
+	return tu
+}
+
 // SetData sets the "data" field.
 func (tu *TransactionUpdate) SetData(s string) *TransactionUpdate {
 	tu.mutation.SetData(s)
 	return tu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (tu *TransactionUpdate) SetUpdatedAt(t time.Time) *TransactionUpdate {
-	tu.mutation.SetUpdatedAt(t)
+// SetNillableData sets the "data" field if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableData(s *string) *TransactionUpdate {
+	if s != nil {
+		tu.SetData(*s)
+	}
 	return tu
 }
 
@@ -53,7 +62,6 @@ func (tu *TransactionUpdate) Mutation() *TransactionMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tu *TransactionUpdate) Save(ctx context.Context) (int, error) {
-	tu.defaults()
 	return withHooks(ctx, tu.sqlSave, tu.mutation, tu.hooks)
 }
 
@@ -79,14 +87,6 @@ func (tu *TransactionUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (tu *TransactionUpdate) defaults() {
-	if _, ok := tu.mutation.UpdatedAt(); !ok {
-		v := transaction.UpdateDefaultUpdatedAt()
-		tu.mutation.SetUpdatedAt(v)
-	}
-}
-
 func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(transaction.Table, transaction.Columns, sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID))
 	if ps := tu.mutation.predicates; len(ps) > 0 {
@@ -101,9 +101,6 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := tu.mutation.Data(); ok {
 		_spec.SetField(transaction.FieldData, field.TypeString, value)
-	}
-	if value, ok := tu.mutation.UpdatedAt(); ok {
-		_spec.SetField(transaction.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -131,15 +128,25 @@ func (tuo *TransactionUpdateOne) SetProviderName(s string) *TransactionUpdateOne
 	return tuo
 }
 
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableProviderName(s *string) *TransactionUpdateOne {
+	if s != nil {
+		tuo.SetProviderName(*s)
+	}
+	return tuo
+}
+
 // SetData sets the "data" field.
 func (tuo *TransactionUpdateOne) SetData(s string) *TransactionUpdateOne {
 	tuo.mutation.SetData(s)
 	return tuo
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (tuo *TransactionUpdateOne) SetUpdatedAt(t time.Time) *TransactionUpdateOne {
-	tuo.mutation.SetUpdatedAt(t)
+// SetNillableData sets the "data" field if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableData(s *string) *TransactionUpdateOne {
+	if s != nil {
+		tuo.SetData(*s)
+	}
 	return tuo
 }
 
@@ -163,7 +170,6 @@ func (tuo *TransactionUpdateOne) Select(field string, fields ...string) *Transac
 
 // Save executes the query and returns the updated Transaction entity.
 func (tuo *TransactionUpdateOne) Save(ctx context.Context) (*Transaction, error) {
-	tuo.defaults()
 	return withHooks(ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
 }
 
@@ -186,14 +192,6 @@ func (tuo *TransactionUpdateOne) Exec(ctx context.Context) error {
 func (tuo *TransactionUpdateOne) ExecX(ctx context.Context) {
 	if err := tuo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (tuo *TransactionUpdateOne) defaults() {
-	if _, ok := tuo.mutation.UpdatedAt(); !ok {
-		v := transaction.UpdateDefaultUpdatedAt()
-		tuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -228,9 +226,6 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	}
 	if value, ok := tuo.mutation.Data(); ok {
 		_spec.SetField(transaction.FieldData, field.TypeString, value)
-	}
-	if value, ok := tuo.mutation.UpdatedAt(); ok {
-		_spec.SetField(transaction.FieldUpdatedAt, field.TypeTime, value)
 	}
 	_node = &Transaction{config: tuo.config}
 	_spec.Assign = _node.assignValues

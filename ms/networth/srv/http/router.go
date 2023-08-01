@@ -10,6 +10,7 @@ import (
 	"github.com/hellohq/hqservice/ms/networth/app"
 	"github.com/hellohq/hqservice/ms/networth/config"
 	"github.com/hellohq/hqservice/ms/networth/srv/http/handlers"
+	"github.com/hellohq/hqservice/ms/networth/srv/http/ws"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/powerman/structlog"
@@ -95,6 +96,9 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 	manualItem.POST("/manual_item", miHandler.Create)
 	manualItem.PUT("/manual_item", miHandler.Update)
 	manualItem.DELETE("/:manualAssetId", miHandler.Delete)
+
+	ws := ws.NewManager()
+	e.GET("/sync", ws.Sync)
 
 	return e, nil
 }

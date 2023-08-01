@@ -22,7 +22,6 @@ type AccountQuery struct {
 	order      []account.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Account
-	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -333,13 +332,9 @@ func (aq *AccountQuery) prepareQuery(ctx context.Context) error {
 
 func (aq *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Account, error) {
 	var (
-		nodes   = []*Account{}
-		withFKs = aq.withFKs
-		_spec   = aq.querySpec()
+		nodes = []*Account{}
+		_spec = aq.querySpec()
 	)
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, account.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Account).scanValues(nil, columns)
 	}

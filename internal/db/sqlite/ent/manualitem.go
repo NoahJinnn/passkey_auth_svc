@@ -5,7 +5,6 @@ package ent
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -29,11 +28,7 @@ type ManualItem struct {
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
 	// Value holds the value of the "value" field.
-	Value float64 `json:"value,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt    time.Time `json:"updated_at,omitempty"`
+	Value        float64 `json:"value,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -46,8 +41,6 @@ func (*ManualItem) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case manualitem.FieldProviderName, manualitem.FieldItemTableID, manualitem.FieldType, manualitem.FieldCategory, manualitem.FieldDescription:
 			values[i] = new(sql.NullString)
-		case manualitem.FieldCreatedAt, manualitem.FieldUpdatedAt:
-			values[i] = new(sql.NullTime)
 		case manualitem.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
@@ -107,18 +100,6 @@ func (mi *ManualItem) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				mi.Value = value.Float64
 			}
-		case manualitem.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
-			} else if value.Valid {
-				mi.CreatedAt = value.Time
-			}
-		case manualitem.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
-			} else if value.Valid {
-				mi.UpdatedAt = value.Time
-			}
 		default:
 			mi.selectValues.Set(columns[i], values[i])
 		}
@@ -172,12 +153,6 @@ func (mi *ManualItem) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("value=")
 	builder.WriteString(fmt.Sprintf("%v", mi.Value))
-	builder.WriteString(", ")
-	builder.WriteString("created_at=")
-	builder.WriteString(mi.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("updated_at=")
-	builder.WriteString(mi.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

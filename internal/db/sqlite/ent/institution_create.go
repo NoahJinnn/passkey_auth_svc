@@ -6,14 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/account"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/connection"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/income"
 	"github.com/hellohq/hqservice/internal/db/sqlite/ent/institution"
 )
 
@@ -30,36 +26,24 @@ func (ic *InstitutionCreate) SetProviderName(s string) *InstitutionCreate {
 	return ic
 }
 
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (ic *InstitutionCreate) SetNillableProviderName(s *string) *InstitutionCreate {
+	if s != nil {
+		ic.SetProviderName(*s)
+	}
+	return ic
+}
+
 // SetData sets the "data" field.
 func (ic *InstitutionCreate) SetData(s string) *InstitutionCreate {
 	ic.mutation.SetData(s)
 	return ic
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (ic *InstitutionCreate) SetCreatedAt(t time.Time) *InstitutionCreate {
-	ic.mutation.SetCreatedAt(t)
-	return ic
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (ic *InstitutionCreate) SetNillableCreatedAt(t *time.Time) *InstitutionCreate {
-	if t != nil {
-		ic.SetCreatedAt(*t)
-	}
-	return ic
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (ic *InstitutionCreate) SetUpdatedAt(t time.Time) *InstitutionCreate {
-	ic.mutation.SetUpdatedAt(t)
-	return ic
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (ic *InstitutionCreate) SetNillableUpdatedAt(t *time.Time) *InstitutionCreate {
-	if t != nil {
-		ic.SetUpdatedAt(*t)
+// SetNillableData sets the "data" field if the given value is not nil.
+func (ic *InstitutionCreate) SetNillableData(s *string) *InstitutionCreate {
+	if s != nil {
+		ic.SetData(*s)
 	}
 	return ic
 }
@@ -76,55 +60,6 @@ func (ic *InstitutionCreate) SetNillableID(u *uuid.UUID) *InstitutionCreate {
 		ic.SetID(*u)
 	}
 	return ic
-}
-
-// SetConnectionID sets the "connection" edge to the Connection entity by ID.
-func (ic *InstitutionCreate) SetConnectionID(id uuid.UUID) *InstitutionCreate {
-	ic.mutation.SetConnectionID(id)
-	return ic
-}
-
-// SetNillableConnectionID sets the "connection" edge to the Connection entity by ID if the given value is not nil.
-func (ic *InstitutionCreate) SetNillableConnectionID(id *uuid.UUID) *InstitutionCreate {
-	if id != nil {
-		ic = ic.SetConnectionID(*id)
-	}
-	return ic
-}
-
-// SetConnection sets the "connection" edge to the Connection entity.
-func (ic *InstitutionCreate) SetConnection(c *Connection) *InstitutionCreate {
-	return ic.SetConnectionID(c.ID)
-}
-
-// AddAccountIDs adds the "accounts" edge to the Account entity by IDs.
-func (ic *InstitutionCreate) AddAccountIDs(ids ...uuid.UUID) *InstitutionCreate {
-	ic.mutation.AddAccountIDs(ids...)
-	return ic
-}
-
-// AddAccounts adds the "accounts" edges to the Account entity.
-func (ic *InstitutionCreate) AddAccounts(a ...*Account) *InstitutionCreate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
-	}
-	return ic.AddAccountIDs(ids...)
-}
-
-// AddIncomeIDs adds the "incomes" edge to the Income entity by IDs.
-func (ic *InstitutionCreate) AddIncomeIDs(ids ...uuid.UUID) *InstitutionCreate {
-	ic.mutation.AddIncomeIDs(ids...)
-	return ic
-}
-
-// AddIncomes adds the "incomes" edges to the Income entity.
-func (ic *InstitutionCreate) AddIncomes(i ...*Income) *InstitutionCreate {
-	ids := make([]uuid.UUID, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
-	}
-	return ic.AddIncomeIDs(ids...)
 }
 
 // Mutation returns the InstitutionMutation object of the builder.
@@ -162,13 +97,13 @@ func (ic *InstitutionCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (ic *InstitutionCreate) defaults() {
-	if _, ok := ic.mutation.CreatedAt(); !ok {
-		v := institution.DefaultCreatedAt()
-		ic.mutation.SetCreatedAt(v)
+	if _, ok := ic.mutation.ProviderName(); !ok {
+		v := institution.DefaultProviderName
+		ic.mutation.SetProviderName(v)
 	}
-	if _, ok := ic.mutation.UpdatedAt(); !ok {
-		v := institution.DefaultUpdatedAt()
-		ic.mutation.SetUpdatedAt(v)
+	if _, ok := ic.mutation.Data(); !ok {
+		v := institution.DefaultData
+		ic.mutation.SetData(v)
 	}
 	if _, ok := ic.mutation.ID(); !ok {
 		v := institution.DefaultID()
@@ -183,12 +118,6 @@ func (ic *InstitutionCreate) check() error {
 	}
 	if _, ok := ic.mutation.Data(); !ok {
 		return &ValidationError{Name: "data", err: errors.New(`ent: missing required field "Institution.data"`)}
-	}
-	if _, ok := ic.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Institution.created_at"`)}
-	}
-	if _, ok := ic.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Institution.updated_at"`)}
 	}
 	return nil
 }
@@ -232,63 +161,6 @@ func (ic *InstitutionCreate) createSpec() (*Institution, *sqlgraph.CreateSpec) {
 	if value, ok := ic.mutation.Data(); ok {
 		_spec.SetField(institution.FieldData, field.TypeString, value)
 		_node.Data = value
-	}
-	if value, ok := ic.mutation.CreatedAt(); ok {
-		_spec.SetField(institution.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
-	}
-	if value, ok := ic.mutation.UpdatedAt(); ok {
-		_spec.SetField(institution.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
-	}
-	if nodes := ic.mutation.ConnectionIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   institution.ConnectionTable,
-			Columns: []string{institution.ConnectionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(connection.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.institution_connection = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := ic.mutation.AccountsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   institution.AccountsTable,
-			Columns: []string{institution.AccountsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := ic.mutation.IncomesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   institution.IncomesTable,
-			Columns: []string{institution.IncomesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(income.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

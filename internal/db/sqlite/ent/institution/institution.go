@@ -3,10 +3,7 @@
 package institution
 
 import (
-	"time"
-
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/gofrs/uuid"
 )
 
@@ -19,39 +16,8 @@ const (
 	FieldProviderName = "provider_name"
 	// FieldData holds the string denoting the data field in the database.
 	FieldData = "data"
-	// FieldCreatedAt holds the string denoting the created_at field in the database.
-	FieldCreatedAt = "created_at"
-	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
-	FieldUpdatedAt = "updated_at"
-	// EdgeConnection holds the string denoting the connection edge name in mutations.
-	EdgeConnection = "connection"
-	// EdgeAccounts holds the string denoting the accounts edge name in mutations.
-	EdgeAccounts = "accounts"
-	// EdgeIncomes holds the string denoting the incomes edge name in mutations.
-	EdgeIncomes = "incomes"
 	// Table holds the table name of the institution in the database.
 	Table = "institutions"
-	// ConnectionTable is the table that holds the connection relation/edge.
-	ConnectionTable = "institutions"
-	// ConnectionInverseTable is the table name for the Connection entity.
-	// It exists in this package in order to avoid circular dependency with the "connection" package.
-	ConnectionInverseTable = "connections"
-	// ConnectionColumn is the table column denoting the connection relation/edge.
-	ConnectionColumn = "institution_connection"
-	// AccountsTable is the table that holds the accounts relation/edge.
-	AccountsTable = "accounts"
-	// AccountsInverseTable is the table name for the Account entity.
-	// It exists in this package in order to avoid circular dependency with the "account" package.
-	AccountsInverseTable = "accounts"
-	// AccountsColumn is the table column denoting the accounts relation/edge.
-	AccountsColumn = "institution_accounts"
-	// IncomesTable is the table that holds the incomes relation/edge.
-	IncomesTable = "incomes"
-	// IncomesInverseTable is the table name for the Income entity.
-	// It exists in this package in order to avoid circular dependency with the "income" package.
-	IncomesInverseTable = "incomes"
-	// IncomesColumn is the table column denoting the incomes relation/edge.
-	IncomesColumn = "institution_incomes"
 )
 
 // Columns holds all SQL columns for institution fields.
@@ -59,14 +25,6 @@ var Columns = []string{
 	FieldID,
 	FieldProviderName,
 	FieldData,
-	FieldCreatedAt,
-	FieldUpdatedAt,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "institutions"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"institution_connection",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -76,21 +34,14 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
-			return true
-		}
-	}
 	return false
 }
 
 var (
-	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() time.Time
-	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
-	DefaultUpdatedAt func() time.Time
-	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
-	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultProviderName holds the default value on creation for the "provider_name" field.
+	DefaultProviderName string
+	// DefaultData holds the default value on creation for the "data" field.
+	DefaultData string
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -111,70 +62,4 @@ func ByProviderName(opts ...sql.OrderTermOption) OrderOption {
 // ByData orders the results by the data field.
 func ByData(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldData, opts...).ToFunc()
-}
-
-// ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
-}
-
-// ByUpdatedAt orders the results by the updated_at field.
-func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
-}
-
-// ByConnectionField orders the results by connection field.
-func ByConnectionField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newConnectionStep(), sql.OrderByField(field, opts...))
-	}
-}
-
-// ByAccountsCount orders the results by accounts count.
-func ByAccountsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newAccountsStep(), opts...)
-	}
-}
-
-// ByAccounts orders the results by accounts terms.
-func ByAccounts(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newAccountsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByIncomesCount orders the results by incomes count.
-func ByIncomesCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newIncomesStep(), opts...)
-	}
-}
-
-// ByIncomes orders the results by incomes terms.
-func ByIncomes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newIncomesStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-func newConnectionStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ConnectionInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, ConnectionTable, ConnectionColumn),
-	)
-}
-func newAccountsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(AccountsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, AccountsTable, AccountsColumn),
-	)
-}
-func newIncomesStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(IncomesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, IncomesTable, IncomesColumn),
-	)
 }
