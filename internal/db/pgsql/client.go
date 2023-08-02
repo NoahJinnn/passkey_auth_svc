@@ -6,7 +6,7 @@ import (
 
 	"entgo.io/ent/dialect"
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/internal/db/sqlite/ent/migrate"
+	"github.com/hellohq/hqservice/ent/migrate"
 )
 
 func NewPgEnt(dsn string) *ent.Client {
