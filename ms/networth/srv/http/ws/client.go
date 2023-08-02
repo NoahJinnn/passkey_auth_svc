@@ -2,7 +2,6 @@ package ws
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"time"
 
@@ -74,7 +73,7 @@ func (c *Client) readMessages() {
 			// If Connection is closed, we will Recieve an error here
 			// We only want to log Strange errors, but not simple Disconnection
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				fmt.Printf("error reading message: %v", err)
+				log.Printf("error reading message: %v", err)
 			}
 			break // Break the loop to close conn & Cleanup
 		}
@@ -108,7 +107,7 @@ func (c *Client) writeMessages() {
 				// Manager has closed this connection channel, so communicate that to frontend
 				if err := c.connection.WriteMessage(websocket.CloseMessage, nil); err != nil {
 					// Log that the connection is closed and the reason
-					fmt.Println("connection closed: ", err)
+					log.Println("connection closed: ", err)
 				}
 				// Return to close the goroutine
 				return

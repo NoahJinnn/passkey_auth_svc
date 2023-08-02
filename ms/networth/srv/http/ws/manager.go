@@ -64,7 +64,10 @@ func (m *Manager) setupEventHandlers() {
 		var outgoingEvent Event
 		outgoingEvent.Type = "ack"
 		outgoingEvent.Payload = data
-		c.egress <- outgoingEvent
+
+		for c := range m.clients[c.userId] {
+			c.egress <- outgoingEvent
+		}
 
 		return nil
 	}
