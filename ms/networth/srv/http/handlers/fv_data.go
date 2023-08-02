@@ -61,8 +61,6 @@ func (h *FvDataHandler) AllAccount(c echo.Context) error {
 		return err
 	}
 
-	// Get account data from sqlite db
-
 	return c.JSON(http.StatusOK, a)
 }
 
@@ -77,6 +75,7 @@ func (h *FvDataHandler) AllTransaction(c echo.Context) error {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
+	// Get all the transactions by collecting all paging data
 	txs, err := h.GetFvDataSvc().AggregateTransactions(c.Request().Context(), userId)
 	if err != nil {
 		return err
@@ -96,12 +95,18 @@ func (h *FvDataHandler) Income(c echo.Context) error {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
 
-	i, err := h.GetFvDataSvc().AggregateIncome(c.Request().Context(), userId)
+	i, err := h.GetFvDataSvc().Income(c.Request().Context(), userId)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, i)
+	var result []interface{}
+	err = json.Unmarshal(i, &result)
+	if err != nil {
+		return errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(err)
+	}
+
+	return c.JSON(http.StatusOK, result)
 }
 
 func (h *FvDataHandler) PagingTransaction(c echo.Context) error {

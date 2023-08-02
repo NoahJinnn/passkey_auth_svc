@@ -9,7 +9,6 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/internal/http/errorhandler"
-	"github.com/hellohq/hqservice/ms/networth/app/provider"
 	"github.com/hellohq/hqservice/ms/networth/config"
 	"github.com/hellohq/hqservice/ms/networth/dal"
 	"github.com/hellohq/hqservice/pkg/httpx"
@@ -23,22 +22,20 @@ type IFvDataSvc interface {
 	GetBalanceHistoryByAccountId(ctx context.Context, accountId string, userId uuid.UUID) (interface{}, error)
 	AggregateAccountBalances(ctx context.Context, userId uuid.UUID) ([]interface{}, error)
 	AggregateTransactions(ctx context.Context, userId uuid.UUID) (interface{}, error)
-	getAccessToken(ctx context.Context, providerName string, userId uuid.UUID) (*AccessToken, error)
 	concatTransactions(ctx context.Context, userId uuid.UUID, offset int, limit int, aggregation *Transactions) (*Transactions, error)
 }
 
 type FvDataSvc struct {
-	req      *httpx.Req
-	repo     dal.INwRepo
-	provider *provider.ProviderSvc
+	req  *httpx.Req
+	repo dal.INwRepo
 }
 
-func NewFvDataSvc(cfg *config.Config, provider *provider.ProviderSvc, repo dal.INwRepo) *FvDataSvc {
+func NewFvDataSvc(cfg *config.Config, repo dal.INwRepo) *FvDataSvc {
 	req := httpx.NewReq("https://api.sandbox.finverse.net/", map[string]string{
 		"Content-Type": "application/json",
 	}, nil)
 
-	return &FvDataSvc{req: req, repo: repo, provider: provider}
+	return &FvDataSvc{req: req, repo: repo}
 }
 
 func (svc *FvDataSvc) AllInstitution(ctx context.Context, userId uuid.UUID) ([]byte, error) {
@@ -62,16 +59,12 @@ func (svc *FvDataSvc) AllInstitution(ctx context.Context, userId uuid.UUID) ([]b
 }
 
 func (svc *FvDataSvc) AllAccount(ctx context.Context, userId uuid.UUID) ([]byte, error) {
-	accessToken, err := svc.getAccessToken(ctx, Finverse, userId)
-	if err != nil {
-		return nil, err
-	}
 
 	resp, err := svc.req.
 		InitReq(ctx, "GET", "/accounts", nil).
 		WithDefaultOpts().
 		WithHeaders(map[string]string{
-			"Authorization": "Bearer " + accessToken.AccessToken,
+			"Authorization": "Bearer " + accessToken,
 		}).
 		Send()
 	if err != nil {
@@ -82,16 +75,12 @@ func (svc *FvDataSvc) AllAccount(ctx context.Context, userId uuid.UUID) ([]byte,
 }
 
 func (svc *FvDataSvc) Income(ctx context.Context, userId uuid.UUID) ([]byte, error) {
-	accessToken, err := svc.getAccessToken(ctx, Finverse, userId)
-	if err != nil {
-		return nil, err
-	}
 
 	resp, err := svc.req.
 		InitReq(ctx, "GET", "/income", nil).
 		WithDefaultOpts().
 		WithHeaders(map[string]string{
-			"Authorization": "Bearer " + accessToken.AccessToken,
+			"Authorization": "Bearer " + accessToken,
 		}).
 		Send()
 	if err != nil {
@@ -111,16 +100,11 @@ func (svc *FvDataSvc) PagingTransaction(ctx context.Context, offset string, limi
 		queryStr = fmt.Sprintf("?offset=%s", offset)
 	}
 
-	accessToken, err := svc.getAccessToken(ctx, Finverse, userId)
-	if err != nil {
-		return nil, err
-	}
-
 	resp, err := svc.req.
 		InitReq(ctx, "GET", "/transactions"+queryStr, nil).
 		WithDefaultOpts().
 		WithHeaders(map[string]string{
-			"Authorization": "Bearer " + accessToken.AccessToken,
+			"Authorization": "Bearer " + accessToken,
 		}).
 		Send()
 	if err != nil {
@@ -131,16 +115,12 @@ func (svc *FvDataSvc) PagingTransaction(ctx context.Context, offset string, limi
 }
 
 func (svc *FvDataSvc) GetBalanceHistoryByAccountId(ctx context.Context, accountId string, userId uuid.UUID) ([]byte, error) {
-	accessToken, err := svc.getAccessToken(ctx, Finverse, userId)
-	if err != nil {
-		return nil, err
-	}
 
 	resp, err := svc.req.
 		InitReq(ctx, "GET", "/balance_history/"+accountId, nil).
 		WithDefaultOpts().
 		WithHeaders(map[string]string{
-			"Authorization": "Bearer " + accessToken.AccessToken,
+			"Authorization": "Bearer " + accessToken,
 		}).
 		Send()
 	if err != nil {
@@ -210,21 +190,6 @@ func (svc *FvDataSvc) AggregateTransactions(ctx context.Context, userId uuid.UUI
 	return aggregation, nil
 }
 
-func (svc *FvDataSvc) AggregateIncome(ctx context.Context, userId uuid.UUID) (interface{}, error) {
-	var aggregation interface{}
-	i, err := svc.Income(ctx, userId)
-	if err != nil {
-		return nil, err
-	}
-
-	err = json.Unmarshal(i, &aggregation)
-	if err != nil {
-		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return aggregation, nil
-}
-
 func (svc *FvDataSvc) concatTransactions(ctx context.Context, userId uuid.UUID, offset int, limit int, aggregation *Transactions) (*Transactions, error) {
 	offsetStr := strconv.Itoa(offset)
 	limitStr := strconv.Itoa(limit)
@@ -239,23 +204,4 @@ func (svc *FvDataSvc) concatTransactions(ctx context.Context, userId uuid.UUID, 
 	}
 	aggregation.Transactions = append(curTxs.Transactions, aggregation.Transactions...)
 	return &curTxs, nil
-}
-
-func (svc *FvDataSvc) getAccessToken(ctx context.Context, providerName string, userId uuid.UUID) (*AccessToken, error) {
-	var accessToken *AccessToken
-	accessTokenPayload, err := svc.provider.ConnectionByProviderName(ctx, userId, providerName)
-	if err != nil {
-		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to get fv connection: %w", err))
-	}
-
-	if accessTokenPayload == nil {
-		return nil, errorhandler.NewHTTPError(http.StatusUnauthorized, "confidential connection not found")
-	}
-
-	err = json.Unmarshal([]byte(accessTokenPayload.Data), &accessToken)
-
-	if err != nil {
-		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-	return accessToken, nil
 }
