@@ -11,9 +11,3 @@ atlas migrate apply \
   --url "postgres://hqservice:h3ll0HQ@localhost:5432/hqservice?sslmode=require"
 
 echo "Migrate PgSQL done"
-
-atlas migrate apply \
-  --dir "file://migrate/migrations/sqlite" \
-  --url "sqlite://file.db?_fk=1"
-
-echo "Migrate SQLite done"

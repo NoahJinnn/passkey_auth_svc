@@ -9,11 +9,13 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/internal/http/errorhandler"
-	"github.com/hellohq/hqservice/ms/networth/app/provider"
 	"github.com/hellohq/hqservice/ms/networth/config"
 	"github.com/hellohq/hqservice/ms/networth/dal"
 	"github.com/hellohq/hqservice/pkg/httpx"
 )
+
+// We store the access_token in memory - in production, store it in a secure persistent data store.
+var accessToken string
 
 type IFvAuthSvc interface {
 	CreateCustomerToken(ctx context.Context, cct *CreateCustomerToken) (*CustomerToken, error)
@@ -22,22 +24,20 @@ type IFvAuthSvc interface {
 }
 
 type FvAuthSvc struct {
-	config   *config.Config
-	req      *httpx.Req
-	repo     dal.INwRepo
-	provider *provider.ProviderSvc
+	config *config.Config
+	req    *httpx.Req
+	repo   dal.INwRepo
 }
 
-func NewFvAuthSvc(cfg *config.Config, provider *provider.ProviderSvc, repo dal.INwRepo) *FvAuthSvc {
+func NewFvAuthSvc(cfg *config.Config, repo dal.INwRepo) *FvAuthSvc {
 	req := httpx.NewReq("https://api.sandbox.finverse.net/", map[string]string{
 		"Content-Type": "application/json",
 	}, nil)
 
 	return &FvAuthSvc{
-		config:   cfg,
-		req:      req,
-		repo:     repo,
-		provider: provider,
+		config: cfg,
+		req:    req,
+		repo:   repo,
 	}
 }
 
@@ -136,16 +136,9 @@ func (svc *FvAuthSvc) ExchangeAccessToken(ctx context.Context, exchangeCode stri
 	var result AccessToken
 	err = json.Unmarshal(resp.Body(), &result)
 	if err != nil {
-		return nil, errorhandler.
-			NewHTTPError(http.StatusInternalServerError).
-			SetInternal(fmt.Errorf("failed to get fv exchange token: %w", err))
+		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to get fv exchange token: %w", err))
 	}
-	err = svc.provider.SaveConnection(ctx, userId, Finverse, result)
-	if err != nil {
-		return nil, errorhandler.
-			NewHTTPError(http.StatusInternalServerError).
-			SetInternal(fmt.Errorf("failed to save fv exchange token to sqlite: %w", err))
-	}
+	accessToken = result.AccessToken
 
 	return &result, nil
 }

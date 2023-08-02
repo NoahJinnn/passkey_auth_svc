@@ -7,4 +7,3 @@ if ! command -v atlas &> /dev/null; then
 fi
 
 ent generate ./ent/schema --target ./ent
-ent generate ./internal/db/sqlite/ent/schema
