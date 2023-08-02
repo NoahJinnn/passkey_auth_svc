@@ -179,13 +179,6 @@ func (svc *FvDataSvc) AggregateAccountBalances(ctx context.Context, userId uuid.
 		aggregation = append(aggregation, balance)
 	}
 
-	err = svc.provider.SaveAccount(ctx, userId, Finverse, aggregation)
-	if err != nil {
-		return nil, errorhandler.
-			NewHTTPError(http.StatusInternalServerError).
-			SetInternal(fmt.Errorf("failed to save fv accounts to sqlite: %w", err))
-	}
-
 	return aggregation, nil
 }
 
@@ -214,13 +207,6 @@ func (svc *FvDataSvc) AggregateTransactions(ctx context.Context, userId uuid.UUI
 		svc.concatTransactions(ctx, userId, offset, limit, aggregation)
 	}
 
-	err = svc.provider.SaveTransaction(ctx, userId, Finverse, aggregation)
-	if err != nil {
-		return nil, errorhandler.
-			NewHTTPError(http.StatusInternalServerError).
-			SetInternal(fmt.Errorf("failed to save fv transactions to sqlite: %w", err))
-	}
-
 	return aggregation, nil
 }
 
@@ -234,13 +220,6 @@ func (svc *FvDataSvc) AggregateIncome(ctx context.Context, userId uuid.UUID) (in
 	err = json.Unmarshal(i, &aggregation)
 	if err != nil {
 		return nil, errorhandler.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	err = svc.provider.SaveIncome(ctx, userId, Finverse, aggregation)
-	if err != nil {
-		return nil, errorhandler.
-			NewHTTPError(http.StatusInternalServerError).
-			SetInternal(fmt.Errorf("failed to save fv income to sqlite: %w", err))
 	}
 
 	return aggregation, nil

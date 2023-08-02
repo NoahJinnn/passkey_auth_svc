@@ -90,13 +90,6 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 	itemTable.PUT("/item_table", itHandler.Update)
 	itemTable.DELETE("/:itemTableId", itHandler.Delete)
 
-	manualItem := nw.Group("/manual_items")
-	miHandler := handlers.NewManualItemHandler(srv)
-	manualItem.GET("", miHandler.ListByUser)
-	manualItem.POST("/manual_item", miHandler.Create)
-	manualItem.PUT("/manual_item", miHandler.Update)
-	manualItem.DELETE("/:manualAssetId", miHandler.Delete)
-
 	ws := ws.NewManager()
 	e.GET("/sync", ws.Sync, session.Session(sessionManager))
 
