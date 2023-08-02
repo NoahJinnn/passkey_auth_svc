@@ -2,7 +2,6 @@ package ws
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"time"
 
@@ -19,7 +18,7 @@ var (
 )
 
 // ClientList is a map used to help manage a map of clients
-type ClientList map[*Client]bool
+type ClientList map[string]map[*Client]bool
 
 // Client is a websocket client, basically a frontend visitor
 type Client struct {
@@ -31,14 +30,17 @@ type Client struct {
 
 	// egress is used to avoid concurrent writes on the WebSocket
 	egress chan Event
+
+	userId string
 }
 
 // NewClient is used to initialize a new Client with all required values initialized
-func NewClient(conn *websocket.Conn, manager *Manager) *Client {
+func NewClient(userId string, conn *websocket.Conn, manager *Manager) *Client {
 	return &Client{
 		connection: conn,
 		manager:    manager,
 		egress:     make(chan Event),
+		userId:     userId,
 	}
 }
 
@@ -49,7 +51,7 @@ func (c *Client) readMessages() {
 	defer func() {
 		// Graceful Close the Connection once this
 		// function is done
-		c.manager.removeClient(c)
+		c.manager.removeClient(c.userId, c)
 	}()
 
 	// Configure Wait time for Pong response, use Current time + pongWait
@@ -71,7 +73,7 @@ func (c *Client) readMessages() {
 			// If Connection is closed, we will Recieve an error here
 			// We only want to log Strange errors, but not simple Disconnection
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				fmt.Printf("error reading message: %v", err)
+				log.Printf("error reading message: %v", err)
 			}
 			break // Break the loop to close conn & Cleanup
 		}
@@ -94,7 +96,7 @@ func (c *Client) writeMessages() {
 	ticker := time.NewTicker(pingInterval)
 	defer func() {
 		// Graceful close if this triggers a closing
-		c.manager.removeClient(c)
+		c.manager.removeClient(c.userId, c)
 	}()
 
 	for {
@@ -105,7 +107,7 @@ func (c *Client) writeMessages() {
 				// Manager has closed this connection channel, so communicate that to frontend
 				if err := c.connection.WriteMessage(websocket.CloseMessage, nil); err != nil {
 					// Log that the connection is closed and the reason
-					fmt.Println("connection closed: ", err)
+					log.Println("connection closed: ", err)
 				}
 				// Return to close the goroutine
 				return

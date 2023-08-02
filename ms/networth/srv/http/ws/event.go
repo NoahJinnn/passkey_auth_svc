@@ -21,12 +21,6 @@ type AckPayload struct {
 	Message string `json:"message"`
 }
 
-// #[derive(Clone, Serialize, Deserialize, Debug)]
-// pub struct SyncPayload {
-//     pub site_id: String,
-//     pub change_set: String,
-// }
-
 type SyncPayload struct {
 	SiteId    string `json:"site_id"`
 	ChangeSet string `json:"change_set"`
