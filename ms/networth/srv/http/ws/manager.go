@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/gofrs/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
 var (
@@ -83,6 +85,15 @@ func (m *Manager) routeEvent(event Event, c *Client) error {
 }
 
 func (m *Manager) Sync(c echo.Context) error {
+	sessionToken, ok := c.Get("session").(jwt.Token)
+	if !ok {
+		return errors.New("failed to cast session object")
+	}
+
+	userId, err := uuid.FromString(sessionToken.Subject())
+	if err != nil {
+		return fmt.Errorf("failed to parse subject as uuid: %w", err)
+	}
 	fmt.Println("New connection")
 	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
@@ -91,9 +102,9 @@ func (m *Manager) Sync(c echo.Context) error {
 	}
 
 	// Create New Client
-	client := NewClient(ws, m)
+	client := NewClient(userId.String(), ws, m)
 	// Add the newly created client to the manager
-	m.addClient(client)
+	m.addClient(userId.String(), client)
 
 	go client.readMessages()
 	go client.writeMessages()
@@ -102,25 +113,31 @@ func (m *Manager) Sync(c echo.Context) error {
 }
 
 // addClient will add clients to our clientList
-func (m *Manager) addClient(client *Client) {
+func (m *Manager) addClient(usedId string, client *Client) {
 	// Lock so we can manipulate
 	m.Lock()
 	defer m.Unlock()
 
 	// Add Client
-	m.clients[client] = true
+	if m.clients[usedId] == nil {
+		m.clients[usedId] = make(map[*Client]bool)
+	}
+	m.clients[usedId][client] = true
 }
 
 // removeClient will remove the client and clean up
-func (m *Manager) removeClient(client *Client) {
+func (m *Manager) removeClient(usedId string, client *Client) {
 	m.Lock()
 	defer m.Unlock()
 
 	// Check if Client exists, then delete it
-	if _, ok := m.clients[client]; ok {
-		// close connection
-		client.connection.Close()
-		// remove
-		delete(m.clients, client)
+	if _, ok := m.clients[usedId]; ok {
+		clientSet := m.clients[usedId]
+		if _, ok := clientSet[client]; ok {
+			// close connection
+			client.connection.Close()
+			// remove
+			delete(clientSet, client)
+		}
 	}
 }

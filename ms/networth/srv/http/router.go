@@ -98,7 +98,7 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 	manualItem.DELETE("/:manualAssetId", miHandler.Delete)
 
 	ws := ws.NewManager()
-	e.GET("/sync", ws.Sync)
+	e.GET("/sync", ws.Sync, session.Session(sessionManager))
 
 	return e, nil
 }

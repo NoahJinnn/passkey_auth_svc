@@ -19,7 +19,7 @@ var (
 )
 
 // ClientList is a map used to help manage a map of clients
-type ClientList map[*Client]bool
+type ClientList map[string]map[*Client]bool
 
 // Client is a websocket client, basically a frontend visitor
 type Client struct {
@@ -31,14 +31,17 @@ type Client struct {
 
 	// egress is used to avoid concurrent writes on the WebSocket
 	egress chan Event
+
+	userId string
 }
 
 // NewClient is used to initialize a new Client with all required values initialized
-func NewClient(conn *websocket.Conn, manager *Manager) *Client {
+func NewClient(userId string, conn *websocket.Conn, manager *Manager) *Client {
 	return &Client{
 		connection: conn,
 		manager:    manager,
 		egress:     make(chan Event),
+		userId:     userId,
 	}
 }
 
@@ -49,7 +52,7 @@ func (c *Client) readMessages() {
 	defer func() {
 		// Graceful Close the Connection once this
 		// function is done
-		c.manager.removeClient(c)
+		c.manager.removeClient(c.userId, c)
 	}()
 
 	// Configure Wait time for Pong response, use Current time + pongWait
@@ -94,7 +97,7 @@ func (c *Client) writeMessages() {
 	ticker := time.NewTicker(pingInterval)
 	defer func() {
 		// Graceful close if this triggers a closing
-		c.manager.removeClient(c)
+		c.manager.removeClient(c.userId, c)
 	}()
 
 	for {
