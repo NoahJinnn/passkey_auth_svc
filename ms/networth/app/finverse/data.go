@@ -31,7 +31,7 @@ type FvDataSvc struct {
 }
 
 func NewFvDataSvc(cfg *config.Config, repo dal.INwRepo) *FvDataSvc {
-	req := httpx.NewReq("https://api.sandbox.finverse.net/", map[string]string{
+	req := httpx.NewReq("https://api.prod.finverse.net/", map[string]string{
 		"Content-Type": "application/json",
 	}, nil)
 
