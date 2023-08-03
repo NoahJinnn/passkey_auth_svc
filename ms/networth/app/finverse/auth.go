@@ -30,7 +30,7 @@ type FvAuthSvc struct {
 }
 
 func NewFvAuthSvc(cfg *config.Config, repo dal.INwRepo) *FvAuthSvc {
-	req := httpx.NewReq("https://api.sandbox.finverse.net/", map[string]string{
+	req := httpx.NewReq("https://api.prod.finverse.net/", map[string]string{
 		"Content-Type": "application/json",
 	}, nil)
 
