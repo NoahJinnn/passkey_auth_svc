@@ -109,32 +109,6 @@ func (h *FvDataHandler) Income(c echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
-func (h *FvDataHandler) PagingTransaction(c echo.Context) error {
-	sessionToken, ok := c.Get("session").(jwt.Token)
-	if !ok {
-		return errors.New("failed to cast session object")
-	}
-
-	userId, err := uuid.FromString(sessionToken.Subject())
-	if err != nil {
-		return fmt.Errorf("failed to parse subject as uuid: %w", err)
-	}
-	offset := c.QueryParam("offset")
-	limit := c.QueryParam("limit")
-
-	txs, err := h.GetFvDataSvc().PagingTransaction(c.Request().Context(), offset, limit, userId)
-	if err != nil {
-		return err
-	}
-
-	var result interface{}
-	err = json.Unmarshal(txs, &result)
-	if err != nil {
-		return errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(err)
-	}
-	return c.JSON(http.StatusOK, result)
-}
-
 func (h *FvDataHandler) GetBalanceHistoryByAccountId(c echo.Context) error {
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {

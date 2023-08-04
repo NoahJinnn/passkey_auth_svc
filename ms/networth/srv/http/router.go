@@ -79,8 +79,6 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 	fv.GET("/accounts/all", fvData.AllAccount)
 	fv.GET("/transactions/all", fvData.AllTransaction)
 	fv.GET("/income", fvData.Income)
-	// TODO: Leave the below routes for FE testing purposes only
-	fv.GET("/transactions", fvData.PagingTransaction)
 	fv.GET("/balance_history/:accountId", fvData.GetBalanceHistoryByAccountId)
 
 	itemTable := nw.Group("/item_tables")
