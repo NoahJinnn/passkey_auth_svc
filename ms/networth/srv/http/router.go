@@ -89,7 +89,7 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 	itemTable.DELETE("/:itemTableId", itHandler.Delete)
 
 	ws := ws.NewManager()
-	e.GET("/sync", ws.Sync, session.Session(sessionManager))
+	e.GET("/sync", ws.SyncBetweenUserDevices, session.Session(sessionManager))
 
 	return e, nil
 }

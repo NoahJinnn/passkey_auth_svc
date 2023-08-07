@@ -52,21 +52,15 @@ func (m *Manager) setupEventHandlers() {
 		if err := json.Unmarshal(e.Payload, &syncP); err != nil {
 			return fmt.Errorf("bad payload in request: %v", err)
 		}
-		fmt.Println("sync payload: ", syncP)
-
-		var ackP AckPayload
-		ackP.Message = "ack success"
-		data, err := json.Marshal(ackP)
-		if err != nil {
-			return fmt.Errorf("failed to marshal broadcast message: %v", err)
-		}
 
 		var outgoingEvent Event
-		outgoingEvent.Type = "ack"
-		outgoingEvent.Payload = data
+		outgoingEvent.Type = "sync"
+		outgoingEvent.Payload = e.Payload
 
-		for c := range m.clients[c.userId] {
-			c.egress <- outgoingEvent
+		for otherC := range m.clients[c.userId] {
+			if c != otherC {
+				otherC.egress <- outgoingEvent
+			}
 		}
 
 		return nil
@@ -87,7 +81,7 @@ func (m *Manager) routeEvent(event Event, c *Client) error {
 	}
 }
 
-func (m *Manager) Sync(c echo.Context) error {
+func (m *Manager) SyncBetweenUserDevices(c echo.Context) error {
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("failed to cast session object")
@@ -97,7 +91,6 @@ func (m *Manager) Sync(c echo.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to parse subject as uuid: %w", err)
 	}
-	fmt.Println("New connection")
 	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		fmt.Println(err)
@@ -106,7 +99,6 @@ func (m *Manager) Sync(c echo.Context) error {
 
 	// Create New Client
 	client := NewClient(userId.String(), ws, m)
-	// Add the newly created client to the manager
 	m.addClient(userId.String(), client)
 
 	go client.readMessages()
