@@ -65,6 +65,6 @@ func (s *Service) RunServe(ctxStartup Ctx, ctxShutdown Ctx, shutdown func(), dbC
 
 func (s *Service) serveEcho(ctx Ctx) error {
 	e, err := server.NewServer(s.appl, s.sessionManager, s.sharedCfg, s.cfg)
-	e.Logger.Fatal(e.Start(s.cfg.Server.BindAddr.String()))
+	e.Logger.Fatal(e.StartTLS(s.cfg.Server.BindAddr.String(), "configs/http-pki/cacert.pem", "configs/http-pki/cakey.pem"))
 	return err
 }

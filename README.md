@@ -67,11 +67,7 @@ Naming convention of environment vars required to run and test project:
 
 #### HTTPS
 
-1. This project requires https:// and will send HSTS and CSP HTTP headers,
-  [Create local CA to issue localhost HTTPS 
-  certificates](https://gist.github.com/powerman/2fc4b1a5aee62dd9491cee7f75ead0b4).
-2. Or you can just use certificates in `configs/dev-pki`, which
-   was created this way:
+1. Generate HTTPS certificates for PostgreSQL using [easyrsa](https://github.com/OpenVPN/easy-rsa/blob/master/README.quickstart.md)
 
 ```
 $ /path/to/easyrsa init-pki
@@ -79,6 +75,11 @@ $ echo Dev CA $(go list -m) | /path/to/easyrsa build-ca nopass
 $ /path/to/easyrsa --days=3650 "--subject-alt-name=DNS:postgres" build-server-full postgres nopass
 $ /path/to/easyrsa --days=3650 "--subject-alt-name=DNS:localhost" build-server-full ms-hq nopass
 $ /path/to/easyrsa --days=3650 "--subject-alt-name=IP:127.0.0.1" build-server-full ms-hq-int nopass
+```
+
+2. Generate HTTPS certificates for `networth` service using [mkcert](https://github.com/FiloSottile/mkcert#mkcert)
+```
+mkcert localhost 127.0.0.1
 ```
 
 ### Usage
