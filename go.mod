@@ -20,7 +20,7 @@ require (
 	entgo.io/ent v0.12.3
 	github.com/OneSignal/onesignal-go-api v1.0.4
 	github.com/cosmtrek/air v1.44.0
-	github.com/go-playground/validator/v10 v10.15.0
+	github.com/go-playground/validator/v10 v10.15.1
 	github.com/go-testfixtures/testfixtures/v3 v3.9.0
 	github.com/go-webauthn/webauthn v0.8.6
 	github.com/gorilla/websocket v1.5.0
