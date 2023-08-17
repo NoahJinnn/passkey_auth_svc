@@ -79,8 +79,11 @@ $ /path/to/easyrsa --days=3650 "--subject-alt-name=IP:127.0.0.1" build-server-fu
 
 2. Generate HTTPS certificates for `networth` service using [mkcert](https://github.com/FiloSottile/mkcert#mkcert)
 ```
+cd ./configs && mkdir http-pki && cd http-pki
 mkcert localhost 127.0.0.1
 ```
+
+Then, change the name of generated cert & key files into `cakey.pem`, `cacert.pem`
 
 ### Usage
 
