@@ -100,7 +100,7 @@ func (h *FvDataHandler) Income(c echo.Context) error {
 		return err
 	}
 
-	var result []interface{}
+	var result interface{}
 	err = json.Unmarshal(i, &result)
 	if err != nil {
 		return errorhandler.NewHTTPError(http.StatusInternalServerError).SetInternal(err)
