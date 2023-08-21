@@ -12,9 +12,6 @@ type Email func(*sql.Selector)
 // FvSession is the predicate function for fvsession builders.
 type FvSession func(*sql.Selector)
 
-// ItemTable is the predicate function for itemtable builders.
-type ItemTable func(*sql.Selector)
-
 // Jwk is the predicate function for jwk builders.
 type Jwk func(*sql.Selector)
 

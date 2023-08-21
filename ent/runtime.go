@@ -8,7 +8,6 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
-	"github.com/hellohq/hqservice/ent/itemtable"
 	"github.com/hellohq/hqservice/ent/jwk"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/primaryemail"
@@ -60,30 +59,6 @@ func init() {
 	fvsessionDescID := fvsessionFields[0].Descriptor()
 	// fvsession.DefaultID holds the default value on creation for the id field.
 	fvsession.DefaultID = fvsessionDescID.Default.(func() uuid.UUID)
-	itemtableFields := schema.ItemTable{}.Fields()
-	_ = itemtableFields
-	// itemtableDescCategory is the schema descriptor for category field.
-	itemtableDescCategory := itemtableFields[4].Descriptor()
-	// itemtable.CategoryValidator is a validator for the "category" field. It is called by the builders before save.
-	itemtable.CategoryValidator = itemtableDescCategory.Validators[0].(func(string) error)
-	// itemtableDescDescription is the schema descriptor for description field.
-	itemtableDescDescription := itemtableFields[5].Descriptor()
-	// itemtable.DefaultDescription holds the default value on creation for the description field.
-	itemtable.DefaultDescription = itemtableDescDescription.Default.(string)
-	// itemtableDescCreatedAt is the schema descriptor for created_at field.
-	itemtableDescCreatedAt := itemtableFields[6].Descriptor()
-	// itemtable.DefaultCreatedAt holds the default value on creation for the created_at field.
-	itemtable.DefaultCreatedAt = itemtableDescCreatedAt.Default.(func() time.Time)
-	// itemtableDescUpdatedAt is the schema descriptor for updated_at field.
-	itemtableDescUpdatedAt := itemtableFields[7].Descriptor()
-	// itemtable.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	itemtable.DefaultUpdatedAt = itemtableDescUpdatedAt.Default.(func() time.Time)
-	// itemtable.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	itemtable.UpdateDefaultUpdatedAt = itemtableDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// itemtableDescID is the schema descriptor for id field.
-	itemtableDescID := itemtableFields[0].Descriptor()
-	// itemtable.DefaultID holds the default value on creation for the id field.
-	itemtable.DefaultID = itemtableDescID.Default.(func() uuid.UUID)
 	jwkFields := schema.Jwk{}.Fields()
 	_ = jwkFields
 	// jwkDescCreatedAt is the schema descriptor for created_at field.

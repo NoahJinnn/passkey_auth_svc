@@ -81,13 +81,6 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 	fv.GET("/income", fvData.Income)
 	fv.GET("/balance_history/:accountId", fvData.GetBalanceHistoryByAccountId)
 
-	itemTable := nw.Group("/item_tables")
-	itHandler := handlers.NewItemTableHandler(srv)
-	itemTable.GET("", itHandler.ListByUser)
-	itemTable.POST("/item_table", itHandler.Create)
-	itemTable.PUT("/item_table", itHandler.Update)
-	itemTable.DELETE("/:itemTableId", itHandler.Delete)
-
 	ws := ws.NewManager()
 	e.GET("/sync", ws.SyncBetweenUserDevices, session.Session(sessionManager))
 

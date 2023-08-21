@@ -3,7 +3,6 @@ package app
 
 import (
 	"github.com/hellohq/hqservice/ms/networth/app/finverse"
-	"github.com/hellohq/hqservice/ms/networth/app/item_table"
 	"github.com/hellohq/hqservice/ms/networth/app/saltedge"
 	"github.com/hellohq/hqservice/ms/networth/config"
 	"github.com/hellohq/hqservice/ms/networth/dal"
@@ -11,7 +10,6 @@ import (
 
 // Appl provides application features (use cases) service.
 type Appl interface {
-	GetItemTableSvc() *item_table.ItemTableSvc
 	GetFvAuthSvc() *finverse.FvAuthSvc
 	GetFvDataSvc() *finverse.FvDataSvc
 	GetSeAccountInfoSvc() *saltedge.SeAccountInfoSvc
@@ -20,7 +18,6 @@ type Appl interface {
 // App implements interface Appl.
 type App struct {
 	cfg              *config.Config
-	itemTableSvc     *item_table.ItemTableSvc
 	seAccountInfoSvc *saltedge.SeAccountInfoSvc
 	fvAuthSvc        *finverse.FvAuthSvc
 	fvDataSvc        *finverse.FvDataSvc
@@ -28,22 +25,16 @@ type App struct {
 
 // New creates and returns new App.
 func New(cfg *config.Config, repo dal.INwRepo) *App {
-	itemTableSvc := item_table.NewItemTableSvc(cfg, repo)
 	seAccountInfoSvc := saltedge.NewSeAccountInfoSvc(cfg)
 	fvAuthSvc := finverse.NewFvAuthSvc(cfg, repo)
 	fvDataSvc := finverse.NewFvDataSvc(cfg, repo)
 
 	return &App{
 		cfg:              cfg,
-		itemTableSvc:     itemTableSvc,
 		seAccountInfoSvc: seAccountInfoSvc,
 		fvAuthSvc:        fvAuthSvc,
 		fvDataSvc:        fvDataSvc,
 	}
-}
-
-func (a App) GetItemTableSvc() *item_table.ItemTableSvc {
-	return a.itemTableSvc
 }
 
 func (a App) GetSeAccountInfoSvc() *saltedge.SeAccountInfoSvc {

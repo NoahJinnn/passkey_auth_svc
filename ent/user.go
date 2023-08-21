@@ -38,15 +38,13 @@ type UserEdges struct {
 	Passcodes []*Passcode `json:"passcodes,omitempty"`
 	// WebauthnCredentials holds the value of the webauthn_credentials edge.
 	WebauthnCredentials []*WebauthnCredential `json:"webauthn_credentials,omitempty"`
-	// ItemTables holds the value of the item_tables edge.
-	ItemTables []*ItemTable `json:"item_tables,omitempty"`
 	// PrimaryEmail holds the value of the primary_email edge.
 	PrimaryEmail *PrimaryEmail `json:"primary_email,omitempty"`
 	// FvSession holds the value of the fv_session edge.
 	FvSession *FvSession `json:"fv_session,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [5]bool
 }
 
 // EmailsOrErr returns the Emails value or an error if the edge
@@ -76,19 +74,10 @@ func (e UserEdges) WebauthnCredentialsOrErr() ([]*WebauthnCredential, error) {
 	return nil, &NotLoadedError{edge: "webauthn_credentials"}
 }
 
-// ItemTablesOrErr returns the ItemTables value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) ItemTablesOrErr() ([]*ItemTable, error) {
-	if e.loadedTypes[3] {
-		return e.ItemTables, nil
-	}
-	return nil, &NotLoadedError{edge: "item_tables"}
-}
-
 // PrimaryEmailOrErr returns the PrimaryEmail value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e UserEdges) PrimaryEmailOrErr() (*PrimaryEmail, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[3] {
 		if e.PrimaryEmail == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: primaryemail.Label}
@@ -101,7 +90,7 @@ func (e UserEdges) PrimaryEmailOrErr() (*PrimaryEmail, error) {
 // FvSessionOrErr returns the FvSession value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e UserEdges) FvSessionOrErr() (*FvSession, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[4] {
 		if e.FvSession == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: fvsession.Label}
@@ -179,11 +168,6 @@ func (u *User) QueryPasscodes() *PasscodeQuery {
 // QueryWebauthnCredentials queries the "webauthn_credentials" edge of the User entity.
 func (u *User) QueryWebauthnCredentials() *WebauthnCredentialQuery {
 	return NewUserClient(u.config).QueryWebauthnCredentials(u)
-}
-
-// QueryItemTables queries the "item_tables" edge of the User entity.
-func (u *User) QueryItemTables() *ItemTableQuery {
-	return NewUserClient(u.config).QueryItemTables(u)
 }
 
 // QueryPrimaryEmail queries the "primary_email" edge of the User entity.
