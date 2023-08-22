@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -8,6 +9,8 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/websocket"
+	"github.com/hellohq/hqservice/ent"
+	"github.com/hellohq/hqservice/ms/networth/srv/http/handlers"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
@@ -30,13 +33,15 @@ type Manager struct {
 
 	// handlers are functions that are used to handle Events
 	handlers map[string]EventHandler
+	srv      *handlers.HttpDeps
 }
 
 // NewManager is used to initalize all the values inside the manager
-func NewManager() *Manager {
+func NewManager(srv *handlers.HttpDeps) *Manager {
 	m := &Manager{
 		clients:  make(ClientList),
 		handlers: make(map[string]EventHandler),
+		srv:      srv,
 	}
 	m.setupEventHandlers()
 	return m
@@ -44,9 +49,9 @@ func NewManager() *Manager {
 
 // setupEventHandlers configures and adds all handlers
 func (m *Manager) setupEventHandlers() {
-	m.handlers["sync"] = func(e Event, c *Client) error {
+	m.handlers[SyncType] = func(e Event, c *Client) error {
 		fmt.Println("handle event type: ", e.Type)
-
+		ctx := context.Background()
 		// Marshal Payload into wanted format
 		var syncP SyncPayload
 		if err := json.Unmarshal(e.Payload, &syncP); err != nil {
@@ -54,8 +59,68 @@ func (m *Manager) setupEventHandlers() {
 		}
 
 		var outgoingEvent Event
-		outgoingEvent.Type = "sync"
+		outgoingEvent.Type = SyncType
 		outgoingEvent.Payload = e.Payload
+
+		csSvc := m.srv.Appl.GetChangesetSvc()
+		_, err := csSvc.Create(ctx, c.userId, &ent.Changeset{
+			CsList:    syncP.ChangeSet,
+			SiteID:    syncP.SiteId,
+			DbVersion: syncP.DbVersion,
+		})
+		if err != nil {
+			errorP, err := json.Marshal(&SaveCsFailedPayload{SiteId: syncP.SiteId})
+			if err != nil {
+				fmt.Printf("bad payload in request: %v\n", err)
+			}
+			outgoingEvent.Type = SaveCsFailedType
+			outgoingEvent.Payload = errorP
+			fmt.Printf("failed to save changeset: %v\n", err)
+		}
+
+		for otherC := range m.clients[c.userId] {
+			if c != otherC {
+				otherC.egress <- outgoingEvent
+			}
+		}
+
+		return nil
+	}
+
+	m.handlers[QueryCsType] = func(e Event, c *Client) error {
+		fmt.Println("handle event type: ", e.Type)
+		ctx := context.Background()
+		// Marshal Payload into wanted format
+		var qcP QueryCsPayload
+		if err := json.Unmarshal(e.Payload, &qcP); err != nil {
+			return fmt.Errorf("bad payload in request: %v", err)
+		}
+
+		var outgoingEvent Event
+		outgoingEvent.Type = QueryCsType
+
+		csSvc := m.srv.Appl.GetChangesetSvc()
+		latestCs, err := csSvc.Latest(ctx, c.userId)
+		if err != nil {
+			errorP, err := json.Marshal(&QueryCsFailedPayload{SiteId: qcP.SiteId})
+			if err != nil {
+				fmt.Printf("bad payload in request: %v\n", err)
+			}
+			outgoingEvent.Type = QueryCsFailedType
+			outgoingEvent.Payload = errorP
+			fmt.Printf("failed to query latest changeset: %v\n", err)
+		} else {
+			syncP := SyncPayload{
+				ChangeSet: latestCs.CsList,
+				SiteId:    latestCs.SiteID,
+				DbVersion: latestCs.DbVersion,
+			}
+			if err := json.Unmarshal(e.Payload, &syncP); err != nil {
+				return fmt.Errorf("bad payload in request: %v", err)
+			}
+
+			outgoingEvent.Payload = e.Payload
+		}
 
 		for otherC := range m.clients[c.userId] {
 			if c != otherC {
@@ -98,8 +163,8 @@ func (m *Manager) SyncBetweenUserDevices(c echo.Context) error {
 	}
 
 	// Create New Client
-	client := NewClient(userId.String(), ws, m)
-	m.addClient(userId.String(), client)
+	client := NewClient(userId, ws, m)
+	m.addClient(userId, client)
 
 	go client.readMessages()
 	go client.writeMessages()
@@ -108,7 +173,7 @@ func (m *Manager) SyncBetweenUserDevices(c echo.Context) error {
 }
 
 // addClient will add clients to our clientList
-func (m *Manager) addClient(usedId string, client *Client) {
+func (m *Manager) addClient(usedId uuid.UUID, client *Client) {
 	// Lock so we can manipulate
 	m.Lock()
 	defer m.Unlock()
@@ -121,7 +186,7 @@ func (m *Manager) addClient(usedId string, client *Client) {
 }
 
 // removeClient will remove the client and clean up
-func (m *Manager) removeClient(usedId string, client *Client) {
+func (m *Manager) removeClient(usedId uuid.UUID, client *Client) {
 	m.Lock()
 	defer m.Unlock()
 
