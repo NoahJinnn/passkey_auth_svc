@@ -11,7 +11,7 @@ import (
 
 type IChangesetSvc interface {
 	Latest(ctx context.Context, userId uuid.UUID) (*ent.Changeset, error)
-	Create(ctx context.Context, userId uuid.UUID, changeset *ent.Changeset) error
+	Upsert(ctx context.Context, userId uuid.UUID, changeset *ent.Changeset) error
 }
 
 type ChangesetSvc struct {
@@ -26,7 +26,7 @@ func (s *ChangesetSvc) Latest(ctx context.Context, userId uuid.UUID) (*ent.Chang
 	return s.repo.GetChangesetRepo().Latest(ctx, userId)
 }
 
-func (s *ChangesetSvc) Create(ctx context.Context, userId uuid.UUID, newCs *ent.Changeset) error {
+func (s *ChangesetSvc) Upsert(ctx context.Context, userId uuid.UUID, newCs *ent.Changeset) error {
 	if err := s.repo.WithTx(ctx, func(ctx context.Context, client *ent.Client) error {
 		latest, err := client.Changeset.
 			Query().
@@ -37,7 +37,10 @@ func (s *ChangesetSvc) Create(ctx context.Context, userId uuid.UUID, newCs *ent.
 			return err
 		}
 
-		if latest.DbVersion < newCs.DbVersion {
+		if latest != nil && (latest.DbVersion >= newCs.DbVersion) {
+			return nil
+		}
+		if latest == nil {
 			_, err = client.Changeset.
 				Create().
 				SetUserID(userId).
@@ -45,11 +48,18 @@ func (s *ChangesetSvc) Create(ctx context.Context, userId uuid.UUID, newCs *ent.
 				SetDbVersion(newCs.DbVersion).
 				SetSiteID(newCs.SiteID).
 				Save(ctx)
-			if err != nil {
-				return err
-			}
+		} else {
+			_, err = client.Changeset.
+				Update().
+				Where(changeset.UserID(userId)).
+				SetCsList(newCs.CsList).
+				SetDbVersion(newCs.DbVersion).
+				SetSiteID(newCs.SiteID).
+				Save(ctx)
 		}
-
+		if err != nil {
+			return err
+		}
 		return nil
 	}); err != nil {
 		return err

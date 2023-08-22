@@ -63,7 +63,7 @@ func (m *Manager) setupEventHandlers() {
 		outgoingEvent.Payload = e.Payload
 
 		csSvc := m.srv.Appl.GetChangesetSvc()
-		err := csSvc.Create(ctx, c.userId, &ent.Changeset{
+		err := csSvc.Upsert(ctx, c.userId, &ent.Changeset{
 			CsList:    syncP.ChangeSet,
 			SiteID:    syncP.SiteId,
 			DbVersion: syncP.DbVersion,
@@ -72,9 +72,10 @@ func (m *Manager) setupEventHandlers() {
 		if err != nil {
 			outgoingEvent.Type = SaveCsFailedType
 			outgoingEvent.Payload = json.RawMessage{}
-			fmt.Printf("failed to save changeset: %v\n", err)
+			fmt.Printf("[WS-SAVE-CS-FAILED] failed to save changeset: %v\n", err)
 			c.egress <- outgoingEvent
 		} else {
+			fmt.Printf("[WS-SYNC] saved changeset: %v\n", e.Payload)
 			for otherC := range m.clients[c.userId] {
 				if c != otherC {
 					otherC.egress <- outgoingEvent
@@ -95,30 +96,43 @@ func (m *Manager) setupEventHandlers() {
 		}
 
 		var outgoingEvent Event
-		outgoingEvent.Type = QueryCsType
 
 		csSvc := m.srv.Appl.GetChangesetSvc()
 		latestCs, err := csSvc.Latest(ctx, c.userId)
 		if err != nil {
 			outgoingEvent.Type = QueryCsFailedType
 			outgoingEvent.Payload = json.RawMessage{}
-			fmt.Printf("failed to query latest changeset: %v\n", err)
+			fmt.Printf("[WS-QUERY-CS-FAILED] failed to query latest changeset: %v\n", err)
+			c.egress <- outgoingEvent
 		} else {
-			if latestCs == nil {
+			fmt.Println("[WS-QUERY-CS] latest changeset: ", latestCs)
+			if latestCs == nil || latestCs.DbVersion <= qcP.DbVersion {
 				return nil
 			}
-			syncP := SyncPayload{
-				ChangeSet: latestCs.CsList,
-				SiteId:    latestCs.SiteID,
-				DbVersion: latestCs.DbVersion,
+			if latestCs.DbVersion-qcP.DbVersion == 1 {
+				syncP := SyncPayload{
+					ChangeSet: latestCs.CsList,
+					SiteId:    latestCs.SiteID,
+					DbVersion: latestCs.DbVersion,
+				}
+				syncPJson, err := json.Marshal(&syncP)
+				if err != nil {
+					return fmt.Errorf("bad payload in request: %v", err)
+				}
+				outgoingEvent.Type = SyncType
+				outgoingEvent.Payload = syncPJson
+				c.egress <- outgoingEvent
+			} else {
+				// Trigger the latest device to sync
+				outgoingEvent.Type = QueryCsType
+				outgoingEvent.Payload = e.Payload
+				for otherC := range m.clients[c.userId] {
+					if c != otherC {
+						otherC.egress <- outgoingEvent
+					}
+				}
 			}
-			if err := json.Unmarshal(e.Payload, &syncP); err != nil {
-				return fmt.Errorf("bad payload in request: %v", err)
-			}
-			outgoingEvent.Type = SyncType
-			outgoingEvent.Payload = e.Payload
 		}
-		c.egress <- outgoingEvent
 		return nil
 	}
 }
