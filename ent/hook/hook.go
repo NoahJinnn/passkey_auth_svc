@@ -9,6 +9,18 @@ import (
 	"github.com/hellohq/hqservice/ent"
 )
 
+// The ChangesetFunc type is an adapter to allow the use of ordinary
+// function as Changeset mutator.
+type ChangesetFunc func(context.Context, *ent.ChangesetMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ChangesetFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ChangesetMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ChangesetMutation", m)
+}
+
 // The EmailFunc type is an adapter to allow the use of ordinary
 // function as Email mutator.
 type EmailFunc func(context.Context, *ent.EmailMutation) (ent.Value, error)

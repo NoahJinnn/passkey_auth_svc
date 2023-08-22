@@ -261,6 +261,29 @@ func HasFvSessionWith(preds ...predicate.FvSession) predicate.User {
 	})
 }
 
+// HasChangesets applies the HasEdge predicate on the "changesets" edge.
+func HasChangesets() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, ChangesetsTable, ChangesetsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasChangesetsWith applies the HasEdge predicate on the "changesets" edge with a given conditions (other predicates).
+func HasChangesetsWith(preds ...predicate.Changeset) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newChangesetsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(func(s *sql.Selector) {

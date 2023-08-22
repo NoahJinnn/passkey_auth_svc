@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ent/changeset"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/passcode"
@@ -149,6 +150,25 @@ func (uc *UserCreate) SetNillableFvSessionID(id *uuid.UUID) *UserCreate {
 // SetFvSession sets the "fv_session" edge to the FvSession entity.
 func (uc *UserCreate) SetFvSession(f *FvSession) *UserCreate {
 	return uc.SetFvSessionID(f.ID)
+}
+
+// SetChangesetsID sets the "changesets" edge to the Changeset entity by ID.
+func (uc *UserCreate) SetChangesetsID(id uuid.UUID) *UserCreate {
+	uc.mutation.SetChangesetsID(id)
+	return uc
+}
+
+// SetNillableChangesetsID sets the "changesets" edge to the Changeset entity by ID if the given value is not nil.
+func (uc *UserCreate) SetNillableChangesetsID(id *uuid.UUID) *UserCreate {
+	if id != nil {
+		uc = uc.SetChangesetsID(*id)
+	}
+	return uc
+}
+
+// SetChangesets sets the "changesets" edge to the Changeset entity.
+func (uc *UserCreate) SetChangesets(c *Changeset) *UserCreate {
+	return uc.SetChangesetsID(c.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -324,6 +344,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fvsession.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.ChangesetsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.ChangesetsTable,
+			Columns: []string{user.ChangesetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(changeset.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

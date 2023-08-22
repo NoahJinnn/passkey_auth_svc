@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ent/changeset"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/jwk"
@@ -34,6 +35,7 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeChangeset                            = "Changeset"
 	TypeEmail                                = "Email"
 	TypeFvSession                            = "FvSession"
 	TypeJwk                                  = "Jwk"
@@ -45,6 +47,719 @@ const (
 	TypeWebauthnSessionData                  = "WebauthnSessionData"
 	TypeWebauthnSessionDataAllowedCredential = "WebauthnSessionDataAllowedCredential"
 )
+
+// ChangesetMutation represents an operation that mutates the Changeset nodes in the graph.
+type ChangesetMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	site_id       *string
+	cs_list       *string
+	db_version    *int32
+	adddb_version *int32
+	created_at    *time.Time
+	updated_at    *time.Time
+	clearedFields map[string]struct{}
+	user          *uuid.UUID
+	cleareduser   bool
+	done          bool
+	oldValue      func(context.Context) (*Changeset, error)
+	predicates    []predicate.Changeset
+}
+
+var _ ent.Mutation = (*ChangesetMutation)(nil)
+
+// changesetOption allows management of the mutation configuration using functional options.
+type changesetOption func(*ChangesetMutation)
+
+// newChangesetMutation creates new mutation for the Changeset entity.
+func newChangesetMutation(c config, op Op, opts ...changesetOption) *ChangesetMutation {
+	m := &ChangesetMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeChangeset,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withChangesetID sets the ID field of the mutation.
+func withChangesetID(id uuid.UUID) changesetOption {
+	return func(m *ChangesetMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Changeset
+		)
+		m.oldValue = func(ctx context.Context) (*Changeset, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Changeset.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withChangeset sets the old Changeset of the mutation.
+func withChangeset(node *Changeset) changesetOption {
+	return func(m *ChangesetMutation) {
+		m.oldValue = func(context.Context) (*Changeset, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ChangesetMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ChangesetMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Changeset entities.
+func (m *ChangesetMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ChangesetMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ChangesetMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Changeset.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetSiteID sets the "site_id" field.
+func (m *ChangesetMutation) SetSiteID(s string) {
+	m.site_id = &s
+}
+
+// SiteID returns the value of the "site_id" field in the mutation.
+func (m *ChangesetMutation) SiteID() (r string, exists bool) {
+	v := m.site_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSiteID returns the old "site_id" field's value of the Changeset entity.
+// If the Changeset object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChangesetMutation) OldSiteID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSiteID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSiteID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSiteID: %w", err)
+	}
+	return oldValue.SiteID, nil
+}
+
+// ResetSiteID resets all changes to the "site_id" field.
+func (m *ChangesetMutation) ResetSiteID() {
+	m.site_id = nil
+}
+
+// SetCsList sets the "cs_list" field.
+func (m *ChangesetMutation) SetCsList(s string) {
+	m.cs_list = &s
+}
+
+// CsList returns the value of the "cs_list" field in the mutation.
+func (m *ChangesetMutation) CsList() (r string, exists bool) {
+	v := m.cs_list
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCsList returns the old "cs_list" field's value of the Changeset entity.
+// If the Changeset object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChangesetMutation) OldCsList(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCsList is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCsList requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCsList: %w", err)
+	}
+	return oldValue.CsList, nil
+}
+
+// ResetCsList resets all changes to the "cs_list" field.
+func (m *ChangesetMutation) ResetCsList() {
+	m.cs_list = nil
+}
+
+// SetDbVersion sets the "db_version" field.
+func (m *ChangesetMutation) SetDbVersion(i int32) {
+	m.db_version = &i
+	m.adddb_version = nil
+}
+
+// DbVersion returns the value of the "db_version" field in the mutation.
+func (m *ChangesetMutation) DbVersion() (r int32, exists bool) {
+	v := m.db_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDbVersion returns the old "db_version" field's value of the Changeset entity.
+// If the Changeset object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChangesetMutation) OldDbVersion(ctx context.Context) (v int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDbVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDbVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDbVersion: %w", err)
+	}
+	return oldValue.DbVersion, nil
+}
+
+// AddDbVersion adds i to the "db_version" field.
+func (m *ChangesetMutation) AddDbVersion(i int32) {
+	if m.adddb_version != nil {
+		*m.adddb_version += i
+	} else {
+		m.adddb_version = &i
+	}
+}
+
+// AddedDbVersion returns the value that was added to the "db_version" field in this mutation.
+func (m *ChangesetMutation) AddedDbVersion() (r int32, exists bool) {
+	v := m.adddb_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDbVersion resets all changes to the "db_version" field.
+func (m *ChangesetMutation) ResetDbVersion() {
+	m.db_version = nil
+	m.adddb_version = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *ChangesetMutation) SetUserID(u uuid.UUID) {
+	m.user = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *ChangesetMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the Changeset entity.
+// If the Changeset object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChangesetMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ClearUserID clears the value of the "user_id" field.
+func (m *ChangesetMutation) ClearUserID() {
+	m.user = nil
+	m.clearedFields[changeset.FieldUserID] = struct{}{}
+}
+
+// UserIDCleared returns if the "user_id" field was cleared in this mutation.
+func (m *ChangesetMutation) UserIDCleared() bool {
+	_, ok := m.clearedFields[changeset.FieldUserID]
+	return ok
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *ChangesetMutation) ResetUserID() {
+	m.user = nil
+	delete(m.clearedFields, changeset.FieldUserID)
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *ChangesetMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *ChangesetMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Changeset entity.
+// If the Changeset object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChangesetMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *ChangesetMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *ChangesetMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *ChangesetMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Changeset entity.
+// If the Changeset object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChangesetMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *ChangesetMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *ChangesetMutation) ClearUser() {
+	m.cleareduser = true
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *ChangesetMutation) UserCleared() bool {
+	return m.UserIDCleared() || m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *ChangesetMutation) UserIDs() (ids []uuid.UUID) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *ChangesetMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// Where appends a list predicates to the ChangesetMutation builder.
+func (m *ChangesetMutation) Where(ps ...predicate.Changeset) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ChangesetMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ChangesetMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Changeset, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ChangesetMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ChangesetMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Changeset).
+func (m *ChangesetMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ChangesetMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.site_id != nil {
+		fields = append(fields, changeset.FieldSiteID)
+	}
+	if m.cs_list != nil {
+		fields = append(fields, changeset.FieldCsList)
+	}
+	if m.db_version != nil {
+		fields = append(fields, changeset.FieldDbVersion)
+	}
+	if m.user != nil {
+		fields = append(fields, changeset.FieldUserID)
+	}
+	if m.created_at != nil {
+		fields = append(fields, changeset.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, changeset.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ChangesetMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case changeset.FieldSiteID:
+		return m.SiteID()
+	case changeset.FieldCsList:
+		return m.CsList()
+	case changeset.FieldDbVersion:
+		return m.DbVersion()
+	case changeset.FieldUserID:
+		return m.UserID()
+	case changeset.FieldCreatedAt:
+		return m.CreatedAt()
+	case changeset.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ChangesetMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case changeset.FieldSiteID:
+		return m.OldSiteID(ctx)
+	case changeset.FieldCsList:
+		return m.OldCsList(ctx)
+	case changeset.FieldDbVersion:
+		return m.OldDbVersion(ctx)
+	case changeset.FieldUserID:
+		return m.OldUserID(ctx)
+	case changeset.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case changeset.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown Changeset field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ChangesetMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case changeset.FieldSiteID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSiteID(v)
+		return nil
+	case changeset.FieldCsList:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCsList(v)
+		return nil
+	case changeset.FieldDbVersion:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDbVersion(v)
+		return nil
+	case changeset.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case changeset.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case changeset.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Changeset field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ChangesetMutation) AddedFields() []string {
+	var fields []string
+	if m.adddb_version != nil {
+		fields = append(fields, changeset.FieldDbVersion)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ChangesetMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case changeset.FieldDbVersion:
+		return m.AddedDbVersion()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ChangesetMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case changeset.FieldDbVersion:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDbVersion(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Changeset numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ChangesetMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(changeset.FieldUserID) {
+		fields = append(fields, changeset.FieldUserID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ChangesetMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ChangesetMutation) ClearField(name string) error {
+	switch name {
+	case changeset.FieldUserID:
+		m.ClearUserID()
+		return nil
+	}
+	return fmt.Errorf("unknown Changeset nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ChangesetMutation) ResetField(name string) error {
+	switch name {
+	case changeset.FieldSiteID:
+		m.ResetSiteID()
+		return nil
+	case changeset.FieldCsList:
+		m.ResetCsList()
+		return nil
+	case changeset.FieldDbVersion:
+		m.ResetDbVersion()
+		return nil
+	case changeset.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case changeset.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case changeset.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown Changeset field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ChangesetMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.user != nil {
+		edges = append(edges, changeset.EdgeUser)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ChangesetMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case changeset.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ChangesetMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ChangesetMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ChangesetMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareduser {
+		edges = append(edges, changeset.EdgeUser)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ChangesetMutation) EdgeCleared(name string) bool {
+	switch name {
+	case changeset.EdgeUser:
+		return m.cleareduser
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ChangesetMutation) ClearEdge(name string) error {
+	switch name {
+	case changeset.EdgeUser:
+		m.ClearUser()
+		return nil
+	}
+	return fmt.Errorf("unknown Changeset unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ChangesetMutation) ResetEdge(name string) error {
+	switch name {
+	case changeset.EdgeUser:
+		m.ResetUser()
+		return nil
+	}
+	return fmt.Errorf("unknown Changeset edge %s", name)
+}
 
 // EmailMutation represents an operation that mutates the Email nodes in the graph.
 type EmailMutation struct {
@@ -3485,6 +4200,8 @@ type UserMutation struct {
 	clearedprimary_email        bool
 	fv_session                  *uuid.UUID
 	clearedfv_session           bool
+	changesets                  *uuid.UUID
+	clearedchangesets           bool
 	done                        bool
 	oldValue                    func(context.Context) (*User, error)
 	predicates                  []predicate.User
@@ -3906,6 +4623,45 @@ func (m *UserMutation) ResetFvSession() {
 	m.clearedfv_session = false
 }
 
+// SetChangesetsID sets the "changesets" edge to the Changeset entity by id.
+func (m *UserMutation) SetChangesetsID(id uuid.UUID) {
+	m.changesets = &id
+}
+
+// ClearChangesets clears the "changesets" edge to the Changeset entity.
+func (m *UserMutation) ClearChangesets() {
+	m.clearedchangesets = true
+}
+
+// ChangesetsCleared reports if the "changesets" edge to the Changeset entity was cleared.
+func (m *UserMutation) ChangesetsCleared() bool {
+	return m.clearedchangesets
+}
+
+// ChangesetsID returns the "changesets" edge ID in the mutation.
+func (m *UserMutation) ChangesetsID() (id uuid.UUID, exists bool) {
+	if m.changesets != nil {
+		return *m.changesets, true
+	}
+	return
+}
+
+// ChangesetsIDs returns the "changesets" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ChangesetsID instead. It exists only for internal usage by the builders.
+func (m *UserMutation) ChangesetsIDs() (ids []uuid.UUID) {
+	if id := m.changesets; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetChangesets resets all changes to the "changesets" edge.
+func (m *UserMutation) ResetChangesets() {
+	m.changesets = nil
+	m.clearedchangesets = false
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -4056,7 +4812,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.emails != nil {
 		edges = append(edges, user.EdgeEmails)
 	}
@@ -4071,6 +4827,9 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.fv_session != nil {
 		edges = append(edges, user.EdgeFvSession)
+	}
+	if m.changesets != nil {
+		edges = append(edges, user.EdgeChangesets)
 	}
 	return edges
 }
@@ -4105,13 +4864,17 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 		if id := m.fv_session; id != nil {
 			return []ent.Value{*id}
 		}
+	case user.EdgeChangesets:
+		if id := m.changesets; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.removedemails != nil {
 		edges = append(edges, user.EdgeEmails)
 	}
@@ -4152,7 +4915,7 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.clearedemails {
 		edges = append(edges, user.EdgeEmails)
 	}
@@ -4167,6 +4930,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	}
 	if m.clearedfv_session {
 		edges = append(edges, user.EdgeFvSession)
+	}
+	if m.clearedchangesets {
+		edges = append(edges, user.EdgeChangesets)
 	}
 	return edges
 }
@@ -4185,6 +4951,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedprimary_email
 	case user.EdgeFvSession:
 		return m.clearedfv_session
+	case user.EdgeChangesets:
+		return m.clearedchangesets
 	}
 	return false
 }
@@ -4198,6 +4966,9 @@ func (m *UserMutation) ClearEdge(name string) error {
 		return nil
 	case user.EdgeFvSession:
 		m.ClearFvSession()
+		return nil
+	case user.EdgeChangesets:
+		m.ClearChangesets()
 		return nil
 	}
 	return fmt.Errorf("unknown User unique edge %s", name)
@@ -4221,6 +4992,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgeFvSession:
 		m.ResetFvSession()
+		return nil
+	case user.EdgeChangesets:
+		m.ResetChangesets()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)
