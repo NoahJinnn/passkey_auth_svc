@@ -28,15 +28,7 @@ type SyncPayload struct {
 	ChangeSet string `json:"change_set"`
 }
 
-type SaveCsFailedPayload struct {
-	SiteId string `json:"site_id"`
-}
-
 type QueryCsPayload struct {
 	DbVersion int32  `json:"db_version"`
 	SiteId    string `json:"site_id"`
-}
-
-type QueryCsFailedPayload struct {
-	SiteId string `json:"site_id"`
 }

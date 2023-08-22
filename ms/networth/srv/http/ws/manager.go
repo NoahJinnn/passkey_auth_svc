@@ -63,24 +63,22 @@ func (m *Manager) setupEventHandlers() {
 		outgoingEvent.Payload = e.Payload
 
 		csSvc := m.srv.Appl.GetChangesetSvc()
-		_, err := csSvc.Create(ctx, c.userId, &ent.Changeset{
+		err := csSvc.Create(ctx, c.userId, &ent.Changeset{
 			CsList:    syncP.ChangeSet,
 			SiteID:    syncP.SiteId,
 			DbVersion: syncP.DbVersion,
 		})
-		if err != nil {
-			errorP, err := json.Marshal(&SaveCsFailedPayload{SiteId: syncP.SiteId})
-			if err != nil {
-				fmt.Printf("bad payload in request: %v\n", err)
-			}
-			outgoingEvent.Type = SaveCsFailedType
-			outgoingEvent.Payload = errorP
-			fmt.Printf("failed to save changeset: %v\n", err)
-		}
 
-		for otherC := range m.clients[c.userId] {
-			if c != otherC {
-				otherC.egress <- outgoingEvent
+		if err != nil {
+			outgoingEvent.Type = SaveCsFailedType
+			outgoingEvent.Payload = json.RawMessage{}
+			fmt.Printf("failed to save changeset: %v\n", err)
+			c.egress <- outgoingEvent
+		} else {
+			for otherC := range m.clients[c.userId] {
+				if c != otherC {
+					otherC.egress <- outgoingEvent
+				}
 			}
 		}
 
@@ -102,14 +100,13 @@ func (m *Manager) setupEventHandlers() {
 		csSvc := m.srv.Appl.GetChangesetSvc()
 		latestCs, err := csSvc.Latest(ctx, c.userId)
 		if err != nil {
-			errorP, err := json.Marshal(&QueryCsFailedPayload{SiteId: qcP.SiteId})
-			if err != nil {
-				fmt.Printf("bad payload in request: %v\n", err)
-			}
 			outgoingEvent.Type = QueryCsFailedType
-			outgoingEvent.Payload = errorP
+			outgoingEvent.Payload = json.RawMessage{}
 			fmt.Printf("failed to query latest changeset: %v\n", err)
 		} else {
+			if latestCs == nil {
+				return nil
+			}
 			syncP := SyncPayload{
 				ChangeSet: latestCs.CsList,
 				SiteId:    latestCs.SiteID,
@@ -118,16 +115,10 @@ func (m *Manager) setupEventHandlers() {
 			if err := json.Unmarshal(e.Payload, &syncP); err != nil {
 				return fmt.Errorf("bad payload in request: %v", err)
 			}
-
+			outgoingEvent.Type = SyncType
 			outgoingEvent.Payload = e.Payload
 		}
-
-		for otherC := range m.clients[c.userId] {
-			if c != otherC {
-				otherC.egress <- outgoingEvent
-			}
-		}
-
+		c.egress <- outgoingEvent
 		return nil
 	}
 }
