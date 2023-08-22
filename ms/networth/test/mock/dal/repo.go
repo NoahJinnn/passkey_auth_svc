@@ -29,3 +29,7 @@ func (r repoT) WithTx(ctx context.Context, exec func(ctx context.Context, client
 func (r repoT) GetFvSessionRepo() dal.IFvSessionRepo {
 	panic("implement me")
 }
+
+func (r repoT) GetChangesetRepo() dal.IChangesetRepo {
+	panic("implement me")
+}

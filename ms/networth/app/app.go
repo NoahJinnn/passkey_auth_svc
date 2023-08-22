@@ -4,6 +4,7 @@ package app
 import (
 	"github.com/hellohq/hqservice/ms/networth/app/finverse"
 	"github.com/hellohq/hqservice/ms/networth/app/saltedge"
+	"github.com/hellohq/hqservice/ms/networth/app/ws"
 	"github.com/hellohq/hqservice/ms/networth/config"
 	"github.com/hellohq/hqservice/ms/networth/dal"
 )
@@ -13,6 +14,7 @@ type Appl interface {
 	GetFvAuthSvc() *finverse.FvAuthSvc
 	GetFvDataSvc() *finverse.FvDataSvc
 	GetSeAccountInfoSvc() *saltedge.SeAccountInfoSvc
+	GetChangesetSvc() *ws.ChangesetSvc
 }
 
 // App implements interface Appl.
@@ -21,19 +23,17 @@ type App struct {
 	seAccountInfoSvc *saltedge.SeAccountInfoSvc
 	fvAuthSvc        *finverse.FvAuthSvc
 	fvDataSvc        *finverse.FvDataSvc
+	csSvc            *ws.ChangesetSvc
 }
 
 // New creates and returns new App.
 func New(cfg *config.Config, repo dal.INwRepo) *App {
-	seAccountInfoSvc := saltedge.NewSeAccountInfoSvc(cfg)
-	fvAuthSvc := finverse.NewFvAuthSvc(cfg, repo)
-	fvDataSvc := finverse.NewFvDataSvc(cfg, repo)
-
 	return &App{
 		cfg:              cfg,
-		seAccountInfoSvc: seAccountInfoSvc,
-		fvAuthSvc:        fvAuthSvc,
-		fvDataSvc:        fvDataSvc,
+		seAccountInfoSvc: saltedge.NewSeAccountInfoSvc(cfg),
+		fvAuthSvc:        finverse.NewFvAuthSvc(cfg, repo),
+		fvDataSvc:        finverse.NewFvDataSvc(cfg, repo),
+		csSvc:            ws.NewChangesetSvc(repo),
 	}
 }
 
@@ -47,4 +47,8 @@ func (a App) GetFvAuthSvc() *finverse.FvAuthSvc {
 
 func (a App) GetFvDataSvc() *finverse.FvDataSvc {
 	return a.fvDataSvc
+}
+
+func (a App) GetChangesetSvc() *ws.ChangesetSvc {
+	return a.csSvc
 }
