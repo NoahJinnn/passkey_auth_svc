@@ -34,6 +34,20 @@ func (cc *ChangesetCreate) SetDbVersion(i int32) *ChangesetCreate {
 	return cc
 }
 
+// SetFirstLaunch sets the "first_launch" field.
+func (cc *ChangesetCreate) SetFirstLaunch(b bool) *ChangesetCreate {
+	cc.mutation.SetFirstLaunch(b)
+	return cc
+}
+
+// SetNillableFirstLaunch sets the "first_launch" field if the given value is not nil.
+func (cc *ChangesetCreate) SetNillableFirstLaunch(b *bool) *ChangesetCreate {
+	if b != nil {
+		cc.SetFirstLaunch(*b)
+	}
+	return cc
+}
+
 // SetUserID sets the "user_id" field.
 func (cc *ChangesetCreate) SetUserID(u uuid.UUID) *ChangesetCreate {
 	cc.mutation.SetUserID(u)
@@ -130,6 +144,10 @@ func (cc *ChangesetCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (cc *ChangesetCreate) defaults() {
+	if _, ok := cc.mutation.FirstLaunch(); !ok {
+		v := changeset.DefaultFirstLaunch
+		cc.mutation.SetFirstLaunch(v)
+	}
 	if _, ok := cc.mutation.CreatedAt(); !ok {
 		v := changeset.DefaultCreatedAt()
 		cc.mutation.SetCreatedAt(v)
@@ -151,6 +169,9 @@ func (cc *ChangesetCreate) check() error {
 	}
 	if _, ok := cc.mutation.DbVersion(); !ok {
 		return &ValidationError{Name: "db_version", err: errors.New(`ent: missing required field "Changeset.db_version"`)}
+	}
+	if _, ok := cc.mutation.FirstLaunch(); !ok {
+		return &ValidationError{Name: "first_launch", err: errors.New(`ent: missing required field "Changeset.first_launch"`)}
 	}
 	if _, ok := cc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Changeset.created_at"`)}
@@ -200,6 +221,10 @@ func (cc *ChangesetCreate) createSpec() (*Changeset, *sqlgraph.CreateSpec) {
 	if value, ok := cc.mutation.DbVersion(); ok {
 		_spec.SetField(changeset.FieldDbVersion, field.TypeInt32, value)
 		_node.DbVersion = value
+	}
+	if value, ok := cc.mutation.FirstLaunch(); ok {
+		_spec.SetField(changeset.FieldFirstLaunch, field.TypeBool, value)
+		_node.FirstLaunch = value
 	}
 	if value, ok := cc.mutation.CreatedAt(); ok {
 		_spec.SetField(changeset.FieldCreatedAt, field.TypeTime, value)

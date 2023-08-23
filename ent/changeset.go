@@ -23,6 +23,8 @@ type Changeset struct {
 	SiteID string `json:"site_id,omitempty"`
 	// DbVersion holds the value of the "db_version" field.
 	DbVersion int32 `json:"db_version,omitempty"`
+	// FirstLaunch holds the value of the "first_launch" field.
+	FirstLaunch bool `json:"first_launch,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID uuid.UUID `json:"user_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -62,6 +64,8 @@ func (*Changeset) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case changeset.FieldFirstLaunch:
+			values[i] = new(sql.NullBool)
 		case changeset.FieldDbVersion:
 			values[i] = new(sql.NullInt64)
 		case changeset.FieldSiteID:
@@ -102,6 +106,12 @@ func (c *Changeset) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field db_version", values[i])
 			} else if value.Valid {
 				c.DbVersion = int32(value.Int64)
+			}
+		case changeset.FieldFirstLaunch:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field first_launch", values[i])
+			} else if value.Valid {
+				c.FirstLaunch = value.Bool
 			}
 		case changeset.FieldUserID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -167,6 +177,9 @@ func (c *Changeset) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("db_version=")
 	builder.WriteString(fmt.Sprintf("%v", c.DbVersion))
+	builder.WriteString(", ")
+	builder.WriteString("first_launch=")
+	builder.WriteString(fmt.Sprintf("%v", c.FirstLaunch))
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", c.UserID))

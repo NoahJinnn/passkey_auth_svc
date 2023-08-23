@@ -19,6 +19,8 @@ const (
 	FieldSiteID = "site_id"
 	// FieldDbVersion holds the string denoting the db_version field in the database.
 	FieldDbVersion = "db_version"
+	// FieldFirstLaunch holds the string denoting the first_launch field in the database.
+	FieldFirstLaunch = "first_launch"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -43,6 +45,7 @@ var Columns = []string{
 	FieldID,
 	FieldSiteID,
 	FieldDbVersion,
+	FieldFirstLaunch,
 	FieldUserID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
@@ -59,6 +62,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultFirstLaunch holds the default value on creation for the "first_launch" field.
+	DefaultFirstLaunch bool
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -85,6 +90,11 @@ func BySiteID(opts ...sql.OrderTermOption) OrderOption {
 // ByDbVersion orders the results by the db_version field.
 func ByDbVersion(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDbVersion, opts...).ToFunc()
+}
+
+// ByFirstLaunch orders the results by the first_launch field.
+func ByFirstLaunch(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFirstLaunch, opts...).ToFunc()
 }
 
 // ByUserID orders the results by the user_id field.

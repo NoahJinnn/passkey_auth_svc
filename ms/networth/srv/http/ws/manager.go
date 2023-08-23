@@ -62,8 +62,9 @@ func (m *Manager) setupEventHandlers() {
 		outgoingEvent.Payload = e.Payload
 		csSvc := m.srv.Appl.GetChangesetSvc()
 		err := csSvc.Upsert(ctx, c.userId, &ent.Changeset{
-			SiteID:    syncP.SiteId,
-			DbVersion: syncP.DbVersion,
+			SiteID:      syncP.SiteId,
+			DbVersion:   syncP.DbVersion,
+			FirstLaunch: true, // the first connection will change this to true
 		})
 
 		if err != nil {
@@ -101,7 +102,7 @@ func (m *Manager) setupEventHandlers() {
 			fmt.Printf("[WS-QUERY-CS-FAILED] failed to query latest changeset: %v\n", err)
 			c.egress <- outgoingEvent
 		} else {
-			fmt.Println("[WS-QUERY-CS] latest version: ", latestCs.DbVersion)
+			fmt.Println("[WS-QUERY-CS]")
 			if latestCs == nil || latestCs.DbVersion <= qcP.DbVersion {
 				return nil
 			}
