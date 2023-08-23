@@ -58,6 +58,9 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 		"/networth",
 		session.Session(sessionManager),
 	)
+	changeset := handlers.NewChangesetHandler(srv)
+	nw.DELETE("/changeset", changeset.Delete)
+
 	se := nw.Group("/se")
 	seAccountInfo := handlers.NewSeAccountInfoHandler(srv)
 	se.GET("/customers/:customer_id", seAccountInfo.Customer)

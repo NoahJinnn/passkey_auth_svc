@@ -12,6 +12,7 @@ import (
 type IChangesetSvc interface {
 	Latest(ctx context.Context, userId uuid.UUID) (*ent.Changeset, error)
 	Upsert(ctx context.Context, userId uuid.UUID, changeset *ent.Changeset) error
+	Delete(ctx context.Context, userId uuid.UUID) error
 }
 
 type ChangesetSvc struct {
@@ -65,4 +66,8 @@ func (s *ChangesetSvc) Upsert(ctx context.Context, userId uuid.UUID, newCs *ent.
 		return err
 	}
 	return nil
+}
+
+func (s *ChangesetSvc) Delete(ctx context.Context, userId uuid.UUID) error {
+	return s.repo.GetChangesetRepo().Delete(ctx, userId)
 }
