@@ -13,6 +13,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "site_id", Type: field.TypeString},
 		{Name: "db_version", Type: field.TypeInt32},
+		{Name: "first_launch", Type: field.TypeBool, Default: false},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "user_id", Type: field.TypeUUID, Unique: true, Nullable: true},
@@ -25,7 +26,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "changesets_users_changesets",
-				Columns:    []*schema.Column{ChangesetsColumns[5]},
+				Columns:    []*schema.Column{ChangesetsColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

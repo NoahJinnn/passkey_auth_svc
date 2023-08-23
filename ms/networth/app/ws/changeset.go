@@ -69,3 +69,14 @@ func (s *ChangesetSvc) Upsert(ctx context.Context, userId uuid.UUID, newCs *ent.
 func (s *ChangesetSvc) Delete(ctx context.Context, userId uuid.UUID) error {
 	return s.repo.GetChangesetRepo().Delete(ctx, userId)
 }
+
+func (s *ChangesetSvc) FirstLaunch(ctx context.Context, userId uuid.UUID) (bool, error) {
+	latest, err := s.repo.GetChangesetRepo().Latest(ctx, userId)
+	if err != nil {
+		return false, err
+	}
+	if latest == nil {
+		return false, err
+	}
+	return latest.FirstLaunch, nil
+}

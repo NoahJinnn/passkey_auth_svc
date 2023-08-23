@@ -49,6 +49,20 @@ func (cu *ChangesetUpdate) AddDbVersion(i int32) *ChangesetUpdate {
 	return cu
 }
 
+// SetFirstLaunch sets the "first_launch" field.
+func (cu *ChangesetUpdate) SetFirstLaunch(b bool) *ChangesetUpdate {
+	cu.mutation.SetFirstLaunch(b)
+	return cu
+}
+
+// SetNillableFirstLaunch sets the "first_launch" field if the given value is not nil.
+func (cu *ChangesetUpdate) SetNillableFirstLaunch(b *bool) *ChangesetUpdate {
+	if b != nil {
+		cu.SetFirstLaunch(*b)
+	}
+	return cu
+}
+
 // SetUserID sets the "user_id" field.
 func (cu *ChangesetUpdate) SetUserID(u uuid.UUID) *ChangesetUpdate {
 	cu.mutation.SetUserID(u)
@@ -145,6 +159,9 @@ func (cu *ChangesetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := cu.mutation.AddedDbVersion(); ok {
 		_spec.AddField(changeset.FieldDbVersion, field.TypeInt32, value)
 	}
+	if value, ok := cu.mutation.FirstLaunch(); ok {
+		_spec.SetField(changeset.FieldFirstLaunch, field.TypeBool, value)
+	}
 	if value, ok := cu.mutation.UpdatedAt(); ok {
 		_spec.SetField(changeset.FieldUpdatedAt, field.TypeTime, value)
 	}
@@ -213,6 +230,20 @@ func (cuo *ChangesetUpdateOne) SetDbVersion(i int32) *ChangesetUpdateOne {
 // AddDbVersion adds i to the "db_version" field.
 func (cuo *ChangesetUpdateOne) AddDbVersion(i int32) *ChangesetUpdateOne {
 	cuo.mutation.AddDbVersion(i)
+	return cuo
+}
+
+// SetFirstLaunch sets the "first_launch" field.
+func (cuo *ChangesetUpdateOne) SetFirstLaunch(b bool) *ChangesetUpdateOne {
+	cuo.mutation.SetFirstLaunch(b)
+	return cuo
+}
+
+// SetNillableFirstLaunch sets the "first_launch" field if the given value is not nil.
+func (cuo *ChangesetUpdateOne) SetNillableFirstLaunch(b *bool) *ChangesetUpdateOne {
+	if b != nil {
+		cuo.SetFirstLaunch(*b)
+	}
 	return cuo
 }
 
@@ -341,6 +372,9 @@ func (cuo *ChangesetUpdateOne) sqlSave(ctx context.Context) (_node *Changeset, e
 	}
 	if value, ok := cuo.mutation.AddedDbVersion(); ok {
 		_spec.AddField(changeset.FieldDbVersion, field.TypeInt32, value)
+	}
+	if value, ok := cuo.mutation.FirstLaunch(); ok {
+		_spec.SetField(changeset.FieldFirstLaunch, field.TypeBool, value)
 	}
 	if value, ok := cuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(changeset.FieldUpdatedAt, field.TypeTime, value)

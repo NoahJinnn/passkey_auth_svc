@@ -66,6 +66,11 @@ func DbVersion(v int32) predicate.Changeset {
 	return predicate.Changeset(sql.FieldEQ(FieldDbVersion, v))
 }
 
+// FirstLaunch applies equality check predicate on the "first_launch" field. It's identical to FirstLaunchEQ.
+func FirstLaunch(v bool) predicate.Changeset {
+	return predicate.Changeset(sql.FieldEQ(FieldFirstLaunch, v))
+}
+
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v uuid.UUID) predicate.Changeset {
 	return predicate.Changeset(sql.FieldEQ(FieldUserID, v))
@@ -184,6 +189,16 @@ func DbVersionLT(v int32) predicate.Changeset {
 // DbVersionLTE applies the LTE predicate on the "db_version" field.
 func DbVersionLTE(v int32) predicate.Changeset {
 	return predicate.Changeset(sql.FieldLTE(FieldDbVersion, v))
+}
+
+// FirstLaunchEQ applies the EQ predicate on the "first_launch" field.
+func FirstLaunchEQ(v bool) predicate.Changeset {
+	return predicate.Changeset(sql.FieldEQ(FieldFirstLaunch, v))
+}
+
+// FirstLaunchNEQ applies the NEQ predicate on the "first_launch" field.
+func FirstLaunchNEQ(v bool) predicate.Changeset {
+	return predicate.Changeset(sql.FieldNEQ(FieldFirstLaunch, v))
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.

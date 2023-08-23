@@ -57,6 +57,7 @@ type ChangesetMutation struct {
 	site_id       *string
 	db_version    *int32
 	adddb_version *int32
+	first_launch  *bool
 	created_at    *time.Time
 	updated_at    *time.Time
 	clearedFields map[string]struct{}
@@ -263,6 +264,42 @@ func (m *ChangesetMutation) ResetDbVersion() {
 	m.adddb_version = nil
 }
 
+// SetFirstLaunch sets the "first_launch" field.
+func (m *ChangesetMutation) SetFirstLaunch(b bool) {
+	m.first_launch = &b
+}
+
+// FirstLaunch returns the value of the "first_launch" field in the mutation.
+func (m *ChangesetMutation) FirstLaunch() (r bool, exists bool) {
+	v := m.first_launch
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFirstLaunch returns the old "first_launch" field's value of the Changeset entity.
+// If the Changeset object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChangesetMutation) OldFirstLaunch(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFirstLaunch is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFirstLaunch requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFirstLaunch: %w", err)
+	}
+	return oldValue.FirstLaunch, nil
+}
+
+// ResetFirstLaunch resets all changes to the "first_launch" field.
+func (m *ChangesetMutation) ResetFirstLaunch() {
+	m.first_launch = nil
+}
+
 // SetUserID sets the "user_id" field.
 func (m *ChangesetMutation) SetUserID(u uuid.UUID) {
 	m.user = &u
@@ -444,12 +481,15 @@ func (m *ChangesetMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ChangesetMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.site_id != nil {
 		fields = append(fields, changeset.FieldSiteID)
 	}
 	if m.db_version != nil {
 		fields = append(fields, changeset.FieldDbVersion)
+	}
+	if m.first_launch != nil {
+		fields = append(fields, changeset.FieldFirstLaunch)
 	}
 	if m.user != nil {
 		fields = append(fields, changeset.FieldUserID)
@@ -472,6 +512,8 @@ func (m *ChangesetMutation) Field(name string) (ent.Value, bool) {
 		return m.SiteID()
 	case changeset.FieldDbVersion:
 		return m.DbVersion()
+	case changeset.FieldFirstLaunch:
+		return m.FirstLaunch()
 	case changeset.FieldUserID:
 		return m.UserID()
 	case changeset.FieldCreatedAt:
@@ -491,6 +533,8 @@ func (m *ChangesetMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldSiteID(ctx)
 	case changeset.FieldDbVersion:
 		return m.OldDbVersion(ctx)
+	case changeset.FieldFirstLaunch:
+		return m.OldFirstLaunch(ctx)
 	case changeset.FieldUserID:
 		return m.OldUserID(ctx)
 	case changeset.FieldCreatedAt:
@@ -519,6 +563,13 @@ func (m *ChangesetMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDbVersion(v)
+		return nil
+	case changeset.FieldFirstLaunch:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFirstLaunch(v)
 		return nil
 	case changeset.FieldUserID:
 		v, ok := value.(uuid.UUID)
@@ -619,6 +670,9 @@ func (m *ChangesetMutation) ResetField(name string) error {
 		return nil
 	case changeset.FieldDbVersion:
 		m.ResetDbVersion()
+		return nil
+	case changeset.FieldFirstLaunch:
+		m.ResetFirstLaunch()
 		return nil
 	case changeset.FieldUserID:
 		m.ResetUserID()

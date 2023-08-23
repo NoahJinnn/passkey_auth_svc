@@ -59,6 +59,7 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 		session.Session(sessionManager),
 	)
 	changeset := handlers.NewChangesetHandler(srv)
+	nw.GET("/firstlaunch", changeset.FirstLaunch)
 	nw.DELETE("/changeset", changeset.Delete)
 
 	se := nw.Group("/se")
