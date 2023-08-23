@@ -101,7 +101,7 @@ func (m *Manager) setupEventHandlers() {
 			fmt.Printf("[WS-QUERY-CS-FAILED] failed to query latest changeset: %v\n", err)
 			c.egress <- outgoingEvent
 		} else {
-			fmt.Println("[WS-QUERY-CS] latest changeset: ", latestCs)
+			fmt.Println("[WS-QUERY-CS] latest version: ", latestCs.DbVersion)
 			if latestCs == nil || latestCs.DbVersion <= qcP.DbVersion {
 				return nil
 			}
