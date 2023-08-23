@@ -26,7 +26,7 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.11.1
-	github.com/lestrrat-go/jwx/v2 v2.0.11
+	github.com/lestrrat-go/jwx/v2 v2.0.12
 	github.com/mattn/goveralls v0.0.11
 	github.com/nicksnyder/go-i18n/v2 v2.2.1
 	github.com/nikoksr/doppler-go v0.3.0
