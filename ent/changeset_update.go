@@ -36,12 +36,6 @@ func (cu *ChangesetUpdate) SetSiteID(s string) *ChangesetUpdate {
 	return cu
 }
 
-// SetCsList sets the "cs_list" field.
-func (cu *ChangesetUpdate) SetCsList(s string) *ChangesetUpdate {
-	cu.mutation.SetCsList(s)
-	return cu
-}
-
 // SetDbVersion sets the "db_version" field.
 func (cu *ChangesetUpdate) SetDbVersion(i int32) *ChangesetUpdate {
 	cu.mutation.ResetDbVersion()
@@ -145,9 +139,6 @@ func (cu *ChangesetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := cu.mutation.SiteID(); ok {
 		_spec.SetField(changeset.FieldSiteID, field.TypeString, value)
 	}
-	if value, ok := cu.mutation.CsList(); ok {
-		_spec.SetField(changeset.FieldCsList, field.TypeString, value)
-	}
 	if value, ok := cu.mutation.DbVersion(); ok {
 		_spec.SetField(changeset.FieldDbVersion, field.TypeInt32, value)
 	}
@@ -209,12 +200,6 @@ type ChangesetUpdateOne struct {
 // SetSiteID sets the "site_id" field.
 func (cuo *ChangesetUpdateOne) SetSiteID(s string) *ChangesetUpdateOne {
 	cuo.mutation.SetSiteID(s)
-	return cuo
-}
-
-// SetCsList sets the "cs_list" field.
-func (cuo *ChangesetUpdateOne) SetCsList(s string) *ChangesetUpdateOne {
-	cuo.mutation.SetCsList(s)
 	return cuo
 }
 
@@ -350,9 +335,6 @@ func (cuo *ChangesetUpdateOne) sqlSave(ctx context.Context) (_node *Changeset, e
 	}
 	if value, ok := cuo.mutation.SiteID(); ok {
 		_spec.SetField(changeset.FieldSiteID, field.TypeString, value)
-	}
-	if value, ok := cuo.mutation.CsList(); ok {
-		_spec.SetField(changeset.FieldCsList, field.TypeString, value)
 	}
 	if value, ok := cuo.mutation.DbVersion(); ok {
 		_spec.SetField(changeset.FieldDbVersion, field.TypeInt32, value)

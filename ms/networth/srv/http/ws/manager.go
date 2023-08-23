@@ -52,19 +52,16 @@ func (m *Manager) setupEventHandlers() {
 	m.handlers[SyncType] = func(e Event, c *Client) error {
 		fmt.Println("handle event type: ", e.Type)
 		ctx := context.Background()
-		// Marshal Payload into wanted format
 		var syncP SyncPayload
 		if err := json.Unmarshal(e.Payload, &syncP); err != nil {
-			return fmt.Errorf("bad payload in request: %v", err)
+			return fmt.Errorf("bad payload in ws msg: %v", err)
 		}
 
 		var outgoingEvent Event
 		outgoingEvent.Type = SyncType
 		outgoingEvent.Payload = e.Payload
-
 		csSvc := m.srv.Appl.GetChangesetSvc()
 		err := csSvc.Upsert(ctx, c.userId, &ent.Changeset{
-			CsList:    syncP.ChangeSet,
 			SiteID:    syncP.SiteId,
 			DbVersion: syncP.DbVersion,
 		})
@@ -75,7 +72,7 @@ func (m *Manager) setupEventHandlers() {
 			fmt.Printf("[WS-SAVE-CS-FAILED] failed to save changeset: %v\n", err)
 			c.egress <- outgoingEvent
 		} else {
-			fmt.Printf("[WS-SYNC] saved changeset: %v\n", e.Payload)
+			fmt.Printf("[WS-SYNC] saved changeset: %v\n", e.Type)
 			for otherC := range m.clients[c.userId] {
 				if c != otherC {
 					otherC.egress <- outgoingEvent
@@ -89,16 +86,15 @@ func (m *Manager) setupEventHandlers() {
 	m.handlers[QueryCsType] = func(e Event, c *Client) error {
 		fmt.Println("handle event type: ", e.Type)
 		ctx := context.Background()
-		// Marshal Payload into wanted format
 		var qcP QueryCsPayload
 		if err := json.Unmarshal(e.Payload, &qcP); err != nil {
-			return fmt.Errorf("bad payload in request: %v", err)
+			return fmt.Errorf("bad payload in ws msg: %v", err)
 		}
 
 		var outgoingEvent Event
-
 		csSvc := m.srv.Appl.GetChangesetSvc()
 		latestCs, err := csSvc.Latest(ctx, c.userId)
+
 		if err != nil {
 			outgoingEvent.Type = QueryCsFailedType
 			outgoingEvent.Payload = json.RawMessage{}
@@ -109,29 +105,22 @@ func (m *Manager) setupEventHandlers() {
 			if latestCs == nil || latestCs.DbVersion <= qcP.DbVersion {
 				return nil
 			}
-			if latestCs.DbVersion-qcP.DbVersion == 1 {
-				syncP := SyncPayload{
-					ChangeSet: latestCs.CsList,
-					SiteId:    latestCs.SiteID,
-					DbVersion: latestCs.DbVersion,
-				}
-				syncPJson, err := json.Marshal(&syncP)
-				if err != nil {
-					return fmt.Errorf("bad payload in request: %v", err)
-				}
-				outgoingEvent.Type = SyncType
-				outgoingEvent.Payload = syncPJson
-				c.egress <- outgoingEvent
-			} else {
-				// Trigger the latest device to sync
-				outgoingEvent.Type = QueryCsType
-				outgoingEvent.Payload = e.Payload
-				for otherC := range m.clients[c.userId] {
-					if c != otherC {
-						otherC.egress <- outgoingEvent
-					}
+			// Trigger the latest device that made changes to sync
+			outgoingEvent.Type = QueryCsType
+			broadcastQcP, err := json.Marshal(&QueryCsPayload{
+				DbVersion: qcP.DbVersion,
+				SiteId:    latestCs.SiteID,
+			})
+			if err != nil {
+				return fmt.Errorf("bad payload in ws msg: %v", err)
+			}
+			outgoingEvent.Payload = broadcastQcP
+			for otherC := range m.clients[c.userId] {
+				if c != otherC {
+					otherC.egress <- outgoingEvent
 				}
 			}
+
 		}
 		return nil
 	}

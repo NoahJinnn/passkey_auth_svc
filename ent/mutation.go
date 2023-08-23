@@ -55,7 +55,6 @@ type ChangesetMutation struct {
 	typ           string
 	id            *uuid.UUID
 	site_id       *string
-	cs_list       *string
 	db_version    *int32
 	adddb_version *int32
 	created_at    *time.Time
@@ -206,42 +205,6 @@ func (m *ChangesetMutation) OldSiteID(ctx context.Context) (v string, err error)
 // ResetSiteID resets all changes to the "site_id" field.
 func (m *ChangesetMutation) ResetSiteID() {
 	m.site_id = nil
-}
-
-// SetCsList sets the "cs_list" field.
-func (m *ChangesetMutation) SetCsList(s string) {
-	m.cs_list = &s
-}
-
-// CsList returns the value of the "cs_list" field in the mutation.
-func (m *ChangesetMutation) CsList() (r string, exists bool) {
-	v := m.cs_list
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCsList returns the old "cs_list" field's value of the Changeset entity.
-// If the Changeset object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ChangesetMutation) OldCsList(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCsList is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCsList requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCsList: %w", err)
-	}
-	return oldValue.CsList, nil
-}
-
-// ResetCsList resets all changes to the "cs_list" field.
-func (m *ChangesetMutation) ResetCsList() {
-	m.cs_list = nil
 }
 
 // SetDbVersion sets the "db_version" field.
@@ -481,12 +444,9 @@ func (m *ChangesetMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ChangesetMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 5)
 	if m.site_id != nil {
 		fields = append(fields, changeset.FieldSiteID)
-	}
-	if m.cs_list != nil {
-		fields = append(fields, changeset.FieldCsList)
 	}
 	if m.db_version != nil {
 		fields = append(fields, changeset.FieldDbVersion)
@@ -510,8 +470,6 @@ func (m *ChangesetMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case changeset.FieldSiteID:
 		return m.SiteID()
-	case changeset.FieldCsList:
-		return m.CsList()
 	case changeset.FieldDbVersion:
 		return m.DbVersion()
 	case changeset.FieldUserID:
@@ -531,8 +489,6 @@ func (m *ChangesetMutation) OldField(ctx context.Context, name string) (ent.Valu
 	switch name {
 	case changeset.FieldSiteID:
 		return m.OldSiteID(ctx)
-	case changeset.FieldCsList:
-		return m.OldCsList(ctx)
 	case changeset.FieldDbVersion:
 		return m.OldDbVersion(ctx)
 	case changeset.FieldUserID:
@@ -556,13 +512,6 @@ func (m *ChangesetMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSiteID(v)
-		return nil
-	case changeset.FieldCsList:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCsList(v)
 		return nil
 	case changeset.FieldDbVersion:
 		v, ok := value.(int32)
@@ -667,9 +616,6 @@ func (m *ChangesetMutation) ResetField(name string) error {
 	switch name {
 	case changeset.FieldSiteID:
 		m.ResetSiteID()
-		return nil
-	case changeset.FieldCsList:
-		m.ResetCsList()
 		return nil
 	case changeset.FieldDbVersion:
 		m.ResetDbVersion()

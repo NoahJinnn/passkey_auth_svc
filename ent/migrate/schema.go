@@ -12,7 +12,6 @@ var (
 	ChangesetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "site_id", Type: field.TypeString},
-		{Name: "cs_list", Type: field.TypeString},
 		{Name: "db_version", Type: field.TypeInt32},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
@@ -26,7 +25,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "changesets_users_changesets",
-				Columns:    []*schema.Column{ChangesetsColumns[6]},
+				Columns:    []*schema.Column{ChangesetsColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

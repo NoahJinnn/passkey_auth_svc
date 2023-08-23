@@ -22,7 +22,6 @@ func (Changeset) Fields() []ent.Field {
 			return id
 		}).Immutable(),
 		field.String("site_id"),
-		field.String("cs_list"),
 		field.Int32("db_version"),
 		field.UUID("user_id", uuid.UUID{}).Optional(),
 		field.Time("created_at").Default(time.Now).Immutable(),

@@ -61,11 +61,6 @@ func SiteID(v string) predicate.Changeset {
 	return predicate.Changeset(sql.FieldEQ(FieldSiteID, v))
 }
 
-// CsList applies equality check predicate on the "cs_list" field. It's identical to CsListEQ.
-func CsList(v string) predicate.Changeset {
-	return predicate.Changeset(sql.FieldEQ(FieldCsList, v))
-}
-
 // DbVersion applies equality check predicate on the "db_version" field. It's identical to DbVersionEQ.
 func DbVersion(v int32) predicate.Changeset {
 	return predicate.Changeset(sql.FieldEQ(FieldDbVersion, v))
@@ -149,71 +144,6 @@ func SiteIDEqualFold(v string) predicate.Changeset {
 // SiteIDContainsFold applies the ContainsFold predicate on the "site_id" field.
 func SiteIDContainsFold(v string) predicate.Changeset {
 	return predicate.Changeset(sql.FieldContainsFold(FieldSiteID, v))
-}
-
-// CsListEQ applies the EQ predicate on the "cs_list" field.
-func CsListEQ(v string) predicate.Changeset {
-	return predicate.Changeset(sql.FieldEQ(FieldCsList, v))
-}
-
-// CsListNEQ applies the NEQ predicate on the "cs_list" field.
-func CsListNEQ(v string) predicate.Changeset {
-	return predicate.Changeset(sql.FieldNEQ(FieldCsList, v))
-}
-
-// CsListIn applies the In predicate on the "cs_list" field.
-func CsListIn(vs ...string) predicate.Changeset {
-	return predicate.Changeset(sql.FieldIn(FieldCsList, vs...))
-}
-
-// CsListNotIn applies the NotIn predicate on the "cs_list" field.
-func CsListNotIn(vs ...string) predicate.Changeset {
-	return predicate.Changeset(sql.FieldNotIn(FieldCsList, vs...))
-}
-
-// CsListGT applies the GT predicate on the "cs_list" field.
-func CsListGT(v string) predicate.Changeset {
-	return predicate.Changeset(sql.FieldGT(FieldCsList, v))
-}
-
-// CsListGTE applies the GTE predicate on the "cs_list" field.
-func CsListGTE(v string) predicate.Changeset {
-	return predicate.Changeset(sql.FieldGTE(FieldCsList, v))
-}
-
-// CsListLT applies the LT predicate on the "cs_list" field.
-func CsListLT(v string) predicate.Changeset {
-	return predicate.Changeset(sql.FieldLT(FieldCsList, v))
-}
-
-// CsListLTE applies the LTE predicate on the "cs_list" field.
-func CsListLTE(v string) predicate.Changeset {
-	return predicate.Changeset(sql.FieldLTE(FieldCsList, v))
-}
-
-// CsListContains applies the Contains predicate on the "cs_list" field.
-func CsListContains(v string) predicate.Changeset {
-	return predicate.Changeset(sql.FieldContains(FieldCsList, v))
-}
-
-// CsListHasPrefix applies the HasPrefix predicate on the "cs_list" field.
-func CsListHasPrefix(v string) predicate.Changeset {
-	return predicate.Changeset(sql.FieldHasPrefix(FieldCsList, v))
-}
-
-// CsListHasSuffix applies the HasSuffix predicate on the "cs_list" field.
-func CsListHasSuffix(v string) predicate.Changeset {
-	return predicate.Changeset(sql.FieldHasSuffix(FieldCsList, v))
-}
-
-// CsListEqualFold applies the EqualFold predicate on the "cs_list" field.
-func CsListEqualFold(v string) predicate.Changeset {
-	return predicate.Changeset(sql.FieldEqualFold(FieldCsList, v))
-}
-
-// CsListContainsFold applies the ContainsFold predicate on the "cs_list" field.
-func CsListContainsFold(v string) predicate.Changeset {
-	return predicate.Changeset(sql.FieldContainsFold(FieldCsList, v))
 }
 
 // DbVersionEQ applies the EQ predicate on the "db_version" field.

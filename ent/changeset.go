@@ -21,8 +21,6 @@ type Changeset struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// SiteID holds the value of the "site_id" field.
 	SiteID string `json:"site_id,omitempty"`
-	// CsList holds the value of the "cs_list" field.
-	CsList string `json:"cs_list,omitempty"`
 	// DbVersion holds the value of the "db_version" field.
 	DbVersion int32 `json:"db_version,omitempty"`
 	// UserID holds the value of the "user_id" field.
@@ -66,7 +64,7 @@ func (*Changeset) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case changeset.FieldDbVersion:
 			values[i] = new(sql.NullInt64)
-		case changeset.FieldSiteID, changeset.FieldCsList:
+		case changeset.FieldSiteID:
 			values[i] = new(sql.NullString)
 		case changeset.FieldCreatedAt, changeset.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -98,12 +96,6 @@ func (c *Changeset) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field site_id", values[i])
 			} else if value.Valid {
 				c.SiteID = value.String
-			}
-		case changeset.FieldCsList:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field cs_list", values[i])
-			} else if value.Valid {
-				c.CsList = value.String
 			}
 		case changeset.FieldDbVersion:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -172,9 +164,6 @@ func (c *Changeset) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
 	builder.WriteString("site_id=")
 	builder.WriteString(c.SiteID)
-	builder.WriteString(", ")
-	builder.WriteString("cs_list=")
-	builder.WriteString(c.CsList)
 	builder.WriteString(", ")
 	builder.WriteString("db_version=")
 	builder.WriteString(fmt.Sprintf("%v", c.DbVersion))

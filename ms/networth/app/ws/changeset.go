@@ -45,7 +45,6 @@ func (s *ChangesetSvc) Upsert(ctx context.Context, userId uuid.UUID, newCs *ent.
 			_, err = client.Changeset.
 				Create().
 				SetUserID(userId).
-				SetCsList(newCs.CsList).
 				SetDbVersion(newCs.DbVersion).
 				SetSiteID(newCs.SiteID).
 				Save(ctx)
@@ -53,7 +52,6 @@ func (s *ChangesetSvc) Upsert(ctx context.Context, userId uuid.UUID, newCs *ent.
 			_, err = client.Changeset.
 				Update().
 				Where(changeset.UserID(userId)).
-				SetCsList(newCs.CsList).
 				SetDbVersion(newCs.DbVersion).
 				SetSiteID(newCs.SiteID).
 				Save(ctx)

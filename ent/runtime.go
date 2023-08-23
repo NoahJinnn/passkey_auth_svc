@@ -27,11 +27,11 @@ func init() {
 	changesetFields := schema.Changeset{}.Fields()
 	_ = changesetFields
 	// changesetDescCreatedAt is the schema descriptor for created_at field.
-	changesetDescCreatedAt := changesetFields[5].Descriptor()
+	changesetDescCreatedAt := changesetFields[4].Descriptor()
 	// changeset.DefaultCreatedAt holds the default value on creation for the created_at field.
 	changeset.DefaultCreatedAt = changesetDescCreatedAt.Default.(func() time.Time)
 	// changesetDescUpdatedAt is the schema descriptor for updated_at field.
-	changesetDescUpdatedAt := changesetFields[6].Descriptor()
+	changesetDescUpdatedAt := changesetFields[5].Descriptor()
 	// changeset.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	changeset.DefaultUpdatedAt = changesetDescUpdatedAt.Default.(func() time.Time)
 	// changeset.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

@@ -17,8 +17,6 @@ const (
 	FieldID = "id"
 	// FieldSiteID holds the string denoting the site_id field in the database.
 	FieldSiteID = "site_id"
-	// FieldCsList holds the string denoting the cs_list field in the database.
-	FieldCsList = "cs_list"
 	// FieldDbVersion holds the string denoting the db_version field in the database.
 	FieldDbVersion = "db_version"
 	// FieldUserID holds the string denoting the user_id field in the database.
@@ -44,7 +42,6 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldSiteID,
-	FieldCsList,
 	FieldDbVersion,
 	FieldUserID,
 	FieldCreatedAt,
@@ -83,11 +80,6 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // BySiteID orders the results by the site_id field.
 func BySiteID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSiteID, opts...).ToFunc()
-}
-
-// ByCsList orders the results by the cs_list field.
-func ByCsList(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCsList, opts...).ToFunc()
 }
 
 // ByDbVersion orders the results by the db_version field.

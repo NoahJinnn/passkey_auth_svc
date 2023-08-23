@@ -28,12 +28,6 @@ func (cc *ChangesetCreate) SetSiteID(s string) *ChangesetCreate {
 	return cc
 }
 
-// SetCsList sets the "cs_list" field.
-func (cc *ChangesetCreate) SetCsList(s string) *ChangesetCreate {
-	cc.mutation.SetCsList(s)
-	return cc
-}
-
 // SetDbVersion sets the "db_version" field.
 func (cc *ChangesetCreate) SetDbVersion(i int32) *ChangesetCreate {
 	cc.mutation.SetDbVersion(i)
@@ -155,9 +149,6 @@ func (cc *ChangesetCreate) check() error {
 	if _, ok := cc.mutation.SiteID(); !ok {
 		return &ValidationError{Name: "site_id", err: errors.New(`ent: missing required field "Changeset.site_id"`)}
 	}
-	if _, ok := cc.mutation.CsList(); !ok {
-		return &ValidationError{Name: "cs_list", err: errors.New(`ent: missing required field "Changeset.cs_list"`)}
-	}
 	if _, ok := cc.mutation.DbVersion(); !ok {
 		return &ValidationError{Name: "db_version", err: errors.New(`ent: missing required field "Changeset.db_version"`)}
 	}
@@ -205,10 +196,6 @@ func (cc *ChangesetCreate) createSpec() (*Changeset, *sqlgraph.CreateSpec) {
 	if value, ok := cc.mutation.SiteID(); ok {
 		_spec.SetField(changeset.FieldSiteID, field.TypeString, value)
 		_node.SiteID = value
-	}
-	if value, ok := cc.mutation.CsList(); ok {
-		_spec.SetField(changeset.FieldCsList, field.TypeString, value)
-		_node.CsList = value
 	}
 	if value, ok := cc.mutation.DbVersion(); ok {
 		_spec.SetField(changeset.FieldDbVersion, field.TypeInt32, value)
