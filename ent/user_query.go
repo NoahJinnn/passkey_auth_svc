@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ent/changeset"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/passcode"
@@ -33,6 +34,7 @@ type UserQuery struct {
 	withWebauthnCredentials *WebauthnCredentialQuery
 	withPrimaryEmail        *PrimaryEmailQuery
 	withFvSession           *FvSessionQuery
+	withChangesets          *ChangesetQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -172,6 +174,28 @@ func (uq *UserQuery) QueryFvSession() *FvSessionQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(fvsession.Table, fvsession.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.FvSessionTable, user.FvSessionColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryChangesets chains the current query on the "changesets" edge.
+func (uq *UserQuery) QueryChangesets() *ChangesetQuery {
+	query := (&ChangesetClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(changeset.Table, changeset.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.ChangesetsTable, user.ChangesetsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -376,6 +400,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withWebauthnCredentials: uq.withWebauthnCredentials.Clone(),
 		withPrimaryEmail:        uq.withPrimaryEmail.Clone(),
 		withFvSession:           uq.withFvSession.Clone(),
+		withChangesets:          uq.withChangesets.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -434,6 +459,17 @@ func (uq *UserQuery) WithFvSession(opts ...func(*FvSessionQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withFvSession = query
+	return uq
+}
+
+// WithChangesets tells the query-builder to eager-load the nodes that are connected to
+// the "changesets" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithChangesets(opts ...func(*ChangesetQuery)) *UserQuery {
+	query := (&ChangesetClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withChangesets = query
 	return uq
 }
 
@@ -515,12 +551,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [5]bool{
+		loadedTypes = [6]bool{
 			uq.withEmails != nil,
 			uq.withPasscodes != nil,
 			uq.withWebauthnCredentials != nil,
 			uq.withPrimaryEmail != nil,
 			uq.withFvSession != nil,
+			uq.withChangesets != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -573,6 +610,12 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	if query := uq.withFvSession; query != nil {
 		if err := uq.loadFvSession(ctx, query, nodes, nil,
 			func(n *User, e *FvSession) { n.Edges.FvSession = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withChangesets; query != nil {
+		if err := uq.loadChangesets(ctx, query, nodes, nil,
+			func(n *User, e *Changeset) { n.Edges.Changesets = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -714,6 +757,33 @@ func (uq *UserQuery) loadFvSession(ctx context.Context, query *FvSessionQuery, n
 	}
 	query.Where(predicate.FvSession(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.FvSessionColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadChangesets(ctx context.Context, query *ChangesetQuery, nodes []*User, init func(*User), assign func(*User, *Changeset)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(changeset.FieldUserID)
+	}
+	query.Where(predicate.Changeset(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ChangesetsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

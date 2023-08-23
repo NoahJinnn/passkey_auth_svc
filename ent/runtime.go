@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ent/changeset"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/jwk"
@@ -23,6 +24,22 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	changesetFields := schema.Changeset{}.Fields()
+	_ = changesetFields
+	// changesetDescCreatedAt is the schema descriptor for created_at field.
+	changesetDescCreatedAt := changesetFields[4].Descriptor()
+	// changeset.DefaultCreatedAt holds the default value on creation for the created_at field.
+	changeset.DefaultCreatedAt = changesetDescCreatedAt.Default.(func() time.Time)
+	// changesetDescUpdatedAt is the schema descriptor for updated_at field.
+	changesetDescUpdatedAt := changesetFields[5].Descriptor()
+	// changeset.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	changeset.DefaultUpdatedAt = changesetDescUpdatedAt.Default.(func() time.Time)
+	// changeset.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	changeset.UpdateDefaultUpdatedAt = changesetDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// changesetDescID is the schema descriptor for id field.
+	changesetDescID := changesetFields[0].Descriptor()
+	// changeset.DefaultID holds the default value on creation for the id field.
+	changeset.DefaultID = changesetDescID.Default.(func() uuid.UUID)
 	emailFields := schema.Email{}.Fields()
 	_ = emailFields
 	// emailDescVerified is the schema descriptor for verified field.

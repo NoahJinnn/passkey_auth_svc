@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ent/changeset"
 	"github.com/hellohq/hqservice/ent/email"
 	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/passcode"
@@ -123,6 +124,25 @@ func (uu *UserUpdate) SetFvSession(f *FvSession) *UserUpdate {
 	return uu.SetFvSessionID(f.ID)
 }
 
+// SetChangesetsID sets the "changesets" edge to the Changeset entity by ID.
+func (uu *UserUpdate) SetChangesetsID(id uuid.UUID) *UserUpdate {
+	uu.mutation.SetChangesetsID(id)
+	return uu
+}
+
+// SetNillableChangesetsID sets the "changesets" edge to the Changeset entity by ID if the given value is not nil.
+func (uu *UserUpdate) SetNillableChangesetsID(id *uuid.UUID) *UserUpdate {
+	if id != nil {
+		uu = uu.SetChangesetsID(*id)
+	}
+	return uu
+}
+
+// SetChangesets sets the "changesets" edge to the Changeset entity.
+func (uu *UserUpdate) SetChangesets(c *Changeset) *UserUpdate {
+	return uu.SetChangesetsID(c.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -200,6 +220,12 @@ func (uu *UserUpdate) ClearPrimaryEmail() *UserUpdate {
 // ClearFvSession clears the "fv_session" edge to the FvSession entity.
 func (uu *UserUpdate) ClearFvSession() *UserUpdate {
 	uu.mutation.ClearFvSession()
+	return uu
+}
+
+// ClearChangesets clears the "changesets" edge to the Changeset entity.
+func (uu *UserUpdate) ClearChangesets() *UserUpdate {
+	uu.mutation.ClearChangesets()
 	return uu
 }
 
@@ -444,6 +470,35 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.ChangesetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.ChangesetsTable,
+			Columns: []string{user.ChangesetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(changeset.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.ChangesetsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.ChangesetsTable,
+			Columns: []string{user.ChangesetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(changeset.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -553,6 +608,25 @@ func (uuo *UserUpdateOne) SetFvSession(f *FvSession) *UserUpdateOne {
 	return uuo.SetFvSessionID(f.ID)
 }
 
+// SetChangesetsID sets the "changesets" edge to the Changeset entity by ID.
+func (uuo *UserUpdateOne) SetChangesetsID(id uuid.UUID) *UserUpdateOne {
+	uuo.mutation.SetChangesetsID(id)
+	return uuo
+}
+
+// SetNillableChangesetsID sets the "changesets" edge to the Changeset entity by ID if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableChangesetsID(id *uuid.UUID) *UserUpdateOne {
+	if id != nil {
+		uuo = uuo.SetChangesetsID(*id)
+	}
+	return uuo
+}
+
+// SetChangesets sets the "changesets" edge to the Changeset entity.
+func (uuo *UserUpdateOne) SetChangesets(c *Changeset) *UserUpdateOne {
+	return uuo.SetChangesetsID(c.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -630,6 +704,12 @@ func (uuo *UserUpdateOne) ClearPrimaryEmail() *UserUpdateOne {
 // ClearFvSession clears the "fv_session" edge to the FvSession entity.
 func (uuo *UserUpdateOne) ClearFvSession() *UserUpdateOne {
 	uuo.mutation.ClearFvSession()
+	return uuo
+}
+
+// ClearChangesets clears the "changesets" edge to the Changeset entity.
+func (uuo *UserUpdateOne) ClearChangesets() *UserUpdateOne {
+	uuo.mutation.ClearChangesets()
 	return uuo
 }
 
@@ -897,6 +977,35 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fvsession.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.ChangesetsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.ChangesetsTable,
+			Columns: []string{user.ChangesetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(changeset.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.ChangesetsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.ChangesetsTable,
+			Columns: []string{user.ChangesetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(changeset.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

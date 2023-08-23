@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
+	"github.com/hellohq/hqservice/ent/changeset"
 	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/primaryemail"
 	"github.com/hellohq/hqservice/ent/user"
@@ -42,9 +43,11 @@ type UserEdges struct {
 	PrimaryEmail *PrimaryEmail `json:"primary_email,omitempty"`
 	// FvSession holds the value of the fv_session edge.
 	FvSession *FvSession `json:"fv_session,omitempty"`
+	// Changesets holds the value of the changesets edge.
+	Changesets *Changeset `json:"changesets,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [6]bool
 }
 
 // EmailsOrErr returns the Emails value or an error if the edge
@@ -98,6 +101,19 @@ func (e UserEdges) FvSessionOrErr() (*FvSession, error) {
 		return e.FvSession, nil
 	}
 	return nil, &NotLoadedError{edge: "fv_session"}
+}
+
+// ChangesetsOrErr returns the Changesets value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) ChangesetsOrErr() (*Changeset, error) {
+	if e.loadedTypes[5] {
+		if e.Changesets == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: changeset.Label}
+		}
+		return e.Changesets, nil
+	}
+	return nil, &NotLoadedError{edge: "changesets"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -178,6 +194,11 @@ func (u *User) QueryPrimaryEmail() *PrimaryEmailQuery {
 // QueryFvSession queries the "fv_session" edge of the User entity.
 func (u *User) QueryFvSession() *FvSessionQuery {
 	return NewUserClient(u.config).QueryFvSession(u)
+}
+
+// QueryChangesets queries the "changesets" edge of the User entity.
+func (u *User) QueryChangesets() *ChangesetQuery {
+	return NewUserClient(u.config).QueryChangesets(u)
 }
 
 // Update returns a builder for updating this User.

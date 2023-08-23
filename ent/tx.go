@@ -12,6 +12,8 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// Changeset is the client for interacting with the Changeset builders.
+	Changeset *ChangesetClient
 	// Email is the client for interacting with the Email builders.
 	Email *EmailClient
 	// FvSession is the client for interacting with the FvSession builders.
@@ -163,6 +165,7 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.Changeset = NewChangesetClient(tx.config)
 	tx.Email = NewEmailClient(tx.config)
 	tx.FvSession = NewFvSessionClient(tx.config)
 	tx.Jwk = NewJwkClient(tx.config)
@@ -182,7 +185,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Email.QueryXXX(), the query will be executed
+// applies a query, for example: Changeset.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

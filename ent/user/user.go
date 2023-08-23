@@ -29,6 +29,8 @@ const (
 	EdgePrimaryEmail = "primary_email"
 	// EdgeFvSession holds the string denoting the fv_session edge name in mutations.
 	EdgeFvSession = "fv_session"
+	// EdgeChangesets holds the string denoting the changesets edge name in mutations.
+	EdgeChangesets = "changesets"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// EmailsTable is the table that holds the emails relation/edge.
@@ -66,6 +68,13 @@ const (
 	FvSessionInverseTable = "fv_sessions"
 	// FvSessionColumn is the table column denoting the fv_session relation/edge.
 	FvSessionColumn = "user_id"
+	// ChangesetsTable is the table that holds the changesets relation/edge.
+	ChangesetsTable = "changesets"
+	// ChangesetsInverseTable is the table name for the Changeset entity.
+	// It exists in this package in order to avoid circular dependency with the "changeset" package.
+	ChangesetsInverseTable = "changesets"
+	// ChangesetsColumn is the table column denoting the changesets relation/edge.
+	ChangesetsColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -169,6 +178,13 @@ func ByFvSessionField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newFvSessionStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByChangesetsField orders the results by changesets field.
+func ByChangesetsField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newChangesetsStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newEmailsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -202,5 +218,12 @@ func newFvSessionStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(FvSessionInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2O, false, FvSessionTable, FvSessionColumn),
+	)
+}
+func newChangesetsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ChangesetsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, ChangesetsTable, ChangesetsColumn),
 	)
 }

@@ -8,6 +8,29 @@ import (
 )
 
 var (
+	// ChangesetsColumns holds the columns for the "changesets" table.
+	ChangesetsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "site_id", Type: field.TypeString},
+		{Name: "db_version", Type: field.TypeInt32},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUUID, Unique: true, Nullable: true},
+	}
+	// ChangesetsTable holds the schema information for the "changesets" table.
+	ChangesetsTable = &schema.Table{
+		Name:       "changesets",
+		Columns:    ChangesetsColumns,
+		PrimaryKey: []*schema.Column{ChangesetsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "changesets_users_changesets",
+				Columns:    []*schema.Column{ChangesetsColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// EmailsColumns holds the columns for the "emails" table.
 	EmailsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -228,6 +251,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		ChangesetsTable,
 		EmailsTable,
 		FvSessionsTable,
 		JwksTable,
@@ -242,6 +266,7 @@ var (
 )
 
 func init() {
+	ChangesetsTable.ForeignKeys[0].RefTable = UsersTable
 	EmailsTable.ForeignKeys[0].RefTable = UsersTable
 	FvSessionsTable.ForeignKeys[0].RefTable = UsersTable
 	PasscodesTable.ForeignKeys[0].RefTable = EmailsTable

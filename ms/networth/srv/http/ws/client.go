@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -18,7 +19,7 @@ var (
 )
 
 // ClientList is a map used to help manage a map of clients
-type ClientList map[string]map[*Client]bool
+type ClientList map[uuid.UUID]map[*Client]bool
 
 // Client is a websocket client, basically a frontend visitor
 type Client struct {
@@ -31,11 +32,11 @@ type Client struct {
 	// egress is used to avoid concurrent writes on the WebSocket
 	egress chan Event
 
-	userId string
+	userId uuid.UUID
 }
 
 // NewClient is used to initialize a new Client with all required values initialized
-func NewClient(userId string, conn *websocket.Conn, manager *Manager) *Client {
+func NewClient(userId uuid.UUID, conn *websocket.Conn, manager *Manager) *Client {
 	return &Client{
 		connection: conn,
 		manager:    manager,
