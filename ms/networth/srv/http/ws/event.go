@@ -17,8 +17,9 @@ type EventHandler func(event Event, c *Client) error
 
 const (
 	SyncType          = "sync"
-	SaveCsFailedType  = "save_cs_failed"
 	QueryCsType       = "query_cs"
+	ResponseCsType    = "response_cs"
+	SaveCsFailedType  = "save_cs_failed"
 	QueryCsFailedType = "query_cs_failed"
 )
 

@@ -51,33 +51,33 @@ func NewManager(srv *handlers.HttpDeps) *Manager {
 func (m *Manager) setupEventHandlers() {
 	m.handlers[SyncType] = func(e Event, c *Client) error {
 		fmt.Println("handle event type: ", e.Type)
-		ctx := context.Background()
 		var syncP SyncPayload
 		if err := json.Unmarshal(e.Payload, &syncP); err != nil {
 			return fmt.Errorf("bad payload in ws msg: %v", err)
 		}
 
-		var outgoingEvent Event
-		outgoingEvent.Type = SyncType
-		outgoingEvent.Payload = e.Payload
+		// var outgoingEvent Event
+		// outgoingEvent.Type = SyncType
+		// outgoingEvent.Payload = e.Payload
+		ctx := context.Background()
 		csSvc := m.srv.Appl.GetChangesetSvc()
-		err := csSvc.Upsert(ctx, c.userId, &ent.Changeset{
+		csSvc.Upsert(ctx, c.userId, &ent.Changeset{
 			SiteID:      syncP.SiteId,
 			DbVersion:   syncP.DbVersion,
 			FirstLaunch: true, // the first connection will change this to true
 		})
 
-		if err != nil {
-			outgoingEvent.Type = SaveCsFailedType
-			outgoingEvent.Payload = json.RawMessage{}
-			fmt.Printf("[WS-SAVE-CS-FAILED] failed to save changeset: %v\n", err)
-			c.egress <- outgoingEvent
-		} else {
-			fmt.Printf("[WS-SYNC] saved changeset: %v\n", e.Type)
-			for otherC := range m.clients[c.userId] {
-				if c != otherC {
-					otherC.egress <- outgoingEvent
-				}
+		// if err != nil {
+		// 	outgoingEvent.Type = SaveCsFailedType
+		// 	outgoingEvent.Payload = json.RawMessage{}
+		// 	fmt.Printf("[WS-SAVE-CS-FAILED] failed to save changeset: %v\n", err)
+		// 	c.egress <- outgoingEvent
+		// } else {
+		// }
+		fmt.Printf("[WS-SYNC] saved changeset: %v\n", e.Type)
+		for otherC := range m.clients[c.userId] {
+			if c != otherC {
+				otherC.egress <- e
 			}
 		}
 
@@ -86,42 +86,56 @@ func (m *Manager) setupEventHandlers() {
 
 	m.handlers[QueryCsType] = func(e Event, c *Client) error {
 		fmt.Println("handle event type: ", e.Type)
-		ctx := context.Background()
-		var qcP QueryCsPayload
-		if err := json.Unmarshal(e.Payload, &qcP); err != nil {
-			return fmt.Errorf("bad payload in ws msg: %v", err)
+		for otherC := range m.clients[c.userId] {
+			if c != otherC {
+				otherC.egress <- e
+			}
 		}
+		// ctx := context.Background()
+		// var qcP QueryCsPayload
+		// if err := json.Unmarshal(e.Payload, &qcP); err != nil {
+		// 	return fmt.Errorf("bad payload in ws msg: %v", err)
+		// }
 
-		var outgoingEvent Event
-		csSvc := m.srv.Appl.GetChangesetSvc()
-		latestCs, err := csSvc.Latest(ctx, c.userId)
+		// var outgoingEvent Event
+		// csSvc := m.srv.Appl.GetChangesetSvc()
+		// latestCs, err := csSvc.Latest(ctx, c.userId)
 
-		if err != nil {
-			outgoingEvent.Type = QueryCsFailedType
-			outgoingEvent.Payload = json.RawMessage{}
-			fmt.Printf("[WS-QUERY-CS-FAILED] failed to query latest changeset: %v\n", err)
-			c.egress <- outgoingEvent
-		} else {
-			fmt.Println("[WS-QUERY-CS]")
-			if latestCs == nil || latestCs.DbVersion <= qcP.DbVersion {
-				return nil
-			}
-			// Trigger the latest device that made changes to sync
-			outgoingEvent.Type = QueryCsType
-			broadcastQcP, err := json.Marshal(&QueryCsPayload{
-				DbVersion: qcP.DbVersion,
-				SiteId:    latestCs.SiteID,
-			})
-			if err != nil {
-				return fmt.Errorf("bad payload in ws msg: %v", err)
-			}
-			outgoingEvent.Payload = broadcastQcP
-			for otherC := range m.clients[c.userId] {
-				if c != otherC {
-					otherC.egress <- outgoingEvent
-				}
-			}
+		// if err != nil {
+		// 	outgoingEvent.Type = QueryCsFailedType
+		// 	outgoingEvent.Payload = json.RawMessage{}
+		// 	fmt.Printf("[WS-QUERY-CS-FAILED] failed to query latest changeset: %v\n", err)
+		// 	c.egress <- outgoingEvent
+		// } else {
+		// 	fmt.Println("[WS-QUERY-CS]")
+		// 	if latestCs == nil || latestCs.DbVersion <= qcP.DbVersion {
+		// 		return nil
+		// 	}
+		// 	// Trigger the latest device that made changes to sync
+		// 	outgoingEvent.Type = QueryCsType
+		// 	broadcastQcP, err := json.Marshal(&QueryCsPayload{
+		// 		DbVersion: qcP.DbVersion,
+		// 		SiteId:    latestCs.SiteID,
+		// 	})
+		// 	if err != nil {
+		// 		return fmt.Errorf("bad payload in ws msg: %v", err)
+		// 	}
+		// 	outgoingEvent.Payload = broadcastQcP
+		// 	for otherC := range m.clients[c.userId] {
+		// 		if c != otherC {
+		// 			otherC.egress <- outgoingEvent
+		// 		}
+		// 	}
+		// }
+		return nil
+	}
 
+	m.handlers[ResponseCsType] = func(e Event, c *Client) error {
+		fmt.Println("handle event type: ", e.Type)
+		for otherC := range m.clients[c.userId] {
+			if c != otherC {
+				otherC.egress <- e
+			}
 		}
 		return nil
 	}
