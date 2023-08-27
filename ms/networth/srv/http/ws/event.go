@@ -16,19 +16,13 @@ type Event struct {
 type EventHandler func(event Event, c *Client) error
 
 const (
-	SyncType          = "sync"
-	SaveCsFailedType  = "save_cs_failed"
-	QueryCsType       = "query_cs"
-	QueryCsFailedType = "query_cs_failed"
+	SyncType       = "sync"
+	QueryCsType    = "query_cs"
+	ResponseCsType = "response_cs"
 )
 
 type SyncPayload struct {
 	DbVersion int32  `json:"db_version"`
 	SiteId    string `json:"site_id"`
 	ChangeSet string `json:"change_set"`
-}
-
-type QueryCsPayload struct {
-	DbVersion int32  `json:"db_version"`
-	SiteId    string `json:"site_id"`
 }

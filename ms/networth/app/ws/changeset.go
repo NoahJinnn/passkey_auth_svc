@@ -37,10 +37,6 @@ func (s *ChangesetSvc) Upsert(ctx context.Context, userId uuid.UUID, newCs *ent.
 		if err != nil && !ent.IsNotFound(err) {
 			return err
 		}
-
-		if latest != nil && (latest.DbVersion >= newCs.DbVersion) {
-			return nil
-		}
 		if latest == nil {
 			_, err = client.Changeset.
 				Create().
