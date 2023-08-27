@@ -47,6 +47,7 @@ func (s *ChangesetSvc) Upsert(ctx context.Context, userId uuid.UUID, newCs *ent.
 				SetUserID(userId).
 				SetDbVersion(newCs.DbVersion).
 				SetSiteID(newCs.SiteID).
+				SetFirstLaunch(newCs.FirstLaunch).
 				Save(ctx)
 		} else {
 			_, err = client.Changeset.
@@ -54,6 +55,7 @@ func (s *ChangesetSvc) Upsert(ctx context.Context, userId uuid.UUID, newCs *ent.
 				Where(changeset.UserID(userId)).
 				SetDbVersion(newCs.DbVersion).
 				SetSiteID(newCs.SiteID).
+				SetFirstLaunch(newCs.FirstLaunch).
 				Save(ctx)
 		}
 		if err != nil {
