@@ -3,38 +3,27 @@
 **Table of Contents**
 
 - [HQ Service modulith](#hq-service-modulith)
-  - [Local development](#local-development)
-    - [Requirements](#requirements)
-    - [Setup](#setup)
-      - [Salt Edge](#salt-edge)
-      - [Doppler](#doppler)
-      - [HTTPS](#https)
-    - [Usage](#usage)
-      - [Cheatsheet](#cheatsheet)
+  - [Requirements](#requirements)
+    - [Salt Edge](#salt-edge)
+    - [Doppler](#doppler)
+    - [HTTPS](#https)
   - [Run](#run)
     - [Docker](#docker)
-      - [Run local PostgresSQL DB](#run-local-postgressql-db)
-      - [Remove container storage](#remove-container-storage)
-    - [Source](#source)
-      - [Run without build](#run-without-build)
-      - [Build first, then run](#build-first-then-run)
+    - [Taskfile](#taskfile)      
   - [Test](#test)
+  - [Migrate](#migrate)
   - [TODO](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # HQ Service modulith
-
-## Local development
-### Requirements
+## Requirements
 
 - Go 1.19
 - [Docker](https://docs.docker.com/install/) 19.03+
 - [Docker Compose](https://docs.docker.com/compose/install/) 1.25+
 
-### Setup
-
-#### Salt Edge
+### Salt Edge
 
 Generate PKI to sign [Signature header](https://docs.saltedge.com/general/#signature_headers)
 
@@ -48,7 +37,7 @@ cd C:\OpenSSL-Win32\bin
 openssl genrsa -out private.pem 2048
 openssl rsa -pubout -in private.pem -out public.pem
 ```
-#### Doppler
+### Doppler
 
 Setup Doppler:
 
@@ -65,7 +54,7 @@ Naming convention of environment vars required to run and test project:
 <PROJECT>__<MS>_<VAR>   - private vars for embedded microservice
 ```
 
-#### HTTPS
+### HTTPS
 
 1. Generate HTTPS certificates for PostgreSQL using [easyrsa](https://github.com/OpenVPN/easy-rsa/blob/master/README.quickstart.md)
 
@@ -85,40 +74,18 @@ mkcert localhost 127.0.0.1
 
 Then, change the name of generated cert & key files into `cakey.pem`, `cacert.pem`
 
-### Usage
-
+## Run
 - `./scripts/sh` - test and run project
 - `./scripts/cover` - analyse and show coverage
 - `./scripts/build` - build docker image and binaries in `bin/`
   - Access project at host/port(s) defined in `doppler`.
-
-#### Cheatsheet
+### Docker
 
 ```sh
 doppler run -- docker-compose up -d --remove-orphans               # (re)start all project's services
-docker-compose logs -f -t                           # view logs of all services
-docker-compose logs -f SERVICENAME                  # view logs of some service
-docker-compose ps                                   # status of all services
-docker-compose restart SERVICENAME
-docker-compose exec SERVICENAME COMMAND             # run command in given container
-docker-compose stop && docker-compose rm -f                     # stop the project
-docker volume rm PROJECT_SERVICENAME    # remove some service's data
-```
-## Run
-
-### Docker
-
-#### Start services
-
-```bash
-doppler run -- docker-compose up -d --remove-orphans
-```
-
-#### Stop services & Remove container storage
-
-```bash
-docker-compose stop && docker-compose rm -f
-docker volume rm hqservice_postgres
+docker-compose logs -f -t                                          # view logs of all services
+docker-compose stop && docker-compose rm -f                        # stop & remove the containers
+docker volume rm hqservice_postgres                                # clear all data
 ```
 
 ### Taskfile
@@ -198,7 +165,7 @@ task scripts:test
 go test -count=1 --tags=integration ./... # run integration tests
 ```
 
-## Migration
+## Migrate
 
 Running schema diff to generate migration scripts for:
 

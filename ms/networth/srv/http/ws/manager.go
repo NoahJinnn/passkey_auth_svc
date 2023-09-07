@@ -27,7 +27,7 @@ var (
 type Manager struct {
 	clients ClientList
 
-	// Using a syncMutex here to be able to lcok state before editing clients
+	// Using a syncMutex here to be able to lock state before editing clients
 	// Could also use Channels to block
 	sync.RWMutex
 
