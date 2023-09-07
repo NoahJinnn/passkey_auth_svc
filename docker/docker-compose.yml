@@ -13,38 +13,13 @@ services:
       - "${HQ_POSTGRES_ADDR_PORT:-0}:5432"
     volumes:
       - "postgres:/var/lib/postgresql/data"
-      - "${POSTGRES_TLS_CERT_PATH}:/dev.crt"
-      - "${POSTGRES_TLS_KEY_PATH}:/dev.key"
     environment:
       POSTGRES_USER: "${HQ_POSTGRES_AUTH_LOGIN}"
       POSTGRES_PASSWORD: "${HQ_POSTGRES_AUTH_PASS}"
-    entrypoint:
-      - bash
-      - -c
-      - |
-        set -x -e -o pipefail
-        install -m 0440 -o root -g postgres /dev.crt /server.crt
-        install -m 0440 -o root -g postgres /dev.key /server.key
-        exec docker-entrypoint.sh postgres -c ssl=on \
-            --ssl_cert_file=/server.crt --ssl_key_file=/server.key
+
     networks:
       - intranet
 
 networks:
   intranet:
-  # hq:
-  #   build:
-  #     context: .
-  #     dockerfile: use `./scripts/build` instead of `docker-compose build`
-  #   image: "go-monolith-example:latest"
-  #   container_name: hqservice
-  #   restart: always
-  #   ports:
-  #     - "${HQ_AUTH_ADDR_PORT:-0}:17000"
-  #   environment:
-  #     HQ_ADDR_HOST: "${HQ_ADDR_HOST}"
-  #     HQ_ADDR_HOST_INT: "${HQ_ADDR_HOST_INT}"
-  #     HQ_X_POSTGRES_ADDR_HOST: "postgres"
-  #     HQ_POSTGRES_AUTH_LOGIN: "${HQ_POSTGRES_AUTH_LOGIN}"
-  #     HQ_POSTGRES_AUTH_PASS: "${HQ_POSTGRES_AUTH_PASS}"
 
