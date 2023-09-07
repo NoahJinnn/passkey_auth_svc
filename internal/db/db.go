@@ -15,7 +15,7 @@ type Db struct {
 }
 
 func InitDbClient(ctxStartupCmdServe context.Context, cfg *sharedconfig.Shared) *Db {
-	cfg.Postgres.SSLMode = pqx.SSLDisable
+	cfg.Postgres.SSLMode = pqx.SSLRequire
 	dateSourceName := cfg.Postgres.FormatDSN()
 	pgEnt := pgsql.NewPgEnt(dateSourceName)
 	return &Db{
