@@ -10,6 +10,11 @@ tasks:
     cmds:
       - ./sh/run_macos "{{.CLI_ARGS}}"
 
+  run-gcp:
+    desc: "Go run app with dev env"
+    cmds:
+      - ./sh/run_macos_gcp "{{.CLI_ARGS}}"
+
   test:
     desc: "Run test"
     cmds:
