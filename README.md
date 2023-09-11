@@ -42,7 +42,15 @@ Setup Doppler:
 task scripts:install:doppler
 ```
 
-```
+### Taskfile
+We use the `Taskfile` command to build our binary, then, run our built `hq` binary.
+- `./scripts/sh` - test and run project
+- `./scripts/cover` - analyse and show coverage
+- `./scripts/build` - build docker image and binaries in `bin/`
+  - Access project at host/port(s) defined in `doppler`.
+
+
+```md
 Naming convention of environment vars required to run and test project:
 
 <PROJECT>_<VAR>         - global vars, not specific for some embedded microservice (e.g. domain)
@@ -73,29 +81,13 @@ mkcert localhost 127.0.0.1
 
 ## Development
 
-- `./scripts/sh` - test and run project
-- `./scripts/cover` - analyse and show coverage
-- `./scripts/build` - build docker image and binaries in `bin/`
-  - Access project at host/port(s) defined in `doppler`.
-### Docker
-
-```sh
-# Cheatsheet
-doppler run -- docker-compose up -d --remove-orphans               # (re)start all project's services
-docker-compose logs -f -t                                          # view logs of all services
-docker-compose stop && docker-compose rm -f                        # stop & remove the containers
-docker volume rm hqservice_postgres                                # clear all data
-```
-
-### Taskfile
-
-We use the `Taskfile` command to build our binary, then, run our built `hq` binary.
+Run our app with single command:
 
 ```bash
 $ PROFILE=<your-doppler-profile> task scripts:run
 ```
 
-More granular scripts
+or, more granular scripts as below.
 
 ```bash
 # Run with cmd arguments to override configurations
@@ -181,6 +173,15 @@ atlas migrate diff migration_name \
 
 ```sh
 task scripts:migrate
+```
+### Docker
+
+```sh
+# Cheatsheet
+doppler run -- docker-compose up -d --remove-orphans               # (re)start all project's services
+docker-compose logs -f -t                                          # view logs of all services
+docker-compose stop && docker-compose rm -f                        # stop & remove the containers
+docker volume rm hqservice_postgres                                # clear all data
 ```
 
 ## TODO
