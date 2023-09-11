@@ -74,7 +74,8 @@ mkcert localhost 127.0.0.1
 
 Then, change the name of generated cert & key files into `cakey.pem`, `cacert.pem`
 
-## Run
+## Development
+
 - `./scripts/sh` - test and run project
 - `./scripts/cover` - analyse and show coverage
 - `./scripts/build` - build docker image and binaries in `bin/`
@@ -82,6 +83,7 @@ Then, change the name of generated cert & key files into `cakey.pem`, `cacert.pe
 ### Docker
 
 ```sh
+# Cheatsheet
 doppler run -- docker-compose up -d --remove-orphans               # (re)start all project's services
 docker-compose logs -f -t                                          # view logs of all services
 docker-compose stop && docker-compose rm -f                        # stop & remove the containers
@@ -93,8 +95,10 @@ docker volume rm hqservice_postgres                                # clear all d
 We use the `Taskfile` command to build our binary, then, run our built `hq` binary.
 
 ```bash
-$ task scripts:run
+$ PROFILE=<your-doppler-profile> task scripts:run
 ```
+
+More granular scripts
 
 ```bash
 # Run with cmd arguments to override configurations
@@ -102,11 +106,12 @@ $ task scripts:run
 # port = `17002`
 # webauthn ID = `example`;
 # webauthn origins = `https://example.com,android:apk-key-hash:your_apk_hash`
-$ task scripts:run -- --port 17002 --wa.id example --wa.origins https://example.com,android:apk-key-hash:your_apk_hash
+$ doppler run -- air serve  "--port 17002 --wa.id example --wa.origins https://example.com,android:apk-key-hash:your_apk_hash"
 ```
 
+Build binary only
+
 ```bash
-# build binary only
 # our binary gets installed into the ./bin/ folder, as `hq`.
 $ task scripts:build:binary
 $ ./bin/hq -h
