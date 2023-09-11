@@ -46,6 +46,7 @@ func NewServeCmd(cfg *sharedconfig.Shared) *cobra.Command {
 		RunE: func(_ *cobra.Command, _ []string) error {
 			Log.Info("started", "version", def.Version())
 			defer Log.Info("finished", "version", def.Version())
+
 			ctxStartupCmdServe, cancel := context.WithTimeout(context.Background(), serveStartupTimeout.Value(nil))
 			defer cancel()
 

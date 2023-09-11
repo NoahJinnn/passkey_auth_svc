@@ -8,7 +8,12 @@ tasks:
   run:
     desc: "Go run app with dev env"
     cmds:
-      - ./sh/run_macos "{{.CLI_ARGS}}"
+      - ./sh/run_macos {{.PROFILE}}
+
+  run-gcp:
+    desc: "Go run app with dev env"
+    cmds:
+      - ./sh/run_macos_gcp "{{.CLI_ARGS}}"
 
   test:
     desc: "Run test"
