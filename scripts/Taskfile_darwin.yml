@@ -8,7 +8,7 @@ tasks:
   run:
     desc: "Go run app with dev env"
     cmds:
-      - ./sh/run_macos {{.DOPPLER_CONFIG}}
+      - ./sh/run_macos {{.PROFILE}}
 
   run-gcp:
     desc: "Go run app with dev env"
