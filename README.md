@@ -69,7 +69,7 @@ cd ./configs && mkdir http-pki && cd http-pki
 mkcert localhost 127.0.0.1
 ```
 
-Then, change the name of generated cert & key files into `cakey.pem`, `cacert.pem`
+
 
 ## Development
 
