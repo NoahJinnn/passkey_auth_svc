@@ -1,19 +1,19 @@
-version: '3'
+version: "3"
 
 includes:
   install: ./install/Taskfile_{{OS}}.yml
   build: ./build/Taskfile_{{OS}}.yml
 
 tasks:
+  setup:
+    desc: "Single command to setup all with mani"
+    cmds:
+      - ./sh/run_macos "{{.PROFILE}}"
+
   run:
-    desc: "Go run app with dev env"
+    desc: "Run app with your profile"
     cmds:
       - ./sh/run_macos {{.PROFILE}}
-
-  run-gcp:
-    desc: "Go run app with dev env"
-    cmds:
-      - ./sh/run_macos_gcp "{{.CLI_ARGS}}"
 
   test:
     desc: "Run test"
@@ -24,7 +24,7 @@ tasks:
     desc: "Get code statistics"
     cmds:
       - ./sh/stat_macos
-  
+
   migrate:
     desc: "Migrate DBs"
     cmds:
