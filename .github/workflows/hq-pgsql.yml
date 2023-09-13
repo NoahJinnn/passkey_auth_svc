@@ -41,7 +41,7 @@ jobs:
             export HQ_POSTGRES_AUTH_LOGIN='${{ secrets.HQ_POSTGRES_AUTH_LOGIN }}' && \
             export HQ_POSTGRES_AUTH_PASS='${{ secrets.HQ_POSTGRES_AUTH_PASS }}' && \
             export HQ_POSTGRES_ADDR_PORT='${{ secrets.HQ_POSTGRES_ADDR_PORT }}' && \
-            docker compose up -d --remove-orphan
+            docker compose up -d
       
 
           
