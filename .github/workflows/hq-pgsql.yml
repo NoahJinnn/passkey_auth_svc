@@ -4,9 +4,8 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_ID: YOUR_PROJECT_ID # TODO: update Google Cloud project id
-  SERVICE: YOUR_SERVICE_NAME # TODO: update Cloud Run service name
-  REGION: YOUR_SERVICE_REGION # TODO: update Cloud Run service region
+  PROJECT_ID: hellohq
+  REGION: asia-southeast1-a
 
 jobs:
   build:
@@ -36,4 +35,10 @@ jobs:
           version: '>= 363.0.0'
   
       - name: 'Use gcloud CLI'
-        run: 'gcloud info'
+        run: |
+          gcloud compute ssh hq-pgsql --project ${{env.PROJECT_ID}} --zone ${{env.REGION}}
+          cd $HOME
+          export HQ_POSTGRES_AUTH_LOGIN="${{secrets.HQ_POSTGRES_AUTH_LOGIN}}"
+          export HQ_POSTGRES_AUTH_PASS="${{secrets.HQ_POSTGRES_AUTH_PASS}}"
+          export HQ_POSTGRES_ADDR_PORT="${{secrets.HQ_POSTGRES_ADDR_PORT}}"
+          docker compose up -d --remove-orphans
