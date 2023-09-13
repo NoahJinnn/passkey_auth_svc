@@ -36,12 +36,13 @@ jobs:
           instance_name: 'hq-pgsql'
           zone: ${{ env.REGION }}
           ssh_private_key: '${{ secrets.GCP_SSH_PRIVATE_KEY }}'
-          command: |
-            cd $HOME && \
-            export HQ_POSTGRES_AUTH_LOGIN='${{ secrets.HQ_POSTGRES_AUTH_LOGIN }}' && \
-            export HQ_POSTGRES_AUTH_PASS='${{ secrets.HQ_POSTGRES_AUTH_PASS }}' && \
-            export HQ_POSTGRES_ADDR_PORT='${{ secrets.HQ_POSTGRES_ADDR_PORT }}' && \
-            docker compose up -d
+          command: 'echo Hello world'
+          # command: |
+          #   cd $HOME && \
+          #   export HQ_POSTGRES_AUTH_LOGIN='${{ secrets.HQ_POSTGRES_AUTH_LOGIN }}' && \
+          #   export HQ_POSTGRES_AUTH_PASS='${{ secrets.HQ_POSTGRES_AUTH_PASS }}' && \
+          #   export HQ_POSTGRES_ADDR_PORT='${{ secrets.HQ_POSTGRES_ADDR_PORT }}' && \
+          #   docker compose up -d
       
 
           
