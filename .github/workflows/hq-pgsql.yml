@@ -3,12 +3,37 @@ name: PostgreSQL
 on:
   workflow_dispatch:
 
+env:
+  PROJECT_ID: YOUR_PROJECT_ID # TODO: update Google Cloud project id
+  SERVICE: YOUR_SERVICE_NAME # TODO: update Cloud Run service name
+  REGION: YOUR_SERVICE_REGION # TODO: update Cloud Run service region
+
 jobs:
   build:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Build and test
+
+      - name: Test
         run: |
           echo Hello World
+
+      - name: Google Auth
+        id: auth
+        uses: 'google-github-actions/auth@v1'
+        with:
+          workload_identity_provider: '${{secrets.WIF_PROVIDER}}'
+          service_account: 'hq-gh-sa@hellohq.iam.gserviceaccount.com'
+  
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v1'
+        with:
+          version: '>= 363.0.0'
+  
+      - name: 'Use gcloud CLI'
+        run: 'gcloud info'
