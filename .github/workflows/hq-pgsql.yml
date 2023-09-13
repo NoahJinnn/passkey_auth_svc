@@ -29,19 +29,19 @@ jobs:
           workload_identity_provider: '${{secrets.WIF_PROVIDER}}'
           service_account: 'hq-gh-sa@hellohq.iam.gserviceaccount.com'
   
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v1'
+      - name: SSH to VM
+        id: 'compute-ssh'
+        uses: 'google-github-actions/ssh-compute@v0'
         with:
-          version: '>= 363.0.0'
-  
-      - name: 'Use gcloud CLI'
-        run: |
-          gcloud compute ssh hq-pgsql \
-          --project "${{ env.PROJECT_ID }}" \
-          --zone "${{ env.REGION }}" \
-          --command "cd $HOME && \
+          instance_name: 'example-instance'
+          zone: 'us-central1-a'
+          ssh_private_key: '${{ secrets.GCP_SSH_PRIVATE_KEY }}'
+          command: |
+            cd $HOME && \
             export HQ_POSTGRES_AUTH_LOGIN='${{ secrets.HQ_POSTGRES_AUTH_LOGIN }}' && \
             export HQ_POSTGRES_AUTH_PASS='${{ secrets.HQ_POSTGRES_AUTH_PASS }}' && \
             export HQ_POSTGRES_ADDR_PORT='${{ secrets.HQ_POSTGRES_ADDR_PORT }}' && \
-            docker compose up -d --remove-orphans"
+            docker compose up -d --remove-orphan
+      
+
           
