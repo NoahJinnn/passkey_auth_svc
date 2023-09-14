@@ -37,7 +37,7 @@ jobs:
           zone: ${{ env.REGION }}
           ssh_private_key: '${{ secrets.GCP_SSH_PRIVATE_KEY }}'
           command: |
-            "cd ~ && ls"
+            "pwd && ls"
 
       - id: 'test'
         run: |-
