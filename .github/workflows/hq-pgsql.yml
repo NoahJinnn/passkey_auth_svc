@@ -37,7 +37,7 @@ jobs:
           zone: ${{ env.REGION }}
           ssh_private_key: '${{ secrets.GCP_SSH_PRIVATE_KEY }}'
           command: |
-            "cd $HOME && \
+            "cd ~ && ls && \
             export HQ_POSTGRES_AUTH_LOGIN='${{ secrets.HQ_POSTGRES_AUTH_LOGIN }}' && \
             export HQ_POSTGRES_AUTH_PASS='${{ secrets.HQ_POSTGRES_AUTH_PASS }}' && \
             export HQ_POSTGRES_ADDR_PORT='${{ secrets.HQ_POSTGRES_ADDR_PORT }}' && \
