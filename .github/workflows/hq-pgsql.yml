@@ -37,11 +37,13 @@ jobs:
           zone: ${{ env.REGION }}
           ssh_private_key: '${{ secrets.GCP_SSH_PRIVATE_KEY }}'
           command: |
-            "cd ~ && ls && \
-            export HQ_POSTGRES_AUTH_LOGIN='${{ secrets.HQ_POSTGRES_AUTH_LOGIN }}' && \
-            export HQ_POSTGRES_AUTH_PASS='${{ secrets.HQ_POSTGRES_AUTH_PASS }}' && \
-            export HQ_POSTGRES_ADDR_PORT='${{ secrets.HQ_POSTGRES_ADDR_PORT }}' && \
-            docker compose up -d"
+            "cd ~ && ls"
+
+      - id: 'test'
+        run: |-
+          echo '${{ steps.compute-ssh.outputs.stdout }}'
+          echo '${{ steps.compute-ssh.outputs.stderr }}'
+      
       
 
           
