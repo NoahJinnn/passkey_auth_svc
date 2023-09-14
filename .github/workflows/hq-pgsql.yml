@@ -19,13 +19,13 @@ jobs:
           key: ${{ secrets.STAGING_KEY }}
           script: |
             cd $HOME 
-            rm -f .env
+            rm -f .env || true
             echo HQ_POSTGRES_PORT=${{ secrets.HQ_POSTGRES_PORT }} >> .env
             echo HQ_POSTGRES_LOGIN=${{ secrets.HQ_POSTGRES_LOGIN }} >> .env
             echo HQ_POSTGRES_PASS=${{ secrets.HQ_POSTGRES_PASS }} >> .env
-            docker-compose stop postgres || true
-            docker-compose rm -f postgres || true
-            docker-compose up -d postgres
+            docker compose stop postgres || true
+            docker compose rm -f postgres || true
+            docker compose up -d postgres
   # build:
   #   permissions:
   #     contents: 'read'
