@@ -19,9 +19,11 @@ jobs:
           key: ${{ secrets.STAGING_KEY }}
           script: |
             cd $HOME && \
-            export HQ_POSTGRES_LOGIN='${{ secrets.HQ_POSTGRES_LOGIN }}' && \
-            export HQ_POSTGRES_PASS='${{ secrets.HQ_POSTGRES_PASS }}' && \
-            export HQ_POSTGRES_PORT='${{ secrets.HQ_POSTGRES_PORT }}' && \
+            export HQ_POSTGRES_LOGIN=${{ secrets.HQ_POSTGRES_LOGIN }} && \
+            export HQ_POSTGRES_PASS=${{ secrets.HQ_POSTGRES_PASS }} && \
+            export HQ_POSTGRES_PORT=${{ secrets.HQ_POSTGRES_PORT }} && \
+            export A_TEXT='${{secrets.A_TEXT}}' && \
+            echo $A_TEXT && \
             docker compose up -d --remove-orphans
   # build:
   #   permissions:
