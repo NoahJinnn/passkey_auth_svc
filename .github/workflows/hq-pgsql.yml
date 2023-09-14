@@ -8,41 +8,56 @@ env:
   REGION: asia-southeast1-a
 
 jobs:
-  build:
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Test
-        run: |
-          echo Hello World
-
-      - name: Google Auth
-        id: auth
-        uses: 'google-github-actions/auth@v1'
+      - uses: appleboy/ssh-action@master
         with:
-          workload_identity_provider: '${{secrets.WIF_PROVIDER}}'
-          service_account: 'hq-gh-sa@hellohq.iam.gserviceaccount.com'
+          host: ${{ secrets.HQ_POSTGRES_HOST }}
+          port: ${{ secrets.STAGING_SSH_PORT }}
+          username: trannguyen
+          key: ${{ secrets.STAGING_KEY }}
+          script: |
+            cd $HOME && \
+            export HQ_POSTGRES_LOGIN='${{ secrets.HQ_POSTGRES_LOGIN }}' && \
+            export HQ_POSTGRES_PASS='${{ secrets.HQ_POSTGRES_PASS }}' && \
+            export HQ_POSTGRES_PORT='${{ secrets.HQ_POSTGRES_PORT }}' && \
+            docker compose up -d --remove-orphans
+  # build:
+  #   permissions:
+  #     contents: 'read'
+  #     id-token: 'write'
+
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+
+  #     - name: Test
+  #       run: |
+  #         echo Hello World
+
+  #     - name: Google Auth
+  #       id: auth
+  #       uses: 'google-github-actions/auth@v1'
+  #       with:
+  #         workload_identity_provider: '${{secrets.WIF_PROVIDER}}'
+  #         service_account: 'hq-gh-sa@hellohq.iam.gserviceaccount.com'
   
-      - name: SSH to VM
-        id: 'compute-ssh'
-        uses: 'google-github-actions/ssh-compute@v0'
-        with:
-          instance_name: 'hq-pgsql'
-          zone: ${{ env.REGION }}
-          ssh_private_key: '${{ secrets.GCP_SSH_PRIVATE_KEY }}'
-          command: |
-            "pwd && ls"
+  #     - name: SSH to VM
+  #       id: 'compute-ssh'
+  #       uses: 'google-github-actions/ssh-compute@v0'
+  #       with:
+  #         instance_name: 'hq-pgsql'
+  #         zone: ${{ env.REGION }}
+  #         ssh_private_key: '${{ secrets.GCP_SSH_PRIVATE_KEY }}'
+  #         command: |
+  #           "pwd && ls"
 
-      - id: 'test'
-        run: |-
-          echo '${{ steps.compute-ssh.outputs.stdout }}'
-          echo '${{ steps.compute-ssh.outputs.stderr }}'
+  #     - id: 'test'
+  #       run: |-
+  #         echo '${{ steps.compute-ssh.outputs.stdout }}'
+  #         echo '${{ steps.compute-ssh.outputs.stderr }}'
       
       
 

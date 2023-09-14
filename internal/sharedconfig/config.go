@@ -49,11 +49,11 @@ var shared = &struct {
 	NetworthAddrHostInt appcfg.NotEmptyString `env:"NETWORTH_ADDR_HOST_INT"`
 	NetworthAddrPort    appcfg.Port           `env:"NETWORTH_ADDR_PORT"`
 
-	PostgresUser     appcfg.NotEmptyString `env:"POSTGRES_AUTH_LOGIN"`
-	PostgresPass     appcfg.NotEmptyString `env:"POSTGRES_AUTH_PASS"`
-	PostgresAddrHost appcfg.NotEmptyString `env:"POSTGRES_ADDR_HOST"`
-	PostgresAddrPort appcfg.Port           `env:"POSTGRES_ADDR_PORT"`
-	PostgresDBName   appcfg.NotEmptyString `env:"POSTGRES_DB_NAME"`
+	PostgresUser   appcfg.NotEmptyString `env:"POSTGRES_LOGIN"`
+	PostgresPass   appcfg.NotEmptyString `env:"POSTGRES_PASS"`
+	PostgresHost   appcfg.NotEmptyString `env:"POSTGRES_HOST"`
+	PostgresPort   appcfg.Port           `env:"POSTGRES_PORT"`
+	PostgresDBName appcfg.NotEmptyString `env:"POSTGRES_NAME"`
 
 	Secrets appcfg.NotEmptyString `env:"JWK_SECRETS"`
 
@@ -70,11 +70,11 @@ var shared = &struct {
 	NetworthAddrHostInt: appcfg.MustNotEmptyString(def.HostnameInt),
 	NetworthAddrPort:    appcfg.MustPort(strconv.Itoa(NetworthPort)),
 
-	PostgresUser:     appcfg.MustNotEmptyString("auth"),
-	PostgresAddrPort: appcfg.MustPort("5432"),
-	PostgresAddrHost: appcfg.MustNotEmptyString("localhost"),
-	PostgresDBName:   appcfg.MustNotEmptyString("postgres"),
-	Secrets:          appcfg.MustNotEmptyString("needsToBeAtLeast16"),
+	PostgresUser:   appcfg.MustNotEmptyString("auth"),
+	PostgresPort:   appcfg.MustPort("5432"),
+	PostgresHost:   appcfg.MustNotEmptyString("localhost"),
+	PostgresDBName: appcfg.MustNotEmptyString("postgres"),
+	Secrets:        appcfg.MustNotEmptyString("needsToBeAtLeast16"),
 }
 
 // Get updates config defaults (from env) and returns shared config.
@@ -97,8 +97,8 @@ func Get() (*Shared, error) {
 		NetworthAddrPort:    shared.NetworthAddrPort,
 
 		Postgres: NewPostgresConfig(pqx.Config{
-			Host:   shared.PostgresAddrHost.Value(&err),
-			Port:   shared.PostgresAddrPort.Value(&err),
+			Host:   shared.PostgresHost.Value(&err),
+			Port:   shared.PostgresPort.Value(&err),
 			DBName: shared.PostgresDBName.Value(&err),
 			User:   shared.PostgresUser.Value(&err),
 			Pass:   shared.PostgresPass.Value(&err),
