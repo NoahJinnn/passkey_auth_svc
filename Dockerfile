@@ -6,11 +6,12 @@ ARG HQ_NETWORTH_ADDR_PORT
 
 WORKDIR /app
 
-COPY . .
-
-ENTRYPOINT [ "bin/hq" ]
+COPY /bin .
 
 EXPOSE ${HQ_AUTH_ADDR_PORT}
 EXPOSE ${HQ_NETWORTH_ADDR_PORT}
+
+ENTRYPOINT [ "./hq" ]
+
 CMD [ "serve", "--wa.id", "${AUTH_DOMAIN}", "--wa.origins", "https://${AUTH_DOMAIN}" ]
 

@@ -2,6 +2,12 @@
 set -x -e -o pipefail
 scriptsdir=$( dirname -- "$0"; )
 
+# Check if GOOS and GOARCH are set
+if [ -z "$GOOS" ] || [ -z "$GOARCH" ]; then
+  echo "GOOS and GOARCH must be set"
+  exit 1
+fi
+
 gitver() {
 	local ver branch rev dirty
 	ver="$(git tag -l --sort=-version:refname --merged HEAD 'v*' | head -n 1)"
