@@ -2,13 +2,13 @@
 set -x -e -o pipefail
 source $( dirname -- "$0"; )/build.sh
 ROOT=$scriptsdir/../../../
-
+AUTH_DOMAIN=$(doppler secrets get AUTH_DOMAIN) # get AUTH_DOMAIN value from doppler
 IMAGE_TAG=$(basename "$(go list -m)")
 cd $ROOT
 # Check if Docker is installed
 if command -v docker > /dev/null; then
   echo "Docker is installed, building using Docker"
-  doppler run -- docker build -t "$IMAGE_TAG" .
+  docker build --build-arg AUTH_DOMAIN="$AUTH_DOMAIN" -t "$IMAGE_TAG" .
 
 # If neither Podman nor Docker are installed
 else

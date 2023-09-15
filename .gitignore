@@ -5,12 +5,9 @@
 # **/name   - exclude path (* doesn't match /) to file/dir "name"  in any dir including project root
 # na/**/me  - exclude path (* doesn't match /) to file/dir "na/me", "na/*/me", "na/*/*/me", …
 # !name     - include previously excluded path …
-/.circleci/config-local.yml
 /.gobincache/
 /bin/
 /cover.out
-# Created by https://www.toptal.com/developers/gitignore/api/macos
-# Edit at https://www.toptal.com/developers/gitignore?templates=macos
 
 ### macOS ###
 # General
@@ -59,3 +56,4 @@ Temporary Items
 coverage.html
 hqservice
 *.db
+*.env
