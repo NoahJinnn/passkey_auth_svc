@@ -1,12 +1,16 @@
 FROM alpine:3.17
 
-WORKDIR /app
+ARG AUTH_DOMAIN
+ARG HQ_AUTH_ADDR_PORT
+ARG HQ_NETWORTH_ADDR_PORT
 
-HEALTHCHECK --interval=30s --timeout=5s \
-    CMD wget -q -O - http://$HOSTNAME:17000/health-check || exit 1
+WORKDIR /app
 
 COPY . .
 
 ENTRYPOINT [ "bin/hq" ]
 
-CMD [ "serve" ]
+EXPOSE ${HQ_AUTH_ADDR_PORT}
+EXPOSE ${HQ_NETWORTH_ADDR_PORT}
+CMD [ "serve", "--wa.id", "${AUTH_DOMAIN}", "--wa.origins", "https://${AUTH_DOMAIN}" ]
+

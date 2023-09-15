@@ -8,12 +8,14 @@ tasks:
   setup:
     desc: "Single command to setup all with mani"
     cmds:
+      - ./ngrok.sh "{{.PROFILE}}"
       - ./sh/run_macos "{{.PROFILE}}"
 
   run:
     desc: "Run app with your profile"
     cmds:
-      - ./sh/run_macos {{.PROFILE}}
+      - ./ngrok.sh "{{.PROFILE}}"
+      - ./sh/run_macos "{{.PROFILE}}"
 
   test:
     desc: "Run test"

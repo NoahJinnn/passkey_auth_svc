@@ -1,8 +1,6 @@
 #!/bin/bash
 set -x -e -o pipefail
 scriptsdir=$( dirname -- "$0"; )
-# Use CGO 1 for sqlite3 due to this error https://github.com/mattn/go-sqlite3/issues/855
-export CGO_ENABLED=1
 
 gitver() {
 	local ver branch rev dirty

@@ -13,4 +13,5 @@ tasks:
     cmds:
       - export GOOS={{OS}}
       - export GOARCH={{ARCH}}
+      - ./ngrok.sh "{{.PROFILE}}"
       - ./build/sh/build_container.sh
