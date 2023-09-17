@@ -11,6 +11,11 @@ tasks:
       - ./ngrok.sh "{{.PROFILE}}"
       - ./sh/run_macos "{{.PROFILE}}"
 
+  ngrok:
+    desc: "Run ngrok"
+    cmds:
+      - ./ngrok.sh "{{.PROFILE}}"
+
   run:
     desc: "Run app with your profile"
     cmds:
@@ -31,3 +36,5 @@ tasks:
     desc: "Migrate DBs"
     cmds:
       - ./sql/migrate_diff.sh
+
+  

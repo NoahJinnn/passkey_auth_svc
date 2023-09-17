@@ -90,6 +90,7 @@ jobs:
       - name: task scripts:build:binary
         run: |
           sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
-          ./bin/task scripts:build:binary
+          ./bin/task scripts:build:container
+
 
   

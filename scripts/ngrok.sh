@@ -6,7 +6,7 @@ sleep 0.5
 
 # Start NGROK in background
 echo "⚡️ Starting ngrok"
-ngrok http 17000 >/dev/null &
+ngrok http 17002 >/dev/null &
 sleep 1
 
 NGROK_REMOTE_URL="$(curl http://localhost:4040/api/tunnels | jq ".tunnels[0].public_url")" # get ngrok url from ngrok's tunnel response
