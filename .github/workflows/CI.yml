@@ -55,14 +55,21 @@ jobs:
 
       - name: Install Doppler CLI
         uses: dopplerhq/cli-action@v2
-        
+
       - name: Test CLI
         run: doppler --version
+      
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          version: 3.x
 
       - name: Run test
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
-        run: ./bin/task scripts:test
+        run: 
+          task scripts:test
 
   build:
     needs: test
@@ -82,11 +89,14 @@ jobs:
           key: v1-build-${{ runner.os }}-${{ hashFiles('go.mod') }}
           restore-keys: |
             v1-build-${{ runner.os }}-
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          version: 3.x
 
-      - name: task scripts:build:binary
-        run: |
-          sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
-          ./bin/task scripts:build:container
+      - name: Build container
+        run: scripts:build:container
 
 
   
