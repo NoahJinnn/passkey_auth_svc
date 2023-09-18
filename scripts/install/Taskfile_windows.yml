@@ -17,8 +17,3 @@ tasks:
     desc: "Install postgresql on windows"
     cmds:
       - scoop install postgresql@15
-
-  gotools:
-    desc: "Install golang tools"
-    cmds:
-      - ./install/sh/gotools.sh
