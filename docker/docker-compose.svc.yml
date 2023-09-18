@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  hqsvc:
+    image: ${IMAGE_TAG}
+    container_name: hq-svc
+    ports:
+      - "${HQ_AUTH_ADDR_PORT:-0}:17000"
+      - "${HQ_NETWORTH_ADDR_PORT:-0}:17002"
+    environment:
+      DOPPLER_TOKEN: "${DOPPLER_TOKEN}"
+
+    healthcheck:
+      test: ["CMD", "nc", "-z", "${HQ_POSTGRES_HOST}", "${HQ_POSTGRES_PORT}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: always
+
+networks:
+  hqsvc:
+    driver: bridge

@@ -1,21 +1,16 @@
 #!/bin/bash
 set -x -e -o pipefail
-source $( dirname -- "$0"; )/build.sh
+scriptsdir=$( dirname -- "$0"; )
+ROOT=$scriptsdir/../../../
 
-# Build binaries for linux-based Docker container.
-GOOS=$1 GOARCH=$2 build "$@"
-
-cd docker
-
+cd $ROOT
 # Check if Docker is installed
-elif command -v docker > /dev/null; then
+if command -v docker > /dev/null; then
   echo "Docker is installed, building using Docker"
-  docker build -t "$(basename "$(go list -m)")" $( dirname -- "$0"; )/../../../
+  docker build -t "$IMAGE_TAG" .
 
 # If neither Podman nor Docker are installed
 else
   echo "Please install Docker, unable to build image."
   exit 1
 fi
-
-

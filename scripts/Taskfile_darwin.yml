@@ -8,24 +8,33 @@ tasks:
   setup:
     desc: "Single command to setup all with mani"
     cmds:
-      - ./sh/run_macos "{{.PROFILE}}"
+      - ./ngrok.sh "{{.PROFILE}}"
+      - ./sh/run_macos.sh "{{.PROFILE}}"
+
+  ngrok:
+    desc: "Run ngrok"
+    cmds:
+      - ./ngrok.sh "{{.PROFILE}}"
 
   run:
     desc: "Run app with your profile"
     cmds:
-      - ./sh/run_macos {{.PROFILE}}
+      - ./ngrok.sh "{{.PROFILE}}"
+      - ./sh/run_macos.sh "{{.PROFILE}}"
 
   test:
     desc: "Run test"
     cmds:
-      - ./sh/test_macos
+      - ./sh/test_macos.sh "{{.PROFILE}}"
 
   stat:
     desc: "Get code statistics"
     cmds:
-      - ./sh/stat_macos
+      - ./sh/stat_macos.sh
 
   migrate:
     desc: "Migrate DBs"
     cmds:
       - ./sql/migrate_diff.sh
+
+  

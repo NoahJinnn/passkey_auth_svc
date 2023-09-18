@@ -4,13 +4,10 @@ tasks:
   binary:
     desc: "Build binary"
     cmds:
-      - export GOOS={{OS}}
-      - export GOARCH={{ARCH}}
-      - ./build/sh/build.sh {{OS}} {{ARCH}} {{.CLI_ARGS}}
+      - ./build/sh/build.sh {{.GOOS}} {{.GOARCH}} {{.CLI_ARGS}}
 
   container:
-    desc: "Build binary and container"
+    desc: "Build container, it requires build binary"
     cmds:
-      - export GOOS={{OS}}
-      - export GOARCH={{ARCH}}
+      - ./build/sh/build.sh {{.GOOS}} {{.GOARCH}} {{.CLI_ARGS}}
       - ./build/sh/build_container.sh

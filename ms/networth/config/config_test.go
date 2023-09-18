@@ -1,15 +1,12 @@
 package config
 
 import (
-	"context"
 	"log"
 	"os"
 	"testing"
 
 	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/pkg/netx"
-	"github.com/nikoksr/doppler-go"
-	"github.com/nikoksr/doppler-go/secret"
 	"github.com/powerman/check"
 	"github.com/sethvargo/go-limiter/httplimit"
 	"github.com/spf13/pflag"
@@ -49,7 +46,6 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	loadDopplerEnvs()
 	os.Setenv("HQ_SALTEDGE_APP_ID", "se_app_id")
 	os.Setenv("HQ_SALTEDGE_SECRET", "se_secret")
 	os.Setenv("HQ_SALTEDGE_PK", "se_pk")
@@ -66,27 +62,9 @@ func TestMain(m *testing.M) {
 	check.TestMain(m)
 }
 
-func loadDopplerEnvs() {
-	// Set your API key
-	doppler.Key = os.Getenv("DOPPLER_TOKEN")
-
-	// List all your secrets
-	secrets, _, err := secret.List(context.Background(), &doppler.SecretListOptions{
-		Project: "hqservice",
-		Config:  "dev",
-	})
-	if err != nil {
-		log.Fatalf("failed to list secrets: %v", err)
-	}
-	os.Clearenv()
-	for name, value := range secrets {
-		os.Setenv(name, *value.Raw)
-	}
+func testGetServe(flags ...string) (*Config, error) {
 	os.Setenv("HQ_ONESIGNAL_APP_ID", "oneSignalAppID")
 	os.Setenv("HQ_ONESIGNAL_APP_KEY", "oneSignalAppKey")
-}
-
-func testGetServe(flags ...string) (*Config, error) {
 	own = testOwn
 	err := Init(testShared, testFlagsets)
 	if err != nil {

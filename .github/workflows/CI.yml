@@ -5,12 +5,20 @@ on:
     branches: [main]
     paths-ignore:
       - '**.md'
+
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
+  packages: write
 
 env:
   GO_VERSION: "^1.19"
   GOFLAGS: "-mod=readonly"
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  REPO_NAME: hellohq/hqservice
+  PKG_NAME: core
 
 jobs:
   lint:
@@ -29,7 +37,9 @@ jobs:
           args: --timeout=3m --issues-exit-code=0 ./...
       - uses: hadolint/hadolint-action@v3.1.0
         with:
-          dockerfile: ./docker/Dockerfile
+          failure-threshold: error
+          verbose: true
+          dockerfile: ./Dockerfile
 
   test:
     runs-on: "ubuntu-latest"
@@ -55,18 +65,21 @@ jobs:
 
       - name: Install Doppler CLI
         uses: dopplerhq/cli-action@v2
+
       - name: Test CLI
         run: doppler --version
-      - name: Install tools
-        run: |
-          sudo apt update
-          sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
-          ./bin/task scripts:install:gotools
+      
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          version: 3.x
 
       - name: Run test
         env:
-          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
-        run: ./bin/task scripts:test
+          DOPPLER_TOKEN: ${{ secrets.TEST_TOKEN }}
+        run: 
+          task scripts:test PROFILE=dev
 
   build:
     needs: test
@@ -87,9 +100,27 @@ jobs:
           restore-keys: |
             v1-build-${{ runner.os }}-
 
-      - name: task scripts:build:binary
-        run: |
-          sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
-          ./bin/task scripts:build:binary
+      - name: Install Doppler CLI
+        uses: dopplerhq/cli-action@v2
 
-  
+      - name: Test CLI
+        run: doppler --version        
+
+      - name: Install Task
+        uses: arduino/setup-task@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          version: 3.x
+
+      - name: Build image
+        env:
+          DOPPLER_TOKEN: ${{ secrets.STAGING_TOKEN }}
+          IMAGE_TAG: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:latest
+        run: 
+          task scripts:build:container
+
+      - name: Push image
+        run: |
+          export CR_PAT=${{ secrets.GITHUB_TOKEN }}
+          echo $CR_PAT | docker login ${{ env.REGISTRY }} -u ${{ github.repository }} --password-stdin
+          docker push ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:latest \

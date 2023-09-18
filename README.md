@@ -158,6 +158,20 @@ task scripts:test
 # change this to task scripts:test:integration
 go test -count=1 --tags=integration ./... # run integration tests
 ```
+## Run app with docker-compose 
+
+1. Build container
+```sh
+task scripts:build:container
+```
+
+2. Run docker-compose
+```sh
+DOPPLER_TOKEN=$(doppler configs tokens create docker -p hqservice -c dev_noah --max-age 30m --plain) \
+IMAGE_TAG=hqservice:latest \
+doppler run -- docker  compose -f docker/docker-compose.svc.yml up
+```
+
 
 ## Migrate
 
@@ -173,15 +187,6 @@ atlas migrate diff migration_name \
 
 ```sh
 task scripts:migrate
-```
-### Docker
-
-```sh
-# Cheatsheet
-doppler run -- docker-compose up -d --remove-orphans               # (re)start all project's services
-docker-compose logs -f -t                                          # view logs of all services
-docker-compose stop && docker-compose rm -f                        # stop & remove the containers
-docker volume rm hqservice_postgres                                # clear all data
 ```
 
 ## TODO
