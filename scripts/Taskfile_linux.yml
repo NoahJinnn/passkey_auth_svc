@@ -9,7 +9,7 @@ tasks:
     desc: "Single command to setup all with mani"
     cmds:
       - ./ngrok.sh "{{.PROFILE}}"
-      - ./sh/run_macos.sh "{{.PROFILE}}"
+      - ./sh/run_linux.sh "{{.PROFILE}}"
 
   ngrok:
     desc: "Run ngrok"
@@ -20,17 +20,17 @@ tasks:
     desc: "Run app with your profile"
     cmds:
       - ./ngrok.sh "{{.PROFILE}}"
-      - ./sh/run_macos "{{.PROFILE}}"
+      - ./sh/run_linux.sh "{{.PROFILE}}"
 
   test:
     desc: "Run test"
     cmds:
-      - ./sh/test_macos.sh "{{.PROFILE}}"
+      - ./sh/test_linux.sh "{{.PROFILE}}"
 
   stat:
     desc: "Get code statistics"
     cmds:
-      - ./sh/stat_macos
+      - ./sh/stat_linux.sh
 
   migrate:
     desc: "Migrate DBs"
