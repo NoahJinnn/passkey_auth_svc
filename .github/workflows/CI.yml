@@ -5,12 +5,20 @@ on:
     branches: [main]
     paths-ignore:
       - '**.md'
+
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
+  packages: write
 
 env:
   GO_VERSION: "^1.19"
   GOFLAGS: "-mod=readonly"
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  REPO_NAME: hellohq/hqservice
+  PKG_NAME: core
 
 jobs:
   lint:
@@ -104,11 +112,16 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           version: 3.x
 
-      - name: Build container
+      - name: Build image
         env:
           DOPPLER_TOKEN: ${{ secrets.STAGING_TOKEN }}
         run: 
           task scripts:build:container
+
+      - name: Deploy image
+        run: |
+          echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin \
+          docker push ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:latest \
 
 
   
