@@ -69,7 +69,7 @@ jobs:
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
         run: 
-          task scripts:test
+          task scripts:test PROFILE=dev
 
   build:
     needs: test

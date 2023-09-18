@@ -9,7 +9,7 @@ tasks:
     desc: "Single command to setup all with mani"
     cmds:
       - ./ngrok.sh "{{.PROFILE}}"
-      - ./sh/run_macos "{{.PROFILE}}"
+      - ./sh/run_macos.sh "{{.PROFILE}}"
 
   ngrok:
     desc: "Run ngrok"
@@ -25,7 +25,7 @@ tasks:
   test:
     desc: "Run test"
     cmds:
-      - ./sh/test_macos
+      - ./sh/test_macos.sh "{{.PROFILE}}"
 
   stat:
     desc: "Get code statistics"
