@@ -17,7 +17,5 @@ services:
     restart: always
 
 networks:
-  default:
-      name: hqsvc
-      external: true
-        
+  hqsvc:
+    driver: bridge
