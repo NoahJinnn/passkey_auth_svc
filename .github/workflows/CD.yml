@@ -9,6 +9,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  packages: read
 
 env:
     # Use docker.io for Docker Hub if empty
