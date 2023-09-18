@@ -115,6 +115,7 @@ jobs:
       - name: Build image
         env:
           DOPPLER_TOKEN: ${{ secrets.STAGING_TOKEN }}
+          IMAGE_TAG: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:latest
         run: 
           task scripts:build:container
 

@@ -2,7 +2,7 @@
 set -x -e -o pipefail
 scriptsdir=$( dirname -- "$0"; )
 ROOT=$scriptsdir/../../../
-IMAGE_TAG=$(basename "$(go list -m)")
+
 cd $ROOT
 # Check if Docker is installed
 if command -v docker > /dev/null; then
