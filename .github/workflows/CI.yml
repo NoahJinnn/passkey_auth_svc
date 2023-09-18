@@ -126,6 +126,7 @@ jobs:
           docker push ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:latest \
 
   deploy:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: appleboy/ssh-action@master
@@ -150,5 +151,5 @@ jobs:
             docker compose stop hq-svc || true
             docker compose rm -f hq-svc || true
             docker compose up -d hq-svc
-            
+
             docker logout ${{ env.REGISTRY }}
