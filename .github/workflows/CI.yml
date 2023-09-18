@@ -105,7 +105,8 @@ jobs:
       - name: Build container
         env:
           DOPPLER_TOKEN: ${{ secrets.STAGING_TOKEN }}
-        run: scripts:build:container
+        run: 
+          task scripts:build:container
 
 
   
