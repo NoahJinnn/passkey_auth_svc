@@ -67,7 +67,7 @@ jobs:
 
       - name: Run test
         env:
-          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+          DOPPLER_TOKEN: ${{ secrets.TEST_TOKEN }}
         run: 
           task scripts:test PROFILE=dev
 
@@ -89,6 +89,13 @@ jobs:
           key: v1-build-${{ runner.os }}-${{ hashFiles('go.mod') }}
           restore-keys: |
             v1-build-${{ runner.os }}-
+
+      - name: Install Doppler CLI
+        uses: dopplerhq/cli-action@v2
+
+      - name: Test CLI
+        run: doppler --version        
+
       - name: Install Task
         uses: arduino/setup-task@v1
         with:
@@ -96,6 +103,8 @@ jobs:
           version: 3.x
 
       - name: Build container
+        env:
+          DOPPLER_TOKEN: ${{ secrets.STAGING_TOKEN }}
         run: scripts:build:container
 
 
