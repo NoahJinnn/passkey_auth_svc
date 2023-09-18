@@ -120,7 +120,8 @@ jobs:
 
       - name: Deploy image
         run: |
-          echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin \
+          export CR_PAT=${{ secrets.GITHUB_TOKEN }}
+          echo $CR_PAT | docker login ${{ env.REGISTRY }} -u ${{ github.repository }} --password-stdin
           docker push ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:latest \
 
 
