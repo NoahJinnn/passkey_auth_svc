@@ -9,5 +9,4 @@ tasks:
   container:
     desc: "Build container, it requires build binary"
     cmds:
-      - ./build/sh/build.sh {{.GOOS}} {{.GOARCH}} {{.CLI_ARGS}}
       - ./build/sh/build_container.sh

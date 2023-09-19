@@ -1,4 +1,3 @@
-# TODO: Re-implement when need to deploy
 name: CD
 
 on:
@@ -49,8 +48,7 @@ jobs:
               export CR_PAT=${{ secrets.GITHUB_TOKEN }}
               echo $CR_PAT | docker login ${{ env.REGISTRY }} -u ${{ github.repository }} --password-stdin
               export IMAGE_TAG=${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:latest
-              echo $IMAGE_TAG
-              docker pull ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:latest
+              docker pull $IMAGE_TAG
 
               export HQ_POSTGRES_HOST=${{ secrets.HQ_POSTGRES_HOST }}
               export HQ_POSTGRES_PORT=${{ secrets.HQ_POSTGRES_PORT }}
