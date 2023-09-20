@@ -57,8 +57,6 @@ func NewServer(appl app.Appl, sessionManager *session.Manager, sharedCfg *shared
 	e.GET("/alive", healthHandler.Alive)
 
 	changeset := handlers.NewChangesetHandler(srv)
-	e.GET("/firstlaunch", changeset.FirstLaunch)
-	e.DELETE("/changeset", changeset.Delete)
 
 	user := e.Group("/users")
 	userHandler := handlers.NewUserHandler(srv, sessionManager)
@@ -66,6 +64,9 @@ func NewServer(appl app.Appl, sessionManager *session.Manager, sharedCfg *shared
 	user.GET("/:id", userHandler.Get, session.Session(sessionManager))
 	e.POST("/user", userHandler.GetUserIdByEmail)
 	e.POST("/logout", userHandler.Logout, session.Session(sessionManager))
+
+	e.GET("/firstlaunch", changeset.FirstLaunch, session.Session(sessionManager))
+	e.DELETE("/changeset", changeset.Delete, session.Session(sessionManager))
 
 	webauthnHandler := handlers.NewWebauthnHandler(srv, sessionManager)
 	webauthn := e.Group("/webauthn")
