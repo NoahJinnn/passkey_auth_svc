@@ -22,7 +22,6 @@ const (
 	EnvPrefix = "HQ_"
 	// Default ports
 	AuthPort = 17000 + iota*2
-	NetworthPort
 )
 
 // Shared contains configurable values shared by microservices.
@@ -30,10 +29,6 @@ type Shared struct {
 	AuthAddrHost    appcfg.NotEmptyString
 	AuthAddrHostInt appcfg.NotEmptyString
 	AuthAddrPort    appcfg.Port
-
-	NetworthAddrHost    appcfg.NotEmptyString
-	NetworthAddrHostInt appcfg.NotEmptyString
-	NetworthAddrPort    appcfg.Port
 
 	Postgres *PostgresConfig
 	Session  Session
@@ -44,10 +39,6 @@ var shared = &struct {
 	AuthAddrHost    appcfg.NotEmptyString `env:"AUTH_ADDR_HOST"`
 	AuthAddrHostInt appcfg.NotEmptyString `env:"AUTH_ADDR_HOST_INT"`
 	AuthAddrPort    appcfg.Port           `env:"AUTH_ADDR_PORT"`
-
-	NetworthAddrHost    appcfg.NotEmptyString `env:"NETWORTH_ADDR_HOST"`
-	NetworthAddrHostInt appcfg.NotEmptyString `env:"NETWORTH_ADDR_HOST_INT"`
-	NetworthAddrPort    appcfg.Port           `env:"NETWORTH_ADDR_PORT"`
 
 	PostgresUser   appcfg.NotEmptyString `env:"POSTGRES_LOGIN"`
 	PostgresPass   appcfg.NotEmptyString `env:"POSTGRES_PASS"`
@@ -65,10 +56,6 @@ var shared = &struct {
 	AuthAddrHost:    appcfg.MustNotEmptyString(def.Hostname),
 	AuthAddrHostInt: appcfg.MustNotEmptyString(def.HostnameInt),
 	AuthAddrPort:    appcfg.MustPort(strconv.Itoa(AuthPort)),
-
-	NetworthAddrHost:    appcfg.MustNotEmptyString(def.Hostname),
-	NetworthAddrHostInt: appcfg.MustNotEmptyString(def.HostnameInt),
-	NetworthAddrPort:    appcfg.MustPort(strconv.Itoa(NetworthPort)),
 
 	PostgresUser:   appcfg.MustNotEmptyString("auth"),
 	PostgresPort:   appcfg.MustPort("5432"),
@@ -91,10 +78,6 @@ func Get() (*Shared, error) {
 		AuthAddrHost:    shared.AuthAddrHost,
 		AuthAddrHostInt: shared.AuthAddrHostInt,
 		AuthAddrPort:    shared.AuthAddrPort,
-
-		NetworthAddrHost:    shared.NetworthAddrHost,
-		NetworthAddrHostInt: shared.NetworthAddrHostInt,
-		NetworthAddrPort:    shared.NetworthAddrPort,
 
 		Postgres: NewPostgresConfig(pqx.Config{
 			Host:   shared.PostgresHost.Value(&err),

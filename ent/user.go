@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/changeset"
-	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/primaryemail"
 	"github.com/hellohq/hqservice/ent/user"
 )
@@ -41,13 +40,11 @@ type UserEdges struct {
 	WebauthnCredentials []*WebauthnCredential `json:"webauthn_credentials,omitempty"`
 	// PrimaryEmail holds the value of the primary_email edge.
 	PrimaryEmail *PrimaryEmail `json:"primary_email,omitempty"`
-	// FvSession holds the value of the fv_session edge.
-	FvSession *FvSession `json:"fv_session,omitempty"`
 	// Changesets holds the value of the changesets edge.
 	Changesets *Changeset `json:"changesets,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [5]bool
 }
 
 // EmailsOrErr returns the Emails value or an error if the edge
@@ -90,23 +87,10 @@ func (e UserEdges) PrimaryEmailOrErr() (*PrimaryEmail, error) {
 	return nil, &NotLoadedError{edge: "primary_email"}
 }
 
-// FvSessionOrErr returns the FvSession value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) FvSessionOrErr() (*FvSession, error) {
-	if e.loadedTypes[4] {
-		if e.FvSession == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: fvsession.Label}
-		}
-		return e.FvSession, nil
-	}
-	return nil, &NotLoadedError{edge: "fv_session"}
-}
-
 // ChangesetsOrErr returns the Changesets value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e UserEdges) ChangesetsOrErr() (*Changeset, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[4] {
 		if e.Changesets == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: changeset.Label}
@@ -189,11 +173,6 @@ func (u *User) QueryWebauthnCredentials() *WebauthnCredentialQuery {
 // QueryPrimaryEmail queries the "primary_email" edge of the User entity.
 func (u *User) QueryPrimaryEmail() *PrimaryEmailQuery {
 	return NewUserClient(u.config).QueryPrimaryEmail(u)
-}
-
-// QueryFvSession queries the "fv_session" edge of the User entity.
-func (u *User) QueryFvSession() *FvSessionQuery {
-	return NewUserClient(u.config).QueryFvSession(u)
 }
 
 // QueryChangesets queries the "changesets" edge of the User entity.

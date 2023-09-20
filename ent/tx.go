@@ -16,8 +16,6 @@ type Tx struct {
 	Changeset *ChangesetClient
 	// Email is the client for interacting with the Email builders.
 	Email *EmailClient
-	// FvSession is the client for interacting with the FvSession builders.
-	FvSession *FvSessionClient
 	// Jwk is the client for interacting with the Jwk builders.
 	Jwk *JwkClient
 	// Passcode is the client for interacting with the Passcode builders.
@@ -167,7 +165,6 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Changeset = NewChangesetClient(tx.config)
 	tx.Email = NewEmailClient(tx.config)
-	tx.FvSession = NewFvSessionClient(tx.config)
 	tx.Jwk = NewJwkClient(tx.config)
 	tx.Passcode = NewPasscodeClient(tx.config)
 	tx.PrimaryEmail = NewPrimaryEmailClient(tx.config)

@@ -10,6 +10,7 @@ import (
 	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/handlers"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/ws"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/powerman/structlog"
@@ -55,12 +56,17 @@ func NewServer(appl app.Appl, sessionManager *session.Manager, sharedCfg *shared
 	e.GET("/ready", healthHandler.Ready)
 	e.GET("/alive", healthHandler.Alive)
 
+	changeset := handlers.NewChangesetHandler(srv)
+
 	user := e.Group("/users")
 	userHandler := handlers.NewUserHandler(srv, sessionManager)
 	user.POST("", userHandler.Create)
 	user.GET("/:id", userHandler.Get, session.Session(sessionManager))
 	e.POST("/user", userHandler.GetUserIdByEmail)
 	e.POST("/logout", userHandler.Logout, session.Session(sessionManager))
+
+	e.GET("/firstlaunch", changeset.FirstLaunch, session.Session(sessionManager))
+	e.DELETE("/changeset", changeset.Delete, session.Session(sessionManager))
 
 	webauthnHandler := handlers.NewWebauthnHandler(srv, sessionManager)
 	webauthn := e.Group("/webauthn")
@@ -90,5 +96,9 @@ func NewServer(appl app.Appl, sessionManager *session.Manager, sharedCfg *shared
 	email.POST("/:id/set_primary", emailHandler.SetPrimaryEmail)
 	email.POST("", emailHandler.Create)
 	email.DELETE("/:id", emailHandler.Delete)
+
+	ws := ws.NewManager(srv)
+	e.GET("/sync", ws.SyncBetweenUserDevices, session.Session(sessionManager))
+
 	return e, nil
 }

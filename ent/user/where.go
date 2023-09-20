@@ -238,29 +238,6 @@ func HasPrimaryEmailWith(preds ...predicate.PrimaryEmail) predicate.User {
 	})
 }
 
-// HasFvSession applies the HasEdge predicate on the "fv_session" edge.
-func HasFvSession() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, FvSessionTable, FvSessionColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasFvSessionWith applies the HasEdge predicate on the "fv_session" edge with a given conditions (other predicates).
-func HasFvSessionWith(preds ...predicate.FvSession) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newFvSessionStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasChangesets applies the HasEdge predicate on the "changesets" edge.
 func HasChangesets() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

@@ -12,7 +12,6 @@ import (
 	"github.com/hellohq/hqservice/internal/http/session"
 	"github.com/hellohq/hqservice/internal/sharedconfig"
 	"github.com/hellohq/hqservice/ms/auth"
-	"github.com/hellohq/hqservice/ms/networth"
 	"github.com/hellohq/hqservice/pkg/concurrent"
 	"github.com/hellohq/hqservice/pkg/def"
 	"github.com/powerman/appcfg"
@@ -32,7 +31,6 @@ type (
 var (
 	embeddedServices = []embeddedService{
 		&auth.Service{},
-		&networth.Service{},
 	}
 	serveStartupTimeout  = appcfg.MustDuration("3s") // must be less than swarm's deploy.update_config.monitor
 	serveShutdownTimeout = appcfg.MustDuration("9s") // `docker stop` use 10s between SIGTERM and SIGKILL

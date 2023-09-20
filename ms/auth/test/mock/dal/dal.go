@@ -63,3 +63,7 @@ func (r repoT) GetEmailRepo() dal.IEmailRepo {
 func (r repoT) GetPasscodeRepo() dal.IPasscodeRepo {
 	return r.passcodeRepo
 }
+
+func (r repoT) GetChangesetRepo() dal.IChangesetRepo {
+	panic("implement me")
+}
