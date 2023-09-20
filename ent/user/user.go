@@ -27,8 +27,6 @@ const (
 	EdgeWebauthnCredentials = "webauthn_credentials"
 	// EdgePrimaryEmail holds the string denoting the primary_email edge name in mutations.
 	EdgePrimaryEmail = "primary_email"
-	// EdgeFvSession holds the string denoting the fv_session edge name in mutations.
-	EdgeFvSession = "fv_session"
 	// EdgeChangesets holds the string denoting the changesets edge name in mutations.
 	EdgeChangesets = "changesets"
 	// Table holds the table name of the user in the database.
@@ -61,13 +59,6 @@ const (
 	PrimaryEmailInverseTable = "primary_emails"
 	// PrimaryEmailColumn is the table column denoting the primary_email relation/edge.
 	PrimaryEmailColumn = "user_id"
-	// FvSessionTable is the table that holds the fv_session relation/edge.
-	FvSessionTable = "fv_sessions"
-	// FvSessionInverseTable is the table name for the FvSession entity.
-	// It exists in this package in order to avoid circular dependency with the "fvsession" package.
-	FvSessionInverseTable = "fv_sessions"
-	// FvSessionColumn is the table column denoting the fv_session relation/edge.
-	FvSessionColumn = "user_id"
 	// ChangesetsTable is the table that holds the changesets relation/edge.
 	ChangesetsTable = "changesets"
 	// ChangesetsInverseTable is the table name for the Changeset entity.
@@ -172,13 +163,6 @@ func ByPrimaryEmailField(field string, opts ...sql.OrderTermOption) OrderOption 
 	}
 }
 
-// ByFvSessionField orders the results by fv_session field.
-func ByFvSessionField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newFvSessionStep(), sql.OrderByField(field, opts...))
-	}
-}
-
 // ByChangesetsField orders the results by changesets field.
 func ByChangesetsField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -211,13 +195,6 @@ func newPrimaryEmailStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PrimaryEmailInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2O, false, PrimaryEmailTable, PrimaryEmailColumn),
-	)
-}
-func newFvSessionStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(FvSessionInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, FvSessionTable, FvSessionColumn),
 	)
 }
 func newChangesetsStep() *sqlgraph.Step {

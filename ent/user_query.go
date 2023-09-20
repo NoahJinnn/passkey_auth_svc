@@ -14,7 +14,6 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent/changeset"
 	"github.com/hellohq/hqservice/ent/email"
-	"github.com/hellohq/hqservice/ent/fvsession"
 	"github.com/hellohq/hqservice/ent/passcode"
 	"github.com/hellohq/hqservice/ent/predicate"
 	"github.com/hellohq/hqservice/ent/primaryemail"
@@ -33,7 +32,6 @@ type UserQuery struct {
 	withPasscodes           *PasscodeQuery
 	withWebauthnCredentials *WebauthnCredentialQuery
 	withPrimaryEmail        *PrimaryEmailQuery
-	withFvSession           *FvSessionQuery
 	withChangesets          *ChangesetQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -152,28 +150,6 @@ func (uq *UserQuery) QueryPrimaryEmail() *PrimaryEmailQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(primaryemail.Table, primaryemail.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.PrimaryEmailTable, user.PrimaryEmailColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryFvSession chains the current query on the "fv_session" edge.
-func (uq *UserQuery) QueryFvSession() *FvSessionQuery {
-	query := (&FvSessionClient{config: uq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := uq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := uq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(fvsession.Table, fvsession.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, user.FvSessionTable, user.FvSessionColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -399,7 +375,6 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withPasscodes:           uq.withPasscodes.Clone(),
 		withWebauthnCredentials: uq.withWebauthnCredentials.Clone(),
 		withPrimaryEmail:        uq.withPrimaryEmail.Clone(),
-		withFvSession:           uq.withFvSession.Clone(),
 		withChangesets:          uq.withChangesets.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
@@ -448,17 +423,6 @@ func (uq *UserQuery) WithPrimaryEmail(opts ...func(*PrimaryEmailQuery)) *UserQue
 		opt(query)
 	}
 	uq.withPrimaryEmail = query
-	return uq
-}
-
-// WithFvSession tells the query-builder to eager-load the nodes that are connected to
-// the "fv_session" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithFvSession(opts ...func(*FvSessionQuery)) *UserQuery {
-	query := (&FvSessionClient{config: uq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	uq.withFvSession = query
 	return uq
 }
 
@@ -551,12 +515,11 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [6]bool{
+		loadedTypes = [5]bool{
 			uq.withEmails != nil,
 			uq.withPasscodes != nil,
 			uq.withWebauthnCredentials != nil,
 			uq.withPrimaryEmail != nil,
-			uq.withFvSession != nil,
 			uq.withChangesets != nil,
 		}
 	)
@@ -604,12 +567,6 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	if query := uq.withPrimaryEmail; query != nil {
 		if err := uq.loadPrimaryEmail(ctx, query, nodes, nil,
 			func(n *User, e *PrimaryEmail) { n.Edges.PrimaryEmail = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := uq.withFvSession; query != nil {
-		if err := uq.loadFvSession(ctx, query, nodes, nil,
-			func(n *User, e *FvSession) { n.Edges.FvSession = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -740,33 +697,6 @@ func (uq *UserQuery) loadPrimaryEmail(ctx context.Context, query *PrimaryEmailQu
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
-func (uq *UserQuery) loadFvSession(ctx context.Context, query *FvSessionQuery, nodes []*User, init func(*User), assign func(*User, *FvSession)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(fvsession.FieldUserID)
-	}
-	query.Where(predicate.FvSession(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.FvSessionColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.UserID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

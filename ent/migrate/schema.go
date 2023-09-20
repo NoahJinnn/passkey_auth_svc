@@ -55,31 +55,6 @@ var (
 			},
 		},
 	}
-	// FvSessionsColumns holds the columns for the "fv_sessions" table.
-	FvSessionsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "access_token", Type: field.TypeString},
-		{Name: "expires_in", Type: field.TypeInt32},
-		{Name: "issued_at", Type: field.TypeString},
-		{Name: "token_type", Type: field.TypeString},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "user_id", Type: field.TypeUUID, Unique: true, Nullable: true},
-	}
-	// FvSessionsTable holds the schema information for the "fv_sessions" table.
-	FvSessionsTable = &schema.Table{
-		Name:       "fv_sessions",
-		Columns:    FvSessionsColumns,
-		PrimaryKey: []*schema.Column{FvSessionsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "fv_sessions_users_fv_session",
-				Columns:    []*schema.Column{FvSessionsColumns[7]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
 	// JwksColumns holds the columns for the "jwks" table.
 	JwksColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -254,7 +229,6 @@ var (
 	Tables = []*schema.Table{
 		ChangesetsTable,
 		EmailsTable,
-		FvSessionsTable,
 		JwksTable,
 		PasscodesTable,
 		PrimaryEmailsTable,
@@ -269,7 +243,6 @@ var (
 func init() {
 	ChangesetsTable.ForeignKeys[0].RefTable = UsersTable
 	EmailsTable.ForeignKeys[0].RefTable = UsersTable
-	FvSessionsTable.ForeignKeys[0].RefTable = UsersTable
 	PasscodesTable.ForeignKeys[0].RefTable = EmailsTable
 	PasscodesTable.ForeignKeys[1].RefTable = UsersTable
 	PrimaryEmailsTable.ForeignKeys[0].RefTable = EmailsTable
