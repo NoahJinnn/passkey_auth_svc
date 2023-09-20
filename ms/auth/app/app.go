@@ -10,6 +10,7 @@ import (
 	"github.com/hellohq/hqservice/ms/auth/app/passcode"
 	"github.com/hellohq/hqservice/ms/auth/app/user"
 	"github.com/hellohq/hqservice/ms/auth/app/wa"
+	"github.com/hellohq/hqservice/ms/auth/app/ws"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/dal"
 	"github.com/hellohq/hqservice/ms/auth/srv/mail"
@@ -21,6 +22,7 @@ type Appl interface {
 	GetUserSvc() *user.UserSvc
 	GetPasscodeSvc() *passcode.PasscodeSvc
 	GetEmailSvc() *email.EmailSvc
+	GetChangesetSvc() *ws.ChangesetSvc
 }
 
 // App implements interface Appl.
@@ -29,6 +31,7 @@ type App struct {
 	userSvc     *user.UserSvc
 	passcodeSvc *passcode.PasscodeSvc
 	emailSvc    *email.EmailSvc
+	csSvc       *ws.ChangesetSvc
 }
 
 // New creates and returns new App.
@@ -52,7 +55,7 @@ func New(mailer mail.IMailer, renderer *mail.Renderer, cfg *config.Config, repo 
 	userSvc := user.NewUserSvc(cfg, repo)
 	passcodeSvc := passcode.NewPasscodeSvc(mailer, renderer, cfg, repo)
 	emailSvc := email.NewEmailSvc(cfg, repo)
-
+	csSvc := ws.NewChangesetSvc(repo)
 	if err != nil {
 		panic(fmt.Errorf("failed to create webauthn instance: %w", err))
 	}
@@ -61,6 +64,7 @@ func New(mailer mail.IMailer, renderer *mail.Renderer, cfg *config.Config, repo 
 		userSvc:     userSvc,
 		passcodeSvc: passcodeSvc,
 		emailSvc:    emailSvc,
+		csSvc:       csSvc,
 	}
 }
 
@@ -78,4 +82,8 @@ func (a App) GetPasscodeSvc() *passcode.PasscodeSvc {
 
 func (a App) GetEmailSvc() *email.EmailSvc {
 	return a.emailSvc
+}
+
+func (a App) GetChangesetSvc() *ws.ChangesetSvc {
+	return a.csSvc
 }

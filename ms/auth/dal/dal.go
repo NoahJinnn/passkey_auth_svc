@@ -26,6 +26,7 @@ type IAuthRepo interface {
 	GetWebauthnSessionRepo() IWebauthnSessionRepo
 	GetEmailRepo() IEmailRepo
 	GetPasscodeRepo() IPasscodeRepo
+	GetChangesetRepo() IChangesetRepo
 }
 
 type AuthRepo struct {
@@ -35,6 +36,7 @@ type AuthRepo struct {
 	waSessionRepo    *waSessionRepo
 	emailRepo        *emailRepo
 	passcodeRepo     *passcodeRepo
+	changesetRepo    *changesetRepo
 }
 type Ctx = context.Context
 
@@ -44,6 +46,7 @@ func New(client *db.Db) *AuthRepo {
 	waSessionRepo := NewWebauthnSessionRepo(client.PgEnt)
 	emailRepo := NewEmailRepo(client.PgEnt)
 	passcodeRepo := NewPasscodeRepo(client.PgEnt)
+	changesetRepo := NewChangesetRepo(client.PgEnt)
 	return &AuthRepo{
 		Db:               client,
 		userRepo:         userRepo,
@@ -51,6 +54,7 @@ func New(client *db.Db) *AuthRepo {
 		waSessionRepo:    waSessionRepo,
 		emailRepo:        emailRepo,
 		passcodeRepo:     passcodeRepo,
+		changesetRepo:    changesetRepo,
 	}
 }
 
@@ -76,4 +80,8 @@ func (r AuthRepo) GetEmailRepo() IEmailRepo {
 
 func (r AuthRepo) GetPasscodeRepo() IPasscodeRepo {
 	return r.passcodeRepo
+}
+
+func (r AuthRepo) GetChangesetRepo() IChangesetRepo {
+	return r.changesetRepo
 }

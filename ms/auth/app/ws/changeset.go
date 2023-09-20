@@ -6,7 +6,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/hellohq/hqservice/ent"
 	"github.com/hellohq/hqservice/ent/changeset"
-	"github.com/hellohq/hqservice/ms/networth/dal"
+	"github.com/hellohq/hqservice/ms/auth/dal"
 )
 
 type IChangesetSvc interface {
@@ -16,10 +16,10 @@ type IChangesetSvc interface {
 }
 
 type ChangesetSvc struct {
-	repo dal.INwRepo
+	repo dal.IAuthRepo
 }
 
-func NewChangesetSvc(repo dal.INwRepo) *ChangesetSvc {
+func NewChangesetSvc(repo dal.IAuthRepo) *ChangesetSvc {
 	return &ChangesetSvc{repo: repo}
 }
 

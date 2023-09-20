@@ -10,7 +10,6 @@ import (
 	"github.com/hellohq/hqservice/ms/networth/app"
 	"github.com/hellohq/hqservice/ms/networth/config"
 	"github.com/hellohq/hqservice/ms/networth/srv/http/handlers"
-	"github.com/hellohq/hqservice/ms/networth/srv/http/ws"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/powerman/structlog"
@@ -58,9 +57,6 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 		"/networth",
 		session.Session(sessionManager),
 	)
-	changeset := handlers.NewChangesetHandler(srv)
-	nw.GET("/firstlaunch", changeset.FirstLaunch)
-	nw.DELETE("/changeset", changeset.Delete)
 
 	se := nw.Group("/se")
 	seAccountInfo := handlers.NewSeAccountInfoHandler(srv)
@@ -84,9 +80,6 @@ func NewServer(appl app.Appl, sessionManager session.IManager, sharedCfg *shared
 	fv.GET("/transactions/all", fvData.AllTransaction)
 	fv.GET("/income", fvData.Income)
 	fv.GET("/balance_history/:accountId", fvData.GetBalanceHistoryByAccountId)
-
-	ws := ws.NewManager(srv)
-	e.GET("/sync", ws.SyncBetweenUserDevices, session.Session(sessionManager))
 
 	return e, nil
 }

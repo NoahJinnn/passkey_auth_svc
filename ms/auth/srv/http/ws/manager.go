@@ -10,7 +10,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/hellohq/hqservice/ent"
-	"github.com/hellohq/hqservice/ms/networth/srv/http/handlers"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/handlers"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )

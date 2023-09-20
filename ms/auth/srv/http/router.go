@@ -10,6 +10,7 @@ import (
 	"github.com/hellohq/hqservice/ms/auth/app"
 	"github.com/hellohq/hqservice/ms/auth/config"
 	"github.com/hellohq/hqservice/ms/auth/srv/http/handlers"
+	"github.com/hellohq/hqservice/ms/auth/srv/http/ws"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/powerman/structlog"
@@ -55,6 +56,10 @@ func NewServer(appl app.Appl, sessionManager *session.Manager, sharedCfg *shared
 	e.GET("/ready", healthHandler.Ready)
 	e.GET("/alive", healthHandler.Alive)
 
+	changeset := handlers.NewChangesetHandler(srv)
+	e.GET("/firstlaunch", changeset.FirstLaunch)
+	e.DELETE("/changeset", changeset.Delete)
+
 	user := e.Group("/users")
 	userHandler := handlers.NewUserHandler(srv, sessionManager)
 	user.POST("", userHandler.Create)
@@ -90,5 +95,9 @@ func NewServer(appl app.Appl, sessionManager *session.Manager, sharedCfg *shared
 	email.POST("/:id/set_primary", emailHandler.SetPrimaryEmail)
 	email.POST("", emailHandler.Create)
 	email.DELETE("/:id", emailHandler.Delete)
+
+	ws := ws.NewManager(srv)
+	e.GET("/sync", ws.SyncBetweenUserDevices, session.Session(sessionManager))
+
 	return e, nil
 }

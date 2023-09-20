@@ -24,20 +24,17 @@ const (
 type INwRepo interface {
 	WithTx(ctx Ctx, exec func(ctx Ctx, client *ent.Client) error) error
 	GetFvSessionRepo() IFvSessionRepo
-	GetChangesetRepo() IChangesetRepo
 }
 
 type NwRepo struct {
 	Db            *db.Db
 	fvSessionRepo *fvSessionRepo
-	changesetRepo *changesetRepo
 }
 
 func New(client *db.Db) *NwRepo {
 	return &NwRepo{
 		Db:            client,
 		fvSessionRepo: NewFvSessionRepo(client.PgEnt),
-		changesetRepo: NewChangesetRepo(client.PgEnt),
 	}
 }
 
@@ -50,11 +47,4 @@ func (r NwRepo) GetFvSessionRepo() IFvSessionRepo {
 		r.fvSessionRepo = NewFvSessionRepo(r.Db.PgEnt)
 	}
 	return r.fvSessionRepo
-}
-
-func (r NwRepo) GetChangesetRepo() IChangesetRepo {
-	if r.changesetRepo == nil {
-		r.changesetRepo = NewChangesetRepo(r.Db.PgEnt)
-	}
-	return r.changesetRepo
 }
