@@ -64,14 +64,14 @@ func TestMain(m *testing.M) {
 }
 
 func testGetServe(flags ...string) (*Config, error) {
+	os.Setenv("HQ_AUTH_ONESIGNAL_APP_ID", "oneSignalAppID")
+	os.Setenv("HQ_AUTH_ONESIGNAL_APP_KEY", "oneSignalAppKey")
+
 	own = testOwn
 	err := Init(testShared, testFlagsets)
 	if err != nil {
 		return nil, err
 	}
-
-	os.Setenv("HQ_ONESIGNAL_APP_ID", "oneSignalAppID")
-	os.Setenv("HQ_ONESIGNAL_APP_KEY", "oneSignalAppKey")
 
 	if len(flags) > 0 {
 		err = testFlagsets.Serve.Parse(flags)
@@ -79,6 +79,7 @@ func testGetServe(flags ...string) (*Config, error) {
 			return nil, err
 		}
 	}
+
 	return GetServe()
 }
 
