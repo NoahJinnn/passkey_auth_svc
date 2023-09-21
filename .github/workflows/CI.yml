@@ -102,12 +102,15 @@ jobs:
           restore-keys: |
             v1-build-${{ runner.os }}-
 
-      - name: Authenticate to Google Cloud
+     
+
+      - name: Google Auth
         id: auth
-        uses: google-github-actions/auth@v0
+        uses: 'google-github-actions/auth@v1'
         with:
-          workload_identity_provider: ${{secrets.WIF_PROVIDER}}
-          service_account: hq-gh-sa@hellohq.iam.gserviceaccount.com
+          workload_identity_provider: '${{secrets.WIF_PROVIDER}}'
+          service_account: 'hq-gh-sa@hellohq.iam.gserviceaccount.com'
+      
       - name: Building and pushing the image
         uses: RafikFarhad/push-to-gcr-github-action@v5-beta # <- use this on your workflow
         with:
