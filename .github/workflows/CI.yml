@@ -102,27 +102,29 @@ jobs:
           restore-keys: |
             v1-build-${{ runner.os }}-
 
-      - name: Install Doppler CLI
-        uses: dopplerhq/cli-action@v2
-
-      - name: Test CLI
-        run: doppler --version        
-
-      - name: Install Task
-        uses: arduino/setup-task@v1
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v0
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          version: 3.x
+          workload_identity_provider: ${{secrets.WIF_PROVIDER}}
+          service_account: hq-gh-sa@hellohq.iam.gserviceaccount.com
+      - name: Building and pushing the image
+        uses: RafikFarhad/push-to-gcr-github-action@v5-beta # <- use this on your workflow
+        with:
+          registry: gcr.io
+          project_id: hellohq
+          image_name: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}
+          image_tag: latest
+          context: .
+      # - name: Build image
+      #   env:
+      #     DOPPLER_TOKEN: ${{ secrets.STAGING_TOKEN }}
+      #     IMAGE_TAG: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:latest
+      #   run: 
+      #     task scripts:build:container
 
-      - name: Build image
-        env:
-          DOPPLER_TOKEN: ${{ secrets.STAGING_TOKEN }}
-          IMAGE_TAG: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:latest
-        run: 
-          task scripts:build:container
-
-      - name: Push image
-        run: |
-          export CR_PAT=${{ secrets.GITHUB_TOKEN }}
-          echo $CR_PAT | docker login ${{ env.REGISTRY }} -u ${{ github.repository }} --password-stdin
-          docker push ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:latest \
+      # - name: Push image
+      #   run: |
+      #     export CR_PAT=${{ secrets.GITHUB_TOKEN }}
+      #     echo $CR_PAT | docker login ${{ env.REGISTRY }} -u ${{ github.repository }} --password-stdin
+      #     docker push ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:latest \
