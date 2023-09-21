@@ -155,6 +155,7 @@ func GetServe() (c *Config, err error) {
 		MaxEmailAddresses:        5,
 		RequireEmailVerification: own.RequireEmailVerification.Value(&err),
 	}
+
 	if err != nil {
 		return nil, appcfg.WrapPErr(err, fs.Serve, own)
 	}

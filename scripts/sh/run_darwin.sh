@@ -11,8 +11,8 @@ elif ! command -v air &> /dev/null; then
 else
     echo "HQ service started by exec built app"
     doppler configure set config=$PROFILE project=hqservice # doppler profile to run hqservice
-    AUTH_DOMAIN=$(doppler secrets get AUTH_DOMAIN) # get AUTH_DOMAIN value from doppler
-
+    AUTH_DOMAIN=$(doppler secrets get AUTH_DOMAIN --plain) # get AUTH_DOMAIN value from doppler
+    
     doppler run -- docker compose -f docker/docker-compose.pgsql.yml down --volumes  &&
     doppler run -- docker compose -f docker/docker-compose.pgsql.yml up -d --remove-orphans &&
     doppler run -- air serve "--wa.id $AUTH_DOMAIN --wa.origins "https://${AUTH_DOMAIN}""
