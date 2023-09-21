@@ -10,14 +10,14 @@ services:
     restart: "always"
     shm_size: "256m"
     ports:
-      - "${HQ_POSTGRES_PORT:-0}:5432"
+      - "${HQ_X_POSTGRES_PORT:-0}:5432"
     volumes:
       - "postgres:/var/lib/postgresql/data"
       - "../configs/dev-pki/issued/postgres.crt:/dev.crt"
       - "../configs/dev-pki/private/postgres.key:/dev.key"
     environment:
-      POSTGRES_USER: "${HQ_POSTGRES_LOGIN}"
-      POSTGRES_PASSWORD: "${HQ_POSTGRES_PASS}"
+      POSTGRES_USER: "${HQ_X_POSTGRES_LOGIN}"
+      POSTGRES_PASSWORD: "${HQ_X_POSTGRES_PASS}"
     entrypoint:
       - bash
       - -c

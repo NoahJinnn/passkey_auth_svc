@@ -40,18 +40,18 @@ var shared = &struct {
 	AuthAddrHostInt appcfg.NotEmptyString `env:"AUTH_ADDR_HOST_INT"`
 	AuthAddrPort    appcfg.Port           `env:"AUTH_ADDR_PORT"`
 
-	PostgresUser   appcfg.NotEmptyString `env:"POSTGRES_LOGIN"`
-	PostgresPass   appcfg.NotEmptyString `env:"POSTGRES_PASS"`
-	PostgresHost   appcfg.NotEmptyString `env:"POSTGRES_HOST"`
-	PostgresPort   appcfg.Port           `env:"POSTGRES_PORT"`
-	PostgresDBName appcfg.NotEmptyString `env:"POSTGRES_NAME"`
+	PostgresUser   appcfg.NotEmptyString `env:"X_POSTGRES_LOGIN"`
+	PostgresPass   appcfg.NotEmptyString `env:"X_POSTGRES_PASS"`
+	PostgresHost   appcfg.NotEmptyString `env:"X_POSTGRES_HOST"`
+	PostgresPort   appcfg.Port           `env:"X_POSTGRES_PORT"`
+	PostgresDBName appcfg.NotEmptyString `env:"X_POSTGRES_NAME"`
 
 	Secrets appcfg.NotEmptyString `env:"JWK_SECRETS"`
 
 	SessionLifespan       appcfg.String      `env:"JWT_LIFESPAN"`
 	Issuer                appcfg.String      `env:"JWT_ISSUER"`
 	Audience              appcfg.StringSlice `env:"JWT_AUDIENCE"`
-	EnableAuthTokenHeader appcfg.Bool        `env:"AUTH_ENABLE_TOKEN_HEADER"`
+	EnableAuthTokenHeader appcfg.Bool        `env:"JWT_ENABLE_TOKEN_HEADER"`
 }{ //nolint:gochecknoglobals // Config is global anyway.
 	AuthAddrHost:    appcfg.MustNotEmptyString(def.Hostname),
 	AuthAddrHostInt: appcfg.MustNotEmptyString(def.HostnameInt),

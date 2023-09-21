@@ -35,14 +35,14 @@ var (
 		// Below envs is loaded by Doppler
 		RpId                     appcfg.String         `env:"AUTH_RP_ID"`
 		RpOrigins                appcfg.StringSlice    `env:"AUTH_RP_ORIGINS"`
-		IosAssociationSite       appcfg.String         `env:"IOS_SITE_ASSOCIATION"`
-		AndroidAssetLinks        appcfg.String         `env:"ANDROID_ASSET_LINKS"`
-		OneSignalAppID           appcfg.String         `env:"ONESIGNAL_APP_ID"`
-		OneSignalAppKey          appcfg.String         `env:"ONESIGNAL_APP_KEY"`
-		FromAddress              appcfg.NotEmptyString `env:"MAIL_FROM_ADDRESS"`
-		FromName                 appcfg.String         `env:"MAIL_FROM_NAME"`
-		TTL                      appcfg.Int            `env:"PASSCODE_TTL"`
-		RequireEmailVerification appcfg.Bool           `env:"REQUIRE_EMAIL_VERIFICATION"`
+		IosAssociationSite       appcfg.String         `env:"AUTH_IOS_SITE_ASSOCIATION"`
+		AndroidAssetLinks        appcfg.String         `env:"AUTH_ANDROID_ASSET_LINKS"`
+		OneSignalAppID           appcfg.String         `env:"AUTH_ONESIGNAL_APP_ID"`
+		OneSignalAppKey          appcfg.String         `env:"AUTH_ONESIGNAL_APP_KEY"`
+		FromAddress              appcfg.NotEmptyString `env:"AUTH_MAIL_FROM_ADDRESS"`
+		FromName                 appcfg.String         `env:"AUTH_MAIL_FROM_NAME"`
+		TTL                      appcfg.Int            `env:"AUTH_PASSCODE_TTL"`
+		RequireEmailVerification appcfg.Bool           `env:"AUTH_REQUIRE_EMAIL_VERIFICATION"`
 	}{
 		TTL:         appcfg.MustInt("300"),
 		FromAddress: appcfg.MustNotEmptyString("noah@hellohq.com"),
