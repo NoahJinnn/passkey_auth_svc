@@ -53,10 +53,9 @@ We use the `Taskfile` command to build our binary, then, run our built `hq` bina
 ```md
 Naming convention of environment vars required to run and test project:
 
-<PROJECT>_<VAR>         - global vars, not specific for some embedded microservice (e.g. domain)
-<PROJECT>_X_<SVC>_<VAR> - vars related to external services (e.g. databases)
+<PROJECT>_<VAR>         - shared vars, not specific for any embedded microservice (e.g. jwt token)
+<PROJECT>_X_<VAR> - vars related to external services (e.g. databases)
 <PROJECT>_<MS>_<VAR>    - vars related to embedded microservice (e.g. addr)
-<PROJECT>__<MS>_<VAR>   - private vars for embedded microservice
 ```
 
 ### HTTPS
@@ -70,13 +69,6 @@ $ /path/to/easyrsa --days=3650 "--subject-alt-name=DNS:postgres" build-server-fu
 $ /path/to/easyrsa --days=3650 "--subject-alt-name=DNS:localhost" build-server-full ms-hq nopass
 $ /path/to/easyrsa --days=3650 "--subject-alt-name=IP:127.0.0.1" build-server-full ms-hq-int nopass
 ```
-
-2. Generate HTTPS certificates for `networth` service using [mkcert](https://github.com/FiloSottile/mkcert#mkcert)
-```
-cd ./configs && mkdir http-pki && cd http-pki
-mkcert localhost 127.0.0.1
-```
-
 
 
 ## Development
@@ -188,34 +180,3 @@ atlas migrate diff migration_name \
 ```sh
 task scripts:migrate
 ```
-
-## TODO
-
-Functionality Group 1: add/connect assets and debts
-
-- [x] Plaid aggregator with dev env
-- [ ] Plaid aggregator with stg, prd env
-- [x] Implement [webauthn](https://github.com/go-webauthn/webauthn) API
-- [ ] Implement [Lago](https://www.getlago.com/resources/compare/lago-vs-stripe) for billing service
-- [ ] Implement authorization with `casbin`
-- [x] Create `User` table
-- [x] Create CRUD REST API for `User` model
-- [ ] Create asset tables based on Kubera features
-- [ ] Create CRUD REST API for asset models
-- [x] Integration test for `auth` svc APIs
-
-Functionality Group 2: Recap feature (‘reflections’)
-
-- [ ] Create DB models: 1. Asset 2. Cashflow 3. Indices 4. IRR 5. Reflections
-- [ ] Create CRUD REST API for all types of model
-- [ ] Integration test APIs
-
-Functionality Group 3: Insurance
-
-- [ ] Create DB model for Insurance to store Insurance providers information, link to static assets
-- [ ] Create CRUD REST API for Insurance model
-- [ ] Integration test APIs
-      Functionality Group 4: Safety Deposit Box
-- Need to discuss
-  Functionality Group 5: Beneficiary
-- Need to discuss

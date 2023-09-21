@@ -9,15 +9,15 @@ jobs:
     steps:
       - uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HQ_POSTGRES_HOST }}
+          host: ${{ secrets.HQ_X_POSTGRES_HOST }}
           port: ${{ secrets.STAGING_SSH_PORT }}
           username: trannguyen
           key: ${{ secrets.STAGING_KEY }}
           script: |
             cd $HOME 
-            export HQ_POSTGRES_PORT=${{ secrets.HQ_POSTGRES_PORT }}
-            export HQ_POSTGRES_LOGIN=${{ secrets.HQ_POSTGRES_LOGIN }}
-            export HQ_POSTGRES_PASS=${{ secrets.HQ_POSTGRES_PASS }}
+            export HQ_X_POSTGRES_PORT=${{ secrets.HQ_X_POSTGRES_PORT }}
+            export HQ_X_POSTGRES_LOGIN=${{ secrets.HQ_X_POSTGRES_LOGIN }}
+            export HQ_X_POSTGRES_PASS=${{ secrets.HQ_X_POSTGRES_PASS }}
             docker compose stop postgres || true
             docker compose rm -f postgres || true
             docker compose up -d postgres

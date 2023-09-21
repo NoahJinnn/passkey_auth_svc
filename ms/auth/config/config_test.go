@@ -19,8 +19,8 @@ var (
 	}
 	want = &Config{
 		Server: Server{
-			BindAddr:    netx.NewAddr("localhost", 17000),
-			BindAddrInt: netx.NewAddr("127.0.0.1", 17000),
+			BindAddr:    netx.NewAddr("0.0.0.0", 17000),
+			BindAddrInt: netx.NewAddr("0.0.0.0", 17000),
 			Cors: Cors{
 				ExposeHeaders: []string{
 					httplimit.HeaderRateLimitLimit,
@@ -64,19 +64,22 @@ func TestMain(m *testing.M) {
 }
 
 func testGetServe(flags ...string) (*Config, error) {
-	os.Setenv("HQ_ONESIGNAL_APP_ID", "oneSignalAppID")
-	os.Setenv("HQ_ONESIGNAL_APP_KEY", "oneSignalAppKey")
+	os.Setenv("HQ_AUTH_ONESIGNAL_APP_ID", "oneSignalAppID")
+	os.Setenv("HQ_AUTH_ONESIGNAL_APP_KEY", "oneSignalAppKey")
+
 	own = testOwn
 	err := Init(testShared, testFlagsets)
 	if err != nil {
 		return nil, err
 	}
+
 	if len(flags) > 0 {
 		err = testFlagsets.Serve.Parse(flags)
 		if err != nil {
 			return nil, err
 		}
 	}
+
 	return GetServe()
 }
 

@@ -10,7 +10,7 @@ services:
       DOPPLER_TOKEN: "${DOPPLER_TOKEN}"
 
     healthcheck:
-      test: ["CMD", "nc", "-z", "${HQ_POSTGRES_HOST}", "${HQ_POSTGRES_PORT}"]
+      test: ["CMD", "nc", "-z", "${HQ_X_POSTGRES_HOST}", "${HQ_X_POSTGRES_PORT}"]
       interval: 10s
       timeout: 5s
       retries: 3

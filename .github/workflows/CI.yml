@@ -78,7 +78,7 @@ jobs:
 
       - name: Run test
         env:
-          DOPPLER_TOKEN: ${{ secrets.TEST_TOKEN }}
+          DOPPLER_TOKEN: ${{ secrets.STAGING_TOKEN }}
         run: 
           task scripts:test PROFILE=dev
 

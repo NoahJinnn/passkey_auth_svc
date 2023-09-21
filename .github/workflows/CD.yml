@@ -50,8 +50,8 @@ jobs:
               export IMAGE_TAG=${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:latest
               docker pull $IMAGE_TAG
 
-              export HQ_POSTGRES_HOST=${{ secrets.HQ_POSTGRES_HOST }}
-              export HQ_POSTGRES_PORT=${{ secrets.HQ_POSTGRES_PORT }}
+              export HQ_X_POSTGRES_HOST=${{ secrets.HQ_X_POSTGRES_HOST }}
+              export HQ_X_POSTGRES_PORT=${{ secrets.HQ_X_POSTGRES_PORT }}
               export HQ_AUTH_ADDR_PORT=${{ secrets.HQ_AUTH_ADDR_PORT }}
               export HQ_NETWORTH_ADDR_PORT=${{ secrets.HQ_NETWORTH_ADDR_PORT }}
               export DOPPLER_TOKEN=${{ secrets.STAGING_TOKEN }}
