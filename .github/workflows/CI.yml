@@ -4,13 +4,7 @@ on:
   pull_request:
     branches: [main]
     paths-ignore:
-      - '**.md'
-
-permissions:
-  contents: write
-  pull-requests: write
-  packages: write
-  id-token: 'write'
+      - "**.md"
 
 env:
   GO_VERSION: "^1.19"
@@ -70,7 +64,7 @@ jobs:
 
       - name: Test CLI
         run: doppler --version
-      
+
       - name: Install Task
         uses: arduino/setup-task@v1
         with:
@@ -80,14 +74,16 @@ jobs:
       - name: Run test
         env:
           DOPPLER_TOKEN: ${{ secrets.STAGING_TOKEN }}
-        run: 
-          task scripts:test PROFILE=dev
+        run: task scripts:test PROFILE=dev
 
   build:
     if: github.actor != 'dependabot[bot]'
     needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: "write"
     steps:
       - uses: actions/setup-go@v4
         with:
@@ -103,32 +99,19 @@ jobs:
           restore-keys: |
             v1-build-${{ runner.os }}-
 
-     
-
       - name: Google Auth
         id: auth
-        uses: 'google-github-actions/auth@v1'
+        uses: "google-github-actions/auth@v1"
         with:
-          workload_identity_provider: '${{secrets.WIF_PROVIDER}}'
-          service_account: 'hq-gh-sa@hellohq.iam.gserviceaccount.com'
-      
+          workload_identity_provider: "${{secrets.WIF_PROVIDER}}"
+          service_account: "hq-gh-sa@hellohq.iam.gserviceaccount.com"
+
       - name: Building and pushing the image
-        uses: RafikFarhad/push-to-gcr-github-action@v5-beta # <- use this on your workflow
+        uses: RafikFarhad/push-to-gcr-github-action@v5-beta
         with:
           registry: gcr.io
           project_id: hellohq
           image_name: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}
           image_tag: latest
           context: .
-      # - name: Build image
-      #   env:
-      #     DOPPLER_TOKEN: ${{ secrets.STAGING_TOKEN }}
-      #     IMAGE_TAG: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:latest
-      #   run: 
-      #     task scripts:build:container
-
-      # - name: Push image
-      #   run: |
-      #     export CR_PAT=${{ secrets.GITHUB_TOKEN }}
-      #     echo $CR_PAT | docker login ${{ env.REGISTRY }} -u ${{ github.repository }} --password-stdin
-      #     docker push ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:latest \
+  
