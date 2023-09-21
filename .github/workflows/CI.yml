@@ -9,11 +9,6 @@ on:
 env:
   GO_VERSION: "^1.19"
   GOFLAGS: "-mod=readonly"
-  # Use docker.io for Docker Hub if empty
-  REGISTRY: ghcr.io
-  # github.repository as <account>/<repo>
-  REPO_NAME: hellohq/hqservice
-  PKG_NAME: core
 
 jobs:
   lint:
@@ -111,7 +106,7 @@ jobs:
         with:
           registry: gcr.io
           project_id: hellohq
-          image_name: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}
+          image_name: asia-docker.pkg.dev/hellohq/be/core
           image_tag: latest
           context: .
   
