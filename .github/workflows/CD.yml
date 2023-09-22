@@ -5,22 +5,15 @@ on:
     branches: [main]
     tags: [v*]
 
-permissions:
-  contents: write
-  pull-requests: write
-  packages: read
-
 env:
-  # Use docker.io for Docker Hub if empty
-  REGISTRY: ghcr.io
-  # github.repository as <account>/<repo>
-  REPO_NAME: hellohq/hqservice
-  PKG_NAME: core
   SVC_ACCOUNT: hq-gh-sa@hellohq.iam.gserviceaccount.com
   IMAGE: asia-docker.pkg.dev/hellohq/be/core
 
 jobs:
   release:
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
     outputs:
       build: ${{ steps.release.outputs.release_created }}
@@ -45,20 +38,26 @@ jobs:
         id: auth
         uses: "google-github-actions/auth@v1"
         with:
+          token_format: access_token
           workload_identity_provider: "${{secrets.WIF_PROVIDER}}"
           service_account: "${{env.SVC_ACCOUNT}}"
 
-      - name: "Set up Cloud SDK"
-        uses: "google-github-actions/setup-gcloud@v1"
+      - name: Login to GCR
+        uses: docker/login-action@v3
         with:
-          version: ">= 363.0.0"
+          registry: asia-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
 
-      - name: "Use gcloud CLI"
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{env.IMAGE}}
+
+      - name: "Run docker compose"
         run: |
-          gcloud auth print-access-token \
-          --impersonate-service-account ${{env.SVC_ACCOUNT}} | docker login -u oauth2accesstoken --password-stdin https://asia-docker.pkg.dev
-          
-          export IMAGE_TAG=${{env.IMAGE}}:latest
+          export IMAGE_TAG=${{env.IMAGE}}:${{ steps.meta.outputs.tags }}
           docker pull $IMAGE_TAG
 
           export HQ_X_POSTGRES_HOST=${{ secrets.HQ_X_POSTGRES_HOST }}
@@ -69,28 +68,3 @@ jobs:
           docker compose stop hqsvc || true
           docker compose rm -f hqsvc || true
           docker compose up -d hqsvc
-
-      # - uses: appleboy/ssh-action@master
-      #   with:
-      #     host: ${{ secrets.STAGING_HOST }}
-      #     port: ${{ secrets.STAGING_SSH_PORT }}
-      #     username: trannguyen
-      #     key: ${{ secrets.STAGING_KEY }}
-      #     script: |
-      #       cd $HOME
-
-      #       export CR_PAT=${{ secrets.GITHUB_TOKEN }}
-      #       echo $CR_PAT | docker login ${{ env.REGISTRY }} -u ${{ github.repository }} --password-stdin
-      #       export IMAGE_TAG=${{ env.REGISTRY }}/${{ env.REPO_NAME }}/${{ env.PKG_NAME }}:latest
-      #       docker pull $IMAGE_TAG
-
-      #       export HQ_X_POSTGRES_HOST=${{ secrets.HQ_X_POSTGRES_HOST }}
-      #       export HQ_X_POSTGRES_PORT=${{ secrets.HQ_X_POSTGRES_PORT }}
-      #       export HQ_AUTH_ADDR_PORT=${{ secrets.HQ_AUTH_ADDR_PORT }}
-      #       export HQ_NETWORTH_ADDR_PORT=${{ secrets.HQ_NETWORTH_ADDR_PORT }}
-      #       export DOPPLER_TOKEN=${{ secrets.STAGING_TOKEN }}
-      #       docker compose stop hqsvc || true
-      #       docker compose rm -f hqsvc || true
-      #       docker compose up -d hqsvc
-
-      #       docker logout ${{ env.REGISTRY }}
