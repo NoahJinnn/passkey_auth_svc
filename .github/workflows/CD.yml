@@ -81,7 +81,7 @@ jobs:
 
       - name: "Run docker compose"
         run: |
-          export IMAGE_TAG=${{env.IMAGE}}:${{ steps.meta.outputs.tags }}
+          export IMAGE_TAG=${{ steps.meta.outputs.tags }}
           docker pull $IMAGE_TAG
 
           export HQ_X_POSTGRES_HOST=${{ secrets.HQ_X_POSTGRES_HOST }}
