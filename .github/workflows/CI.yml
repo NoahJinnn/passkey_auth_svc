@@ -9,8 +9,6 @@ on:
 env:
   GO_VERSION: "^1.19"
   GOFLAGS: "-mod=readonly"
-  SVC_ACCOUNT: hq-gh-sa@hellohq.iam.gserviceaccount.com
-  IMAGE: asia-docker.pkg.dev/hellohq/be/core
 
 jobs:
   lint:
