@@ -46,5 +46,5 @@ RUN apt-get update && apt-get install -y apt-transport-https ca-certificates cur
 
 # Copy the binary to the production image from the builder stage.
 COPY --from=builder /app/server /app/server
-
-CMD [ "doppler", "run", "--", "/app/server", "serve", "--wa.id", "$AUTH_DOMAIN", "--wa.origins", "https://${AUTH_DOMAIN}" ]
+ENTRYPOINT ["doppler", "run", "--", "/app/server", "serve"]
+CMD [ "--wa.id", "$AUTH_DOMAIN", "--wa.origins", "https://${AUTH_DOMAIN}" ]
