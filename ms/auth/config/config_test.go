@@ -54,7 +54,6 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	// loadDopplerEnvs()
 	var err error
 	testShared, err = sharedconfig.Get()
 	if err != nil {

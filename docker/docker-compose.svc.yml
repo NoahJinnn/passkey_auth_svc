@@ -5,7 +5,6 @@ services:
     container_name: hq-svc
     ports:
       - "${HQ_AUTH_ADDR_PORT:-0}:17000"
-      - "${HQ_NETWORTH_ADDR_PORT:-0}:17002"
     environment:
       DOPPLER_TOKEN: "${DOPPLER_TOKEN}"
 

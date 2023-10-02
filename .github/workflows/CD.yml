@@ -95,7 +95,6 @@ jobs:
             export HQ_X_POSTGRES_HOST=${{ secrets.HQ_X_POSTGRES_HOST }}
             export HQ_X_POSTGRES_PORT=${{ secrets.HQ_X_POSTGRES_PORT }}
             export HQ_AUTH_ADDR_PORT=${{ secrets.HQ_AUTH_ADDR_PORT }}
-            export HQ_NETWORTH_ADDR_PORT=${{ secrets.HQ_NETWORTH_ADDR_PORT }}
             export DOPPLER_TOKEN=${{ secrets.STAGING_TOKEN }}
             docker compose stop hqsvc || true
             docker compose rm -f hqsvc || true
