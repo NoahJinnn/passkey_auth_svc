@@ -18,11 +18,6 @@ import (
 
 type Ctx = context.Context
 
-type IPasscodeSvc interface {
-	InitLogin(ctx Ctx, userId uuid.UUID, emailId uuid.UUID, acceptLang string) (*ent.Passcode, error)
-	FinishLogin(ctx Ctx, passcodeId uuid.UUID, reqCode string) (*ent.Passcode, error)
-}
-
 type PasscodeSvc struct {
 	repo              dal.IAuthRepo
 	cfg               *config.Config

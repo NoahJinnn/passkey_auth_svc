@@ -16,12 +16,6 @@ import (
 
 type Ctx = context.Context
 
-type IUserSvc interface {
-	GetById(ctx Ctx, userID uuid.UUID) (*ent.User, *string, error)
-	GetUserIdByEmail(ctx Ctx, email string) (*uuid.UUID, error)
-	Create(ctx Ctx, email string) (newU *ent.User, emailID uuid.UUID, err error)
-}
-
 type UserSvc struct {
 	repo dal.IAuthRepo
 	cfg  *config.Config

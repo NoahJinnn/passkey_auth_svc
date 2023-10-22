@@ -9,12 +9,6 @@ import (
 	"github.com/hellohq/hqservice/ms/auth/dal"
 )
 
-type IChangesetSvc interface {
-	Latest(ctx context.Context, userId uuid.UUID) (*ent.Changeset, error)
-	Upsert(ctx context.Context, userId uuid.UUID, changeset *ent.Changeset) error
-	Delete(ctx context.Context, userId uuid.UUID) error
-}
-
 type ChangesetSvc struct {
 	repo dal.IAuthRepo
 }

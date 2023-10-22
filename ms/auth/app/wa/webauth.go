@@ -20,16 +20,6 @@ import (
 
 type Ctx = context.Context
 
-type IWebauthnSvc interface {
-	InitRegistration(ctx Ctx, userId uuid.UUID) (*protocol.CredentialCreation, error)
-	FinishRegistration(ctx Ctx, request *protocol.ParsedCredentialCreationData, sessionUserId string) (credentialId string, userId string, err error)
-	InitLogin(ctx Ctx, reqUserId *string) (*protocol.CredentialAssertion, error)
-	FinishLogin(ctx Ctx, request *protocol.ParsedCredentialAssertionData) (credentialId string, userId string, err error)
-	ListCredentials(ctx Ctx, userId uuid.UUID) ([]*ent.WebauthnCredential, error)
-	UpdateCredential(ctx Ctx, userId uuid.UUID, id string, name *string) error
-	DeleteCredential(ctx Ctx, userId uuid.UUID, id string) error
-}
-
 type WebauthnSvc struct {
 	repo     dal.IAuthRepo
 	waClient *webauthn.WebAuthn

@@ -16,13 +16,6 @@ import (
 
 type Ctx = context.Context
 
-type IEmailSvc interface {
-	ListByUser(ctx Ctx, userId uuid.UUID) ([]*ent.Email, error)
-	Create(ctx Ctx, userId uuid.UUID, email string) (*ent.Email, error)
-	Delete(ctx Ctx, userId uuid.UUID, emailId uuid.UUID) error
-	SetPrimaryEmail(ctx Ctx, userId uuid.UUID, emailId uuid.UUID) error
-}
-
 type EmailSvc struct {
 	cfg  *config.Config
 	repo dal.IAuthRepo
