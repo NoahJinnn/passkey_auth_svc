@@ -1,7 +1,13 @@
 #!/bin/sh
 PROFILE=$1
 echo "⚡️ Kill old ngrok"
-kill -9 "$(pgrep ngrok)"
+ngrok_pid=$(pgrep ngrok)
+if [ -n "$ngrok_pid" ]; then
+  kill -9 "$ngrok_pid"
+  echo "ngrok process killed with PID: $ngrok_pid"
+else
+  echo "ngrok process not found"
+fi
 sleep 1
 
 # Start NGROK in background
