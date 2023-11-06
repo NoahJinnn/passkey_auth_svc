@@ -19,7 +19,7 @@ require (
 require (
 	entgo.io/ent v0.12.3
 	github.com/OneSignal/onesignal-go-api v1.0.4
-	github.com/go-playground/validator/v10 v10.15.1
+	github.com/go-playground/validator/v10 v10.16.0
 	github.com/go-testfixtures/testfixtures/v3 v3.9.0
 	github.com/go-webauthn/webauthn v0.8.6
 	github.com/gorilla/websocket v1.5.0
@@ -220,7 +220,6 @@ require (
 	github.com/opencontainers/image-spec v1.1.0-rc2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/plaid/plaid-go/v3 v3.5.0
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/polyfloyd/go-errorlint v1.0.6 // indirect
 	github.com/powerman/tail v0.1.0 // indirect
