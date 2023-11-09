@@ -28,11 +28,6 @@ Generate PKI to sign [Signature header](https://docs.saltedge.com/general/#signa
 # For macOS or Linux
 openssl genrsa -out private.pem 2048
 openssl rsa -pubout -in private.pem -out public.pem
-
-# For Windows
-cd C:\OpenSSL-Win32\bin
-openssl genrsa -out private.pem 2048
-openssl rsa -pubout -in private.pem -out public.pem
 ```
 ### Doppler
 
@@ -143,23 +138,23 @@ Running tests
 
 ```sh
 # run all tests
-task scripts:test
+$ PROFILE=<your-doppler-profile> task scripts:test
 
 # TODO: 
 # currently not working, fix this and add integration test
 # change this to task scripts:test:integration
-go test -count=1 --tags=integration ./... # run integration tests
+$ go test -count=1 --tags=integration ./... # run integration tests
 ```
 ## Run app with docker-compose 
 
 1. Build container
 ```sh
-task scripts:build:container
+$ task scripts:build:container
 ```
 
 2. Run docker-compose
 ```sh
-DOPPLER_TOKEN=$(doppler configs tokens create docker -p hqservice -c dev_noah --max-age 30m --plain) \
+$ DOPPLER_TOKEN=$(doppler configs tokens create docker -p hqservice -c dev_noah --max-age 30m --plain) \
 IMAGE_TAG=hqservice:latest \
 doppler run -- docker  compose -f docker/docker-compose.svc.yml up
 ```

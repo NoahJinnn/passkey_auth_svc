@@ -9,14 +9,9 @@ import (
 )
 
 func NewWebauthnUser(ctx context.Context, user ent.User, credentials []*ent.WebauthnCredential) (*WebauthnUser, error) {
-	emails := user.Edges.Emails
-	primEmail := user.Edges.PrimaryEmail
-	var email ent.Email
-	for _, m := range emails {
-		if m.UserID.String() == primEmail.UserID.String() {
-			email = *m
-			break
-		}
+	email, err := user.Edges.PrimaryEmail.QueryEmail().First(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	return &WebauthnUser{

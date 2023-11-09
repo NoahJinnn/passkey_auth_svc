@@ -40,8 +40,8 @@ var (
 		},
 		Passcode: Passcode{
 			Email: Email{
-				FromAddress: "noah@hellohq.com",
-				FromName:    "HelloHQ Pte. Ltd.",
+				FromAddress: "noreply@hellohq.com",
+				FromName:    "No Reply @ HelloHQ",
 			},
 			OneSignalAppKey: "oneSignalAppKey",
 			OneSignalAppID:  "oneSignalAppID",

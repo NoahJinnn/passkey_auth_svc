@@ -45,7 +45,7 @@ var (
 		RequireEmailVerification appcfg.Bool           `env:"AUTH_REQUIRE_EMAIL_VERIFICATION"`
 	}{
 		TTL:         appcfg.MustInt("300"),
-		FromAddress: appcfg.MustNotEmptyString("noah@hellohq.com"),
+		FromAddress: appcfg.MustNotEmptyString("noreply@hellohq.com"),
 	}
 )
 
