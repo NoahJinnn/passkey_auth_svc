@@ -17,7 +17,7 @@ require (
 )
 
 require (
-	entgo.io/ent v0.12.3
+	entgo.io/ent v0.12.5
 	github.com/OneSignal/onesignal-go-api v1.0.4
 	github.com/go-playground/validator/v10 v10.15.1
 	github.com/go-testfixtures/testfixtures/v3 v3.9.0
@@ -33,7 +33,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.10.2-0.20230427182402-87a07dfb83bf // indirect
+	ariga.io/atlas v0.14.1-0.20230918065911-83ad451a4935 // indirect
 	github.com/ClickHouse/ch-go v0.56.0 // indirect
 	github.com/ClickHouse/clickhouse-go/v2 v2.10.0 // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
