@@ -27,7 +27,7 @@ require (
 	github.com/labstack/echo/v4 v4.11.1
 	github.com/lestrrat-go/jwx/v2 v2.0.17
 	github.com/nicksnyder/go-i18n/v2 v2.2.1
-	github.com/ory/dockertest/v3 v3.9.1
+	github.com/ory/dockertest/v3 v3.10.0
 	github.com/powerman/pqx v0.7.0
 	github.com/sethvargo/go-limiter v0.7.2
 )
@@ -70,7 +70,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.17 // indirect
 	github.com/mattn/goveralls v0.0.11 // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
-	github.com/opencontainers/runc v1.1.3 // indirect
+	github.com/opencontainers/runc v1.1.5 // indirect
 	github.com/paulmach/orb v0.9.2 // indirect
 	github.com/pierrec/lz4/v4 v4.1.17 // indirect
 	github.com/powerman/deepequal v0.1.0 // indirect
@@ -93,7 +93,6 @@ require (
 	google.golang.org/grpc v1.55.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gotest.tools/v3 v3.3.0 // indirect
 )
 
 require (
