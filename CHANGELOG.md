@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.0.0 (2024-01-15)
+
+
+### Features
+
+* **auth,-networth:** Move websocket and changeset api to auth service ([e0944b5](https://github.com/NoahJinnn/passkey_auth_svc/commit/e0944b58706018873042131281bfb28005cc6aa7))
+* **configs:** Update env naming follow the convention in README ([b44db78](https://github.com/NoahJinnn/passkey_auth_svc/commit/b44db7823dcecc89f109f55505734051f730ec9d))
+* **ent:** remove networth ent model ([a97a40d](https://github.com/NoahJinnn/passkey_auth_svc/commit/a97a40d746630130018391cdf9fc161c1a11036e))
+* **ms/networth:** Remove networth svc ([a935049](https://github.com/NoahJinnn/passkey_auth_svc/commit/a9350496c58ba08837fd384e5bc1497c6143200e))
+* **router:** Add session middleware for firstlaunch route ([d5c42e8](https://github.com/NoahJinnn/passkey_auth_svc/commit/d5c42e87589f2cc19dd33657161e9ae02f98a74d))
+* **scripts:** Add setup script to integrate with manifest for single command run ([c162ec7](https://github.com/NoahJinnn/passkey_auth_svc/commit/c162ec78ac9c77ee21705fb3a33dffddcb5f7aee))
+* **scripts:** Run ngrok without corruption ([7ad9b2c](https://github.com/NoahJinnn/passkey_auth_svc/commit/7ad9b2ccaaac9a4875cf24f5c3f6d8e87ef3130d))
+* **scripts:** Update sleep time to avoid null url ([cde0316](https://github.com/NoahJinnn/passkey_auth_svc/commit/cde0316b1f07f5dc7742aa8550cc2c8d5eb0a82d))
+
+
+### Bug Fixes
+
+* **hq-pgsql.yml:** Fix wrong settings ([8f3675b](https://github.com/NoahJinnn/passkey_auth_svc/commit/8f3675bca174bfbebb3dce44f08c4034decc6165))
+* **ngrok.sh:** When there is not ngrok_pid, just start the ngrok ([da499c1](https://github.com/NoahJinnn/passkey_auth_svc/commit/da499c1f69baedc302f1209b26ae06791bee8852))
+* **run_darwin.sh:** Add option arg for print raw string of AUTH_DOMAIN ([034e276](https://github.com/NoahJinnn/passkey_auth_svc/commit/034e2766c31c58a9edaed2de8e8930355b02cceb))
+* **wa:** Get email address for webauthn registration ([173a159](https://github.com/NoahJinnn/passkey_auth_svc/commit/173a159545ab99c94243508cc6599fe0899b7e76))
+* **yml:** Fix typo cmd ([8b27179](https://github.com/NoahJinnn/passkey_auth_svc/commit/8b271790e6ab4d58ac1c83cad138bd65000ad05a))
+* **yml:** Remove unknown flag ([14b659d](https://github.com/NoahJinnn/passkey_auth_svc/commit/14b659dd72a3b3ae8a9843e260bd8d729672b1ed))
+* **yml:** Test simple case ([9288b85](https://github.com/NoahJinnn/passkey_auth_svc/commit/9288b854282e11400da173a7b9f25d5b538b85c3))
+
 ## [1.0.3](https://github.com/HelloHQ/hqservice/compare/v1.0.2...v1.0.3) (2023-07-09)
 
 
