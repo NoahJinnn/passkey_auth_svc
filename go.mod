@@ -19,7 +19,7 @@ require (
 require (
 	entgo.io/ent v0.12.5
 	github.com/OneSignal/onesignal-go-api v1.0.4
-	github.com/go-playground/validator/v10 v10.16.0
+	github.com/go-playground/validator/v10 v10.19.0
 	github.com/go-testfixtures/testfixtures/v3 v3.9.0
 	github.com/go-webauthn/webauthn v0.8.6
 	github.com/gorilla/websocket v1.5.0
@@ -45,7 +45,7 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/frankban/quicktest v1.14.4 // indirect
 	github.com/fxamacker/cbor/v2 v2.4.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
 	github.com/go-faster/errors v0.6.1 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
@@ -61,7 +61,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.13.0 // indirect
 	github.com/klauspost/compress v1.16.5 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
-	github.com/leodido/go-urn v1.2.4 // indirect
+	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.2 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/httprc v1.0.4 // indirect
@@ -268,14 +268,14 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
-	golang.org/x/crypto v0.15.0
+	golang.org/x/crypto v0.19.0
 	golang.org/x/exp v0.0.0-20230307190834-24139beb5833 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20230206171751-46f607a40771 // indirect
 	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/net v0.14.0 // indirect
+	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/oauth2 v0.7.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
 	golang.org/x/text v0.14.0
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4 // indirect
