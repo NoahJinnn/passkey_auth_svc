@@ -1,0 +1,19 @@
+version: '3'
+
+tasks:
+  doppler:
+    desc: "Install Doppler on macOS"
+    cmds:
+      - |
+        scoop bucket add doppler https://github.com/DopplerHQ/scoop-doppler.git
+        scoop install doppler
+
+  hadolint:
+    desc: "Install hadolint on windows"
+    cmds:
+      - scoop install hadolint
+  
+  postgresql:
+    desc: "Install postgresql on windows"
+    cmds:
+      - scoop install postgresql@15

@@ -1,0 +1,101 @@
+name: CD
+
+on:
+  push:
+    branches: [main]
+    tags: [v*]
+
+env:
+  GO_VERSION: "^1.19"
+  SVC_ACCOUNT: hq-gh-sa@passkey_auth_svc.iam.gserviceaccount.com
+  IMAGE: asia-docker.pkg.dev/passkey_auth_svc/be/core
+
+jobs:
+  release:
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          release-type: go
+          default-branch: main
+          pull-request-header: "(:robot:) create a new release PR on ${{ github.ref_name }}"
+          commit-search-depth: 100
+  
+  deploy:
+    needs: release
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg
+            ~/.cache/go-build
+          key: v1-build-${{ runner.os }}-${{ hashFiles('go.mod') }}
+          restore-keys: |
+            v1-build-${{ runner.os }}-
+
+      - name: Google Auth
+        id: auth
+        uses: "google-github-actions/auth@v1"
+        with:
+          token_format: access_token
+          workload_identity_provider: "${{secrets.WIF_PROVIDER}}"
+          service_account: "${{env.SVC_ACCOUNT}}"
+
+      - name: Login to GCR
+        uses: docker/login-action@v3
+        with:
+          registry: asia-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{env.IMAGE}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: "Run docker compose"
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          port: ${{ secrets.STAGING_SSH_PORT }}
+          username: trannguyen
+          key: ${{ secrets.STAGING_KEY }}
+          script: |
+            gcloud auth configure-docker asia-docker.pkg.dev --quiet
+            cd $HOME
+            export IMAGE_TAG=${{ steps.meta.outputs.tags }}
+            docker pull $IMAGE_TAG
+
+            export HQ_X_POSTGRES_HOST=${{ secrets.HQ_X_POSTGRES_HOST }}
+            export HQ_X_POSTGRES_PORT=${{ secrets.HQ_X_POSTGRES_PORT }}
+            export HQ_AUTH_ADDR_PORT=${{ secrets.HQ_AUTH_ADDR_PORT }}
+            export DOPPLER_TOKEN=${{ secrets.STAGING_TOKEN }}
+            docker compose stop passkey_auth_svc || true
+            docker compose rm -f passkey_auth_svc || true
+            docker compose up -d passkey_auth_svc

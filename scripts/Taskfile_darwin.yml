@@ -1,0 +1,39 @@
+version: "3"
+
+includes:
+  install: ./install/Taskfile_{{OS}}.yml
+  build: ./build/Taskfile_{{OS}}.yml
+
+tasks:
+  setup:
+    desc: "Single command to setup all with mani"
+    cmds:
+      - ./sh/run_{{OS}}.sh "{{.PROFILE}}"
+
+  ngrok:
+    desc: "Run ngrok"
+    cmds:
+      - ./ngrok.sh "{{.PROFILE}}"
+
+  run:
+    desc: "Run app with your profile"
+    cmds:
+      - ./ngrok.sh "{{.PROFILE}}"
+      - ./sh/run_{{OS}}.sh "{{.PROFILE}}"
+
+  test:
+    desc: "Run test"
+    cmds:
+      - ./sh/test_{{OS}}.sh "{{.PROFILE}}"
+
+  stat:
+    desc: "Get code statistics"
+    cmds:
+      - ./sh/stat_{{OS}}.sh
+
+  migrate:
+    desc: "Migrate DBs"
+    cmds:
+      - ./sql/migrate_diff.sh
+
+  

@@ -1,0 +1,58 @@
+# /name     - exclude path (* doesn't match /) to file/dir "name"  beginning in project root
+# na/me     - exclude path (* doesn't match /) to file/dir "na/me" anywhere
+# name      - exclude path (* do      match /) to file/dir "name"  anywhere
+# name/     - exclude path …                   to      dir …
+# **/name   - exclude path (* doesn't match /) to file/dir "name"  in any dir including project root
+# na/**/me  - exclude path (* doesn't match /) to file/dir "na/me", "na/*/me", "na/*/*/me", …
+# !name     - include previously excluded path …
+/.gobincache/
+/bin/
+/cover.out
+
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+### macOS Patch ###
+# iCloud generated files
+*.icloud
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+/static/apple-app-site-association
+/static/assetlinks.json
+
+/configs/*
+
+# test and build artifacts
+coverage.html
+*.db
+*.env
