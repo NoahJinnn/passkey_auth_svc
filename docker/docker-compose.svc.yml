@@ -1,8 +1,8 @@
 version: "3.9"
 services:
-  hqsvc:
+  passkey_auth_svc:
     image: ${IMAGE_TAG}
-    container_name: hq-svc
+    container_name: passkey-auth-svc
     ports:
       - "${HQ_AUTH_ADDR_PORT:-0}:17000"
     environment:
@@ -16,5 +16,5 @@ services:
     restart: always
 
 networks:
-  hqsvc:
+  passkey_auth_svc:
     driver: bridge
