@@ -55,7 +55,7 @@ jobs:
             v3-test-${{ runner.os }}-
 
       - name: Install Doppler CLI
-        uses: dopplerhq/cli-action@v2
+        uses: dopplerhq/cli-action@v3
 
       - name: Test CLI
         run: doppler --version
